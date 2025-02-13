@@ -1,0 +1,20 @@
+data:
+  dataset: electricity
+  path: datasets/
+  rebuild: False
+  reset: False
+  find_example: False
+  format: csv
+  indiv_split: 0.7
+  date_split: 0.7
+  seed:
+  indiv:
+
+model:
+  lag: 336
+  horizon: 24
+
+misc:
+  seed:
+  outputdir: outputs/
+  smth: 1
