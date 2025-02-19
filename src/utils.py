@@ -21,6 +21,11 @@ def get_temporal_features(date):
 
 def set_random_data(path="datasets/", prefix="", lag=168, horizon=24, name="rand", context_by_individual=False):
     """gets a random individual and random window from dataset"""
+    if prefix is None:
+        prefix = ""
+    if prefix != "":
+        prefix = prefix + "_"
+    name = name + "_"
     values = torch.load(path + prefix + "values.pt")
     if os.path.exists(path + prefix + "context.pt"):
         context = torch.load(path + prefix + "context.pt")
@@ -40,34 +45,39 @@ def set_random_data(path="datasets/", prefix="", lag=168, horizon=24, name="rand
         else:
             context = context[:, :, rand_date : rand_date+lag+horizon]
 
-    torch.save(inputs, path + name + "_input.pt")
+    torch.save(inputs, path + name + "input.pt")
     if context is not None:
-        torch.save(inputs, path + name + "_context.pt")
-    torch.save(target, path + name + "_target.pt")
-    torch.save((rand_indiv, datetimes[rand_date]), path + name + "_indivdate.pt")
+        torch.save(inputs, path + name + "context.pt")
+    torch.save(target, path + name + "target.pt")
+    torch.save((rand_indiv, datetimes[rand_date]), path + name + "indivdate.pt")
 
 
-def fetch_example_data(path, names):
+def fetch_example_data(path="datasets/", names=None):
     """fetches example data"""
     if type(names) == list:
         dico = {}
         for name in names:
-            dico[name] = load_example(path, name + "_")
+            dico[name] = load_example(path, name)
         return dico
     else:
-        return load_example(path, names + "_")
+        if names is None:
+            name = "rand"
+        else:
+            name = names
+        return load_example(path, name)
 
 
-def rename_example_data(path, name, new_dir):
+def rename_example_data(path, name, new_dir, old_name="rand"):
     """renames example data to new name (to create new examples)"""
     if not os.path.exists(new_dir):
         os.makedirs(new_dir)
-    os.rename(path + "example.pdf", f"{new_dir}{name}_example.pdf")
-    os.rename(path + "normal_example.pdf", f"{new_dir}{name}_normal_example.pdf")
-    os.rename(path + "rand_input.pt", f"{new_dir}{name}_input.pt")
-    os.rename(path + "rand_context.pt", f"{new_dir}{name}_context.pt")
-    os.rename(path + "rand_target.pt", f"{new_dir}{name}_target.pt")
-    os.rename(path + "rand_indivdate.pt", f"{new_dir}{name}_indivdate.pt")
+    os.rename(path + old_name + "_example.pdf", f"{new_dir}{name}_example.pdf")
+    os.rename(path + old_name + "_normal_example.pdf", f"{new_dir}{name}_normal_example.pdf")
+    os.rename(path + old_name + "_input.pt", f"{new_dir}{name}_input.pt")
+    if os.path.exists(path + old_name + "_context.pt"):
+        os.rename(path + old_name + "_context.pt", f"{new_dir}{name}_context.pt")
+    os.rename(path + old_name + "_target.pt", f"{new_dir}{name}_target.pt")
+    os.rename(path + old_name + "_indivdate.pt", f"{new_dir}{name}_indivdate.pt")
 
 
 def get_stats(values, stat, dim=0):

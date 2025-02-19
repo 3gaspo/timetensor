@@ -153,6 +153,10 @@ def build_datasets(fetcher, path="datasets/", indiv_split=0.8, date_split=0.8, s
 
 
 def load_data(path="datasets/", prefix=""):
+    if prefix is None:
+        prefix = ""
+    if prefix != "":
+        prefix = prefix + "_"
     values = torch.load(path + prefix + "values.pt")
     if os.path.exists(path + prefix + "context.pt"):
         context = torch.load(path + prefix + "context.pt")
@@ -162,14 +166,18 @@ def load_data(path="datasets/", prefix=""):
     return values, context, datetimes
 
 def load_example(path="datasets/", prefix=""):
-    input = torch.load(path + prefix + "input.pt")
+    if prefix is None:
+        prefix = ""
+    elif prefix != "":
+        prefix = prefix + "_"
+    inpt = torch.load(path + prefix + "input.pt")
     target = torch.load(path + prefix + "target.pt")
     if os.path.exists(path + prefix + "context.pt"):
         context = torch.load(path + prefix + "context.pt")
     else:
         context = None
     indiv, date = torch.load(path + prefix + "indivdate.pt", weights_only=False)
-    return input, context, target, indiv, date
+    return inpt, context, target, indiv, date
 
 
 def load_datasets(path="datasets/"):

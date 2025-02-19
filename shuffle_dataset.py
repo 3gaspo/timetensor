@@ -41,20 +41,23 @@ def run(cfg):
         logger.info(f"Build in {(t2-t1)/60:.3f} min")
 
         data_splits = load_datasets(path)
-        plot_stats(data_splits, "mean", path, "mean_distributions.pdf")
-        plot_stats(data_splits, "max", path, "max_distributions.pdf") 
+        plot_stats({"train": data_splits["train"], "valid": data_splits["valid"]}, "mean", path, "means_train_valid.pdf")
+        plot_stats({"train": data_splits["train"], "valid": data_splits["valid"]}, "max", path, "max_train_valid.pdf")
+        plot_stats({"valid": data_splits["valid"], "test": data_splits["test"]}, "mean", path, "means_valid_test.pdf")
+        plot_stats({"valid": data_splits["valid"], "test": data_splits["test"]}, "max", path, "max_valid_test.pdf")
     
     if reset:
         logger.info("Setting new example")
         lag = cfg.model.lag
         horizon = cfg.model.horizon
-        set_random_data(path, "train_", lag, horizon, name="rand")
+        name = cfg.data.example_name
+        set_random_data(path, "train", lag, horizon, name=name)
         x, c, y, i, d  = fetch_example_data(path, "rand")
         logger.info(f"Set indiv {i} date {d} as example")
         x_normalized, mean, std =  normalize(x, return_stats=True)
         y_normalized = (y - mean)/std
-        plot_example(x[0], y[0], path, f"example.pdf", "Example")        
-        plot_example(x_normalized[0], y_normalized[0], path, f"normal_example.pdf", "Normlized Example")        
+        plot_example(x[0], y[0], path, f"{name}_example.pdf", "Example")        
+        plot_example(x_normalized[0], y_normalized[0], path, f"{name}_normal_example.pdf", "Normlized Example")        
 
     logger.info('End of script\n')
 
