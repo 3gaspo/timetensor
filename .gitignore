@@ -1,0 +1,6 @@
+uv.lock
+outputs/2025*
+__pycache__/
+.venv
+datasets/electricity.csv
+datasets/electricity.txt
