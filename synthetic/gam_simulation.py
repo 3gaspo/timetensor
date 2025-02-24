@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-show_axis = True #to show axis in plots
+show_axis = False #to show axis in plots
 T = 900
 t = np.arange(0, T)
 zoom_idx = 24 * 7
@@ -15,7 +15,7 @@ def cyclic(x, period, offset, amplitude, phase):
     """returns a sinusoidal wave"""
     return offset + amplitude * np.cos((x-phase) * 2 * np.pi / period)
 
-temperatures = cyclic(t, day_freq, 0, 5 , day_freq//2) + cyclic(t, year_freq, 15, 10, year_freq//2) + np.random.normal(0, 0.5, size=T)
+temperatures = cyclic(t, day_freq, 0, 5 , day_freq//2) + cyclic(t, year_freq, 15, 10, year_freq//2) #+ np.random.normal(0, 0.5, size=T)
 
 plt.clf()
 plt.plot(t, temperatures)
