@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import os
 
-from src.dataset import load_example
+from .dataset import load_example
 
 def get_temporal_features(date):
     """returns list of size context(=3) for a given date"""

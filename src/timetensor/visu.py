@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.utils import get_stats
+from .utils import get_stats
 
 def plot_example(x, y, path="", name="example.pdf", title="Example"):
     """plots example data"""
