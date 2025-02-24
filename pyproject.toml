@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "timetensor"
 version = "0.1.0"
@@ -23,3 +27,6 @@ dependencies = [
 dev = [
     "ipykernel>=6.29.5",
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]
