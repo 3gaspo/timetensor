@@ -1,3 +1,3 @@
-import dataset
-import utils
-import visu
+from . import dataset
+from . import utils
+from . import visu
