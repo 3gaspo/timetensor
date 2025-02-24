@@ -5,10 +5,11 @@ import hydra
 import logging
 from time import perf_counter
 
-from src.dataset import build_datasets, load_datasets
-from src.utils import set_random_data, fetch_example_data
-from src.utils import normalize
-from src.visu import plot_example, plot_stats
+#remove src if using this script in another working directory
+from src.timetensor.dataset import build_datasets, load_datasets
+from src.timetensor.utils import set_random_data, fetch_example_data
+from src.timetensor.utils import normalize
+from src.timetensor.visu import plot_example, plot_stats
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -32,7 +33,8 @@ def run(cfg):
         t1 = perf_counter()
         dataset = cfg.data.dataset
         if dataset == "electricity":
-            from datasets.electricity import fetch_data
+            #remove src if using this script in another working directory
+            from src.timetensor.electricity import fetch_data
             fetcher = lambda path: fetch_data(path, raw_format=cfg.data.format, years=None, hourly=None)
         else:
             "Dataset name not recognized"
