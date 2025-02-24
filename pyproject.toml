@@ -17,12 +17,6 @@ dependencies = [
     "numpy>=2.2.0",
     "scikit-learn>=1.6.0",
     "torch>=2.5.1",
-    "torchinfo>=1.8.0",
-]
-
-[dependency-groups]
-dev = [
-    "ipykernel>=6.29.5",
 ]
 
 [tool.setuptools.packages.find]
