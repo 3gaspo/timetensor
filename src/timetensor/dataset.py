@@ -45,7 +45,7 @@ class TimeSeriesDataset(Dataset):
         else:
             return self.N_individuals
 
-    def set_subset(ratio):
+    def set_subset(self, ratio):
         if self.by_date:
             indices = np.random.choice(self.dates, size=int(self.dates * ratio), replace=False).tolist()
             values = self.values[:, :, indices]
