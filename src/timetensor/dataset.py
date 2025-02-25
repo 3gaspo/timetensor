@@ -25,10 +25,7 @@ class TimeSeriesDataset(Dataset):
         self.individuals, self.dim_values, self.dates = self.values.shape
         if self.context is not None:
             self.contexts, self.dim_context, _dates = self.context.shape
-        else:
-            self.contexts, self.dim_context, _dates = 0, 0, self.dates
-        
-        assert _dates == self.dates, "not the same dates in values and context"
+            assert _dates == self.dates, "not the same dates in values and context"        
         assert self.dates > self.lags + self.horizon, "not enough dates for this lag and horizon"
         
         self.datetimes = datetimes
@@ -37,7 +34,10 @@ class TimeSeriesDataset(Dataset):
 
 
     def shape(self):
-        return (self.individuals, self.dim_values, self.dates), (self.contexts, self.dim_context, self.dates)
+        if self.context is not None:
+            return (self.individuals, self.dim_values, self.dates), (self.contexts, self.dim_context, self.dates)
+        else:
+            return (self.individuals, self.dim_values, self.dates)
 
     def __len__(self):
         if self.by_date:
@@ -68,8 +68,6 @@ class TimeSeriesDataset(Dataset):
                 values = self.values[:, :, idx : idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
                 if self.context is not None:
                     context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
-                else:
-                    context = None
                 inputs = values[:, :, :self.lags] # (individuals, dim, lags)
                 target = values[:, :, self.lags:] # (individuals, dim, horizon)
             else: #1 batch = 1 individual, batch of dates
@@ -79,8 +77,6 @@ class TimeSeriesDataset(Dataset):
                 values = self.values[indiv, :, idx : idx + self.lags + self.horizon] # (dim_values, lags+horizon)
                 if self.context is not None:
                     context = self.context[indiv, :, idx : idx + self.lags + self.horizon] # (dim_context, lags+horizon)
-                else:
-                    context = None
                 inputs = values[:, :, :self.lags] # (dim, lag)
                 target = values[:, :, self.lags:] # (dim, horizon)
 
@@ -94,12 +90,13 @@ class TimeSeriesDataset(Dataset):
                     context = self.context[idx, :, t: t + self.lags + self.horizon] # (dim_context, lags+horizon)
                 else:
                     context = self.context[:, :, t: t + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
-            else:
-                context = None
             inputs = values[:, :, :self.lags] # (dim, lags)
             target = values[:, :, self.lags:] # (dim, horizon)
 
-        return inputs, context, target
+        if self.context is not None:
+            return inputs, context, target
+        else:
+            return inputs, target
 
 
 def train_test_split(values, context, datetimes, indiv_split=0.8, date_split=0.8, seed=None, context_by_individuals=False):
