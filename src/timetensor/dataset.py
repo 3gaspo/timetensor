@@ -68,6 +68,8 @@ class TimeSeriesDataset(Dataset):
                 values = self.values[:, :, idx : idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
                 if self.context is not None:
                     context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
+                else:
+                    context = None
                 inputs = values[:, :, :self.lags] # (individuals, dim, lags)
                 target = values[:, :, self.lags:] # (individuals, dim, horizon)
             else: #1 batch = 1 individual, batch of dates
@@ -85,10 +87,13 @@ class TimeSeriesDataset(Dataset):
                 np.random.seed(self.seed)
             t = np.random.randint(self.dates - self.lags - self.horizon)
             values = self.values[idx, :, t: t + self.lags + self.horizon] # (dim_values, lags+horizon)
-            if self.context is not None and self.context_by_individuals:
-                context = self.context[idx, :, t: t + self.lags + self.horizon] # (dim_context, lags+horizon)
-            elif self.context is not None:
-                context = self.context[:, :, t: t + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
+            if self.context is not None:
+                if self.context_by_individuals:
+                    context = self.context[idx, :, t: t + self.lags + self.horizon] # (dim_context, lags+horizon)
+                else:
+                    context = self.context[:, :, t: t + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
+            else:
+                context = None
             inputs = values[:, :, :self.lags] # (dim, lags)
             target = values[:, :, self.lags:] # (dim, horizon)
 
