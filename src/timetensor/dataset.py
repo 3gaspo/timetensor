@@ -26,7 +26,7 @@ class TimeSeriesDataset(Dataset):
         if self.context is not None:
             self.contexts, self.dim_context, _dates = self.context.shape
         else:
-            self.context, self.dim_context, _dates = 0, 0, self.dates
+            self.contexts, self.dim_context, _dates = 0, 0, self.dates
         
         assert _dates == self.dates, "not the same dates in values and context"
         assert self.dates > self.lags + self.horizon, "not enough dates for this lag and horizon"
@@ -211,7 +211,7 @@ def load_datasets(path="datasets/"):
     return data_dict
 
 
-def get_train_loaders(batch_size, lags, horizon, path="datasets/", valid_mode=1, by_date=True, subset=1):
+def get_train_loaders(path, batch_size, lags, horizon, valid_mode=1, by_date=True, subset=1):
 
     data_dict = load_datasets(path)
     
