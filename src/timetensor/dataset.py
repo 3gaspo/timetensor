@@ -41,7 +41,7 @@ class TimeSeriesDataset(Dataset):
 
     def __len__(self):
         if self.by_date:
-            return self.dates
+            return self.dates - (self.lags + self.horizon)
         else:
             return self.N_individuals
 
@@ -79,6 +79,8 @@ class TimeSeriesDataset(Dataset):
                 values = self.values[indiv, :, idx : idx + self.lags + self.horizon] # (dim_values, lags+horizon)
                 if self.context is not None:
                     context = self.context[indiv, :, idx : idx + self.lags + self.horizon] # (dim_context, lags+horizon)
+                else:
+                    context = None
                 inputs = values[:, :, :self.lags] # (dim, lag)
                 target = values[:, :, self.lags:] # (dim, horizon)
 
