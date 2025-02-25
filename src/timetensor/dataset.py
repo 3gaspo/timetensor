@@ -29,7 +29,7 @@ class TimeSeriesDataset(Dataset):
             self.context, self.dim_context, _dates = 0, 0, self.dates
         
         assert _dates == self.dates, "not the same dates in values and context"
-        assert self.dates > self.lag + self.horizon, "not enough dates for this lag and horizon"
+        assert self.dates > self.lags + self.horizon, "not enough dates for this lag and horizon"
         
         self.datetimes = datetimes
         self.by_date = by_date
@@ -68,8 +68,8 @@ class TimeSeriesDataset(Dataset):
                 values = self.values[:, :, idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
                 if self.context is not None:
                     context = self.context[:, :, idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
-                inputs = values[:, :, :self.lag] # (individuals, dim, lag)
-                target = values[:, :, self.lag:] # (individuals, dim, horizon)
+                inputs = values[:, :, :self.lags] # (individuals, dim, lags)
+                target = values[:, :, self.lags:] # (individuals, dim, horizon)
             else: #1 batch = 1 individual, batch of dates
                 if self.seed is not None:
                     np.random.seed(self.seed)
@@ -77,8 +77,8 @@ class TimeSeriesDataset(Dataset):
                 values = self.values[indiv, :, idx + self.lags + self.horizon] # (dim_values, lags+horizon)
                 if self.context is not None:
                     context = self.context[indiv, :, idx + self.lags + self.horizon] # (dim_context, lags+horizon)
-                inputs = values[:, :, :self.lag] # (dim, lag)
-                target = values[:, :, self.lag:] # (dim, horizon)
+                inputs = values[:, :, :self.lags] # (dim, lag)
+                target = values[:, :, self.lags:] # (dim, horizon)
 
         else: #1 batch = batch of individuals, random date
             if self.seed is not None:
@@ -89,8 +89,8 @@ class TimeSeriesDataset(Dataset):
                 context = self.context[idx, :, t + self.lags + self.horizon] # (dim_context, lags+horizon)
             elif self.context is not None:
                 context = self.context[:, :, t + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
-            inputs = values[:, :, :self.lag] # (dim, lag)
-            target = values[:, :, self.lag:] # (dim, horizon)
+            inputs = values[:, :, :self.lags] # (dim, lags)
+            target = values[:, :, self.lags:] # (dim, horizon)
 
         return inputs, context, target
 
