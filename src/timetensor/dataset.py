@@ -230,6 +230,6 @@ def get_train_loaders(batch_size, lags, horizon, path="datasets/", valid_mode=1,
         validkey = "valid"
     values, context, datetimes = data_dict[validkey]["values"], data_dict[validkey].get("context"), data_dict[validkey]["datetimes"]
     dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True)
-    loaders_dict = {"valid":  DataLoader(dataset, batch_size=batch_size, shuffle=False)}
+    loaders_dict["valid"] = DataLoader(dataset, batch_size=batch_size, shuffle=False)}
     
     return loaders_dict
