@@ -8,10 +8,9 @@ data:
   indiv_split: 0.7
   date_split: 0.7
   seed:
-  indiv:
 
 model:
-  lag: 336
+  lags: 336
   horizon: 24
 
 misc:

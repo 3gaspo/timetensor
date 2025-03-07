@@ -50,10 +50,10 @@ def run(cfg):
     
     if reset:
         logger.info("Setting new example")
-        lag = cfg.model.lag
+        lags = cfg.model.lags
         horizon = cfg.model.horizon
         name = cfg.data.example_name
-        set_random_data(path, "train", lag, horizon, name=name)
+        set_random_data(path, "train", lags, horizon, name=name)
         x, c, y, i, d  = fetch_example_data(path, "rand")
         logger.info(f"Set indiv {i} date {d} as example")
         x_normalized, mean, std =  normalize(x, return_stats=True)

@@ -225,7 +225,7 @@ def get_train_loaders(path, batch_size, lags, horizon, valid_mode=1, by_date=Tru
     if subset < 1:
         assert subset > 0
         dataset.set_subset(subset)
-    loaders_dict = {"train":  DataLoader(dataset, batch_size=batch_size, shuffle=True)}
+    loaders_dict = {"train":  DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)}
     
     #valid loader
     if valid_mode == 2:
@@ -234,6 +234,32 @@ def get_train_loaders(path, batch_size, lags, horizon, valid_mode=1, by_date=Tru
         validkey = "valid"
     values, context, datetimes = data_dict[validkey]["values"], data_dict[validkey].get("context"), data_dict[validkey]["datetimes"]
     dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True)
-    loaders_dict["valid"] = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+    loaders_dict["valid"] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
     
+    #test loader
+    values, context, datetimes = data_dict["test"]["values"], data_dict["test"].get("context"), data_dict["test"]["datetimes"]
+    dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True)
+    loaders_dict["test"] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+
     return loaders_dict
+
+
+def collate_fn(data):
+    """
+       data: is a list of tuples with (input, (context), target)
+    """
+    if len(data[0]) == 3:
+        inputs, contexts, targets = zip(*data)
+    else:
+        inputs, targets = zip(*data)
+        contexts = None
+
+    inputs = torch.stack(inputs) #(bs, (individuals), dim, lookback)
+    #if len(data[0][0].shape()) == 4: #individuals dim
+    inputs = inputs.view(-1, inputs.shape()[-2], inputs.shape()[-1]) #  (bs * (individuals), dim, lookback)
+
+    if contexts is not None:
+        contexts = torch.stack(contexts)
+    targets = torch.stack(targets)
+
+    return inputs, contexts, targets
