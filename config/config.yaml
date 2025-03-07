@@ -1,6 +1,6 @@
 data:
   dataset: electricity
-  path: datasets/
+  path: ../datasets/
   rebuild: False
   reset: False
   example_name : rand
@@ -12,8 +12,23 @@ data:
 model:
   lags: 336
   horizon: 24
+  name: linear
+  revin: False
+
+training:
+  loss: mse
+  bs: 128
+  lr: 0.0001
+  schedule: False
+  n_prints: 10
+  n_evals: 100
 
 misc:
   seed:
-  outputdir: outputs/
-  smth: 1
+  output_dir: outputs/
+  save_name:
+  verbose: True
+
+defaults:
+  - _self_
+  - model_configs: linear

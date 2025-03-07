@@ -98,17 +98,28 @@ def get_stats(values, stat, dim=0):
 
 
 
-def normalize(X, return_stats=False):
+# def normalize(X, return_stats=False):
+#   """
+#   X: tensor (B, dim, features)
+#   normalize for each B
+#   """
+#   mean = X.mean(dim=-1, keepdim=True)
+#   std =  X.std(dim=-1, keepdim=True)
+#   std = torch.where(std != 0, std, 1)
+  
+#   X_normalized = (X - mean) / std
+
+#   if return_stats:
+#     return X_normalized, mean, std
+#   return X_normalized
+
+def get_normal_stats(x, std_cst=1):
   """
   X: tensor (B, dim, features)
   normalize for each B
   """
-  mean = X.mean(dim=-1, keepdim=True)
-  std =  X.std(dim=-1, keepdim=True)
-  std = torch.where(std != 0, std, 1)
+  mean = x.mean(dim=-1, keepdim=True).detach()
+  std =  x.std(dim=-1, keepdim=True).detach()
+  std = torch.where(std != 0, std, std_cst)
   
-  X_normalized = (X - mean) / std
-
-  if return_stats:
-    return X_normalized, mean, std
-  return X_normalized
+  return mean, std

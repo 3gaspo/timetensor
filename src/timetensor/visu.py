@@ -36,3 +36,26 @@ def plot_stats(splits_dict, stat, path="", name="stats.pdf", dim=0):
     plt.xscale("log")
     plt.ylabel("Counts")
     plt.savefig(path + name)
+
+
+def plot_losses(train_losses, valid_losses=None, path="", name="losses.pdf", title="Losses", logscale=True):
+    """plots losses during training"""
+    plt.clf()
+    fig = plt.figure(figsize=(10,5))
+    if valid_losses is not None:
+        plt.plot(train_losses, label="train")
+        n_evals = len(valid_losses)
+        test_freq = len(train_losses) // n_evals
+        T = [test_freq * k for k in range(n_evals)] + [len(train_losses)]
+        plt.plot(T, valid_losses, label="valid")
+    else:
+        T = range(1, len(train_losses))
+        plt.plot(T, train_losses)
+    if logscale:
+      plt.yscale('log')
+    plt.xlabel("Steps")
+    plt.ylabel("Loss")
+    plt.title(title)
+    plt.legend()
+    fig.tight_layout()
+    plt.savefig(path + name)
