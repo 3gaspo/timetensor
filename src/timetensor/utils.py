@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import os
+import json
 
 from .dataset import load_example
 
@@ -123,3 +124,23 @@ def get_normal_stats(x, std_cst=1):
   std = torch.where(std != 0, std, std_cst)
   
   return mean, std
+
+
+def save_results(value, path, name, model_name, metric_name):
+    """adds accuracy result to pandas file"""
+    file_path = path + name
+    if os.path.exists(file_path):
+      with open(file_path, "r") as file:
+        dico = json.load(file)
+    else:
+      dico = {}
+    
+    model_dico = dico.get(model_name, {})
+    model_dico[metric_name] = float(value)
+    dico[model_name] = model_dico
+    with open(file_path, "w") as file:
+        try:
+            json.dump(dico, file, indent=4)
+        except:
+            print(dico)
+            

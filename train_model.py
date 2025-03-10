@@ -2,25 +2,17 @@ import hydra
 import logging
 import os
 import torch
+import torch.nn as nn
+import numpy as np
 
 from src.timetensor.dataset import get_train_loaders
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import train_model, eval_model
-from src.timetensor.visu import plot_losses#, plot_pred, plot_errors, plot_horizon_errors
-
-# from src.data.dataloader import get_data_loaders
-# from src.data.process import fetch_example_data
-# from src.training.pipeline import train_model, eval_model
-# from src.training.utils import save_results, normalize
-# from src.models.network import MLP
-# from src.models.patchtst.patch_tst import PatchTST
-# from src.models.naive import persistence, repeat, lookback, linear
+from src.timetensor.visu import plot_losses, plot_errors, plot_horizon_errors#, plot_pred
+from src.timetensor.utils import save_results
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
-from omegaconf import OmegaConf
-
-from hydra import
 
 @hydra.main(version_base=None, config_path="config", config_name="config")
 def run(cfg):
@@ -31,8 +23,9 @@ def run(cfg):
     #configs
     path = cfg.data.path
     lags, horizon = cfg.model.lags, cfg.model.horizon
-    batch_size, lr = cfg.training.bs, cfg.training.lr
-    model_name = cfg.model.name
+    batch_size, subset_data, lr = cfg.training.bs, cfg.training.subset_data, cfg.training.lr
+    criterion_name, normalized = cfg.training.loss, cfg.training.normalized
+    model_name, retrain = cfg.model.name, cfg.training.retrain
     revin = cfg.model.revin
     kwargs = cfg.model_configs
     output_dir = cfg.misc.output_dir
@@ -57,60 +50,81 @@ def run(cfg):
     if verbose:
         logger.info("Fetched output directories")
 
-    # lr, schedule = cfg.training.lr, cfg.training.schedule
-    # loss_name = cfg.training.loss
-    # do_print = cfg.training.print
-    # valid_steps, test_steps = cfg.training.valid_steps, cfg.training.test_steps
-    # n_prints, n_evals = cfg.training.n_prints, cfg.training.n_evals
-    # seed = cfg.misc.seed
-
     #data
-    data_dict = get_train_loaders(path, batch_size, lags, horizon)
+    data_dict = get_train_loaders(path, batch_size, lags, horizon, subset=subset_data)
     if verbose:
-        logger.info("Fetched dataloaders")
+        if subset_data < 1:
+            logger.info(f"Fetched dataloaders with subset ratio:{subset_data}")
+        else:
+            logger.info("Fetched dataloaders")
     
     #sizes
     logger.info(f"Dataset shape : {data_dict['train'].dataset.shape()}")
-    X, y = next(iter(data_dict["train"]))
+    X, c, y = next(iter(data_dict["train"]))
     if verbose:
-        logger.info(f"Batch sizes : X={X.shape}, y={y.shape}")
+        if c is not None:
+            logger.info(f"Batch sizes : X={X.shape}, c={c.shape}, y={y.shape}")
+        else:
+            logger.info(f"Batch sizes : X={X.shape}, y={y.shape}")
 
     #model
     model = load_model(model_name, horizon, revin, **kwargs)
     if verbose:
         logger.info(f"Fetched model {model_name}")
-
+    if criterion_name == "MSE":
+        criterion = nn.MSELoss()
+    else:
+        criterion = None
 
     #training
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    eval_losses = {"MSE":nn.MSELoss(reduction="none")}
     if model_name in ["MLP", "linear","patch_tst"]:
-        logger.info("Starting training...")
         logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps={len(data_dict['train'])}")
-    
-        model, train_losses, valid_losses = train_model(model, data_dict, lr, device=device)
-        torch.save(model.state_dict(), save_dir + "model.pt")
-        plot_losses(train_losses, valid_losses, save_dir, "train_losses.pdf", f"Losses of {save_name}")
-        plot_losses(valid_losses, None, save_dir, "vaild_losses.pdf", f"Losses of {save_name}")
-        torch.save(train_losses, save_dir + "train_losses.pt")
-        torch.save(valid_losses, save_dir + "valid_losses.pt")
-        logger.info("End of training")
+        if retrain:
+            logger.info("Starting training...")
+            model, train_losses, valid_losses = train_model(model, data_dict, lr, criterion, normalized, device=device)
+            torch.save(model.state_dict(), save_dir + "model.pt")
+            torch.save(train_losses, save_dir + f"{criterion_name}_train_losses.pt")
+            for loss_name, loss_values in valid_losses.items():
+                torch.save(loss_values, save_dir + f"{loss_name}_valid_losses.pt")
+            logger.info("End of training")
+        else:
+            valid_losses = {}
+            for key in eval_losses:
+                valid_losses[key] = []
+                valid_losses["N"+key] = []
+            model = load_model(model_name, horizon, revin, **kwargs)
+            model.load_state_dict(torch.load(save_dir + "model.pt"))
+            train_losses = torch.load(save_dir + f"{criterion_name}_train_losses.pt",weights_only=False)
+            for loss_name, _ in valid_losses.items():
+                valid_losses[loss_name] = torch.load(save_dir + f"{loss_name}_valid_losses.pt",weights_only=False)
+        #plots
+        plot_losses(train_losses, valid_losses["NMSE"], save_dir, "train_losses.pdf", f"Training NMSE of {save_name}")
+        plot_losses(valid_losses["MSE"], None, save_dir, "vaild_losses.pdf", f"Validation MSE of {save_name}")
+        plot_losses(valid_losses["NMSE"], None, save_dir, "vaild_nlosses.pdf", f"Validation NMSE of {save_name}")
+        logger.info("Plotted losses")
     else:
         logger.info("No training needed")
 
-    # #eval
-    # test_losses, normalized_test_losses = eval_model(model, test_loader, device, normal=normal, return_all=True) #(bs * steps, dim, horizon)
-    # test_mse, test_nmse = test_losses.mean().item(), normalized_test_losses.mean().item()
+    #eval
+    logger.info("Computing test metrics")
+    test_losses = eval_model(model, data_dict["test"], device, eval_losses, verbose=1) #(bs * steps, dim, horizon)
     # torch.save(test_losses, save_dir + "test_losses.pt")
-    # torch.save(normalized_test_losses, save_dir + "normalized_losses.pt")
-    # logger.info(f"Test MSE : {test_mse:.2f}, Test NMSE : {test_nmse:.5f}")
-    # save_results(test_mse, output_dir, "results.json", save_name, "Test MSE")
-    # save_results(test_nmse, output_dir, "results.json", save_name, "Test NMSE")
+    mean_test_mse, std_test_mse = test_losses["MSE"].mean(), test_losses["MSE"].mean()
+    mean_test_nmse, std_test_nmse = test_losses["NMSE"].std(), test_losses["NMSE"].std()
+    # save_results(mean_test_mse, save_dir, "mean_results.json", save_name, "Test MSE")
+    # save_results(std_test_mse, save_dir, "std_results.json", save_name, "Test MSE")
+    # save_results(mean_test_nmse, save_dir, "mean_results.json", save_name, "Test MSE")
+    # save_results(std_test_nmse, save_dir, "std_results.json", save_name, "Test MSE")
+    logger.info(f"Test MSE : {mean_test_mse:.2f} (+/- {std_test_mse:.2f}), Test NMSE : {mean_test_nmse:.2f} (+/- {std_test_nmse:.2f})")
 
-    # #errors
-    # plot_errors(test_losses[:, 0, :].mean(axis=1).cpu().numpy(), save_dir, "test_mse.pdf", f"Test MSE of {save_name} : {test_mse}")
-    # plot_errors(normalized_test_losses[:, 0, :].mean(axis=1).cpu().numpy(), save_dir, "test_nme.pdf", f"Test NMSE of {save_name} : {test_nmse}")
-    # plot_horizon_errors(test_losses[:, 0, :].mean(axis=0).cpu().numpy(), save_dir, "horizon_mse.pdf", f"Test MSE of {save_name} : {test_nmse}")
-    # plot_horizon_errors(normalized_test_losses[:, 0, :].mean(axis=0).cpu().numpy(), save_dir, "horizon_nmse.pdf", f"Test NMSE of {save_name} : {test_nmse}")
+
+    #errors
+    plot_errors(test_losses["MSE"].sum(axis=1).mean(axis=1), save_dir, "test_mse.pdf", f"Test MSE of {save_name} : {mean_test_mse}")
+    plot_errors(test_losses["NMSE"].sum(axis=1).mean(axis=1), save_dir, "test_nme.pdf", f"Test NMSE of {save_name} : {mean_test_nmse}")
+    plot_horizon_errors(test_losses["MSE"].sum(axis=1).mean(axis=0), save_dir, "horizon_mse.pdf", f"Test MSE of {save_name} : {mean_test_mse}")
+    plot_horizon_errors(test_losses["NMSE"].sum(axis=1).mean(axis=0), save_dir, "horizon_nmse.pdf", f"Test NMSE of {save_name} : {mean_test_nmse}")
     
     # #example
     # dico = fetch_example_data("datasets/examples/", ["motif", "big_motif", "anomalie"])

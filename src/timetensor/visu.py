@@ -43,19 +43,42 @@ def plot_losses(train_losses, valid_losses=None, path="", name="losses.pdf", tit
     plt.clf()
     fig = plt.figure(figsize=(10,5))
     if valid_losses is not None:
-        plt.plot(train_losses, label="train")
+        plt.plot(range(1, len(train_losses)+1), train_losses, label="train")
         n_evals = len(valid_losses)
-        test_freq = len(train_losses) // n_evals
-        T = [test_freq * k for k in range(n_evals)] + [len(train_losses)]
+        test_freq = max(len(train_losses) // n_evals, 1)
+        T = [1] + [test_freq * k for k in range(1,n_evals)] + [len(train_losses)]
+        T = list(np.unique(T))
         plt.plot(T, valid_losses, label="valid")
+        plt.legend()
     else:
-        T = range(1, len(train_losses))
-        plt.plot(T, train_losses)
+        plt.plot(range(1, len(train_losses)+1), train_losses)
     if logscale:
       plt.yscale('log')
     plt.xlabel("Steps")
     plt.ylabel("Loss")
     plt.title(title)
-    plt.legend()
     fig.tight_layout()
+    plt.savefig(path + name)
+
+
+def plot_errors(losses, path="", name="errors.pdf", title="Loss distribution"):
+    """plots histogram of errors"""
+    plt.clf()
+    fig = plt.figure(figsize=(10,5))
+    plt.hist(losses, bins=100)
+    plt.yscale("log")
+    plt.title(title)
+    plt.xlabel("Losses")
+    plt.ylabel("Frequency")
+    plt.savefig(path + name)
+
+
+def plot_horizon_errors(losses, path="", name="horizon.pdf", title="Mean errors by horizon"):
+    """plots errors according to horizon"""
+    plt.clf()
+    fig = plt.figure(figsize=(15,5))
+    plt.bar(range(len(losses)), losses)
+    plt.title(title)
+    plt.xlabel("Horizon")
+    plt.ylabel("Mean error")
     plt.savefig(path + name)

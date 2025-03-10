@@ -16,8 +16,11 @@ model:
   revin: False
 
 training:
-  loss: mse
-  bs: 128
+  retrain: True
+  loss: MSE
+  normalized: True
+  bs: 8
+  subset_data: 1
   lr: 0.0001
   schedule: False
   n_prints: 10

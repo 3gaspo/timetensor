@@ -28,7 +28,7 @@ class TimeSeriesDataset(Dataset):
             assert _dates == self.dates, "not the same dates in values and context"        
         assert self.dates > self.lags + self.horizon, "not enough dates for this lag and horizon"
         
-        self.datetimes = datetimes
+        self.datetimes = np.array(datetimes)
         self.by_date = by_date
         self.return_all_individuals, self.context_by_individuals = return_all_individuals, context_by_individuals
 
@@ -47,19 +47,22 @@ class TimeSeriesDataset(Dataset):
 
     def set_subset(self, ratio):
         if self.by_date:
-            indices = np.random.choice(self.dates, size=int(self.dates * ratio), replace=False).tolist()
+            new_len = int(self.dates * ratio)
+            if new_len <= self.lags + self.horizon:
+                raise ValueError("Subset not big enough") 
+            indices = np.random.choice(self.dates, size=new_len, replace=False).tolist()
             self.values = self.values[:, :, indices]
             if self.context is not None:
                 self.context = self.context[:, :, indices]
-            self.datetimes = self.datetimes[:, :, indices]
-            self.dates = int(self.dates * ratio)
+            self.datetimes = self.datetimes[indices]
+            self.dates = new_len
 
         else:
             indices = np.random.choice(self.N_individuals, size=int(self.N_individuals * ratio), replace=False).tolist()
             self.values = self.values[indices, :, :]
             if self.context is not None:
                 self.context = self.context[indices, :, :]
-            self.datetimes = self.datetimes[indices, :, :]
+            self.datetimes = self.datetimes[indices]
             self.N_individuals = int(self.N_individuals * ratio)
 
     def __getitem__(self, idx):
@@ -255,11 +258,12 @@ def collate_fn(data):
         contexts = None
 
     inputs = torch.stack(inputs) #(bs, (individuals), dim, lookback)
-    #if len(data[0][0].shape()) == 4: #individuals dim
-    inputs = inputs.view(-1, inputs.shape()[-2], inputs.shape()[-1]) #  (bs * (individuals), dim, lookback)
+    inputs = inputs.view(-1, inputs.shape[-2], inputs.shape[-1]) #  (bs * (individuals), dim, lookback)
 
     if contexts is not None:
         contexts = torch.stack(contexts)
+        contexts = contexts.view(-1, contexts.shape[-2], contexts.shape[-1]) 
     targets = torch.stack(targets)
+    targets = targets.view(-1, targets.shape[-2], targets.shape[-1])
 
     return inputs, contexts, targets

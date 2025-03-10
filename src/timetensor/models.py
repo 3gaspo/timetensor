@@ -71,7 +71,7 @@ class linear(nn.Module):
         self.fc = nn.Linear(lags * dim, horizon * dim)
     def forward(self, x, context=None):
         batch_size = x.shape[0]
-        input = x.view(batch_size, self.lag * self.dim) # (B, lag*dim)
+        input = x.view(batch_size, self.lags * self.dim) # (B, lag*dim)
         output = self.fc(input) # (B, horizon*dim)
         output = output.view(batch_size, self.dim, self.horizon) # (B, dim, horizon)
         return output
