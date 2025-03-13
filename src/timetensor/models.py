@@ -6,31 +6,31 @@ from .utils import get_normal_stats
 
 
 class RevIN(nn.Module):
-    def __init__(self, model, num_features, eps=1):
+    def __init__(self, model, dim, eps=1):
         """
         RevIN: Reversible Instance Normalization for Time Series Forecasting
         param num_features: Number of features in the time series
         """
         super(RevIN, self).__init__()
-        self.num_features, self.eps = num_features, eps
-        self.gamma = nn.Parameter(torch.ones(1, 1, num_features))  #scale
-        self.beta = nn.Parameter(torch.zeros(1, 1, num_features))  #shift
+        self.dim, self.eps = dim, eps
+        self.gamma = nn.Parameter(torch.ones(1, dim, 1))  #scale
+        self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
         self.model = model
 
     def norm(self, x):
         self.mu, self.std = get_normal_stats(x, std_cst=self.eps)
-        x = (x - self.mu) / self.std
+        x = (x - self.mu) / self.std # (B, dim, lags)
         x = x * self.gamma + self.beta
         return x
-    def denorm(self, x):
-        x = (x - self.beta) / torch.where(self.gamma != 0, self.gamma, self.eps)
-        x * self.std + self.mu
-        return x
+    def denorm(self, y):
+        y = (y - self.beta) / torch.where(self.gamma != 0, self.gamma, self.eps) #(B, dim, horizon)
+        y * self.std + self.mu
+        return y
     
-    def forward(self, x, mode="norm"):
-        x  = self.norm(x)
-        output = self.model(x)
-        output = self.denorm(output)
+    def forward(self, x, c=None): #(B, dim, lags)
+        x  = self.norm(x) #(B, dim, lags)
+        pred = self.model(x, c) #(B, dim, horizon)
+        output = self.denorm(pred) #(B, dim, horizon)
         return output
     
 
@@ -77,8 +77,9 @@ class linear(nn.Module):
         return output
 
 
-def load_model(model_name, horizon, revin=False, **kwargs):
+def load_model(model_name, shape, revin=False, **kwargs):
     """loads models from str model name"""
+    dim, lags, horizon = shape[0], shape[1], shape[2]
     if model_name == "persistence":
         model = persistence(horizon)
     elif model_name == "repeat":
@@ -89,20 +90,13 @@ def load_model(model_name, horizon, revin=False, **kwargs):
             raise ValueError("Please provide lookback_idx for lookback model")
         model = lookback(idx, horizon)
     elif model_name == "linear":
-        lags = kwargs.get("lags")
-        dim = kwargs.get("dim")
-        if lags is None or dim is None:
-            raise ValueError("Please provided lags and dim for linear model")
         model = linear(lags, horizon, dim)
     elif model_name == "patch_tst":
-        lags = kwargs.get("lags")
-        if lags is None:
-            raise ValueError("Please provided lags for patchtst model")
         model = PatchTST(lags, horizon)
     else:
         raise ValueError(f"Model name not recognized : {model_name}")
     
     if revin:
-        return RevIN(model, kwargs.get("revin_features"), kwargs.get("std_cst", 1))
+        return RevIN(model, dim, kwargs.get("std_cst", 1))
     else:
         return model

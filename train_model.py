@@ -8,8 +8,8 @@ import numpy as np
 from src.timetensor.dataset import get_train_loaders
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import train_model, eval_model
-from src.timetensor.visu import plot_losses, plot_errors, plot_horizon_errors#, plot_pred
-from src.timetensor.utils import save_results
+from src.timetensor.visu import plot_losses, plot_errors, plot_horizon_errors, plot_pred
+from src.timetensor.utils import save_results, fetch_example_data
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -21,7 +21,7 @@ def run(cfg):
     logger.info("=====Running main script=====")
 
     #configs
-    path = cfg.data.path
+    data_path = cfg.data.path
     lags, horizon = cfg.model.lags, cfg.model.horizon
     batch_size, subset_data, lr = cfg.training.bs, cfg.training.subset_data, cfg.training.lr
     criterion_name, normalized = cfg.training.loss, cfg.training.normalized
@@ -38,7 +38,7 @@ def run(cfg):
     if save_name is None:
         save_name = model_name
         if revin:
-            save_name + "_revin"    
+            save_name = save_name + "_revin"   
     save_dir = output_dir + save_name + "/"
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
@@ -51,7 +51,7 @@ def run(cfg):
         logger.info("Fetched output directories")
 
     #data
-    data_dict = get_train_loaders(path, batch_size, lags, horizon, subset=subset_data)
+    data_dict = get_train_loaders(data_path, batch_size, lags, horizon, subset=subset_data)
     if verbose:
         if subset_data < 1:
             logger.info(f"Fetched dataloaders with subset ratio:{subset_data}")
@@ -60,7 +60,8 @@ def run(cfg):
     
     #sizes
     logger.info(f"Dataset shape : {data_dict['train'].dataset.shape()}")
-    X, c, y = next(iter(data_dict["train"]))
+    X, c, y = next(iter(data_dict["train"])) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
+    shape = [X.shape[1], X.shape[2], y.shape[2]]
     if verbose:
         if c is not None:
             logger.info(f"Batch sizes : X={X.shape}, c={c.shape}, y={y.shape}")
@@ -68,9 +69,10 @@ def run(cfg):
             logger.info(f"Batch sizes : X={X.shape}, y={y.shape}")
 
     #model
-    model = load_model(model_name, horizon, revin, **kwargs)
+    print("DEBUG, kwargs:", kwargs)
+    model = load_model(model_name, shape, revin, **kwargs)
     if verbose:
-        logger.info(f"Fetched model {model_name}")
+        logger.info(f"Fetched model {save_name}")
     if criterion_name == "MSE":
         criterion = nn.MSELoss()
     else:
@@ -79,7 +81,7 @@ def run(cfg):
     #training
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     eval_losses = {"MSE":nn.MSELoss(reduction="none")}
-    if model_name in ["MLP", "linear","patch_tst"]:
+    if model_name in ["MLP", "linear","patch_tst"] or revin:
         logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps={len(data_dict['train'])}")
         if retrain:
             logger.info("Starting training...")
@@ -110,13 +112,13 @@ def run(cfg):
     #eval
     logger.info("Computing test metrics")
     test_losses = eval_model(model, data_dict["test"], device, eval_losses, verbose=1) #(bs * steps, dim, horizon)
-    # torch.save(test_losses, save_dir + "test_losses.pt")
-    mean_test_mse, std_test_mse = test_losses["MSE"].mean(), test_losses["MSE"].mean()
-    mean_test_nmse, std_test_nmse = test_losses["NMSE"].std(), test_losses["NMSE"].std()
-    # save_results(mean_test_mse, save_dir, "mean_results.json", save_name, "Test MSE")
-    # save_results(std_test_mse, save_dir, "std_results.json", save_name, "Test MSE")
-    # save_results(mean_test_nmse, save_dir, "mean_results.json", save_name, "Test MSE")
-    # save_results(std_test_nmse, save_dir, "std_results.json", save_name, "Test MSE")
+    torch.save(test_losses, save_dir + "test_losses.pt")
+    mean_test_mse, std_test_mse = test_losses["MSE"].mean(), test_losses["MSE"].std()
+    mean_test_nmse, std_test_nmse = test_losses["NMSE"].mean(), test_losses["NMSE"].std()
+    save_results(mean_test_mse, output_dir, "mean_results.json", save_name, "Test MSE")
+    save_results(std_test_mse, output_dir, "std_results.json", save_name, "Test MSE")
+    save_results(mean_test_nmse, output_dir, "mean_results.json", save_name, "Test NMSE")
+    save_results(std_test_nmse, output_dir, "std_results.json", save_name, "Test NMSE")
     logger.info(f"Test MSE : {mean_test_mse:.2f} (+/- {std_test_mse:.2f}), Test NMSE : {mean_test_nmse:.2f} (+/- {std_test_nmse:.2f})")
 
 
@@ -126,21 +128,15 @@ def run(cfg):
     plot_horizon_errors(test_losses["MSE"].sum(axis=1).mean(axis=0), save_dir, "horizon_mse.pdf", f"Test MSE of {save_name} : {mean_test_mse}")
     plot_horizon_errors(test_losses["NMSE"].sum(axis=1).mean(axis=0), save_dir, "horizon_nmse.pdf", f"Test NMSE of {save_name} : {mean_test_nmse}")
     
-    # #example
-    # dico = fetch_example_data("datasets/examples/", ["motif", "big_motif", "anomalie"])
-    # for data_name, data_tuple in dico.items():
-    #     x, c, y = data_tuple[0].unsqueeze(0).to(device), data_tuple[1].unsqueeze(0).to(device), data_tuple[2].unsqueeze(0).to(device)
-    #     x_normalized, mean, std =  normalize(x, return_stats=True)
-    #     if normal:
-    #         pred_normalized = model(x_normalized,c)
-    #         pred = pred_normalized*std + mean
-    #     else:
-    #         pred = model(x,c)
-    #         pred_normalized = (pred - mean)/std
-    #     y_normalized = (y - mean)/std
-    #     plot_pred(x[0,0].cpu().detach().numpy(), y[0,0].cpu().detach().numpy(), pred[0,0].cpu().detach().numpy(), save_dir + "examples/", f"{data_name}_predictions.pdf", f"Example {data_name} prediction for {save_name}")        
-    #     plot_pred(x_normalized[0,0].cpu().detach().numpy(), y_normalized[0,0].cpu().detach().numpy(), pred_normalized[0,0].cpu().detach().numpy(), save_dir + "examples/", f"{data_name}_normal_predictions.pdf", f"Example {data_name} normalized prediction for {save_name}")        
-    # logger.info('Saved plots')
+    #example
+    dico = fetch_example_data(data_path + "examples/", ["rand"])
+    for data_name, data_tuple in dico.items():
+        x, c, y = data_tuple[0].unsqueeze(0).to(device), data_tuple[1], data_tuple[2].unsqueeze(0).to(device)
+        if c is not None:
+            c = c.unsqueeze(0).to(device)
+        pred = model(x,c)
+        plot_pred(x[0,0].cpu().detach().numpy(), y[0,0].cpu().detach().numpy(), pred[0,0].cpu().detach().numpy(), save_dir + "examples/", f"{data_name}_predictions.pdf", f"Example {data_name} prediction for {save_name}")        
+    logger.info('Saved plots')
 
     logger.info('End of script\n')
 

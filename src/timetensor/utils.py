@@ -46,14 +46,14 @@ def set_random_data(path="datasets/", prefix="", lag=168, horizon=24, name="rand
         else:
             context = context[:, :, rand_date : rand_date+lag+horizon]
 
-    torch.save(inputs, path + name + "input.pt")
+    torch.save(inputs, path + "examples/" + name + "input.pt")
     if context is not None:
-        torch.save(inputs, path + name + "context.pt")
-    torch.save(target, path + name + "target.pt")
-    torch.save((rand_indiv, datetimes[rand_date]), path + name + "indivdate.pt")
+        torch.save(inputs, path + "examples/" + name + "context.pt")
+    torch.save(target, path + "examples/" + name + "target.pt")
+    torch.save((rand_indiv, datetimes[rand_date]), path + "examples/" + name + "indivdate.pt")
 
 
-def fetch_example_data(path="datasets/", names=None):
+def fetch_example_data(path="datasets/examples/", names=None):
     """fetches example data"""
     if type(names) == list:
         dico = {}
@@ -97,22 +97,6 @@ def get_stats(values, stat, dim=0):
         values_stat = values_stat[:, dim]
     return values_stat, total_stat #(Nindiv), (1)
 
-
-
-# def normalize(X, return_stats=False):
-#   """
-#   X: tensor (B, dim, features)
-#   normalize for each B
-#   """
-#   mean = X.mean(dim=-1, keepdim=True)
-#   std =  X.std(dim=-1, keepdim=True)
-#   std = torch.where(std != 0, std, 1)
-  
-#   X_normalized = (X - mean) / std
-
-#   if return_stats:
-#     return X_normalized, mean, std
-#   return X_normalized
 
 def get_normal_stats(x, std_cst=1):
   """

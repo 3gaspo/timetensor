@@ -38,16 +38,18 @@ def plot_stats(splits_dict, stat, path="", name="stats.pdf", dim=0):
     plt.savefig(path + name)
 
 
-def plot_losses(train_losses, valid_losses=None, path="", name="losses.pdf", title="Losses", logscale=True):
+def plot_losses(train_losses, valid_losses=None, path="", name="losses.pdf", title="Losses", logscale=True, eval_freq=10):
     """plots losses during training"""
     plt.clf()
     fig = plt.figure(figsize=(10,5))
     if valid_losses is not None:
         plt.plot(range(1, len(train_losses)+1), train_losses, label="train")
-        n_evals = len(valid_losses)
-        test_freq = max(len(train_losses) // n_evals, 1)
-        T = [1] + [test_freq * k for k in range(1,n_evals)] + [len(train_losses)]
-        T = list(np.unique(T))
+        T = [1]
+        k = 1
+        while len(T) < len(valid_losses)-1:
+            T.append(eval_freq * k)
+            k+=1
+        T.append(len(train_losses))
         plt.plot(T, valid_losses, label="valid")
         plt.legend()
     else:
@@ -81,4 +83,20 @@ def plot_horizon_errors(losses, path="", name="horizon.pdf", title="Mean errors 
     plt.title(title)
     plt.xlabel("Horizon")
     plt.ylabel("Mean error")
+    plt.savefig(path + name)
+
+
+def plot_pred(x, y, pred, path="", name="prediction.pdf", title="Predictions"):
+    """plots example prediction"""
+    plt.clf()
+    lag = len(x)
+    horizon = len(y)
+    fig = plt.figure(figsize=(20,5))
+    plt.plot(range(lag), x, label="Lookback")
+    plt.plot(range(lag, lag+horizon), pred, label="Prediction")
+    plt.plot(range(lag, lag+horizon), y, label="Horizon")
+    plt.axvline(x=lag, color='black', linestyle='--')
+    plt.legend(bbox_to_anchor=(0.5, -0.15), ncol=3, loc='center', fontsize=14)
+    plt.title(title)
+    fig.tight_layout()
     plt.savefig(path + name)

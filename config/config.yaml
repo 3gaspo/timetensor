@@ -19,12 +19,9 @@ training:
   retrain: True
   loss: MSE
   normalized: True
-  bs: 8
-  subset_data: 1
+  bs: 4
+  subset_data: 0.1
   lr: 0.0001
-  schedule: False
-  n_prints: 10
-  n_evals: 100
 
 misc:
   seed:

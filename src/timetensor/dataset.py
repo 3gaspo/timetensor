@@ -47,10 +47,14 @@ class TimeSeriesDataset(Dataset):
 
     def set_subset(self, ratio):
         if self.by_date:
-            new_len = int(self.dates * ratio)
-            if new_len <= self.lags + self.horizon:
-                raise ValueError("Subset not big enough") 
-            indices = np.random.choice(self.dates, size=new_len, replace=False).tolist()
+            if type(ratio)==float:
+                new_len = int(self.dates * ratio)
+                if new_len <= self.lags + self.horizon:
+                    raise ValueError("Subset not big enough") 
+                indices = np.random.choice(self.dates, size=new_len, replace=False).tolist()
+            else:
+                indices = ratio
+                new_len = len(indices)
             self.values = self.values[:, :, indices]
             if self.context is not None:
                 self.context = self.context[:, :, indices]
@@ -58,12 +62,17 @@ class TimeSeriesDataset(Dataset):
             self.dates = new_len
 
         else:
-            indices = np.random.choice(self.N_individuals, size=int(self.N_individuals * ratio), replace=False).tolist()
+            if type(ratio)==float:
+                new_len = int(self.N_individuals * ratio)
+                indices = np.random.choice(self.N_individuals, size=new_len, replace=False).tolist()
+            else:
+                indices = ratio
             self.values = self.values[indices, :, :]
             if self.context is not None:
                 self.context = self.context[indices, :, :]
             self.datetimes = self.datetimes[indices]
-            self.N_individuals = int(self.N_individuals * ratio)
+            self.N_individuals = new_len
+        return indices
 
     def __getitem__(self, idx):
         if self.by_date:
@@ -208,7 +217,7 @@ def load_example(path="datasets/", prefix=""):
 
 
 def load_datasets(path="datasets/"):
-    files = [f for f in os.listdir(path) if ".pt" in f]
+    files = [f for f in os.listdir(path) if ".pt" in f and "subset" not in f]
     data_dict = {}
     for file in files:
         name, key = file.split(".")[0].split("_")
@@ -227,7 +236,12 @@ def get_train_loaders(path, batch_size, lags, horizon, valid_mode=1, by_date=Tru
     dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date)
     if subset < 1:
         assert subset > 0
-        dataset.set_subset(subset)
+        if os.path.exists(path + f"subset_indices_{subset}.pt"):
+            subset_indices = list(torch.load(path + f"subset_indices_{subset}.pt", weights_only=False))
+            _ = dataset.set_subset(subset_indices)
+        else:
+            subset_indices = dataset.set_subset(subset)
+            torch.save(subset_indices, path + f"subset_indices_{subset}.pt")
     loaders_dict = {"train":  DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)}
     
     #valid loader

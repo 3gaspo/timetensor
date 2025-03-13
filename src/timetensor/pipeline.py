@@ -13,7 +13,7 @@ def nloss(loss, pred, y, mean, std):
     normal_y = (y - mean)/std
     return loss(normal_pred, normal_y)
 
-def train_model(model, loaders_dict, lr, criterion=None, normalized_criterion=True, n_prints=10, n_evals=100, optimizer=None, device=None, scheduler=None, verbose=1, eval_losses=None):
+def train_model(model, loaders_dict, lr, criterion=None, normalized_criterion=True, print_freq=50, eval_freq=10, optimizer=None, device=None, scheduler=None, verbose=1, eval_losses=None):
     """trains model and returns model, train and valid losses"""
     
     #model
@@ -43,12 +43,10 @@ def train_model(model, loaders_dict, lr, criterion=None, normalized_criterion=Tr
     else:
         do_eval = False
     steps = len(train_loader)
-    eval_freq = max(steps // n_evals, 1)
-    print_freq = max(steps // n_prints, 1)
 
     if verbose:
         print(f"Using device: {device}")
-        print(f"Number of steps (batches) : {len(train_loader)}")
+        print(f"Number of steps (batches): {len(train_loader)}, eval_freq: {eval_freq}, print_freq: {print_freq}")
 
     train_losses = []
 
