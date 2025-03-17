@@ -9,7 +9,6 @@ class RevIN(nn.Module):
     def __init__(self, model, dim, eps=1):
         """
         RevIN: Reversible Instance Normalization for Time Series Forecasting
-        param num_features: Number of features in the time series
         """
         super(RevIN, self).__init__()
         self.dim, self.eps = dim, eps
@@ -24,7 +23,7 @@ class RevIN(nn.Module):
         return x
     def denorm(self, y):
         y = (y - self.beta) / torch.where(self.gamma != 0, self.gamma, self.eps) #(B, dim, horizon)
-        y * self.std + self.mu
+        y = y * self.std + self.mu
         return y
     
     def forward(self, x, c=None): #(B, dim, lags)

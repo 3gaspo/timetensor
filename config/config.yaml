@@ -20,7 +20,7 @@ training:
   loss: MSE
   normalized: True
   bs: 4
-  subset_data: 0.1
+  subset_data: 0.2
   lr: 0.0001
 
 misc:

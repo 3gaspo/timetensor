@@ -10,6 +10,7 @@ do
     do
         python3 train_model.py \
             "model.name=$model_name" \
+            "model_configs=$model_name" \
             "misc.output_dir=$output_dir" \
             "model.revin=$revin"
     done

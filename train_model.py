@@ -33,6 +33,8 @@ def run(cfg):
     verbose = cfg.misc.verbose
     if verbose:
         logger.info("Fetched configs")
+        logger.info(f"Model {model_name}, revin {revin}, kwargs {kwargs}")
+
 
     #save dirs
     if save_name is None:
@@ -49,12 +51,13 @@ def run(cfg):
         os.makedirs(save_dir + "examples/")
     if verbose:
         logger.info("Fetched output directories")
+        logger.info(f"Save directory : {save_dir}")
 
     #data
     data_dict = get_train_loaders(data_path, batch_size, lags, horizon, subset=subset_data)
     if verbose:
         if subset_data < 1:
-            logger.info(f"Fetched dataloaders with subset ratio:{subset_data}")
+            logger.info(f"Fetched dataloaders with subset ratio : {subset_data}")
         else:
             logger.info("Fetched dataloaders")
     
@@ -69,10 +72,10 @@ def run(cfg):
             logger.info(f"Batch sizes : X={X.shape}, y={y.shape}")
 
     #model
-    print("DEBUG, kwargs:", kwargs)
-    model = load_model(model_name, shape, revin, **kwargs)
     if verbose:
-        logger.info(f"Fetched model {save_name}")
+        logger.info(f"Fetching model")
+    model = load_model(model_name, shape, revin, **kwargs)
+
     if criterion_name == "MSE":
         criterion = nn.MSELoss()
     else:
@@ -85,7 +88,12 @@ def run(cfg):
         logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps={len(data_dict['train'])}")
         if retrain:
             logger.info("Starting training...")
+            # for name, param in model.named_parameters():
+            #     print(f"Parameter name: {name} | ", param)
             model, train_losses, valid_losses = train_model(model, data_dict, lr, criterion, normalized, device=device)
+            # for name, param in model.named_parameters():
+            #     print(f"Parameter name: {name} | ", param)
+            
             torch.save(model.state_dict(), save_dir + "model.pt")
             torch.save(train_losses, save_dir + f"{criterion_name}_train_losses.pt")
             for loss_name, loss_values in valid_losses.items():
