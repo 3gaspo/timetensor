@@ -45,8 +45,8 @@ class TimeSeriesDataset(Dataset):
         else:
             return self.N_individuals
 
-    def set_subset(self, ratio):
-        if self.by_date:
+    def set_subset(self, ratio, mode=None):
+        if (mode None and self.by_date) or mode=="date":
             if type(ratio)==float:
                 new_len = int(self.dates * ratio)
                 if new_len <= self.lags + self.horizon:
@@ -61,7 +61,7 @@ class TimeSeriesDataset(Dataset):
             self.datetimes = self.datetimes[indices]
             self.dates = new_len
 
-        else:
+        elif mode=="individuals":
             if type(ratio)==float:
                 new_len = int(self.N_individuals * ratio)
                 indices = np.random.choice(self.N_individuals, size=new_len, replace=False).tolist()
@@ -72,6 +72,8 @@ class TimeSeriesDataset(Dataset):
                 self.context = self.context[indices, :, :]
             self.datetimes = self.datetimes[indices]
             self.N_individuals = new_len
+        else:
+            raise ValueError("Unrecognized mode: ", mode)
         return indices
 
     def __getitem__(self, idx):
