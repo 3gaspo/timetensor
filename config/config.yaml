@@ -9,6 +9,9 @@ data:
   date_split: 0.7
   seed:
 
+fed:
+  splits: [0.2, 0.5, 0.3]
+
 model:
   lags: 336
   horizon: 24

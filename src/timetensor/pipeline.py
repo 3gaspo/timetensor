@@ -13,6 +13,32 @@ def nloss(loss, pred, y, mean, std):
     normal_y = (y - mean)/std
     return loss(normal_pred, normal_y)
 
+
+def compute_step(model, X_batch, y_batch, context_batch, normalized_criterion=True, frozen_modules=None):
+    """computes forward and backward on batch"""
+    if context_batch is not None:
+        context_batch = context_batch.to(device)
+    
+    if normalized_criterion:
+        mean, std = get_normal_stats(X_batch) # (B, dim, 1)
+    
+    optimizer.zero_grad()
+    predictions = model(X_batch, context_batch)
+
+    if normalized_criterion:
+        loss = nloss(criterion, predictions, y_batch, mean, std)
+    else:
+        loss = criterion(predictions, y_batch)
+
+    if frozen_modules is not None:
+        for frozen_module in frozen_modules:
+            frozen_module.zero_grad()
+
+    loss.backward()
+
+    return loss.item()
+
+
 def train_model(model, loaders_dict, lr, criterion=None, normalized_criterion=True, print_freq=50, eval_freq=10, optimizer=None, device=None, scheduler=None, verbose=1, eval_losses=None):
     """trains model and returns model, train and valid losses"""
     
@@ -58,26 +84,12 @@ def train_model(model, loaders_dict, lr, criterion=None, normalized_criterion=Tr
     for X_batch, context_batch, y_batch in train_loader:
         step += 1
         X_batch, y_batch = X_batch.to(device), y_batch.to(device)
-        if context_batch is not None:
-            context_batch = context_batch.to(device)
-        
-        if normalized_criterion:
-            mean, std = get_normal_stats(X_batch) # (B, dim, 1)
-        
-        optimizer.zero_grad()
-        predictions = model(X_batch, context_batch)
 
-        if normalized_criterion:
-            loss = nloss(criterion, predictions, y_batch, mean, std)
-        else:
-            loss = criterion(predictions, y_batch)
-
-        loss.backward()
+        loss = compute_step(model, X_batch, y_batch, context_batch, normalized_criterion)
         optimizer.step()
-
-        train_losses.append(loss.item()) #loss of batch
         if scheduler is not None:
             scheduler.step()
+        train_losses.append(loss) #loss of batch
         
         if do_eval and (step == 1 or step%eval_freq == 0 or step==steps):
             valid_loss = average_loss(eval_model(model, valid_loader, device, eval_losses))
@@ -124,6 +136,7 @@ def eval_model(model, loader, device, eval_losses, verbose=0):
     if verbose:
         print(f"Evaluation done in {(t2-t1)/60:.3f} min")
     return {key: torch.stack(losses[key]) for key in losses}
+
 
 def average_loss(eval_losses):
     mean_losses = {}
