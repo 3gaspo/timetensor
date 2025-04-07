@@ -17,24 +17,45 @@ def plot_example(x, y, path="", name="example.pdf", title="Example"):
     fig.tight_layout()
     plt.savefig(path + name)
 
-def plot_stats(splits_dict, stat, path="", name="stats.pdf", dim=0):
+# def plot_stats(splits_dict, stat, path="", name="stats.pdf", dim=0):
+#     """plots stats of datasets"""
+#     plt.clf()
+#     fig = plt.figure(figsize=(10,5))
+#     for split_name, split_dict in splits_dict.items():
+#         if split_dict.get("values") is not None:
+#             stat_values, total_stat = get_stats(split_dict["values"], stat, dim)
+#             bins = np.logspace(-2, 6, 100)
+#             plt.hist(stat_values, label= f"{split_name} - {stat}={total_stat:.2f}", bins=bins, density=True, alpha=0.5)
+#         else:
+#             _, total_stat = get_stats(split_dict["input"], stat, None)
+#             plt.axvline(x=total_stat, color='red', linestyle='--', linewidth=2)
+
+#     plt.legend()
+#     plt.title(f"{stat} distribution")
+#     plt.xlabel(f"{stat}")
+#     plt.xscale("log")
+#     plt.ylabel("Counts")
+#     plt.savefig(path + name)
+
+import random
+def scatter_stats(values_dict, path="", name="stats.pdf", dim=0):
     """plots stats of datasets"""
     plt.clf()
     fig = plt.figure(figsize=(10,5))
-    for split_name, split_dict in splits_dict.items():
-        if split_dict.get("values") is not None:
-            stat_values, total_stat = get_stats(split_dict["values"], stat, dim)
-            bins = np.logspace(-2, 6, 100)
-            plt.hist(stat_values, label= f"{split_name} - {stat}={total_stat:.2f}", bins=bins, density=True, alpha=0.5)
-        else:
-            _, total_stat = get_stats(split_dict["input"], stat, None)
-            plt.axvline(x=total_stat, color='red', linestyle='--', linewidth=2)
+    for split_name, split_values in values_dict.items():
+        std_values, total_std = get_stats(split_values, "std", dim)
+        mean_values, total_mean = get_stats(split_values, "mean", dim)
+        if len(mean_values)>2000:
+            idx=random.sample(range(len(mean_values)),1000)
+            mean_values, std_values = mean_values[idx], std_values[idx]
+        plt.scatter(mean_values, std_values, label= f"{split_name} - std={total_std:.2f}, mean={total_mean:.2f}", s=10)
 
     plt.legend()
-    plt.title(f"{stat} distribution")
-    plt.xlabel(f"{stat}")
+    plt.title(f"Max mean distribution")
+    plt.xlabel(f"mean")
     plt.xscale("log")
-    plt.ylabel("Counts")
+    plt.yscale("log")
+    plt.ylabel("std")
     plt.savefig(path + name)
 
 

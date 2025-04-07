@@ -17,7 +17,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 @hydra.main(version_base=None, config_path="config", config_name="config")
 def run(cfg):
     logger = logging.getLogger(__name__)
-    print("\n\n")
+    print("\n")
     logger.info("=====Running main script=====")
 
     #configs
@@ -62,7 +62,7 @@ def run(cfg):
             logger.info("Fetched dataloaders")
     
     #sizes
-    logger.info(f"Dataset shape : {data_dict['train'].dataset.shape()}")
+    logger.info(f"Dataset shape : {data_dict['train'].dataset.shape}")
     X, c, y = next(iter(data_dict["train"])) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
     shape = [X.shape[1], X.shape[2], y.shape[2]]
     if verbose:

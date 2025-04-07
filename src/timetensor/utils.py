@@ -81,6 +81,23 @@ def rename_example_data(path, name, new_dir, old_name="rand"):
     os.rename(path + old_name + "_indivdate.pt", f"{new_dir}{name}_indivdate.pt")
 
 
+def unroll_windows(dataloader, cap=None, shuffle=False):
+    """unrolls (x,y) examples of dataloaders"""
+    X = []
+    Y = []
+    i = 0
+    for x, c, y in dataloader:
+        X.append(x)
+        Y.append(y)
+        if cap is not None and i == cap and not shuffle:
+            break
+        i+=1
+    if shuffle:
+        X, Y = np.random.shuffle(X), np.random.shuffle(Y)
+    return torch.concat(X), torch.concat(Y)
+
+
+
 def get_stats(values, stat, dim=0):
     """returns tensor of given stats for a loader
     values (Nindiv, Ndim, Ndates)
@@ -91,6 +108,9 @@ def get_stats(values, stat, dim=0):
     elif stat == "max":
         values_stat, _ = values.max(axis=-1) #(Nindiv, Ndim)
         total_stat = values.max()
+    elif stat == "std":
+        values_stat = values.std(axis=-1) #(Nindiv, Ndim)
+        total_stat = values.std()
     else:
         raise ValueError("Unrecognized stat name")
     if dim is not None:

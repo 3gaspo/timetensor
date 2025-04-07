@@ -32,7 +32,7 @@ class TimeSeriesDataset(Dataset):
         self.by_date = by_date
         self.return_all_individuals, self.context_by_individuals = return_all_individuals, context_by_individuals
 
-
+    @property
     def shape(self):
         if self.context is not None:
             return (self.individuals, self.dim_values, self.dates), (self.contexts, self.dim_context, self.dates)
@@ -44,37 +44,6 @@ class TimeSeriesDataset(Dataset):
             return self.dates - (self.lags + self.horizon)
         else:
             return self.N_individuals
-
-    # def set_subset(self, ratio, mode=None):
-    #     if (mode is None and self.by_date) or mode=="date":
-    #         if type(ratio)==float:
-    #             new_len = int(self.dates * ratio)
-    #             if new_len <= self.lags + self.horizon:
-    #                 raise ValueError("Subset not big enough") 
-    #             indices = np.random.choice(self.dates, size=new_len, replace=False).tolist()
-    #         else:
-    #             indices = ratio
-    #             new_len = len(indices)
-    #         self.values = self.values[:, :, indices]
-    #         if self.context is not None:
-    #             self.context = self.context[:, :, indices]
-    #         self.datetimes = self.datetimes[indices]
-    #         self.dates = new_len
-
-    #     elif mode=="individuals":
-    #         if type(ratio)==float:
-    #             new_len = int(self.N_individuals * ratio)
-    #             indices = np.random.choice(self.N_individuals, size=new_len, replace=False).tolist()
-    #         else:
-    #             indices = ratio
-    #         self.values = self.values[indices, :, :]
-    #         if self.context is not None:
-    #             self.context = self.context[indices, :, :]
-    #         self.datetimes = self.datetimes[indices]
-    #         self.N_individuals = new_len
-    #     else:
-    #         raise ValueError("Unrecognized mode: ", mode)
-    #     return indices
 
     def __getitem__(self, idx):
         if self.by_date:
@@ -135,33 +104,46 @@ class Subset(Dataset):
             raise ValueError(f"Unrecognized mode: {self.mode}")
 
     def __getitem__(self, idx):
-        return self.dataset[self.indices[idx]] #should call __get__item
-
+        items =  self.dataset[self.indices[idx]]
+        try:
+            assert items[0].shape[2]==self.dataset.lags
+        except:
+            raise ValueError(f"error at idx: {idx}={self.indices[idx]}, items:{len(items)}, shapes: {items[0].shape}, {items[1].shape}")
+        return items
+    
     def __len__(self):
         if self.dataset.by_date:
             if self.mode == "individuals":
                 return len(self.dataset)
             else:
-                return len(self.indices)
+                return len(self.indices) - (self.dataset.lags + self.dataset.horizon)
         else:
             if self.mode == "individuals":
                 return len(self.indices)
             else:
                 return len(self.dataset)
 
+    @property
     def shape(self):
         if self.dataset.context is not None:
             return (self.individuals, self.dataset.dim_values, self.dates), (self.contexts, self.dataset.dim_context, self.dates)
         else:
             return (self.individuals, self.dataset.dim_values, self.dates)
 
+    @property
+    def values(self):
+        if self.mode == "dates":
+            return self.dataset.values[:, :, self.indices]
+        else:
+            return self.dataset.values[self.indices, :, :]
 
 def get_subset_indices(dataset, ratio, mode=None):
     if (mode is None and dataset.by_date) or mode=="date":
-        new_len = int(dataset.dates * ratio)
+        old_len = dataset.dates - dataset.lags - dataset.horizon
+        new_len = int(old_len * ratio)
         if new_len <= dataset.lags + dataset.horizon:
             raise ValueError("Subset not big enough") 
-        indices = np.random.choice(dataset.dates, size=new_len, replace=False).tolist()
+        indices = np.random.choice(old_len, size=new_len, replace=False).tolist()
 
     elif mode=="individuals":
         new_len = int(dataset.N_individuals * ratio)
@@ -306,16 +288,17 @@ def get_train_loaders(path, batch_size, lags, horizon, valid_mode=1, by_date=Tru
             assert subset > 0
             if os.path.exists(path + f"subset_indices_{subset}.pt"):
                 subset_indices = list(torch.load(path + f"subset_indices_{subset}.pt", weights_only=False))
-                #_ = dataset.set_subset(subset_indices)
             else:
                 subset_indices = get_subset_indices(dataset, subset)
-                #subset_indices = dataset.set_subset(subset)
                 torch.save(subset_indices, path + f"subset_indices_{subset}.pt")
         if by_date:
             mode = "dates"
         else:
             mode = "individuals"
         dataset = Subset(dataset, subset_indices, mode)
+
+        #print("debug: by_date=",dataset.dataset.by_date, " mode=",dataset.mode, " len=",len(dataset), " lags,hor=", dataset.dataset.lags, dataset.dataset.horizon)
+        #print("debug : ", dataset[0][0].shape, dataset[len(dataset)-1][0].shape)
     loaders_dict = {"train":  DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)}
     
     #valid loader
