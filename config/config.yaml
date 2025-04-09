@@ -1,16 +1,21 @@
 data:
   dataset: electricity
-  path: ../datasets/
-  rebuild: False
-  reset: False
-  example_name : rand
   format: csv
+  path: ../datasets/
   indiv_split: 0.7
   date_split: 0.7
+  subset:
+    train: 0.1
+    valid: 1
+    valid2: 1
+    test: 1
   seed:
 
 fed:
-  splits: [0.2, 0.5, 0.3]
+  splits:
+    ../datasets/node_0_indices.pt: [0.7, 0.7]
+    ../datasets/node_1_indices.pt: [0.7, 0.7]
+    ../datasets/node_2_indices.pt: [0.7, 0.7]
 
 model:
   lags: 336

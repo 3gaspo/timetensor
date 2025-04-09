@@ -38,7 +38,7 @@ def plot_example(x, y, path="", name="example.pdf", title="Example"):
 #     plt.savefig(path + name)
 
 import random
-def scatter_stats(values_dict, path="", name="stats.pdf", dim=0):
+def scatter_stats(values_dict, path="", name="stats.pdf", dim=0, title=None):
     """plots stats of datasets"""
     plt.clf()
     fig = plt.figure(figsize=(10,5))
@@ -51,7 +51,10 @@ def scatter_stats(values_dict, path="", name="stats.pdf", dim=0):
         plt.scatter(mean_values, std_values, label= f"{split_name} - std={total_std:.2f}, mean={total_mean:.2f}", s=10)
 
     plt.legend()
-    plt.title(f"Max mean distribution")
+    if title is None:
+        plt.title(f"Max mean distribution")
+    else:
+        plt.title(title)
     plt.xlabel(f"mean")
     plt.xscale("log")
     plt.yscale("log")

@@ -104,11 +104,14 @@ class Subset(Dataset):
             raise ValueError(f"Unrecognized mode: {self.mode}")
 
     def __getitem__(self, idx):
-        items =  self.dataset[self.indices[idx]]
-        try:
-            assert items[0].shape[2]==self.dataset.lags
-        except:
-            raise ValueError(f"error at idx: {idx}={self.indices[idx]}, items:{len(items)}, shapes: {items[0].shape}, {items[1].shape}")
+        if (self.mode == "individuals" and self.dataset.by_date) or (self.mode == "dates" and not self.dataset.by_date):
+            return self.dataset[idx]
+        else:
+            items =  self.dataset[self.indices[idx]]
+            try:
+                assert items[0].shape[2]==self.dataset.lags
+            except:
+                raise ValueError(f"error for subset={self.dataset.shape} at idx: {idx}={self.indices[idx]}")
         return items
     
     def __len__(self):
@@ -137,19 +140,60 @@ class Subset(Dataset):
         else:
             return self.dataset.values[self.indices, :, :]
 
+
+def build_dataset(fetcher, path="datasets/"):
+    """uses fetcher to extract raw data and saves as values, context, datetimes"""
+    values, context, datetimes = fetcher(path)
+    torch.save(values, path + "values.pt")
+    if context is not None:
+        torch.save(context, path + "context.pt")
+    torch.save(datetimes, path+ "datetimes.pt")
+
+def load_data(path="datasets/", prefix=""):
+    """loads values, context, datetimes from path (with eventual prefix)"""
+    if prefix is None:
+        prefix = ""
+    if prefix != "":
+        prefix = prefix + "_"
+    values = torch.load(path + prefix + "values.pt")
+    if os.path.exists(path + prefix + "context.pt"):
+        context = torch.load(path + prefix + "context.pt")
+    else:
+        context = None
+    datetimes = torch.load(path + prefix + "datetimes.pt", weights_only=False)
+    return values, context, datetimes
+
+def load_example(path="datasets/", prefix=""):
+    """loads intput, context, target, indiv, date from path (with eventual prefix)"""
+    if prefix is None:
+        prefix = ""
+    elif prefix != "":
+        prefix = prefix + "_"
+    inpt = torch.load(path + prefix + "input.pt")
+    target = torch.load(path + prefix + "target.pt")
+    if os.path.exists(path + prefix + "context.pt"):
+        context = torch.load(path + prefix + "context.pt")
+    else:
+        context = None
+    indiv, date = torch.load(path + prefix + "indivdate.pt", weights_only=False)
+    return inpt, context, target, indiv, date
+
+
+
 def get_subset_indices(dataset, ratio, mode=None):
-    if (mode is None and dataset.by_date) or mode=="date":
+    """returns subset of random indices for dataset"""
+    if (mode is None and dataset.by_date) or mode=="date": #sample dates
         old_len = dataset.dates - dataset.lags - dataset.horizon
         new_len = int(old_len * ratio)
         if new_len <= dataset.lags + dataset.horizon:
             raise ValueError("Subset not big enough") 
         indices = np.random.choice(old_len, size=new_len, replace=False).tolist()
 
-    elif mode=="individuals":
+    elif mode=="individuals": #sample individuals
         new_len = int(dataset.N_individuals * ratio)
         indices = np.random.choice(dataset.N_individuals, size=new_len, replace=False).tolist()
         dataset.values = dataset.values[indices, :, :]
-        if self.context is not None:
+        if dataset.context is not None:
             dataset.context = dataset.context[indices, :, :]
         dataset.datetimes = dataset.datetimes[indices]
         dataset.N_individuals = new_len
@@ -158,55 +202,74 @@ def get_subset_indices(dataset, ratio, mode=None):
     return indices
 
 
-def train_test_split(values, context, datetimes, indiv_split=0.8, date_split=0.8, seed=None, context_by_individuals=False):
-    """splits values and datetimes with a split among individuals and dates"""
+def train_test_split(values, context, datetimes, indiv_split=None, date_split=None, seed=None, context_by_individuals=False, path=""):
+    """returns dict of train/valid/test of provided values,context,datetimes
+    split parameters can be in [0,1] or str path to indices
+    """
 
     if seed is not None:
         np.random.seed(seed)
 
-    if date_split is not None and date_split<1: #split dates
-        dates = len(datetimes)
-        stop_date = int(date_split * dates)
-        dates1, dates2 = datetimes[:stop_date], datetimes[stop_date:] 
+    if date_split is not None:
+        if type(date_split)==str:
+            dates_idx1, dates_idx2 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False))
+            dates1, dates2 = datetimes[dates_idx1], datetimes[dates_idx2]
+        elif type(date_split)==float and date_split<1: #split dates
+            dates = len(datetimes)
+            stop_date = int(date_split * dates)
+            dates_idx1, dates_idx2 = list(range(stop_date)), list(range(stop_date, dates))
+            dates1, dates2 = list(datetimes[:stop_date]), list(datetimes[stop_date:])
+            torch.save(dates_idx1, path + "date_split1.pt")
+            torch.save(dates_idx2, path + "date_split1.pt")
 
-        if indiv_split is not None and indiv_split<1: #split individuals
-            individuals = values.shape[0]
-            stop_indiv = int(indiv_split * individuals)
-            indices = np.random.permutation(individuals)
-            indices1, indices2 = indices[:stop_indiv], indices[stop_indiv:]
+        if indiv_split is not None: #split individuals
+            if type(indiv_split)==str:
+                indices1, indices2 = list(torch.load(indiv_split + "_split1.pt", weights_only=False)), list(torch.load(indiv_split + "_split2.pt", weights_only=False))
+            elif type(indiv_split)==float and indiv_split<1: 
+                individuals = values.shape[0]
+                stop_indiv = int(indiv_split * individuals)
+                indices = np.random.permutation(individuals)
+                indices1, indices2 = list(indices[:stop_indiv]), list(indices[stop_indiv:])
+                torch.save(indices1, path + "indiv_split1.pt")
+                torch.save(indices2, path + "indiv_split1.pt")
 
-            values1 = values[indices1, :, :stop_date]
-            values2 = values[indices1, :, stop_date:]
-            values3 = values[indices2, :, :stop_date]
-            values4 = values[indices2, :, stop_date:]
+            values1 = values[indices1, :, :][: , :, dates_idx1]
+            values2 = values[indices1, :, :][: , :, dates_idx2]
+            values3 = values[indices2, :, :][: , :, dates_idx1]
+            values4 = values[indices2, :, :][: , :, dates_idx2]
             if context is not None:
                 if context_by_individuals:
-                    context1 = context[indices1, :, :stop_date]
-                    context2 = context[indices1, :, stop_date:]
-                    context3 = context[indices2, :, :stop_date]
-                    context4 = context[indices2, :, stop_date:]
+                    context1 = context[indices1, :, :][: , :, dates_idx1]
+                    context2 = context[indices1, :, :][: , :, dates_idx2]
+                    context3 = context[indices2, :, :][: , :, dates_idx1]
+                    context4 = context[indices2, :, :][: , :, dates_idx2]
                 else:
-                    context1 = context[:, :, :stop_date]
-                    context2 = context[:, :, stop_date:]
-                    context3 = context[:, :, :stop_date]
-                    context4 = context[:, :, stop_date:]
+                    context1 = context[:, :, :][: , :, dates_idx1]
+                    context2 = context[:, :, :][: , :, dates_idx2]
+                    context3 = context[:, :, :][: , :, dates_idx1]
+                    context4 = context[:, :, :][: , :, dates_idx2]
             else:
                 context1, context2, context3, context4 = None, None, None, None
             return {"train":(values1, context1, dates1), "valid":(values2, context2, dates2), "valid2":(values3, context3, dates1), "test": (values4, context4, dates2)}
 
         else:
             if context is not None:
-                context1 = context[:,:,dates1]
-                context2 = context[:,:,dates2]
+                context1 = context[:, :, :][: , :, dates_idx1]
+                context2 = context[:, :, :][: , :, dates_idx2]
             else:
                 context1, context2 = None, None
-            return {"train": (values[:,:,dates1], context1, dates1), "test":(values[:,:,dates2], context2, dates2)}
+            return {"train": (values[:, :, dates1], context1, dates1), "test":(values[:,:,dates2], context2, dates2)}
 
-    elif indiv_split is not None and indiv_split<1: #split individuals
-        individuals = values.shape[0]
-        stop_indiv = int(indiv_split * individuals)
-        indices = np.random.permutation(individuals)
-        indices1, indices2 = indices[:stop_indiv], indices[stop_indiv:]
+    elif indiv_split is not None:
+        if type(indiv_split)==str:
+            indices1, indices2 = list(torch.load(indiv_split + "_split1.pt", weights_only=False)), list(torch.load(indiv_split + "_split2.pt", weights_only=False))
+        elif type(indiv_split)==float and indiv_split<1: 
+            individuals = values.shape[0]
+            stop_indiv = int(indiv_split * individuals)
+            indices = np.random.permutation(individuals)
+            indices1, indices2 = list(indices[:stop_indiv]), list(indices[stop_indiv:])
+            torch.save(indices1, path + "indiv_split1.pt")
+            torch.save(indices2, path + "indiv_split1.pt")
 
         values1 = values[indices1, :, :]
         values2 = values[indices2, :, :]
@@ -222,99 +285,49 @@ def train_test_split(values, context, datetimes, indiv_split=0.8, date_split=0.8
         return {"train":(values1, context1, dates1), "test" :(values2, context2, dates2)}
     
     else:
-        return {"":(values, context, datetimes)}
+        return {"train":(values, context, datetimes)}
 
 
-def build_datasets(fetcher, path="datasets/", indiv_split=0.8, date_split=0.8, seed=None):
-    values, context, datetimes = fetcher(path)
-    data_dict = train_test_split(values, context, datetimes, indiv_split, date_split, seed)
-    for key, (values, context, datetimes) in data_dict.items():
-        torch.save(values, path + key + "_values.pt")
-        if context is not None:
-            torch.save(context, path + key + "_context.pt")
-        torch.save(datetimes, path + key + "_datetimes.pt")
 
+def get_dataset_splits(path="datasets/", indiv_split=None, date_split=None, seed=None, save=False, context_by_individuals=False):
+    values, context, datetimes = load_data(path) #load dataset
+    data_dict = train_test_split(values, context, datetimes, indiv_split, date_split, seed, context_by_individuals, path) #split randomly of according to paths
 
-def load_data(path="datasets/", prefix=""):
-    if prefix is None:
-        prefix = ""
-    if prefix != "":
-        prefix = prefix + "_"
-    values = torch.load(path + prefix + "values.pt")
-    if os.path.exists(path + prefix + "context.pt"):
-        context = torch.load(path + prefix + "context.pt")
-    else:
-        context = None
-    datetimes = torch.load(path + prefix + "datetimes.pt", weights_only=False)
-    return values, context, datetimes
-
-def load_example(path="datasets/", prefix=""):
-    if prefix is None:
-        prefix = ""
-    elif prefix != "":
-        prefix = prefix + "_"
-    inpt = torch.load(path + prefix + "input.pt")
-    target = torch.load(path + prefix + "target.pt")
-    if os.path.exists(path + prefix + "context.pt"):
-        context = torch.load(path + prefix + "context.pt")
-    else:
-        context = None
-    indiv, date = torch.load(path + prefix + "indivdate.pt", weights_only=False)
-    return inpt, context, target, indiv, date
-
-
-def load_datasets(path="datasets/"):
-    files = [f for f in os.listdir(path) if ".pt" in f and "subset" not in f]
-    data_dict = {}
-    for file in files:
-        name, key = file.split(".")[0].split("_")
-        if data_dict.get(name) is None:
-            data_dict[name] = {}
-        data_dict[name][key] = torch.load(path + file, weights_only=False)
+    if save:
+        for key, (values, context, datetimes) in data_dict.items():
+            torch.save(values, path + key + "_values.pt")
+            if context is not None:
+                torch.save(context, path + key + "_context.pt")
+            torch.save(datetimes, path + key + "_datetimes.pt")
     return data_dict
 
 
-def get_train_loaders(path, batch_size, lags, horizon, valid_mode=1, by_date=True, subset=1):
 
-    data_dict = load_datasets(path)
-    
-    #train loader
-    values, context, datetimes = data_dict["train"]["values"], data_dict["train"].get("context"), data_dict["train"]["datetimes"]
-    dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date)
-    if type(subset)==str or (type(subset)==float and subset < 1):
-        if type(subset)==str:
-            subset_indices = list(torch.load(subset, weights_only=False))
-        else:
-            assert subset > 0
-            if os.path.exists(path + f"subset_indices_{subset}.pt"):
-                subset_indices = list(torch.load(path + f"subset_indices_{subset}.pt", weights_only=False))
+def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets=None, path=""):
+    """returns dataloaders from data_dict as eventual subsets"""
+    loaders_dict = {}
+    for key, (values, context, datetimes) in data_dict.items():
+        dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date)
+        subset = subsets.get(key)
+        if subset is not None and (type(subset)==str or (type(subset)==float and subset<1 and subset>0)):
+            if by_date:
+                mode = "dates"
             else:
+                mode = "individuals"
+            if type(subset)==str:
+                subset_indices = list(torch.load(subset, weights_only=False))
+            elif type(subset)==float:
                 subset_indices = get_subset_indices(dataset, subset)
-                torch.save(subset_indices, path + f"subset_indices_{subset}.pt")
-        if by_date:
-            mode = "dates"
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                torch.save(subset_indices, path + f"{key}_subset_indices_{subset}.pt")
+            dataset = Subset(dataset, subset_indices, mode)
+
+        if key=="train":
+            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
         else:
-            mode = "individuals"
-        dataset = Subset(dataset, subset_indices, mode)
-
-        #print("debug: by_date=",dataset.dataset.by_date, " mode=",dataset.mode, " len=",len(dataset), " lags,hor=", dataset.dataset.lags, dataset.dataset.horizon)
-        #print("debug : ", dataset[0][0].shape, dataset[len(dataset)-1][0].shape)
-    loaders_dict = {"train":  DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)}
-    
-    #valid loader
-    if valid_mode == 2:
-        validkey = "valid2"
-    else:
-        validkey = "valid"
-    values, context, datetimes = data_dict[validkey]["values"], data_dict[validkey].get("context"), data_dict[validkey]["datetimes"]
-    dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True)
-    loaders_dict["valid"] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
-    
-    #test loader
-    values, context, datetimes = data_dict["test"]["values"], data_dict["test"].get("context"), data_dict["test"]["datetimes"]
-    dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True)
-    loaders_dict["test"] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
-
+            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+       
     return loaders_dict
 
 

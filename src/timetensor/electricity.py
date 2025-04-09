@@ -30,7 +30,7 @@ def fetch_csv_data(path):
     """returns electricity.csv dataset as consumptions tensor and datetimes list"""
     df = pd.read_csv(path + "electricity.csv")
     datetimes = [datetime.datetime.strptime(date.strip('"'), "%Y-%m-%d %H:%M:%S") for date in df.date]
-    consumptions = df.drop(columns=["date","OT"]).values
+    consumptions = df.drop(columns=["date"]).rename(columns={"OT":"320"}).values
     consumptions = torch.tensor(consumptions, dtype=torch.float32).transpose(1,0).unsqueeze(1) #(N_individuals, 1, N_dates)
     return consumptions, datetimes
 
