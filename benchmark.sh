@@ -12,7 +12,8 @@ do
             "model.name=$model_name" \
             "model_configs=$model_name" \
             "misc.output_dir=$output_dir" \
-            "model.revin=$revin"
+            "model.revin=$revin" \
+            "misc.bencmark=True" \
     done
 done
 

@@ -27,7 +27,7 @@ def run(cfg):
     criterion_name, normalized, revin = cfg.training.loss, cfg.training.normalized,  cfg.model.revin
     model_name, retrain = cfg.model.name, cfg.training.retrain
     kwargs = cfg.model_configs
-    verbose = cfg.misc.verbose
+    verbose, benchmark = cfg.misc.verbose, cfg.misc.benchmark
     if verbose:
         logger.info("Fetched main configs")
         logger.info(f"Model {model_name}, revin {revin}, kwargs {kwargs}")
@@ -83,11 +83,13 @@ def run(cfg):
             model = load_model(model_name, shape, revin, **kwargs)
             learner = Learner(model, criterion, lr, eval_losses, device=device, normalized_criterion=True)
             logger.info("Starting training...")
-            train_losses, valid_losses = train_model(learner, loaders_dict)
+            train_losses, valid_losses, valid_losses2 = train_model(learner, loaders_dict)
             torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")
             torch.save(train_losses, save_dir + f"{criterion_name}_train_losses.pt")
             for loss_name, loss_values in valid_losses.items():
                 torch.save(loss_values, save_dir + f"{loss_name}_valid_losses.pt")
+            for loss_name, loss_values in valid_losses2.items():
+                torch.save(loss_values, save_dir + f"{loss_name}_valid_losses2.pt")
             logger.info("End of training")
         else:
             model = load_model(model_name, shape, revin, **kwargs)
@@ -99,25 +101,33 @@ def run(cfg):
             for loss_name in eval_losses:
                 valid_losses[loss_name] = torch.load(save_dir + f"{loss_name}_valid_losses.pt",weights_only=False)
                 valid_losses["N"+loss_name] = torch.load(save_dir + f"N{loss_name}_valid_losses.pt",weights_only=False)
+            valid_losses2 = {}
+            for loss_name in eval_losses:
+                valid_losses2[loss_name] = torch.load(save_dir + f"{loss_name}_valid_losses2.pt",weights_only=False)
+                valid_losses2["N"+loss_name] = torch.load(save_dir + f"N{loss_name}_valid_losses2.pt",weights_only=False)
 
         #plots
-        plot_losses(train_losses, valid_losses["NMSE"], save_dir, "train_losses.pdf", f"Training NMSE of {save_name}")
-        plot_losses(valid_losses["MSE"], None, save_dir, "vaild_losses.pdf", f"Validation MSE of {save_name}")
-        plot_losses(valid_losses["NMSE"], None, save_dir, "vaild_nlosses.pdf", f"Validation NMSE of {save_name}")
+        plot_losses(train_losses, valid_losses["MSE"], valid_losses2["MSE"],  save_dir, "train_losses.pdf", f"Training MSE of {save_name}")
+        plot_losses(train_losses, valid_losses["NMSE"], valid_losses2["NMSE"],  save_dir, "train_nlosses.pdf", f"Training NMSE of {save_name}")
+
         logger.info("Plotted losses")
     else:
         logger.info("No training needed")
 
     #eval
     logger.info("Computing test metrics")
-    test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1) #(bs * steps, dim, horizon)
+    test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1) #(ndates*nindividuals, dim, horizon)
     torch.save(test_losses, save_dir + "test_losses.pt")
     mean_test_mse, std_test_mse = test_losses["MSE"].mean(), test_losses["MSE"].std()
     mean_test_nmse, std_test_nmse = test_losses["NMSE"].mean(), test_losses["NMSE"].std()
-    save_results(mean_test_mse, output_dir, "mean_results.json", save_name, "Test MSE")
-    save_results(std_test_mse, output_dir, "std_results.json", save_name, "Test MSE")
-    save_results(mean_test_nmse, output_dir, "mean_results.json", save_name, "Test NMSE")
-    save_results(std_test_nmse, output_dir, "std_results.json", save_name, "Test NMSE")
+    if benchmark:
+        test_dir = output_dir
+    else:
+        test_dir = save_dir
+    save_results(mean_test_mse, test_dir, "mean_results.json", save_name, "Test MSE")
+    save_results(std_test_mse, test_dir, "std_results.json", save_name, "Test MSE")
+    save_results(mean_test_nmse, test_dir, "mean_results.json", save_name, "Test NMSE")
+    save_results(std_test_nmse, test_dir, "std_results.json", save_name, "Test NMSE")
     logger.info(f"Test MSE : {mean_test_mse:.2f} (+/- {std_test_mse:.2f}), Test NMSE : {mean_test_nmse:.2f} (+/- {std_test_nmse:.2f})")
 
 

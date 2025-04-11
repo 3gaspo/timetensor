@@ -71,7 +71,7 @@ def scatter_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, log
     plt.savefig(path + name)
 
 
-def plot_losses(train_losses, valid_losses=None, path="", name="losses.pdf", title="Losses", logscale=True, eval_freq=10):
+def plot_losses(train_losses, valid_losses=None, valid_losses2=None, path="", name="losses.pdf", title="Losses", logscale=True, eval_freq=10):
     """plots losses during training"""
     plt.clf()
     fig = plt.figure(figsize=(10,5))
@@ -84,6 +84,8 @@ def plot_losses(train_losses, valid_losses=None, path="", name="losses.pdf", tit
             k+=1
         T.append(len(train_losses))
         plt.plot(T, valid_losses, label="valid")
+        if valid_losses2 is not None:
+            plt.plot(T, valid_losses2, label="valid2")
         plt.legend()
     else:
         plt.plot(range(1, len(train_losses)+1), train_losses)

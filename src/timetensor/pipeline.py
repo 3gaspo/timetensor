@@ -77,9 +77,8 @@ class Learner:
                 
                 predictions = self.model(X_batch, context_batch) #normalization done (or not) inside model
                 for loss_name, criterion in self.eval_losses.items():
-                    loss = criterion(predictions, y_batch).cpu()
+                    loss = criterion(predictions, y_batch).cpu() # (bs * individuals, dim, horizon)
                     normalized_loss = nloss(criterion, predictions, y_batch, mean, std).cpu()
-
                     if losses.get(loss_name) is None:
                         losses[loss_name] = []
                         losses["N"+loss_name] = []
@@ -89,8 +88,7 @@ class Learner:
         if verbose:
             print(f"Evaluation done in {(t2-t1)/60:.3f} min")
         
-        
-        eval_dict = {key: torch.stack(losses[key]) for key in losses}
+        eval_dict = {key: torch.stack(losses[key]) for key in losses} # (ndates * individuals, dim, horizon)
         if return_all:
             return eval_dict
         else:
@@ -99,13 +97,13 @@ class Learner:
 
 
 
-#def train_model(model, loaders_dict, lr, criterion=None, normalized_criterion=True, print_freq=50, eval_freq=10, optimizer=None, device=None, scheduler=None, verbose=1, eval_losses=None):
 def train_model(learner, loaders_dict, print_freq=50, eval_freq=10, verbose=1, do_eval=True):
     """trains model in learner on loaders and returns train and valid losses"""
     
     #data
     train_loader = loaders_dict["train"]
     valid_loader = loaders_dict.get("valid")
+    valid_loader2 = loaders_dict.get("valid2")
     steps = len(train_loader)
 
     if verbose:
@@ -114,6 +112,7 @@ def train_model(learner, loaders_dict, print_freq=50, eval_freq=10, verbose=1, d
 
     train_losses = []
     valid_losses = {}
+    valid_losses2 = {}
     t1 = perf_counter()
 
     #training
@@ -124,18 +123,28 @@ def train_model(learner, loaders_dict, print_freq=50, eval_freq=10, verbose=1, d
         train_losses.append(loss) #loss of batch
         
         if do_eval and (step == 1 or step % eval_freq == 0 or step == steps):
+
+            #valid 1
             average_eval_dict = learner.eval(valid_loader)
             for loss_name, loss_value in average_eval_dict.items():
                 if loss_name not in valid_losses:
                     valid_losses[loss_name] = []
                 valid_losses[loss_name].append(loss_value)
+
+            #valid 2
+            average_eval_dict2 = learner.eval(valid_loader2)
+            for loss_name, loss_value in average_eval_dict2.items():
+                if loss_name not in valid_losses2:
+                    valid_losses2[loss_name] = []
+                valid_losses2[loss_name].append(loss_value)
+
             if step == 1 or step % print_freq == 0 or step == steps:
-                print(f"Step {step} | " + " | ".join([f"valid {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict.items()]))
+                print(f"Step {step} | " + " | ".join([f"valid1 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict.items()]) + " | " + " | ".join([f"valid2 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict2.items()]))
 
     t2 = perf_counter()
     if verbose:
         print(f"Training done in {(t2-t1)/60:.3f} min")
-    return train_losses, valid_losses
+    return train_losses, valid_losses, valid_losses2
 
 
 

@@ -33,6 +33,7 @@ training:
 misc:
   seed:
   output_dir: ../outputs/
+  benchmark: False
   save_name:
   verbose: True
 
