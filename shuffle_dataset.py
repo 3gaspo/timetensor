@@ -1,15 +1,10 @@
-## Script to rebuild dataset from scratch if cfg.rebuild=True
-## Sets a new random data as example
-
 import hydra
 import logging
 from time import perf_counter
 
-#remove src if using this script in another working directory
-from src.timetensor.dataset import get_train_loaders, build_dataset, get_dataset_splits #,build_datasets, load_datasets
+from src.timetensor.dataset import get_train_loaders, build_dataset, get_dataset_splits
 from src.timetensor.utils import set_random_data, fetch_example_data
-#from src.timetensor.utils import normalize
-from src.timetensor.visu import plot_example, scatter_stats#, plot_stats
+from src.timetensor.visu import plot_example, scatter_stats, plot_stats
 from src.timetensor.utils import unroll_windows
 
 import warnings
@@ -61,9 +56,11 @@ def run(cfg):
     #stats
     if verbose:
         logger.info("Plotting stats")
-    scatter_stats({key: data_dict[key][0] for key in data_dict}, data_path, name="stats_split_central.pdf", title="Individuals distributions")
-    scatter_stats({"train":data_dict["train"][0], "subset_train":loaders_dict["train"].dataset.values}, data_path, name="stats_subset_central.pdf", title="Individuals distributions")
-    scatter_stats({key: unroll_windows(loaders_dict[key])[0] for key in ["train", "test"]}, data_path, name="unrolled_stats_split_central.pdf", title="Inputs distribution")
+    scatter_stats({key: data_dict[key][0] for key in data_dict}, data_path, name="scatter_stats.pdf", title="Individuals distributions")
+    scatter_stats({"train":data_dict["train"][0], "subset_train":loaders_dict["train"].dataset.values}, data_path, name="scatter_subset.pdf", title="Individuals distributions")
+    scatter_stats({key: unroll_windows(loaders_dict[key])[0] for key in ["train", "test"]}, data_path, name="scatter_unrolled_inputs.pdf", title="Inputs distribution")
+    plot_stats({key: unroll_windows(loaders_dict[key])[1] for key in ["train", "test"]}, data_path, name="plot_unrolled_outputs.pdf", title="Outputs distribution", logscale=True)
+    plot_stats({key: unroll_windows(loaders_dict[key], normal=True)[1] for key in ["train", "test"]}, data_path, name="plot_unrolled_Noutputs.pdf", title="Normalized outputs distribution", logscale=False)
 
     #examples
     if verbose:
@@ -80,5 +77,4 @@ def run(cfg):
 
 if __name__ == "__main__":
     run()
-
 

@@ -160,7 +160,7 @@ def load_data(path="datasets/", prefix=""):
         context = torch.load(path + prefix + "context.pt")
     else:
         context = None
-    datetimes = torch.load(path + prefix + "datetimes.pt", weights_only=False)
+    datetimes = np.array(torch.load(path + prefix + "datetimes.pt", weights_only=False))
     return values, context, datetimes
 
 def load_example(path="datasets/", prefix=""):
@@ -220,7 +220,7 @@ def train_test_split(values, context, datetimes, indiv_split=None, date_split=No
             dates_idx1, dates_idx2 = list(range(stop_date)), list(range(stop_date, dates))
             dates1, dates2 = list(datetimes[:stop_date]), list(datetimes[stop_date:])
             torch.save(dates_idx1, path + "date_split1.pt")
-            torch.save(dates_idx2, path + "date_split1.pt")
+            torch.save(dates_idx2, path + "date_split2.pt")
 
         if indiv_split is not None: #split individuals
             if type(indiv_split)==str:
@@ -231,7 +231,7 @@ def train_test_split(values, context, datetimes, indiv_split=None, date_split=No
                 indices = np.random.permutation(individuals)
                 indices1, indices2 = list(indices[:stop_indiv]), list(indices[stop_indiv:])
                 torch.save(indices1, path + "indiv_split1.pt")
-                torch.save(indices2, path + "indiv_split1.pt")
+                torch.save(indices2, path + "indiv_split2.pt")
 
             values1 = values[indices1, :, :][: , :, dates_idx1]
             values2 = values[indices1, :, :][: , :, dates_idx2]
@@ -269,7 +269,7 @@ def train_test_split(values, context, datetimes, indiv_split=None, date_split=No
             indices = np.random.permutation(individuals)
             indices1, indices2 = list(indices[:stop_indiv]), list(indices[stop_indiv:])
             torch.save(indices1, path + "indiv_split1.pt")
-            torch.save(indices2, path + "indiv_split1.pt")
+            torch.save(indices2, path + "indiv_split2.pt")
 
         values1 = values[indices1, :, :]
         values2 = values[indices2, :, :]

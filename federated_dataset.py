@@ -7,7 +7,7 @@ import numpy as np
 
 from src.timetensor.dataset import get_train_loaders#, TimeSeriesDataset, load_datasets
 from src.timetensor.federated import get_client_splits, Client
-from src.timetensor.visu import scatter_stats
+from src.timetensor.visu import scatter_stats, plot_stats
 from src.timetensor.utils import unroll_windows
 
 import warnings
@@ -46,8 +46,9 @@ def run(cfg):
         dataloaders = client.dataloaders
         print("client_id : ", client.id, " train=", dataloaders["train"].dataset.shape, " valid=", dataloaders["valid"].dataset.shape, " test=", dataloaders["test"].dataset.shape)
 
-    scatter_stats({f"node{k}": clients[k].dataloaders["train"].dataset.values for k in range(N)}, data_path, name="stats_nodes.pdf", title="Individuals distributions")
-    scatter_stats({f"node{k}": unroll_windows(clients[k].dataloaders["train"])[0] for k in range(N)}, data_path, "unrolled_stats_nodes.pdf", title="Inputs distribution")
+    scatter_stats({f"node{k}": clients[k].dataloaders["train"].dataset.values for k in range(N)}, data_path, name="scatter_stats_nodes.pdf", title="Individuals distributions")
+    scatter_stats({f"node{k}": unroll_windows(clients[k].dataloaders["train"])[0] for k in range(N)}, data_path, "scatter_unrolled_inputs_nodes.pdf", title="Inputs distribution")
+    plot_stats({f"node{k}": unroll_windows(clients[k].dataloaders["train"], normal=True)[1] for k in range(N)}, data_path, "plot_unrolled_Noutputs_nodes.pdf", title="Normalized Outputs distribution", logscale=False)
 
     logger.info("Plots done")
 

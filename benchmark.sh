@@ -1,10 +1,10 @@
 source .venv/bin/activate
 
-output_dir="outputs/benchmark/"
+output_dir="../outputs/benchmark/"
 rm -rf "$output_dir"
 mkdir -p "$output_dir"
 
-for model_name in persistence repeat lookback linear
+for model_name in linear
 do
     for revin in 0 1
     do
@@ -15,3 +15,5 @@ do
             "model.revin=$revin"
     done
 done
+
+python3 losses.py "misc.output_dir=$output_dir"

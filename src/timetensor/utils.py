@@ -58,14 +58,21 @@ def fetch_example_data(path="datasets/examples", names="rand"):
         return load_example(path + names + "/")
 
 
-def unroll_windows(dataloader, cap=None, shuffle=False):
+def unroll_windows(dataloader, cap=None, shuffle=False, normal=False):
     """unrolls (x,y) examples of dataloaders (typically individuals*dates examples)"""
     X = []
     Y = []
     i = 0
     for x, c, y in dataloader:
-        X.append(x)
-        Y.append(y)
+        if normal:
+            mean, std = get_normal_stats(x)
+            nx = normalize(x, mean, std)
+            ny = normalize(x, mean, std)
+            X.append(nx)
+            Y.append(ny)
+        else:
+            X.append(x)
+            Y.append(y)
         if cap is not None and i == cap and not shuffle:
             break
         i+=1
@@ -124,4 +131,21 @@ def save_results(value, path, name, model_name, metric_name):
             json.dump(dico, file, indent=4)
         except:
             print(dico)
+
+
+def normalize(x, mean, std):
+    return (x - mean) / std
+
+def nloss(loss, pred, y, mean, std):
+    """returns normalized loss"""
+    normal_pred = normalize(pred, mean, std)
+    normal_y = normalize(y, mean, std)
+    return loss(normal_pred, normal_y)
+
+def average_loss(eval_losses):
+    """averages the losses inside dictionnary"""
+    mean_losses = {}
+    for loss_name, losses in eval_losses.items():
+        mean_losses[loss_name] = losses.mean()
+    return mean_losses
             

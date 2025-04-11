@@ -3,6 +3,7 @@ import numpy as np
 import os
 import torch
 
+
 class Client:
     def __init__(self, dataloaders, model=None, id=None, params={}):
         self.dataloaders = dataloaders
