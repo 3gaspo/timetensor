@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from src.timetensor.dataset import get_dataset_splits, get_train_loaders
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import train_model
+from src.timetensor.utils import unroll_windows
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -22,20 +23,17 @@ def run(cfg):
     data_path = cfg.data.path
     lags, horizon = cfg.model.lags, cfg.model.horizon
     batch_size = cfg.training.bs
-    model_name, revin = cfg.model.name, cfg.model.revin
+    model_name = cfg.model.name
     kwargs = cfg.model_configs
     verbose = cfg.misc.verbose
     if verbose:
         logger.info("Fetched main configs")
-        logger.info(f"Model {model_name}, revin {revin}, kwargs {kwargs}")
 
     #save dirs
     output_dir = cfg.misc.output_dir
-    save_name = cfg.misc.save_name
+    save_name = "sklinear"
     if save_name is None:
         save_name = model_name
-        if revin:
-            save_name = save_name + "_revin"   
     save_dir = output_dir + save_name + "/" #current experiment dir
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -57,13 +55,14 @@ def run(cfg):
     shape = [X.shape[1], X.shape[2], y.shape[2]]
 
     #model
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = load_model(model_name, shape, revin, **kwargs)
-    model.load_state_dict(torch.load(save_dir + "trained_model.pt"))
-    model.to(device)
+    model = load_model("sklinear", shape, False, **kwargs)
+    Xtrain, Ytrain = unroll_windows(loaders_dict["train"])
+    print("Shapes: ", Xtrain.shape, Ytrain.shape)
+    Xtrain, Ytrain = Xtrain[:, 0, :], Ytrain[:, 0, :]
+    model.fit(Xtrain, Ytrain)
 
     #plotting weights
-    weights = model.fc.weight.detach().cpu().numpy()
+    weights = model.reg.coef_
     print(weights.shape)
 
 

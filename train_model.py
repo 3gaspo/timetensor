@@ -24,13 +24,13 @@ def run(cfg):
     data_path = cfg.data.path
     lags, horizon = cfg.model.lags, cfg.model.horizon
     batch_size, lr = cfg.training.bs, cfg.training.lr
-    criterion_name, normalized, revin = cfg.training.loss, cfg.training.normalized,  cfg.model.revin
+    criterion_name, normalized, normalization = cfg.training.loss, cfg.training.normalized,  cfg.model.normalization
     model_name, retrain = cfg.model.name, cfg.training.retrain
     kwargs = cfg.model_configs
     verbose, benchmark = cfg.misc.verbose, cfg.misc.benchmark
     if verbose:
         logger.info("Fetched main configs")
-        logger.info(f"Model {model_name}, revin {revin}, kwargs {kwargs}")
+        logger.info(f"Model {model_name}, normalization {normalization}, kwargs {kwargs}")
 
 
     #save dirs
@@ -38,8 +38,8 @@ def run(cfg):
     save_name = cfg.misc.save_name
     if save_name is None:
         save_name = model_name
-        if revin:
-            save_name = save_name + "_revin"   
+        if normalization:
+            save_name = save_name + f"_normalization{normalization}"   
     save_dir = output_dir + save_name + "/" #current experiment dir
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -77,10 +77,10 @@ def run(cfg):
         print("Unknown criterion name")
         criterion = None
     eval_losses = {"MSE":nn.MSELoss(reduction="none")}
-    if model_name in ["MLP", "linear","patch_tst"] or revin:
+    if model_name in ["MLP", "linear","patch_tst"] or normalization==3:
         logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps={len(loaders_dict['train'])}")
         if retrain:
-            model = load_model(model_name, shape, revin, **kwargs)
+            model = load_model(model_name, shape, normalization, **kwargs)
             learner = Learner(model, criterion, lr, eval_losses, device=device, normalized_criterion=True)
             logger.info("Starting training...")
             train_losses, valid_losses, valid_losses2 = train_model(learner, loaders_dict)
@@ -92,7 +92,7 @@ def run(cfg):
                 torch.save(loss_values, save_dir + f"{loss_name}_valid_losses2.pt")
             logger.info("End of training")
         else:
-            model = load_model(model_name, shape, revin, **kwargs)
+            model = load_model(model_name, shape, normalization, **kwargs)
             learner = Learner(model, criterion, lr, eval_losses, device=device, normalized_criterion=True)
             model.load_state_dict(torch.load(save_dir + "trained_model.pt"))
             model.to(device)

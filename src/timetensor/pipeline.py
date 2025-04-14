@@ -9,32 +9,46 @@ from .utils import get_normal_stats, nloss, average_loss
 
 class Learner:
     def __init__(self, model, criterion, lr, eval_losses, device=None, optimizer=None, scheduler=None, normalized_criterion=True):
-
-        
+        """
+        optimizer: to be called on model.parameters() and lr
+        scheduler: to be called on optimizer(model)
+        """
         if criterion is None:
             self.criterion = nn.MSELoss() # mean over 1/B * 1/dim * 1/horizon
         else:
             self.criterion = criterion
+        
         if optimizer is None:
-            self.optimizer = optim.Adam(model.parameters(), lr=lr)
+            self.optimizer = lambda model: optim.Adam(model.parameters(), lr=lr)
         else:
             self.optimizer = optimizer
         if scheduler is not None:
-            self.scheduler = scheduler(self.optimizer)
+            self.scheduler = lambda optimizer: scheduler(optimizer)
         else:
             self.scheduler = scheduler
+
         if device is None:
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         else:
             self.device = device
         self.model = model
         self.model.to(self.device)
+        self.reset_optimizer()
 
         self.normalized_criterion = normalized_criterion
         self.eval_losses = eval_losses
 
+    def reset_model(self, weights):
+        self.model.load_state_dict(weights)
+    def reset_optimizer(self):
+        self.curent_optimizer = self.optimizer(self.model)
+        self.current_scheduler = self.scheduler(curent_optimizer)
+    def get_weights(self):
+        return self.model.state_dict()
+
     def compute_step(self, X_batch, context_batch, y_batch, frozen_modules=None):
         """computes forward and backward on batch"""
+        assert self.model is not None
         self.model.train()
         X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
         if context_batch is not None:
@@ -43,7 +57,7 @@ class Learner:
         if self.normalized_criterion:
             mean, std = get_normal_stats(X_batch) # (B, dim, 1)
         
-        self.optimizer.zero_grad()
+        self.curent_optimizer.zero_grad()
         predictions = self.model(X_batch, context_batch)
 
         if self.normalized_criterion:
@@ -56,7 +70,7 @@ class Learner:
                 frozen_module.zero_grad()
 
         loss.backward()
-        self.optimizer.step()
+        self.curent_optimizer.step()
         if self.scheduler is not None:
             self.scheduler.step()
 

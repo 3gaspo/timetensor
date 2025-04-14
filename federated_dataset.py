@@ -51,7 +51,7 @@ def run(cfg):
     plot_stats({f"node{k}": unroll_windows(clients[k].dataloaders["train"], normal=True)[1] for k in range(N)}, data_path, "plot_unrolled_Noutputs_nodes.pdf", title="Normalized Outputs distribution", logscale=False)
 
     logger.info("Plots done")
-
+    logger.info('End of script\n')
 
 if __name__ == "__main__":
     run()

@@ -6,14 +6,15 @@ mkdir -p "$output_dir"
 
 for model_name in linear
 do
-    for revin in 0 1
+    for normalization in 0 1 2 3
     do
         python3 train_model.py \
             "model.name=$model_name" \
             "model_configs=$model_name" \
             "misc.output_dir=$output_dir" \
-            "model.revin=$revin" \
-            "misc.bencmark=True" \
+            "model.normalization=$normalization" \
+            "misc.benchmark=True" \
+            "training.retrain=True"
     done
 done
 

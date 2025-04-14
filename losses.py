@@ -23,16 +23,24 @@ def run(cfg):
 
     losses_dict = {}
     Nlosses_dict = {}
+    losses_dict2 = {}
+    Nlosses_dict2 = {}
 
     for expe_name in expe_names:
-        if expe_name in ["linear", "linear_revin"]:
-            valid_losses = torch.load(output_dir + expe_name + "/" + "MSE_valid_losses.pt")
-            Nvalid_losses = torch.load(output_dir + expe_name + "/" + "NMSE_valid_losses.pt")
-            losses_dict[expe_name] = valid_losses
-            Nlosses_dict[expe_name] = Nvalid_losses
+        valid_losses = torch.load(output_dir + expe_name + "/" + "MSE_valid_losses.pt")
+        Nvalid_losses = torch.load(output_dir + expe_name + "/" + "NMSE_valid_losses.pt")
+        losses_dict[expe_name] = valid_losses
+        Nlosses_dict[expe_name] = Nvalid_losses
 
-    plot_multi_losses(losses_dict, output_dir, "losses.pdf", f"Valid losses of Linear model")
-    plot_multi_losses(Nlosses_dict, output_dir, "normal_losses.pdf", f"Normalized valid losses of Linear model")
+        valid_losses2 = torch.load(output_dir + expe_name + "/" + "MSE_valid_losses2.pt")
+        Nvalid_losses2 = torch.load(output_dir + expe_name + "/" + "NMSE_valid_losses2.pt")
+        losses_dict2[expe_name] = valid_losses2
+        Nlosses_dict2[expe_name] = Nvalid_losses2
+
+    plot_multi_losses(losses_dict, output_dir, "losses.pdf", f"Valid losses of {expe_name}")
+    plot_multi_losses(Nlosses_dict, output_dir, "normal_losses.pdf", f"Normalized valid losses of {expe_name}")
+    plot_multi_losses(losses_dict, output_dir, "losses2.pdf", f"Valid2 losses of {expe_name}")
+    plot_multi_losses(Nlosses_dict, output_dir, "normal_losses2.pdf", f"Normalized valid2 losses of {expe_name}")
 
     logger.info('End of script\n')
 

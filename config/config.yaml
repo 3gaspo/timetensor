@@ -13,18 +13,18 @@ data:
 
 fed:
   splits:
-    ../datasets/node_0_indices.pt: [0.7, 0.7]
-    ../datasets/node_1_indices.pt: [0.7, 0.7]
-    ../datasets/node_2_indices.pt: [0.7, 0.7]
+    ../datasets/node_0_indices.pt: [../datasets/node_0/indiv, ../datasets/node_0/date]
+    ../datasets/node_1_indices.pt: [../datasets/node_1/indiv, ../datasets/node_1/date]
+    ../datasets/node_2_indices.pt: [../datasets/node_2/indiv, ../datasets/node_2/date]
 
 model:
   lags: 336
   horizon: 24
   name: linear
-  revin: False
+  normalization: 1
 
 training:
-  retrain: True
+  retrain: False
   loss: MSE
   normalized: True
   bs: 4

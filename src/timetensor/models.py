@@ -31,6 +31,54 @@ class RevIN(nn.Module):
         pred = self.model(x, c) #(B, dim, horizon)
         output = self.denorm(pred) #(B, dim, horizon)
         return output
+
+
+class Normalized(nn.Module):
+    def __init__(self, model, mean, std):
+        """
+        Normalizes input before predictions and denormalizes prediction
+        """
+        super(Normalized, self).__init__()
+        self.model = model
+        self.mean, self.std = mean, std
+
+    def norm(self, x):
+        x = (x - self.mean) / self.std # (B, dim, lags)
+        return x
+    def denorm(self, y):
+        y = y * self.std + self.mean
+        return y
+    
+    def forward(self, x, c=None): #(B, dim, lags)
+        x  = self.norm(x) #(B, dim, lags)
+        pred = self.model(x, c) #(B, dim, horizon)
+        output = self.denorm(pred) #(B, dim, horizon)
+        return output
+
+class InstanceNormalized(nn.Module):
+    def __init__(self, model, eps=1):
+        """
+        Normalizes input before predictions and denormalizes prediction
+        """
+        super(InstanceNormalized, self).__init__()
+        self.eps = eps
+        self.model = model
+
+    def norm(self, x):
+        self.mean, self.std = get_normal_stats(x, std_cst=self.eps)
+        x = (x - self.mean) / self.std # (B, dim, lags)
+        return x
+    def denorm(self, y):
+        y = y * self.std + self.mean
+        return y
+    
+    def forward(self, x, c=None): #(B, dim, lags)
+        x  = self.norm(x) #(B, dim, lags)
+        pred = self.model(x, c) #(B, dim, horizon)
+        output = self.denorm(pred) #(B, dim, horizon)
+        return output
+
+
     
 
 class persistence(nn.Module):
@@ -76,8 +124,28 @@ class linear(nn.Module):
         return output
 
 
-def load_model(model_name, shape, revin=False, **kwargs):
-    """loads models from str model name"""
+from sklearn.linear_model import LinearRegression
+
+class sklinear():
+    """linear layer on lags"""
+    def __init__(self):
+        self.reg = LinearRegression()
+
+    def fit(self, Xtrain, ytrain):
+        self.reg.fit(Xtrain, ytrain)
+
+    def __call__(self, X):
+        return self.reg.predict(X)
+
+
+def load_model(model_name, shape, normalization=1, **kwargs):
+    """loads models from str model name
+    normalization:
+        0/False
+        1: by provided mean and std
+        2: by instance
+        3: revin
+    """
     dim, lags, horizon = shape[0], shape[1], shape[2]
     if model_name == "persistence":
         model = persistence(horizon)
@@ -90,12 +158,22 @@ def load_model(model_name, shape, revin=False, **kwargs):
         model = lookback(idx, horizon)
     elif model_name == "linear":
         model = linear(lags, horizon, dim)
+    elif model_name == "sklinear":
+        model = sklinear()
     elif model_name == "patch_tst":
         model = PatchTST(lags, horizon)
     else:
         raise ValueError(f"Model name not recognized : {model_name}")
     
-    if revin:
+    if normalization==1:
+        mean, std = kwargs.get("mean"), kwargs.get("std")
+        if mean is None or std is None:
+            mean = 2500
+            std = 15000
+        return Normalized(model, mean, std)
+    elif normalization==2:
+        return InstanceNormalized(model, kwargs.get("std_cst", 1))
+    elif normalization==3:
         return RevIN(model, dim, kwargs.get("std_cst", 1))
     else:
         return model
