@@ -4,7 +4,7 @@ import torch.optim as optim
 from time import perf_counter
 import numpy as np
 
-from .utils import get_normal_stats, nloss, average_loss
+from .utils import get_normal_stats, nloss, average_loss, append_in_dict
 
 
 class Learner:
@@ -42,7 +42,8 @@ class Learner:
         self.model.load_state_dict(weights)
     def reset_optimizer(self):
         self.curent_optimizer = self.optimizer(self.model)
-        self.current_scheduler = self.scheduler(curent_optimizer)
+        if self.scheduler is not None:
+            self.current_scheduler = self.scheduler(self.curent_optimizer)
     def get_weights(self):
         return self.model.state_dict()
 
@@ -72,7 +73,7 @@ class Learner:
         loss.backward()
         self.curent_optimizer.step()
         if self.scheduler is not None:
-            self.scheduler.step()
+            self.current_scheduler.step()
 
         return loss.item()
 
@@ -138,19 +139,11 @@ def train_model(learner, loaders_dict, print_freq=50, eval_freq=10, verbose=1, d
         
         if do_eval and (step == 1 or step % eval_freq == 0 or step == steps):
 
-            #valid 1
+            #valid eval
             average_eval_dict = learner.eval(valid_loader)
-            for loss_name, loss_value in average_eval_dict.items():
-                if loss_name not in valid_losses:
-                    valid_losses[loss_name] = []
-                valid_losses[loss_name].append(loss_value)
-
-            #valid 2
             average_eval_dict2 = learner.eval(valid_loader2)
-            for loss_name, loss_value in average_eval_dict2.items():
-                if loss_name not in valid_losses2:
-                    valid_losses2[loss_name] = []
-                valid_losses2[loss_name].append(loss_value)
+            append_in_dict(valid_losses, average_eval_dict)
+            append_in_dict(valid_losses2, average_eval_dict2)
 
             if step == 1 or step % print_freq == 0 or step == steps:
                 print(f"Step {step} | " + " | ".join([f"valid1 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict.items()]) + " | " + " | ".join([f"valid2 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict2.items()]))

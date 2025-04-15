@@ -24,7 +24,7 @@ model:
   normalization: 1
 
 training:
-  retrain: False
+  retrain: True
   loss: MSE
   normalized: True
   bs: 4

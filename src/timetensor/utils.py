@@ -149,3 +149,9 @@ def average_loss(eval_losses):
         mean_losses[loss_name] = losses.mean()
     return mean_losses
             
+
+def append_in_dict(dico1, dico2):
+    for key, value in dico2.items():
+        if key not in dico1:
+            dico1[key] = []
+        dico1[key].append(value)
