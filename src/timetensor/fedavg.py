@@ -41,5 +41,5 @@ class GlobalFedAvg(DefaultGlobalServer):
         averaged_weights = {}
         for key in weights[0].keys():
             raw_weights = [weights[i][key].clone().detach().cpu() for i in range(C)]
-            averaged_weights[key] = sum(torch.tensor([raw_weights[i]*importances[i] for i in range(C)]))
+            averaged_weights[key] = sum([raw_weights[i]*importances[i] for i in range(C)])
         return averaged_weights

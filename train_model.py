@@ -88,7 +88,6 @@ def run(cfg):
             torch.save(train_losses, save_dir + f"{criterion_name}_train_losses.pt")
             for loss_name, loss_values in valid_losses.items():
                 torch.save(loss_values, save_dir + f"{loss_name}_valid_losses.pt")
-            for loss_name, loss_values in valid_losses2.items():
                 torch.save(loss_values, save_dir + f"{loss_name}_valid_losses2.pt")
             logger.info("End of training")
         else:
@@ -97,12 +96,10 @@ def run(cfg):
             model.load_state_dict(torch.load(save_dir + "trained_model.pt"))
             model.to(device)
             train_losses = torch.load(save_dir + f"{criterion_name}_train_losses.pt",weights_only=False)
-            valid_losses = {}
+            valid_losses, valid_losses2 = {}, {}
             for loss_name in eval_losses:
                 valid_losses[loss_name] = torch.load(save_dir + f"{loss_name}_valid_losses.pt",weights_only=False)
                 valid_losses["N"+loss_name] = torch.load(save_dir + f"N{loss_name}_valid_losses.pt",weights_only=False)
-            valid_losses2 = {}
-            for loss_name in eval_losses:
                 valid_losses2[loss_name] = torch.load(save_dir + f"{loss_name}_valid_losses2.pt",weights_only=False)
                 valid_losses2["N"+loss_name] = torch.load(save_dir + f"N{loss_name}_valid_losses2.pt",weights_only=False)
 

@@ -4,7 +4,7 @@ from time import perf_counter
 
 from src.timetensor.dataset import get_train_loaders, build_dataset, get_dataset_splits
 from src.timetensor.utils import set_random_data, fetch_example_data
-from src.timetensor.visu import plot_example, scatter_stats, plot_stats
+from src.timetensor.visu import plot_example, scatter_stats, plot_stats, scatter_input_output
 from src.timetensor.utils import unroll_windows
 
 import warnings
@@ -56,11 +56,16 @@ def run(cfg):
     #stats
     if verbose:
         logger.info("Plotting stats")
-    scatter_stats({key: data_dict[key][0] for key in data_dict}, data_path, name="scatter_stats.pdf", title="Individuals distributions")
-    scatter_stats({"train":data_dict["train"][0], "subset_train":loaders_dict["train"].dataset.values}, data_path, name="scatter_subset.pdf", title="Individuals distributions")
-    scatter_stats({key: unroll_windows(loaders_dict[key])[0] for key in ["train", "test"]}, data_path, name="scatter_unrolled_inputs.pdf", title="Inputs distribution")
-    plot_stats({key: unroll_windows(loaders_dict[key])[1] for key in ["train", "test"]}, data_path, name="plot_unrolled_outputs.pdf", title="Outputs distribution", logscale=True)
-    plot_stats({key: unroll_windows(loaders_dict[key], normal=True)[1] for key in ["train", "test"]}, data_path, name="plot_unrolled_Noutputs.pdf", title="Normalized outputs distribution", logscale=False)
+
+    unrolls = {key: unroll_windows(loaders_dict[key]) for key in ["train", "valid"]}
+    nunrolls = {key: unroll_windows(loaders_dict[key], normal=True) for key in ["train", "valid"]}
+    x_dict = {key: unrolls[key][0] for key in unrolls}
+    y_dict = {key: unrolls[key][1] for key in unrolls}
+    nx_dict =  {key: nunrolls[key][0] for key in nunrolls}
+    
+    scatter_input_output(x_dict, y_dict, data_path, name="output_inputs.pdf")
+    scatter_stats(x_dict, data_path, name="inputs_stats.pdf", title="Inputs statistics")
+    plot_stats(nx_dict, data_path, name="normal_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-6,1e-6))
 
     #examples
     if verbose:

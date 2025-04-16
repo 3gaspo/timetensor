@@ -19,10 +19,10 @@ def plot_example(x, y, path="", name="example.pdf", title="Example"):
     plt.savefig(path + name)
 
 
-def plot_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True):
+def plot_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True, limits=None):
     """plots stats of datasets"""
     plt.clf()
-    fig = plt.figure(figsize=(10,5))
+    fig = plt.figure(figsize=(15,5))
     for split_name, split_values in values_dict.items():
         mean_values, total_mean = get_stats(split_values, "mean", dim)
         if len(mean_values)>2000:
@@ -32,7 +32,7 @@ def plot_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, logsca
             bins = np.logspace(-2, 6, 100)
         else:
             bins = 100
-        plt.hist(mean_values, bins=bins, density=True, alpha=0.5, label= f"{split_name} - mean={total_mean:.2f}")
+        plt.hist(mean_values, bins=bins, range=limits, density=True, alpha=0.5, label= f"{split_name} - mean={total_mean:.2f}")
 
     plt.legend()
     if title is None:
@@ -60,7 +60,7 @@ def scatter_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, log
 
     plt.legend()
     if title is None:
-        plt.title(f"Max mean distribution")
+        plt.title(f"Distributions")
     else:
         plt.title(title)
     plt.xlabel(f"mean")
@@ -68,6 +68,32 @@ def scatter_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, log
         plt.xscale("log")
         plt.yscale("log")
     plt.ylabel("std")
+    plt.savefig(path + name)
+
+def scatter_input_output(x_dict, y_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True):
+    """plots stats of datasets"""
+    plt.clf()
+    fig = plt.figure(figsize=(10,5))
+    for key in x_dict:
+        xmean_values, xtotal_mean = get_stats(x_dict[key], "mean", dim)
+        ymean_values, ytotal_mean = get_stats(y_dict[key], "mean", dim)
+
+        if len(xmean_values)>2000:
+            idx=random.sample(range(len(xmean_values)),1000)
+            xmean_values, ymean_values = xmean_values[idx], ymean_values[idx]
+
+        plt.scatter(xmean_values, ymean_values, label= f"{key} - mean_x={xtotal_mean:.2f}, mean_y={ytotal_mean:.2f}", s=10)
+
+    plt.legend()
+    if title is None:
+        plt.title(f"Output/Input mean distributions")
+    else:
+        plt.title(title)
+    plt.xlabel(f"Input means")
+    plt.ylabel("Output means")
+    if logscale:
+        plt.xscale("log")
+        plt.yscale("log")
     plt.savefig(path + name)
 
 
@@ -97,12 +123,16 @@ def plot_losses(train_losses, valid_losses=None, valid_losses2=None, path="", na
     fig.tight_layout()
     plt.savefig(path + name)
 
-def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", logscale=True):
+def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", logscale=True, x_every=None):
     """plots losses during training"""
     plt.clf()
     fig = plt.figure(figsize=(10,5))
     for expe_name, losses in losses_dict.items():
         plt.plot(range(1, len(losses)+1), losses, label=f"{expe_name}")
+    if x_every is not None:
+        for k in range(1, (len(losses)+1)//x_every):
+            plt.axvline(k*x_every, linestyle="--", color="red")
+
     if logscale:
       plt.yscale('log')
     plt.xlabel("Steps")

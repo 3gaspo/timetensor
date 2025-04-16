@@ -25,6 +25,12 @@ class Client:
         else:
             return shape[0]*shape[2]
 
+    def get_weights(self):
+        if self.model is not None:
+            return self.model.state_dict()
+        else:
+            return None
+
 def client_split(values, context, datetimes, splits, shuffle=True, replace=False, seed=None, context_by_individuals=False, path=""):
     """splits individuals according to splits"""
     
@@ -136,6 +142,9 @@ class DefaultLocalServer():
     def send(self):
         """what to send to the server"""
         pass
+
+    def eval(self):
+        return self.learner.eval(self.client.dataloaders["test"])
 
 
 class DefaultGlobalServer():

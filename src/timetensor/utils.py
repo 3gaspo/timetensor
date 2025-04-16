@@ -146,7 +146,7 @@ def average_loss(eval_losses):
     """averages the losses inside dictionnary"""
     mean_losses = {}
     for loss_name, losses in eval_losses.items():
-        mean_losses[loss_name] = losses.mean()
+        mean_losses[loss_name] = losses.mean().item()
     return mean_losses
             
 
@@ -154,4 +154,13 @@ def append_in_dict(dico1, dico2):
     for key, value in dico2.items():
         if key not in dico1:
             dico1[key] = []
-        dico1[key].append(value)
+        if type(value) == float:
+            dico1[key].append(value)
+        elif type(value) == list:
+            dico1[key] += value
+        elif type(value) == torch.tensor and len(T.shape)==0:
+            dico1[key] += value.item()
+        else:
+            print('problem')
+            print(type(value))
+            print(value.shape)
