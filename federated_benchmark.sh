@@ -1,14 +1,14 @@
 source .venv/bin/activate
 
-output_dir="../outputs/benchmark/"
+output_dir="../outputs/federated_benchmark/"
 rm -rf "$output_dir"
 mkdir -p "$output_dir"
 
-for model_name in lookback
+for model_name in linear
 do
-    for normalization in 0 3
+    for normalization in 0 1 2 3
     do
-        python3 train_model.py \
+        python3 train_fedavg.py \
             "model.name=$model_name" \
             "model_configs=$model_name" \
             "misc.output_dir=$output_dir" \
@@ -18,4 +18,4 @@ do
     done
 done
 
-python3 losses.py "misc.output_dir=$output_dir"
+python3 print_table.py "misc.output_dir=$output_dir"

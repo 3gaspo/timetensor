@@ -8,7 +8,7 @@ from .utils import get_normal_stats, nloss, average_loss, append_in_dict
 
 
 class Learner:
-    def __init__(self, model, criterion, lr, eval_losses, device=None, optimizer=None, scheduler=None, normalized_criterion=True):
+    def __init__(self, model, criterion, lr, eval_losses, device=None, optimizer=None, scheduler=None, normalized_criterion=True, do_train=True):
         """
         optimizer: to be called on model.parameters() and lr
         scheduler: to be called on optimizer(model)
@@ -33,7 +33,9 @@ class Learner:
             self.device = device
         self.model = model
         self.model.to(self.device)
-        self.reset_optimizer()
+        self.do_train = do_train
+        if self.do_train:
+            self.reset_optimizer()
 
         self.normalized_criterion = normalized_criterion
         self.eval_losses = eval_losses
@@ -49,7 +51,7 @@ class Learner:
 
     def compute_step(self, X_batch, context_batch, y_batch, frozen_modules=None):
         """computes forward and backward on batch"""
-        assert self.model is not None
+        assert self.model is not None and self.do_train
         self.model.train()
         X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
         if context_batch is not None:

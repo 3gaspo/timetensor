@@ -24,7 +24,7 @@ def run(cfg):
     data_path = cfg.data.path
     lags, horizon = cfg.model.lags, cfg.model.horizon
     batch_size, lr = cfg.training.bs, cfg.training.lr
-    criterion_name, normalized, normalization = cfg.training.loss, cfg.training.normalized,  cfg.model.normalization
+    criterion_name, normalization = cfg.training.loss, cfg.model.normalization
     model_name, retrain = cfg.model.name, cfg.training.retrain
     kwargs = cfg.model_configs
     verbose, benchmark = cfg.misc.verbose, cfg.misc.benchmark
@@ -39,7 +39,12 @@ def run(cfg):
     if save_name is None:
         save_name = model_name
         if normalization:
-            save_name = save_name + f"_normalization{normalization}"   
+            if normalization == 1:
+                save_name = save_name + f"_normal_train"
+            elif normalization == 2:
+                save_name = save_name + f"_normal_instance"
+            elif normalization == 3:
+                save_name = save_name + f"_normal_revin"
     save_dir = output_dir + save_name + "/" #current experiment dir
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -77,11 +82,14 @@ def run(cfg):
         print("Unknown criterion name")
         criterion = None
     eval_losses = {"MSE":nn.MSELoss(reduction="none")}
-    if model_name in ["MLP", "linear","patch_tst"] or normalization==3:
+    model = load_model(model_name, shape, normalization, **kwargs)
+    if model_name in ["persistence", "repeat", "lookback"] and normalization!=3:
+        learner = Learner(model, criterion, lr, eval_losses, device=device, normalized_criterion=True, do_train=False)
+        logger.info("No training needed")
+    else:
+        learner = Learner(model, criterion, lr, eval_losses, device=device, normalized_criterion=True)
         logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps={len(loaders_dict['train'])}")
         if retrain:
-            model = load_model(model_name, shape, normalization, **kwargs)
-            learner = Learner(model, criterion, lr, eval_losses, device=device, normalized_criterion=True)
             logger.info("Starting training...")
             train_losses, valid_losses, valid_losses2 = train_model(learner, loaders_dict)
             torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")
@@ -91,8 +99,6 @@ def run(cfg):
                 torch.save(loss_values, save_dir + f"{loss_name}_valid_losses2.pt")
             logger.info("End of training")
         else:
-            model = load_model(model_name, shape, normalization, **kwargs)
-            learner = Learner(model, criterion, lr, eval_losses, device=device, normalized_criterion=True)
             model.load_state_dict(torch.load(save_dir + "trained_model.pt"))
             model.to(device)
             train_losses = torch.load(save_dir + f"{criterion_name}_train_losses.pt",weights_only=False)
@@ -108,8 +114,6 @@ def run(cfg):
         plot_losses(train_losses, valid_losses["NMSE"], valid_losses2["NMSE"],  save_dir, "train_nlosses.pdf", f"Training NMSE of {save_name}")
 
         logger.info("Plotted losses")
-    else:
-        logger.info("No training needed")
 
     #eval
     logger.info("Computing test metrics")

@@ -26,10 +26,10 @@ def run(cfg):
     data_path = cfg.data.path
     lags, horizon = cfg.model.lags, cfg.model.horizon
     batch_size, lr = cfg.training.bs, cfg.training.lr
-    criterion_name, normalized, normalization = cfg.training.loss, cfg.training.normalized,  cfg.model.normalization
+    criterion_name, normalization = cfg.training.loss, cfg.model.normalization
     model_name, retrain = cfg.model.name, cfg.training.retrain
     kwargs = cfg.model_configs
-    verbose = cfg.misc.verbose
+    verbose, benchmark = cfg.misc.verbose, cfg.misc.benchmark
     splits = cfg.fed.splits
     N = len(splits)
 
@@ -45,7 +45,12 @@ def run(cfg):
     if save_name is None:
         save_name = model_name
         if normalization:
-            save_name = save_name + f"_normalization{normalization}"   
+            if normalization == 1:
+                save_name = save_name + f"_normal_train"
+            elif normalization == 2:
+                save_name = save_name + f"_normal_instance"
+            elif normalization == 3:
+                save_name = save_name + f"_normal_revin"  
     save_dir = output_dir + save_name + "/" #current experiment dir
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -164,11 +169,23 @@ def run(cfg):
         mse_means.append(mean_test_mse)
         nmse_means.append(mean_test_nmse)
         sizes.append(nodes[k].client.get_size()) 
+        save_results(mean_test_mse, path, "mean_results.json", save_name, "Test MSE")
+        save_results(mean_test_nmse, path, "mean_results.json", save_name, "Test NMSE")
 
-        save_results(mean_test_mse, save_dir, "mean_results.json", save_name + f"_node_{k}", "Test MSE")
-        save_results(mean_test_nmse, save_dir, "mean_results.json", save_name + f"_node_{k}", "Test NMSE")
+    mean_mse = np.mean(mse_means)
+    mean_nmse = np.mean(nmse_means)
+    avg_mse = np.sum(np.array(mse_means) * np.array(sizes)) / np.sum(sizes)
+    avg_nmse = np.sum(np.array(nmse_means) * np.array(sizes)) / np.sum(sizes)
+    if benchmark:
+        test_dir = output_dir
+    else:
+        test_dir = save_dir
+    save_results(mean_mse, test_dir, "mean_results.json", save_name, "Uniform MSE")
+    save_results(mean_nmse, test_dir, "mean_results.json", save_name, "Uniform NMSE")
+    save_results(avg_mse, test_dir, "mean_results.json", save_name, "Weighted MSE")
+    save_results(avg_nmse, test_dir, "mean_results.json", save_name, "Weighted NMSE")
 
-    logger.info(f"Uniform average: MSE={np.mean(mse_means):.2f}, NMSE={np.mean(nmse_means):.2f} | Sized average: MSE={np.sum(np.array(mse_means) * np.array(sizes)) / np.sum(sizes):.2f}, NMSE={np.sum(np.array(nmse_means) * np.array(sizes)) / np.sum(sizes):.2f}")
+    logger.info(f"Uniform average: MSE={mean_mse:.2f}, NMSE={mean_nmse:.2f} | Sized average: MSE={avg_mse:.2f}, NMSE={avg_nmse:.2f}")
 
     logger.info('End of script\n')
 

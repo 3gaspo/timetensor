@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+import pandas as pd
+import json
+from tabulate import tabulate
 
 from .utils import get_stats
 
@@ -180,3 +183,21 @@ def plot_pred(x, y, pred, path="", name="prediction.pdf", title="Predictions"):
     plt.title(title)
     fig.tight_layout()
     plt.savefig(path + name)
+
+
+
+def pd_to_latex(path):
+    """returns latex code to create table from dataframe in path"""
+    df = pd.read_csv(path)
+    latex_output = df.to_latex(index=False, float_format="%.4f")
+    print(latex_output)
+
+
+def print_nice_table(path, div=1e4):
+    """print table from dataframe in path"""
+    with open(path) as file:
+        data = json.load(file)
+    df = pd.DataFrame(data)# / div
+    df.index = ["Test MSE", "Test NMSE"]
+    table = tabulate(df, headers='keys', tablefmt='grid', showindex=True, floatfmt=".4f")
+    print(table)

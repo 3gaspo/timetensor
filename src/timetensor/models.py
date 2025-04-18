@@ -2,7 +2,9 @@ import torch
 import torch.nn as nn
 
 # from .patchtst import PatchTST
+from .dlinear import DLinear
 from .utils import get_normal_stats
+from sklearn.linear_model import LinearRegression
 
 
 class RevIN(nn.Module):
@@ -124,7 +126,6 @@ class linear(nn.Module):
         return output
 
 
-from sklearn.linear_model import LinearRegression
 
 class sklinear():
     """linear layer on lags"""
@@ -158,6 +159,8 @@ def load_model(model_name, shape, normalization=1, **kwargs):
         model = lookback(idx, horizon)
     elif model_name == "linear":
         model = linear(lags, horizon, dim)
+    elif model_name == "DLinear":
+        model = DLinear(lags, horizon, dim, kwargs.get("kernel_size",25))
     elif model_name == "sklinear":
         model = sklinear()
     elif model_name == "patch_tst":
