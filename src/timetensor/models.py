@@ -114,14 +114,14 @@ class lookback(nn.Module):
 
 class linear(nn.Module):
     """linear layer on lags"""
-    def __init__(self, lags, horizon, dim):
+    def __init__(self, lags, dim, horizon):
         super(linear, self).__init__()
         self.lags, self.dim, self.horizon  = lags, dim, horizon
         self.fc = nn.Linear(lags * dim, horizon * dim)
     def forward(self, x, context=None):
         batch_size = x.shape[0]
-        input = x.view(batch_size, self.lags * self.dim) # (B, lag*dim)
-        output = self.fc(input) # (B, horizon*dim)
+        inpt = x.view(batch_size, self.lags * self.dim) # (B, lag*dim)
+        output = self.fc(inpt) # (B, horizon*dim)
         output = output.view(batch_size, self.dim, self.horizon) # (B, dim, horizon)
         return output
 
@@ -135,11 +135,13 @@ class sklinear():
     def fit(self, Xtrain, ytrain):
         self.reg.fit(Xtrain, ytrain)
 
-    def __call__(self, X):
-        return self.reg.predict(X)
+    def __call__(self, X, context=None):
+        if len(X.shape) == 3:
+            X = X[:, 0, :]
+        return torch.tensor(self.reg.predict(X.cpu()))
 
 
-def load_model(model_name, shape, normalization=1, **kwargs):
+def load_model(model_name, shape, normalization=0, **kwargs):
     """loads models from str model name
     normalization:
         0/False
@@ -147,7 +149,7 @@ def load_model(model_name, shape, normalization=1, **kwargs):
         2: by instance
         3: revin
     """
-    dim, lags, horizon = shape[0], shape[1], shape[2]
+    lags, dim, horizon = shape[0], shape[1], shape[2]
     if model_name == "persistence":
         model = persistence(horizon)
     elif model_name == "repeat":
@@ -158,9 +160,9 @@ def load_model(model_name, shape, normalization=1, **kwargs):
             raise ValueError("Please provide lookback_idx for lookback model")
         model = lookback(idx, horizon)
     elif model_name == "linear":
-        model = linear(lags, horizon, dim)
+        model = linear(lags, dim, horizon)
     elif model_name == "DLinear":
-        model = DLinear(lags, horizon, dim, kwargs.get("kernel_size",25))
+        model = DLinear(lags, dim, horizon, kwargs.get("kernel_size",25))
     elif model_name == "sklinear":
         model = sklinear()
     elif model_name == "patch_tst":

@@ -19,7 +19,7 @@ def run(cfg):
     output_dir = cfg.misc.output_dir
     logger.info("Fetched configs")
  
-    expe_names = [name for name in os.listdir(output_dir) if os.path.isdir(os.path.join(output_dir, name)) and name not in ["persistence", "repeat", "lookback"]]
+    expe_names = [name for name in os.listdir(output_dir) if os.path.isdir(os.path.join(output_dir, name)) and name not in ["persistence", "repeat", "lookback", "sklinear"]]
 
     if len(expe_names) >0:
         losses_dict = {}

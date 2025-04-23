@@ -193,11 +193,22 @@ def pd_to_latex(path):
     print(latex_output)
 
 
-def print_nice_table(path, div=1e4):
+def print_nice_table(path, alpha=4, beta=4):
     """print table from dataframe in path"""
     with open(path) as file:
         data = json.load(file)
-    df = pd.DataFrame(data)# / div
-    df.index = ["Test MSE", "Test NMSE"]
+    df = pd.DataFrame(data) * 10**alpha
+    df.iloc[1] = df.iloc[1] * 10**beta
+    df.index = [f"Test MSE * 1e{alpha}", f"Test NMSE * 1e{alpha+beta}"]
     table = tabulate(df, headers='keys', tablefmt='grid', showindex=True, floatfmt=".4f")
     print(table)
+
+
+def plot_weights(weights, path, name="weights.pdf", title='Model weights'):
+    plt.figure()
+    plt.imshow(weights, aspect='auto', cmap='viridis')
+    plt.colorbar(label='Weight value')
+    plt.xlabel('Inputs (lookback)')
+    plt.ylabel('Outputs (horizon)')
+    plt.title(title)
+    plt.savefig(path + name)

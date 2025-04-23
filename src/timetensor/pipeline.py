@@ -5,10 +5,11 @@ from time import perf_counter
 import numpy as np
 
 from .utils import get_normal_stats, nloss, average_loss, append_in_dict
+from .utils import unroll_windows, get_loader_array
 
 
 class Learner:
-    def __init__(self, model, criterion, lr, eval_losses, device=None, optimizer=None, scheduler=None, normalized_criterion=True, do_train=True):
+    def __init__(self, model, criterion, lr, eval_losses, device=None, optimizer=None, scheduler=None, normalize_criterion=True, do_train=True, pytorch=True):
         """
         optimizer: to be called on model.parameters() and lr
         scheduler: to be called on optimizer(model)
@@ -17,7 +18,9 @@ class Learner:
             self.criterion = nn.MSELoss() # mean over 1/B * 1/dim * 1/horizon
         else:
             self.criterion = criterion
-        
+        self.normalize_criterion = normalize_criterion
+        self.eval_losses = eval_losses
+
         if optimizer is None:
             self.optimizer = lambda model: optim.Adam(model.parameters(), lr=lr)
         else:
@@ -32,13 +35,12 @@ class Learner:
         else:
             self.device = device
         self.model = model
-        self.model.to(self.device)
+        self.pytorch = pytorch
+        if self.pytorch:
+            self.model.to(self.device)
         self.do_train = do_train
-        if self.do_train:
+        if self.pytorch and self.do_train:
             self.reset_optimizer()
-
-        self.normalized_criterion = normalized_criterion
-        self.eval_losses = eval_losses
 
     def reset_model(self, weights):
         self.model.load_state_dict(weights)
@@ -47,23 +49,26 @@ class Learner:
         if self.scheduler is not None:
             self.current_scheduler = self.scheduler(self.curent_optimizer)
     def get_weights(self):
-        return self.model.state_dict()
+        if self.pytorch:
+            return self.model.state_dict()
+        else:
+            return self.model.reg.coef_
 
     def compute_step(self, X_batch, context_batch, y_batch, frozen_modules=None):
         """computes forward and backward on batch"""
-        assert self.model is not None and self.do_train
+        assert self.model is not None and self.do_train and self.pytorch
         self.model.train()
         X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
         if context_batch is not None:
             context_batch = context_batch.to(self.device)
         
-        if self.normalized_criterion:
+        if self.normalize_criterion:
             mean, std = get_normal_stats(X_batch) # (B, dim, 1)
         
         self.curent_optimizer.zero_grad()
         predictions = self.model(X_batch, context_batch)
 
-        if self.normalized_criterion:
+        if self.normalize_criterion:
             loss = nloss(self.criterion, predictions, y_batch, mean, std)
         else:
             loss = self.criterion(predictions, y_batch)
@@ -79,33 +84,51 @@ class Learner:
 
         return loss.item()
 
+    def fit(self, loader, dim=0):
+        assert not self.pytorch
+        Xtrain, Ytrain = get_loader_array(loader)
+        self.model.fit(Xtrain.cpu(), Ytrain.cpu())
 
     def eval(self, loader, verbose=0, return_all=False):
-        """evaluates model on loader and returns mean loss"""    
-        self.model.eval()
+        """evaluates model on loader and returns mean loss"""
         losses = {}
         t1 = perf_counter()
-        with torch.no_grad():
-            for X_batch, context_batch, y_batch in loader:
-                X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
-                if context_batch is not None:
-                    context_batch = context_batch.to(self.device)
-                mean, std = get_normal_stats(X_batch)
-                
-                predictions = self.model(X_batch, context_batch) #normalization done (or not) inside model
-                for loss_name, criterion in self.eval_losses.items():
-                    loss = criterion(predictions, y_batch).cpu() # (bs * individuals, dim, horizon)
-                    normalized_loss = nloss(criterion, predictions, y_batch, mean, std).cpu()
-                    if losses.get(loss_name) is None:
-                        losses[loss_name] = []
-                        losses["N"+loss_name] = []
-                    losses[loss_name] += loss
-                    losses["N"+loss_name] += normalized_loss
+        if self.pytorch:
+            self.model.eval()
+            with torch.no_grad():
+                for X_batch, context_batch, y_batch in loader:
+                    X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
+                    if context_batch is not None:
+                        context_batch = context_batch.to(self.device)
+                    mean, std = get_normal_stats(X_batch)
+                    
+                    predictions = self.model(X_batch, context_batch) #normalization done (or not) inside model
+                    for loss_name, criterion in self.eval_losses.items():
+                        loss = criterion(predictions, y_batch).cpu() # (bs * individuals, dim, horizon)
+                        normalized_loss = nloss(criterion, predictions, y_batch, mean, std).cpu()
+                        if losses.get(loss_name) is None:
+                            losses[loss_name] = []
+                            losses["N"+loss_name] = []
+                        losses[loss_name] += loss.tolist()
+                        losses["N"+loss_name] += normalized_loss.tolist()
+        else:
+            Xtest, Ytest = get_loader_array(loader) #reduces to dim=0
+            predictions = self.model(Xtest).unsqueeze(dim=1)
+            Xtest, Ytest =  Xtest.unsqueeze(dim=1), Ytest.unsqueeze(dim=1)
+            mean, std = get_normal_stats(Xtest)
+
+            for loss_name, criterion in self.eval_losses.items():
+                loss = criterion(predictions, Ytest).cpu()
+                normalized_loss = nloss(criterion, predictions, Ytest, mean, std).cpu()
+                losses[loss_name] = loss.tolist()
+                losses["N"+loss_name] = normalized_loss.tolist()
         t2 = perf_counter()
+
         if verbose:
             print(f"Evaluation done in {(t2-t1)/60:.3f} min")
         
-        eval_dict = {key: torch.stack(losses[key]) for key in losses} # (ndates * individuals, dim, horizon)
+        #eval_dict = {key: torch.stack(losses[key]) for key in losses} # (ndates * individuals, dim, horizon)
+        eval_dict = {key: torch.tensor(losses[key]) for key in losses} # (ndates * individuals, dim, horizon)
         if return_all:
             return eval_dict
         else:

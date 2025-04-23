@@ -4,18 +4,31 @@ output_dir="../outputs/benchmark/"
 rm -rf "$output_dir"
 mkdir -p "$output_dir"
 
-for model_name in lookback
+for model_name in persistence lookback sklinear linear
 do
-    for normalization in 0 3
-    do
+    if [ "$model_name" = "linear" ]; then
+        for normalization in 1 2 3
+        do
+            python3 train_model.py \
+                "model.name=$model_name" \
+                "model_configs=$model_name" \
+                "misc.output_dir=$output_dir" \
+                "model.normalization=$normalization" \
+                "misc.benchmark=True" \
+                "training.retrain=True" \
+                "training.normalize_criterion=True"
+        done
+    else
         python3 train_model.py \
             "model.name=$model_name" \
             "model_configs=$model_name" \
             "misc.output_dir=$output_dir" \
-            "model.normalization=$normalization" \
+            "model.normalization=0" \
             "misc.benchmark=True" \
-            "training.retrain=True"
-    done
+            "training.retrain=True" \
+            "training.normalize_criterion=True"
+    fi
 done
 
 python3 losses.py "misc.output_dir=$output_dir"
+python3 print_table.py "misc.output_dir=$output_dir"

@@ -10,12 +10,16 @@ data:
     valid2: 1
     test: 1
   seed:
+  mean: 2500
+  std: 15000
 
 fed:
   splits:
     ../datasets/node_0_indices.pt: [../datasets/node_0/indiv, ../datasets/node_0/date]
     ../datasets/node_1_indices.pt: [../datasets/node_1/indiv, ../datasets/node_1/date]
     ../datasets/node_2_indices.pt: [../datasets/node_2/indiv, ../datasets/node_2/date]
+  epochs: 3
+  rounds: 5
 
 model:
   lags: 336
@@ -26,6 +30,7 @@ model:
 training:
   retrain: True
   loss: MSE
+  normalize_criterion: True
   bs: 4
   lr: 0.0001
 

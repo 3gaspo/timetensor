@@ -32,7 +32,7 @@ class series_decomp(nn.Module):
         return res, moving_mean
 
 class DLinear(nn.Module):
-    def __init__(self, lags, horizon, dim, kernel_size=25):
+    def __init__(self, lags, dim, horizon, kernel_size=25):
         super(DLinear, self).__init__()
         self.lags, self.dim, self.horizon  = lags, dim, horizon
 

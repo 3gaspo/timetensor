@@ -2,8 +2,32 @@ import numpy as np
 import torch
 import os
 import json
+import hydra
 
 from .dataset import load_example, load_data
+
+
+def get_dirs(output_dir, save_name, model_name, normalization):
+    if save_name is None:
+        save_name = model_name
+        if normalization:
+            if model_name not in ["persistence", "repeat", "lookback"]:
+                if normalization == 1:
+                    save_name = save_name + f"_avgtrain"
+                elif normalization == 2:
+                    save_name = save_name + f"_instance"
+            if normalization == 3:
+                save_name = save_name + f"_revin"
+    save_dir = output_dir + save_name + "/" #current experiment dir
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    hydra_dir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir #hydra logs
+    with open(save_dir + f'hydra_dir.txt', 'w') as file: 
+        file.write(f"{hydra_dir}") #save path of hydra logs to experiment dir
+    if not os.path.exists(save_dir + "examples/"): #dir for example predictions
+        os.makedirs(save_dir + "examples/")
+    return save_name, save_dir
+
 
 def get_temporal_features(date):
     """returns list of size context(=3) for a given date"""
@@ -81,6 +105,10 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False):
     return torch.concat(X), torch.concat(Y)
 
 
+def get_loader_array(loader, dim=0):
+    X, Y = unroll_windows(loader)
+    X, Y = X[:, dim, :], Y[:, dim, :]
+    return X, Y
 
 def get_stats(values, stat, dim=0):
     """returns tensor of given stats for a loader
@@ -135,6 +163,7 @@ def save_results(value, path, name, model_name, metric_name):
 
 def normalize(x, mean, std):
     return (x - mean) / std
+
 
 def nloss(loss, pred, y, mean, std):
     """returns normalized loss"""

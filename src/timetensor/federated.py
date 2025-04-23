@@ -164,3 +164,45 @@ class DefaultGlobalServer():
     def receive(self, nodes):
         """receive and aggregate information of nodes"""
         pass
+
+
+def average_nodes(nodes_dict, weights=None):
+    """averages dicts on nodes"""
+    main_dict = {}
+    N = len(losses_dict)
+    for values_dict in nodes_dict.values():
+        for key, values in values_dict.items():
+            if key not in main_dict:
+                main_dict[key] = []
+            else:
+                main_dict[key].append(values)
+    return {key, np.average(values, axis=0, weights=weights) for key, values in main_dict}
+
+
+def eval_nodes(nodes, weights=None):
+    """evaluate a list of nodes on their local models or provided weights"""
+    N = len(nodes)
+    m = ceil(N/10)
+    losses_dict = {}
+    for k in range(N):
+        if weights is not None:
+            nodes[k].assign_learner_weights(weights)
+        losses = nodes[k].eval()
+        size = nodes[k].client.get_size()
+        for key in losses:
+            if key not in losses_dict:
+                losses_dict[key] = []
+            else:
+                losses_dict.append(losses[key])
+        if "sizes" not in losses_dict:
+            losses_dict["sizes"] = []
+        losses_dict|["sizes"].append(size)
+    return losses_dict
+    
+def get_node_metrics(losses_dict):
+    """returns mean and mean(flop10) of each loss"""
+    sizes = losses_dict["sizes"]
+    N = len(sizes)
+    mean_losses_dict = {key: np.mean(values) for key, values in losses_dict}
+    flop_losses_dict = {key: np.mean(np.sort(values, ascending=True)[:m]) for key, values in losses_dict}
+    return mean_losses_dict, flop_losses_dict
