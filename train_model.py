@@ -7,9 +7,9 @@ import numpy as np
 
 from src.timetensor.dataset import get_dataset_splits, get_train_loaders
 from src.timetensor.models import load_model
-from src.timetensor.pipeline import Learner, train_model
+from src.timetensor.pipeline import Learner, train_model, Loss
 from src.timetensor.visu import plot_losses, plot_errors, plot_horizon_errors, plot_pred, plot_weights
-from src.timetensor.utils import save_results, fetch_example_data, nloss, get_dirs
+from src.timetensor.utils import save_results, fetch_example_data, get_dirs
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -25,7 +25,7 @@ def run(cfg):
     data_path = cfg.data.path
     lags, horizon = cfg.model.lags, cfg.model.horizon
     batch_size, lr = cfg.training.bs, cfg.training.lr
-    criterion_name, normalize_criterion, normalization = cfg.training.loss, cfg.training.normalize_criterion, cfg.model.normalization
+    criterion_name, normalization = cfg.training.loss, cfg.model.normalization
     model_name, retrain = cfg.model.name, cfg.training.retrain
     kwargs = cfg.model_configs
     verbose, benchmark = cfg.misc.verbose, cfg.misc.benchmark
@@ -62,73 +62,64 @@ def run(cfg):
     #training
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if criterion_name == "MSE":
-        criterion = lambda pred,y: nloss(nn.MSELoss(), pred, y, cfg.data.mean, cfg.data.std)
+        criterion = Loss(nn.MSELoss())
+    elif criterion_name == "MMSE":
+        criterion = Loss(nn.MSELoss(), cfg.data.mean, cfg.data.std)
+    elif criterion_name == "NMSE":
+        criterion = Loss(nn.MSELoss(), instance_norm=True)
     else:
         print("Unknown criterion name")
         criterion = None
-    #eval_losses = {"MSE":nn.MSELoss(reduction="none")}
-    eval_losses = {"MSE":lambda pred, y: nloss(nn.MSELoss(reduction="none"), pred, y, cfg.data.mean, cfg.data.std)}
+    eval_losses = {"MSE":Loss(nn.MSELoss(reduction="none")), "MMSE":Loss(nn.MSELoss(reduction="none"), cfg.data.mean, cfg.data.std), "NMSE": Loss(nn.MSELoss(reduction="none"), instance_norm=True)}
 
     model = load_model(model_name, shape, normalization, **kwargs)
     if model_name in ["persistence", "repeat", "lookback"] and normalization!=3:
-        learner = Learner(model, criterion, lr, eval_losses, device=device, normalize_criterion=normalize_criterion, do_train=False)
+        learner = Learner(model, criterion, lr, eval_losses, device=device, do_train=False)
         logger.info("No training needed")
     elif model_name == "sklinear":
         logger.info("Starting scikit-learn fitting...")
-        learner = Learner(model, criterion, lr, eval_losses, device=device, normalize_criterion=normalize_criterion, pytorch=False)
+        learner = Learner(model, criterion, lr, eval_losses, device=device, pytorch=False)
         learner.fit(loaders_dict["train"])
         logger.info("End of training")
     else:
-        learner = Learner(model, criterion, lr, eval_losses, device=device, normalize_criterion=normalize_criterion)
+        learner = Learner(model, criterion, lr, eval_losses, device=device)
         logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps={len(loaders_dict['train'])}")
         if retrain:
             logger.info("Starting training...")
             train_losses, valid_losses, valid_losses2 = train_model(learner, loaders_dict)
             torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")
-            torch.save(train_losses, save_dir + f"{criterion_name}_train_losses.pt")
-            for loss_name, loss_values in valid_losses.items():
-                torch.save(loss_values, save_dir + f"{loss_name}_valid_losses.pt")
-                torch.save(loss_values, save_dir + f"{loss_name}_valid_losses2.pt")
+            torch.save(train_losses, save_dir + f"train_losses.pt")
+            torch.save(valid_losses, save_dir + f"valid_losses.pt")
+            torch.save(valid_losses2, save_dir + f"valid_losses2.pt")
+
             logger.info("End of training")
         else:
             model.load_state_dict(torch.load(save_dir + "trained_model.pt"))
             model.to(device)
-            train_losses = torch.load(save_dir + f"{criterion_name}_train_losses.pt",weights_only=False)
-            valid_losses, valid_losses2 = {}, {}
-            for loss_name in eval_losses:
-                valid_losses[loss_name] = torch.load(save_dir + f"{loss_name}_valid_losses.pt",weights_only=False)
-                valid_losses["N"+loss_name] = torch.load(save_dir + f"N{loss_name}_valid_losses.pt",weights_only=False)
-                valid_losses2[loss_name] = torch.load(save_dir + f"{loss_name}_valid_losses2.pt",weights_only=False)
-                valid_losses2["N"+loss_name] = torch.load(save_dir + f"N{loss_name}_valid_losses2.pt",weights_only=False)
+            train_losses = torch.load(save_dir + f"train_losses.pt",weights_only=False)
+            valid_losses = torch.load(save_dir + f"valid_losses.pt", weights_only=False)
+            valid_losses2 = torch.load(save_dir + f"valid_losses2.pt", weights_only=False)
 
         #plots
-        plot_losses(train_losses, valid_losses["MSE"], valid_losses2["MSE"],  save_dir, "train_losses.pdf", f"Training MSE of {save_name}")
-        plot_losses(train_losses, valid_losses["NMSE"], valid_losses2["NMSE"],  save_dir, "train_nlosses.pdf", f"Training NMSE of {save_name}")
-
+        for loss_name in eval_losses:
+            plot_losses(train_losses, valid_losses[loss_name], valid_losses2[loss_name],  save_dir, f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}")
         logger.info("Plotted losses")
 
     #eval
     logger.info("Computing test metrics")
     test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1) #(ndates*nindividuals, dim, horizon)
     torch.save(test_losses, save_dir + "test_losses.pt")
-    mean_test_mse, std_test_mse = test_losses["MSE"].mean(), test_losses["MSE"].std()
-    mean_test_nmse, std_test_nmse = test_losses["NMSE"].mean(), test_losses["NMSE"].std()
     if benchmark:
         test_dir = output_dir
     else:
         test_dir = save_dir
-    save_results(mean_test_mse, test_dir, "mean_results.json", save_name, "Test MSE")
-    save_results(std_test_mse, test_dir, "std_results.json", save_name, "Test MSE")
-    save_results(mean_test_nmse, test_dir, "mean_results.json", save_name, "Test NMSE")
-    save_results(std_test_nmse, test_dir, "std_results.json", save_name, "Test NMSE")
-    logger.info(f"Test MSE : {mean_test_mse:.4f} (+/- {std_test_mse:.4f}), Test NMSE : {mean_test_nmse:.4f} (+/- {std_test_nmse:.4f})")
+    for loss_name in eval_losses:
+        mean, std = test_losses[loss_name].mean(), test_losses[loss_name].std()
+        save_results(mean, test_dir, "mean_results.json", save_name, f"Test {loss_name}")
+        save_results(std, test_dir, "std_results.json", save_name, f"Test {loss_name}")
 
-
-    #errors
-    plot_errors(test_losses["MSE"].sum(axis=1).mean(axis=1), save_dir, "test_mse.pdf", f"Test MSE of {save_name} : {mean_test_mse}")
-    plot_errors(test_losses["NMSE"].sum(axis=1).mean(axis=1), save_dir, "test_nme.pdf", f"Test NMSE of {save_name} : {mean_test_nmse}")
-    plot_horizon_errors(test_losses["MSE"].sum(axis=1).mean(axis=0), save_dir, "horizon_mse.pdf", f"Test MSE of {save_name} : {mean_test_mse}")
-    plot_horizon_errors(test_losses["NMSE"].sum(axis=1).mean(axis=0), save_dir, "horizon_nmse.pdf", f"Test NMSE of {save_name} : {mean_test_nmse}")
+        plot_errors(test_losses[loss_name].sum(axis=1).mean(axis=1), save_dir, f"test_{loss_name}.pdf", f"Test {loss_name} of {save_name} : {mean}")
+        plot_horizon_errors(test_losses[loss_name].sum(axis=1).mean(axis=0), save_dir, f"horizon_{loss_name}.pdf", f"Test {loss_name} of {save_name} : {mean}")
     
     #example
     dico = fetch_example_data(data_path + "examples/", ["rand"])

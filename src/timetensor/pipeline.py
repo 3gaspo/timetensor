@@ -4,21 +4,42 @@ import torch.optim as optim
 from time import perf_counter
 import numpy as np
 
-from .utils import get_normal_stats, nloss, average_loss, append_in_dict
+from .utils import get_normal_stats, average_loss, append_in_dict
 from .utils import unroll_windows, get_loader_array
+from .utils import normalize
+
+class Loss():
+    def __init__(self, loss, mean=None, std=None, instance_norm=False):
+        self.loss = loss #e.g nn.MSELoss()
+        self.instance_norm = instance_norm
+
+        self.mean = mean
+        self.std = std
+        self.standard_norm = (mean is not None and std is not None)
+
+    def __call__(self, pred, y, mean=None, std=None):
+        if self.standard_norm:
+            pred = normalize(pred, self.mean, self.std)
+            y = normalize(y, self.mean, self.std)
+        if self.instance_norm:
+            assert (mean is not None and std is not None), "mean and std must be provided for instance normalization"
+            pred = normalize(pred, mean, std)
+            y = normalize(y, mean, std)
+        return self.loss(pred, y)
+
+
 
 
 class Learner:
-    def __init__(self, model, criterion, lr, eval_losses, device=None, optimizer=None, scheduler=None, normalize_criterion=True, do_train=True, pytorch=True):
+    def __init__(self, model, criterion, lr, eval_losses, device=None, optimizer=None, scheduler=None, do_train=True, pytorch=True):
         """
         optimizer: to be called on model.parameters() and lr
         scheduler: to be called on optimizer(model)
         """
         if criterion is None:
-            self.criterion = nn.MSELoss() # mean over 1/B * 1/dim * 1/horizon
+            self.criterion = Loss(nn.MSELoss()) # mean over 1/B * 1/dim * 1/horizon
         else:
             self.criterion = criterion
-        self.normalize_criterion = normalize_criterion
         self.eval_losses = eval_losses
 
         if optimizer is None:
@@ -61,18 +82,12 @@ class Learner:
         X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
         if context_batch is not None:
             context_batch = context_batch.to(self.device)
-        
-        if self.normalize_criterion:
-            mean, std = get_normal_stats(X_batch) # (B, dim, 1)
+        mean, std = get_normal_stats(X_batch) # (B, dim, 1)
         
         self.curent_optimizer.zero_grad()
+
         predictions = self.model(X_batch, context_batch)
-
-        if self.normalize_criterion:
-            loss = nloss(self.criterion, predictions, y_batch, mean, std)
-        else:
-            loss = self.criterion(predictions, y_batch)
-
+        loss = self.criterion(predictions, y_batch, mean, std)
         if frozen_modules is not None:
             for frozen_module in frozen_modules:
                 frozen_module.zero_grad()
@@ -104,13 +119,10 @@ class Learner:
                     
                     predictions = self.model(X_batch, context_batch) #normalization done (or not) inside model
                     for loss_name, criterion in self.eval_losses.items():
-                        loss = criterion(predictions, y_batch).cpu() # (bs * individuals, dim, horizon)
-                        normalized_loss = nloss(criterion, predictions, y_batch, mean, std).cpu()
+                        loss = criterion(predictions, y_batch, mean, std).cpu() # (bs * individuals, dim, horizon)
                         if losses.get(loss_name) is None:
                             losses[loss_name] = []
-                            losses["N"+loss_name] = []
                         losses[loss_name] += loss.tolist()
-                        losses["N"+loss_name] += normalized_loss.tolist()
         else:
             Xtest, Ytest = get_loader_array(loader) #reduces to dim=0
             predictions = self.model(Xtest).unsqueeze(dim=1)
@@ -118,10 +130,8 @@ class Learner:
             mean, std = get_normal_stats(Xtest)
 
             for loss_name, criterion in self.eval_losses.items():
-                loss = criterion(predictions, Ytest).cpu()
-                normalized_loss = nloss(criterion, predictions, Ytest, mean, std).cpu()
+                loss = criterion(predictions, Ytest, mean, std).cpu()
                 losses[loss_name] = loss.tolist()
-                losses["N"+loss_name] = normalized_loss.tolist()
         t2 = perf_counter()
 
         if verbose:

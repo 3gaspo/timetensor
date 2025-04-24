@@ -4,6 +4,7 @@ import os
 import torch
 
 from src.timetensor.visu import plot_multi_losses
+from src.timetensor.utils import append_in_dict
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -23,25 +24,23 @@ def run(cfg):
 
     if len(expe_names) >0:
         losses_dict = {}
-        Nlosses_dict = {}
         losses_dict2 = {}
-        Nlosses_dict2 = {}
 
         for expe_name in expe_names:
-            valid_losses = torch.load(output_dir + expe_name + "/" + "MSE_valid_losses.pt")
-            Nvalid_losses = torch.load(output_dir + expe_name + "/" + "NMSE_valid_losses.pt")
-            losses_dict[expe_name] = valid_losses
-            Nlosses_dict[expe_name] = Nvalid_losses
+            valid_losses = torch.load(output_dir + expe_name + "/" + "valid_losses.pt", weights_only=False)
+            valid_losses2 = torch.load(output_dir + expe_name + "/" + "valid_losses2.pt", weights_only=False)
 
-            valid_losses2 = torch.load(output_dir + expe_name + "/" + "MSE_valid_losses2.pt")
-            Nvalid_losses2 = torch.load(output_dir + expe_name + "/" + "NMSE_valid_losses2.pt")
-            losses_dict2[expe_name] = valid_losses2
-            Nlosses_dict2[expe_name] = Nvalid_losses2
 
-        plot_multi_losses(losses_dict, output_dir, "losses.pdf", f"Valid losses")
-        plot_multi_losses(Nlosses_dict, output_dir, "normal_losses.pdf", f"Normalized valid losses")
-        plot_multi_losses(losses_dict, output_dir, "losses2.pdf", f"Valid2 losses")
-        plot_multi_losses(Nlosses_dict, output_dir, "normal_losses2.pdf", f"Normalized valid2 losses")
+            for loss_name in valid_losses:
+                if loss_name not in losses_dict:
+                    losses_dict[loss_name] = {}
+                    losses_dict2[loss_name] = {}
+                losses_dict[loss_name][expe_name] = valid_losses[loss_name]
+                losses_dict2[loss_name][expe_name] = valid_losses2[loss_name]
+
+        for loss_name in valid_losses:
+            plot_multi_losses(losses_dict[loss_name], output_dir, f"{loss_name}_valid.pdf", f"Valid {loss_name}")
+            plot_multi_losses(losses_dict2[loss_name], output_dir, f"{loss_name}_valid2.pdf", f"Valid2 {loss_name}")
         logger.info('Plotted multi losses')
     else:
         logger.info('No losses to plot')
