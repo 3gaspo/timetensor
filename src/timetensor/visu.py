@@ -193,13 +193,15 @@ def pd_to_latex(path):
     print(latex_output)
 
 
-def print_nice_table(path, alpha=4, beta=4):
+def print_nice_table(path, multipliers=None):
     """print table from dataframe in path"""
     with open(path) as file:
         data = json.load(file)
-    df = pd.DataFrame(data) * 10**alpha
-    df.iloc[1] = df.iloc[1] * 10**beta
-    df.index = [f"Test MSE * 1e{alpha}", f"Test NMSE * 1e{alpha+beta}"]
+    df = pd.DataFrame(data)
+    if multipliers is not None:
+        for k in range(len(multipliers)):
+            df.iloc[k] = df.iloc[k] * 10**multipliers[k]
+        df.index = [f"{name} * 1e{multipliers[k]}" for k, name in enumerate(df.index)]
     table = tabulate(df, headers='keys', tablefmt='grid', showindex=True, floatfmt=".4f")
     print(table)
 

@@ -351,3 +351,15 @@ def collate_fn(data):
     targets = targets.view(-1, targets.shape[-2], targets.shape[-1])
 
     return inputs, contexts, targets
+
+
+def aggregate_loaders(loaders, context_by_individuals=False, by_date=True):
+    if not context_by_individuals and by_date: #other cases tODO
+        values_list = []
+        for loader in loaders:
+            values_list.append(loaders.dataset.values)
+        extended_values = torch.stack(values_list, dim=0)
+
+        extended_dataset = TimeSeriesDataset(extended_values, loader.dataset.datetimes, loader.dataset.context, loader.dataset.lags, loader.dataset.horizon, by_date=True)
+        extended_loader = DataLoader(extended_dataset, batch_size=loader.batch_size, shuffle=loader.shuffle, collate_fn=loader.collate_fn)
+        return extended_loader

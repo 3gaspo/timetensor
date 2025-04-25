@@ -11,7 +11,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 def run(cfg):
     
     output_dir = cfg.misc.output_dir
-    print_nice_table(output_dir + "mean_results.json")
+    print_nice_table(output_dir + "mean_results.json", multipliers=[-5, 4, 1, 1])
 
 if __name__ == "__main__":
     run()

@@ -147,13 +147,14 @@ class Learner:
 
 
 
-def train_model(learner, loaders_dict, print_freq=50, eval_freq=10, verbose=1, do_eval=True):
+def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, verbose=1, do_eval=True):
     """trains model in learner on loaders and returns train and valid losses"""
     
     #data
     train_loader = loaders_dict["train"]
     valid_loader = loaders_dict.get("valid")
     valid_loader2 = loaders_dict.get("valid2")
+    test_loader = loaders_dict.get("test")
     steps = len(train_loader)
 
     if verbose:
@@ -167,22 +168,25 @@ def train_model(learner, loaders_dict, print_freq=50, eval_freq=10, verbose=1, d
 
     #training
     step = 0
-    for X_batch, context_batch, y_batch in train_loader:
-        step += 1
-        loss = learner.compute_step(X_batch, context_batch, y_batch)
-        train_losses.append(loss) #loss of batch
-        
-        if do_eval and (step == 1 or step % eval_freq == 0 or step == steps):
+    for epoch in range(epochs):
+        for X_batch, context_batch, y_batch in train_loader:
+            step += 1
+            loss = learner.compute_step(X_batch, context_batch, y_batch)
+            train_losses.append(loss) #loss of batch
+            
+            if do_eval and (step == 1 or step % eval_freq == 0 or step == steps):
 
-            #valid eval
-            average_eval_dict = learner.eval(valid_loader)
-            average_eval_dict2 = learner.eval(valid_loader2)
-            append_in_dict(valid_losses, average_eval_dict)
-            append_in_dict(valid_losses2, average_eval_dict2)
+                #valid eval
+                average_eval_dict = learner.eval(valid_loader)
+                average_eval_dict2 = learner.eval(valid_loader2)
+                append_in_dict(valid_losses, average_eval_dict)
+                append_in_dict(valid_losses2, average_eval_dict2)
 
-            if step == 1 or step % print_freq == 0 or step == steps:
-                print(f"Step {step} | " + " | ".join([f"valid1 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict.items()]) + " | " + " | ".join([f"valid2 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict2.items()]))
-
+                if verbose and (step == 1 or step % print_freq == 0 or step == steps):
+                    print(f"Step {step} | " + " | ".join([f"valid1 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict.items()]))
+        if verbose:
+            average_test_dict = learner.eval(test_loader)
+            print(f"==Epoch {epoch+1} | " + " | ".join([f"test {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_test_dict.items()]) + "==")
     t2 = perf_counter()
     if verbose:
         print(f"Training done in {(t2-t1)/60:.3f} min")

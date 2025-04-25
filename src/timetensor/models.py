@@ -165,6 +165,9 @@ def load_model(model_name, shape, normalization=0, **kwargs):
         model = DLinear(lags, dim, horizon, kwargs.get("kernel_size",25))
     elif model_name == "sklinear":
         model = sklinear()
+        if normalization > 0:
+            print("Normalization not supported for scikit learn model")
+        return model
     elif model_name == "patch_tst":
         model = PatchTST(lags, horizon)
     else:

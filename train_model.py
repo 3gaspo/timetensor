@@ -24,7 +24,7 @@ def run(cfg):
     #configs
     data_path = cfg.data.path
     lags, horizon = cfg.model.lags, cfg.model.horizon
-    batch_size, lr = cfg.training.bs, cfg.training.lr
+    batch_size, lr, epochs = cfg.training.bs, cfg.training.lr, cfg.training.epochs
     criterion_name, normalization = cfg.training.loss, cfg.model.normalization
     model_name, retrain = cfg.model.name, cfg.training.retrain
     kwargs = cfg.model_configs
@@ -70,7 +70,13 @@ def run(cfg):
     else:
         print("Unknown criterion name")
         criterion = None
-    eval_losses = {"MSE":Loss(nn.MSELoss(reduction="none")), "MMSE":Loss(nn.MSELoss(reduction="none"), cfg.data.mean, cfg.data.std), "NMSE": Loss(nn.MSELoss(reduction="none"), instance_norm=True)}
+    eval_losses = {
+        "MSE":Loss(nn.MSELoss(reduction="none")),
+        "MMSE":Loss(nn.MSELoss(reduction="none"), cfg.data.mean, cfg.data.std),
+        "NMSE": Loss(nn.MSELoss(reduction="none"), instance_norm=True),
+        "MAE": Loss(nn.L1Loss(reduction="none")),
+        "NMAE": Loss(nn.L1Loss(reduction="none", instance_norm=True))
+        }
 
     model = load_model(model_name, shape, normalization, **kwargs)
     if model_name in ["persistence", "repeat", "lookback"] and normalization!=3:
@@ -86,7 +92,7 @@ def run(cfg):
         logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps={len(loaders_dict['train'])}")
         if retrain:
             logger.info("Starting training...")
-            train_losses, valid_losses, valid_losses2 = train_model(learner, loaders_dict)
+            train_losses, valid_losses, valid_losses2 = train_model(learner, loaders_dict, epochs=epochs)
             torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")
             torch.save(train_losses, save_dir + f"train_losses.pt")
             torch.save(valid_losses, save_dir + f"valid_losses.pt")
@@ -141,8 +147,17 @@ def run(cfg):
             if normalization!=0:
                 weights = model.model.fc.weight.detach().cpu().numpy()
             else:
-                weights = model.fc
+                weights = model.fc.weight.detach().cpu().numpy()
         plot_weights(weights, save_dir, title=f'{save_name} weights')
+    if model_name == "DLinear":
+        if normalization!=0:
+            linear_weights = model.model.Linear_Seasonal[0].weight.detach().cpu().numpy()
+            season_weights = model.model.Linear_Trend[0].weight.detach().cpu().numpy()
+        else:
+            linear_weights = model.Linear_Seasonal[0].weight.detach().cpu().numpy()
+            season_weights = model.Linear_Trend[0].weight.detach().cpu().numpy()
+        plot_weights(linear_weights, save_dir, name="season_weights.pdf", title=f'{save_name} seasonal weights')
+        plot_weights(season_weights, save_dir, name="trend_weights.pdf", f'{save_name} trend weights')
 
     logger.info('End of script\n')
 

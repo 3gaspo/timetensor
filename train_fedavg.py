@@ -13,6 +13,7 @@ from src.timetensor.federated import get_client_splits, Client
 from src.timetensor.utils import save_results, append_in_dict, get_node_metrics, eval_nodes, get_dirs
 from src.timetensor.fedavg import LocalFedAvg, GlobalFedAvg
 from src.timetensor.visu import plot_losses, plot_multi_losses
+from src.timetensor.dataset import aggregate_loaders
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -100,6 +101,7 @@ def run(cfg):
     global_model = load_model(model_name, shape, normalization, **kwargs)
     if retrain:
         shadow_learner = Learner(copy.deepcopy(global_model), criterion, lr, eval_losses, device=device)
+        server_client = Client({ for key in }, id="server")
         shadow_server = LocalFedAvg()#TO DO aggregated_client, shadow_learner)
     else:
         global_model.load_state_dict(torch.load(save_dir + "trained_model.pt"))
