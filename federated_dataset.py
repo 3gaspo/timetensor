@@ -38,7 +38,7 @@ def run(cfg):
     clients = []
     for k in range(N):
         path = data_path + f"node_{k}/"
-        loaders_dict = get_train_loaders(node_data_dict[f"node_{k}"], batch_size, lags, horizon, by_date=True, subsets=cfg.data.subset, path=data_path + f"/node_{k}/")
+        loaders_dict = get_train_loaders(node_data_dict[f"node_{k}"], batch_size, lags, horizon, by_date=True, subsets=cfg.fed.subsets[k], path=data_path + f"/node_{k}/")
         client = Client(loaders_dict, id=k)
         clients.append(client)
 

@@ -53,18 +53,26 @@ def run(cfg):
     #nodes
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if criterion_name == "MSE":
-        criterion = nn.MSELoss()
+        criterion = Loss(nn.MSELoss())
+    elif criterion_name == "MMSE":
+        criterion = Loss(nn.MSELoss(), cfg.data.mean, cfg.data.std)
+    elif criterion_name == "NMSE":
+        criterion = Loss(nn.MSELoss(), instance_norm=True)
     else:
         print("Unknown criterion name")
         criterion = None
-    eval_losses = {"MSE":lambda pred, y: nloss(nn.MSELoss(reduction="none"), pred, y, cfg.data.mean, cfg.data.std)}
+    eval_losses = {
+        "MSE":Loss(nn.MSELoss(reduction="none")),
+        "MMSE":Loss(nn.MSELoss(reduction="none"), cfg.data.mean, cfg.data.std),
+        "NMSE": Loss(nn.MSELoss(reduction="none"), instance_norm=True),
+        "MAE": Loss(nn.L1Loss(reduction="none")),
+        "NMAE": Loss(nn.L1Loss(reduction="none", instance_norm=True))
+        }
 
     node_data_dict = get_client_splits(data_path, splits)
-    nodes = []
-    sizes = []
+    nodes, sizes = [], []
     shadow_nodes = [] #performing only local training
     for k in range(N):
-
         #data
         path = data_path + f"node_{k}/"
         loaders_dict = get_train_loaders(node_data_dict[f"node_{k}"], batch_size, lags, horizon, by_date=True, subsets=cfg.data.subset, path=path)
@@ -90,7 +98,7 @@ def run(cfg):
             model.to(device)
 
         node = LocalFedAvg(client, learner)
-        sizes.append(node.client.get_size()) 
+        
         nodes.append(node)
         if retrain:
             shadow_node = LocalFedAvg(shadow_client, shadow_learner)

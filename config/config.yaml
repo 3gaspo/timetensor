@@ -15,9 +15,10 @@ data:
 
 fed:
   splits:
-    ../datasets/node_0_indices.pt: [../datasets/node_0/indiv, ../datasets/node_0/date]
-    ../datasets/node_1_indices.pt: [../datasets/node_1/indiv, ../datasets/node_1/date]
-    ../datasets/node_2_indices.pt: [../datasets/node_2/indiv, ../datasets/node_2/date]
+    ../datasets/node_0_indices.pt: ../datasets/node_0/date
+    ../datasets/node_1_indices.pt: ../datasets/node_1/date
+    ../datasets/node_2_indices.pt: ../datasets/node_2/date
+  subsets: [0.1 0.1 0.1]
   epochs: 3
   rounds: 5
 

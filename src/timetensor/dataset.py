@@ -83,7 +83,7 @@ class TimeSeriesDataset(Dataset):
 
 
 class Subset(Dataset):
-    def __init__(self, dataset, indices, mode="individuals"):
+    def __init__(self, dataset, indices, mode="dates"):
         self.dataset = dataset
         self.indices = indices
         self.mode = mode
@@ -287,6 +287,35 @@ def train_test_split(values, context, datetimes, indiv_split=None, date_split=No
     else:
         return {"train":(values, context, datetimes)}
 
+
+def temporal_split(values, context, datetimes, date_split=None, seed=None, path=""):
+    """returns dict of train/valid/test of provided values,context,datetimes
+    """
+    if seed is not None:
+        np.random.seed(seed)
+
+    if date_split is not None:
+        if type(date_split)==str:
+            dates_idx1, dates_idx2, dates_idx3 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False)), list(torch.load(date_split + "_split3.pt", weights_only=False)),
+            dates1, dates2, dates3 = datetimes[dates_idx1], datetimes[dates_idx2], datetimes[dates_idx3]
+        elif type(date_split)==list: #split dates
+            dates = len(datetimes)
+            stop_date1, stop_date2 = int(date_split[0] * dates), int((date_split[0] + date_split[0])*dates)
+            dates_idx1, dates_idx2, dates_idx3 = list(range(stop_date1)), list(range(stop_date1, stop_date2)), list(range(stop_date2, dates))
+            dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
+            torch.save(dates_idx1, path + "date_split1.pt")
+            torch.save(dates_idx2, path + "date_split2.pt")
+            torch.save(dates_idx3, path + "date_split3.pt")
+
+        if context is not None:
+            context1 = context[:, :, :][: , :, dates_idx1]
+            context2 = context[:, :, :][: , :, dates_idx2]
+            context3 = context[:, :, :][: , :, dates_idx3]
+        else:
+            context1, context2, context3 = None, None, None
+        return {"train": (values[:, :, dates1], context1, dates1), "valid":(values[:,:,dates2], context2, dates2), "test":(values[:,:,dates3], context3, dates3)}    
+    else:
+        return {"train":(values, context, datetimes)}
 
 
 def get_dataset_splits(path="datasets/", indiv_split=None, date_split=None, seed=None, save=False, context_by_individuals=False):
