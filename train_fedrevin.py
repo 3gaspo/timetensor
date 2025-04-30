@@ -10,10 +10,10 @@ from src.timetensor.dataset import get_train_loaders, aggregate_loaders
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import Learner, train_model, Loss
 from src.timetensor.federated import get_client_splits, Client, get_node_metrics, eval_nodes, average_nodes
-from src.timetensor.utils import save_results, append_in_dict, get_dirs
+from src.timetensor.utils import save_results, append_in_dict, get_dirs, unroll_windows
 from src.timetensor.fedavg import GlobalFedAvg
 from src.timetensor.fedrevin import LocalFedRevin
-from src.timetensor.visu import plot_losses, plot_multi_losses
+from src.timetensor.visu import plot_losses, plot_multi_losses, plot_stats
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -188,6 +188,17 @@ def run(cfg):
         save_results(avg_loss_dict[loss_name], test_dir, f"{loss_name}_mean_results.json", save_name, f"Uniform {loss_name}")
         save_results(mean_losses_dict[loss_name], test_dir, f"{loss_name}_mean_results.json", save_name, f"Weighted {loss_name}")
         save_results(flop_losses_dict[loss_name], test_dir, f"{loss_name}_mean_results.json", save_name, f"Flop10 {loss_name}")
+
+    #plot
+    if normalization == 3:
+        params = [{"beta": nodes[k].learner.model.beta.data.detach().cpu().numpy()[0][0][0], "gamma": nodes[k].learner.model.gamma.data.detach().cpu().numpy()[0][0][0]} for k in range(N)]
+        logger.info(f"Final revin parameters: {params}")
+        unrolls = {f"node_{k}": unroll_windows(nodes[k].client.dataloaders["train"], normal=True) for k in range(N)}
+        runrolls = {f"node_{k}": unroll_windows(nodes[k].client.dataloaders["train"], normal=True, beta=nodes[k].learner.model.beta.data.detach().cpu().numpy()[0][0][0], gamma=nodes[k].learner.model.gamma.data.detach().cpu().numpy()[0][0][0]) for k in range(N)}
+        x_dict = {key: unrolls[key][0] for key in unrolls}
+        rx_dict = {key: runrolls[key][0] for key in runrolls}
+        plot_stats(x_dict, save_dir, name="normal_outputs_nodes.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-6,1e-6))
+        plot_stats(rx_dict, save_dir, name="revin_outputs_nodes.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-6,1e-6))
 
     logger.info('End of script\n')
 

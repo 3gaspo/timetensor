@@ -1,0 +1,20 @@
+splits:
+  ../datasets/node_0_indices.pt: ../datasets/node_0/date #- 0.5- 0.3- 0.2
+  ../datasets/node_1_indices.pt: ../datasets/node_1/date #- 0.5- 0.3- 0.2 
+  ../datasets/node_2_indices.pt: ../datasets/node_2/date #- 0.5- 0.3- 0.2 
+subsets:
+  node0:
+    train: ../datasets/node_0/train_subset_indices_0.1.pt
+    valid: ../datasets/node_0/valid_subset_indices_0.1.pt
+    test: ../datasets/node_0/test_subset_indices_0.1.pt
+  node1:
+    train: ../datasets/node_0/train_subset_indices_0.1.pt
+    valid: ../datasets/node_0/valid_subset_indices_0.1.pt
+    test: ../datasets/node_0/test_subset_indices_0.1.pt
+  node2:
+    train: ../datasets/node_0/train_subset_indices_0.1.pt
+    valid: ../datasets/node_0/valid_subset_indices_0.1.pt
+    test: ../datasets/node_0/test_subset_indices_0.1.pt
+epochs: 2
+rounds: 2
+reset_revin: False

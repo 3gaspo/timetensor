@@ -82,7 +82,7 @@ def fetch_example_data(path="datasets/examples", names="rand"):
         return load_example(path + names + "/")
 
 
-def unroll_windows(dataloader, cap=None, shuffle=False, normal=False):
+def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, gamma=1, beta=0, std_cst=1):
     """unrolls (x,y) examples of dataloaders (typically individuals*dates examples)"""
     X = []
     Y = []
@@ -90,8 +90,11 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False):
     for x, c, y in dataloader:
         if normal:
             mean, std = get_normal_stats(x)
-            nx = normalize(x, mean, std)
-            ny = normalize(x, mean, std)
+            if gamma is not None:
+                std = std*gamma
+                std = torch.where(std != 0, std, std_cst)
+            nx = normalize(x, mean-beta, std)
+            ny = normalize(x, mean-beta, std)
             X.append(nx)
             Y.append(ny)
         else:
@@ -161,7 +164,7 @@ def save_results(value, path, name, model_name, metric_name):
             print(dico)
 
 
-def normalize(x, mean, std):
+def normalize(x, mean, std, std_cst=1):
     return (x - mean) / std
 
 

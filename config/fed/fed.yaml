@@ -1,0 +1,20 @@
+splits:
+  ../datasets/node_0_indices.pt: ../datasets/node_0/date #- 0.5- 0.3- 0.2
+  ../datasets/node_1_indices.pt: ../datasets/node_1/date #- 0.5- 0.3- 0.2 
+  ../datasets/node_2_indices.pt: ../datasets/node_2/date #- 0.5- 0.3- 0.2 
+subsets:
+  node0:
+    train: 1
+    valid: 1
+    test: 1
+  node1:
+    train: 1
+    valid: 1
+    test: 1
+  node2:
+    train: 1
+    valid: 1
+    test: 1
+epochs: 3
+rounds: 5
+reset_revin: False
