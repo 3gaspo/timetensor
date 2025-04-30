@@ -199,9 +199,12 @@ def print_nice_table(path, multipliers=None):
         data = json.load(file)
     df = pd.DataFrame(data)
     if multipliers is not None:
-        for k in range(len(multipliers)):
-            df.iloc[k] = df.iloc[k] * 10**multipliers[k]
-        df.index = [f"{name} * 1e{multipliers[k]}" for k, name in enumerate(df.index)]
+        new_index = list(df.index)
+        for k in range(max(len(multipliers), df.shape[1])):
+            if multipliers[k] != 0:
+                df.iloc[k] = df.iloc[k] * 10**multipliers[k]
+                new_index[k] = new_index[k] + f" * 1e{multipliers[k]}"
+        df.index = new_index
     table = tabulate(df, headers='keys', tablefmt='grid', showindex=True, floatfmt=".4f")
     print(table)
 

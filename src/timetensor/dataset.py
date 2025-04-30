@@ -5,8 +5,7 @@ import os
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
-    def __init__(self, values, datetimes, context=None, lags=48, horizon=24,
-               by_date=True, return_all_individuals=True, context_by_individuals=False):#, steps=None, seed=None, shuffle=False):    
+    def __init__(self, values, datetimes, context=None, lags=48, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=False, seed=None):    
         """
         values (N_individuals, dim_values, dates):  past target values 
         datetimes (dates): list of dates in datetime Y-m-d H:M:S format
@@ -31,6 +30,7 @@ class TimeSeriesDataset(Dataset):
         self.datetimes = np.array(datetimes)
         self.by_date = by_date
         self.return_all_individuals, self.context_by_individuals = return_all_individuals, context_by_individuals
+        self.seed = seed
 
     @property
     def shape(self):
@@ -60,8 +60,8 @@ class TimeSeriesDataset(Dataset):
                 values = self.values[indiv, :, idx : idx + self.lags + self.horizon] # (dim_values, lags+horizon)
                 if self.context is not None:
                     context = self.context[indiv, :, idx : idx + self.lags + self.horizon] # (dim_context, lags+horizon)
-                inputs = values[:, :, :self.lags] # (dim, lag)
-                target = values[:, :, self.lags:] # (dim, horizon)
+                inputs = values[:, :self.lags] # (dim, lag)
+                target = values[:, self.lags:] # (dim, horizon)
 
         else: #1 batch = batch of individuals, random date
             if self.seed is not None:
@@ -73,8 +73,8 @@ class TimeSeriesDataset(Dataset):
                     context = self.context[idx, :, t: t + self.lags + self.horizon] # (dim_context, lags+horizon)
                 else:
                     context = self.context[:, :, t: t + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
-            inputs = values[:, :, :self.lags] # (dim, lags)
-            target = values[:, :, self.lags:] # (dim, horizon)
+            inputs = values[:, :self.lags] # (dim, lags)
+            target = values[:, self.lags:] # (dim, horizon)
 
         if self.context is not None:
             return inputs, context, target
@@ -87,6 +87,7 @@ class Subset(Dataset):
         self.dataset = dataset
         self.indices = indices
         self.mode = mode
+        self.lags, self.horizon = self.dataset.lags, self.dataset.horizon 
 
         if self.mode == "individuals":
             self.individuals = len(indices)
@@ -132,13 +133,18 @@ class Subset(Dataset):
             return (self.individuals, self.dataset.dim_values, self.dates), (self.contexts, self.dataset.dim_context, self.dates)
         else:
             return (self.individuals, self.dataset.dim_values, self.dates)
-
     @property
     def values(self):
         if self.mode == "dates":
             return self.dataset.values[:, :, self.indices]
         else:
             return self.dataset.values[self.indices, :, :]
+    @property
+    def datetimes(self):
+        if self.mode == "dates":
+            return self.dataset.datetimes[self.indices]
+        else:
+            return self.dataset.datetimes
 
 
 def build_dataset(fetcher, path="datasets/"):
@@ -258,7 +264,7 @@ def train_test_split(values, context, datetimes, indiv_split=None, date_split=No
                 context2 = context[:, :, :][: , :, dates_idx2]
             else:
                 context1, context2 = None, None
-            return {"train": (values[:, :, dates1], context1, dates1), "test":(values[:,:,dates2], context2, dates2)}
+            return {"train": (values[:, :, dates_idx1], context1, dates1), "test":(values[:,:,dates_idx2], context2, dates2)}
 
     elif indiv_split is not None:
         if type(indiv_split)==str:
@@ -293,27 +299,25 @@ def temporal_split(values, context, datetimes, date_split=None, seed=None, path=
     """
     if seed is not None:
         np.random.seed(seed)
-
     if date_split is not None:
         if type(date_split)==str:
             dates_idx1, dates_idx2, dates_idx3 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False)), list(torch.load(date_split + "_split3.pt", weights_only=False)),
             dates1, dates2, dates3 = datetimes[dates_idx1], datetimes[dates_idx2], datetimes[dates_idx3]
-        elif type(date_split)==list: #split dates
+        elif type(date_split[0])==float: #split dates
             dates = len(datetimes)
-            stop_date1, stop_date2 = int(date_split[0] * dates), int((date_split[0] + date_split[0])*dates)
+            stop_date1, stop_date2 = int(date_split[0] * dates), int((date_split[0] + date_split[1])*dates)
             dates_idx1, dates_idx2, dates_idx3 = list(range(stop_date1)), list(range(stop_date1, stop_date2)), list(range(stop_date2, dates))
             dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
             torch.save(dates_idx1, path + "date_split1.pt")
             torch.save(dates_idx2, path + "date_split2.pt")
             torch.save(dates_idx3, path + "date_split3.pt")
-
         if context is not None:
             context1 = context[:, :, :][: , :, dates_idx1]
             context2 = context[:, :, :][: , :, dates_idx2]
             context3 = context[:, :, :][: , :, dates_idx3]
         else:
             context1, context2, context3 = None, None, None
-        return {"train": (values[:, :, dates1], context1, dates1), "valid":(values[:,:,dates2], context2, dates2), "test":(values[:,:,dates3], context3, dates3)}    
+        return {"train": (values[:,:,dates_idx1], context1, dates1), "valid":(values[:,:,dates_idx2], context2, dates2), "test":(values[:,:,dates_idx3], context3, dates3)}    
     else:
         return {"train":(values, context, datetimes)}
 
@@ -383,12 +387,12 @@ def collate_fn(data):
 
 
 def aggregate_loaders(loaders, context_by_individuals=False, by_date=True):
-    if not context_by_individuals and by_date: #other cases tODO
+    if (not context_by_individuals) and by_date: #other cases tODO
         values_list = []
         for loader in loaders:
-            values_list.append(loaders.dataset.values)
-        extended_values = torch.stack(values_list, dim=0)
-
+            values_list.append(loader.dataset.values)
+        extended_values = torch.cat(values_list, dim=0)
+        shuffle = isinstance(loader.sampler, torch.utils.data.RandomSampler)
         extended_dataset = TimeSeriesDataset(extended_values, loader.dataset.datetimes, loader.dataset.context, loader.dataset.lags, loader.dataset.horizon, by_date=True)
-        extended_loader = DataLoader(extended_dataset, batch_size=loader.batch_size, shuffle=loader.shuffle, collate_fn=loader.collate_fn)
+        extended_loader = DataLoader(extended_dataset, batch_size=loader.batch_size, shuffle=shuffle, collate_fn=loader.collate_fn)
         return extended_loader

@@ -75,7 +75,7 @@ def run(cfg):
         "MMSE":Loss(nn.MSELoss(reduction="none"), cfg.data.mean, cfg.data.std),
         "NMSE": Loss(nn.MSELoss(reduction="none"), instance_norm=True),
         "MAE": Loss(nn.L1Loss(reduction="none")),
-        "NMAE": Loss(nn.L1Loss(reduction="none", instance_norm=True))
+        "NMAE": Loss(nn.L1Loss(reduction="none"), instance_norm=True)
         }
 
     model = load_model(model_name, shape, normalization, **kwargs)
@@ -100,8 +100,10 @@ def run(cfg):
 
             logger.info("End of training")
         else:
-            model.load_state_dict(torch.load(save_dir + "trained_model.pt"))
+            weights = torch.load(save_dir + "trained_model.pt")
+            model.load_state_dict(weights)
             model.to(device)
+            learner.reset_model(weights)
             train_losses = torch.load(save_dir + f"train_losses.pt",weights_only=False)
             valid_losses = torch.load(save_dir + f"valid_losses.pt", weights_only=False)
             valid_losses2 = torch.load(save_dir + f"valid_losses2.pt", weights_only=False)
@@ -157,7 +159,7 @@ def run(cfg):
             linear_weights = model.Linear_Seasonal[0].weight.detach().cpu().numpy()
             season_weights = model.Linear_Trend[0].weight.detach().cpu().numpy()
         plot_weights(linear_weights, save_dir, name="season_weights.pdf", title=f'{save_name} seasonal weights')
-        plot_weights(season_weights, save_dir, name="trend_weights.pdf", f'{save_name} trend weights')
+        plot_weights(season_weights, save_dir, name="trend_weights.pdf", title=f'{save_name} trend weights')
 
     logger.info('End of script\n')
 

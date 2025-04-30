@@ -165,12 +165,6 @@ def normalize(x, mean, std):
     return (x - mean) / std
 
 
-# def nloss(loss, pred, y, mean, std):
-#     """returns normalized loss"""
-#     normal_pred = normalize(pred, mean, std)
-#     normal_y = normalize(y, mean, std)
-#     return loss(normal_pred, normal_y)
-
 def average_loss(eval_losses):
     """averages the losses inside dictionnary"""
     mean_losses = {}

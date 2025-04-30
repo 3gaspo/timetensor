@@ -4,9 +4,9 @@ output_dir="../outputs/federated_benchmark/"
 rm -rf "$output_dir"
 mkdir -p "$output_dir"
 
-for model_name in linear
+for model_name in Dlinear
 do
-    for normalization in 0 1 2 3
+    for normalization in 2 3
     do
         python3 train_fedavg.py \
             "model.name=$model_name" \
@@ -14,8 +14,10 @@ do
             "misc.output_dir=$output_dir" \
             "model.normalization=$normalization" \
             "misc.benchmark=True" \
-            "training.retrain=True"
+            "training.retrain=True" \
+            "training.loss=NMSE"
     done
 done
 
-python3 print_table.py "misc.output_dir=$output_dir"
+python3 print_table.py "misc.output_dir=${output_dir}NMSE_" "misc.table_coeffs=1 1 1"
+python3 print_table.py "misc.output_dir=${output_dir}MMSE_" "misc.table_coeffs=3 3 3"

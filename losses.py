@@ -14,7 +14,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 def run(cfg):
     logger = logging.getLogger(__name__)
     print("\n")
-    logger.info("=====Running data script=====")
+    logger.info("=====Running loss script=====")
 
     #configs
     output_dir = cfg.misc.output_dir
