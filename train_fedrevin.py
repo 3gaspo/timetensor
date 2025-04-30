@@ -11,7 +11,8 @@ from src.timetensor.models import load_model
 from src.timetensor.pipeline import Learner, train_model, Loss
 from src.timetensor.federated import get_client_splits, Client, get_node_metrics, eval_nodes, average_nodes
 from src.timetensor.utils import save_results, append_in_dict, get_dirs
-from src.timetensor.fedavg import LocalFedAvg, GlobalFedAvg
+from src.timetensor.fedavg import GlobalFedAvg
+from src.timetensor.fedrevin import LocalFedRevin
 from src.timetensor.visu import plot_losses, plot_multi_losses
 
 import warnings
@@ -80,15 +81,14 @@ def run(cfg):
         dataloaders = client.dataloaders
         X, c, y = next(iter(dataloaders["train"]))
         shape = [X.shape[2], X.shape[1], y.shape[2]]
-        #logger.info(f"Client_id={client.id} | train={dataloaders['train'].dataset.shape} valid={dataloaders['valid'].dataset.shape} test={dataloaders['test'].dataset.shape}")
 
         #learner
         model = load_model(model_name, shape, normalization, **kwargs)
         learner = Learner(model, criterion, lr, eval_losses, device=device)
         shadow_learner = Learner(copy.deepcopy(model), criterion, lr, eval_losses, device=device)    
-        node = LocalFedAvg(client, learner)
+        node = LocalFedRevin(client, learner)
         nodes.append(node)
-        shadow_node = LocalFedAvg(shadow_client, shadow_learner)
+        shadow_node = LocalFedRevin(shadow_client, shadow_learner)
         shadow_nodes.append(shadow_node)
         sizes.append(client.get_size())
             
@@ -98,7 +98,7 @@ def run(cfg):
     global_model = load_model(model_name, shape, normalization, **kwargs)
     global_shadow_learner = Learner(copy.deepcopy(global_model), criterion, lr, eval_losses, device=device)
     server_client = Client({key: aggregate_loaders([all_loaders[k][key] for k in range(N)]) for key in ["train","valid", "test"]}, id="server")
-    shadow_server = LocalFedAvg(server_client, global_shadow_learner)#TO DO aggregated_client, shadow_learner)
+    shadow_server = LocalFedRevin(server_client, global_shadow_learner)#TO DO aggregated_client, shadow_learner)
     server = GlobalFedAvg(global_model)
 
     #FedAvg
@@ -117,6 +117,8 @@ def run(cfg):
             append_in_dict(global_valid_losses, shadow_losses)
             for i, local in enumerate(nodes):
                 logger.info(f"Computing {E} epochs for local {local.id}")
+                if cfg.fed.reset_revin:
+                    local.reset_revin()
                 losses = local.compute_round(E) #computes E steps of local training
                 shadow_losses = shadow_nodes[i].compute_round(E)
                 append_in_dict(valid_losses[f"node_{i}"], losses)

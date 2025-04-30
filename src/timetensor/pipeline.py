@@ -75,7 +75,7 @@ class Learner:
         else:
             return self.model.reg.coef_
 
-    def compute_step(self, X_batch, context_batch, y_batch, frozen_modules=None):
+    def compute_step(self, X_batch, context_batch, y_batch):
         """computes forward and backward on batch"""
         assert self.model is not None and self.do_train and self.pytorch
         self.model.train()
@@ -88,9 +88,6 @@ class Learner:
 
         predictions = self.model(X_batch, context_batch)
         loss = self.criterion(predictions, y_batch, mean, std)
-        if frozen_modules is not None:
-            for frozen_module in frozen_modules:
-                frozen_module.zero_grad()
 
         loss.backward()
         self.curent_optimizer.step()

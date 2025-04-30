@@ -115,9 +115,13 @@ class DefaultLocalServer():
         """resets the learner optimizer to provided weights"""
         self.learner.reset_model(weights)
         self.learner.reset_optimizer()
+    def assign_client_learner(self):
+        self.assign_learner_weights(self.client.model.state_dict())
     def get_latest_weights(self):
         return self.learner.get_weights()
-
+    def get_client_weights(self):
+        return self.client.model.state_dict()
+        
     def compute_epoch(self):
         """computes one training epoch"""
         loader = self.client.dataloaders["train"]

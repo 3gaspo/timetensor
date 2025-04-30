@@ -33,6 +33,7 @@ fed:
       test: ../datasets/node_0/test_subset_indices_0.1.pt
   epochs: 3
   rounds: 5
+  reset_revin: False
 
 model:
   lags: 336
