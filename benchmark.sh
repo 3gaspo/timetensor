@@ -27,10 +27,10 @@ do
             "model.name=linear" \
             "model_configs=linear" \
             "misc.output_dir=$output_dir" \
-            "model.normalization=3" \
+            "model.normalization=$normalization" \
             "misc.benchmark=True" \
             "training.retrain=True" \
-            "training.epochs=2" \
+            "training.epochs=1" \
             "training.loss=$loss" \
             "data.subset.train=1" \
             "data.subset.valid=1" \
@@ -46,7 +46,7 @@ python3 train_model.py \
     "model.normalization=3" \
     "misc.benchmark=True" \
     "training.retrain=True" \
-    "training.epochs=2" \
+    "training.epochs=1" \
     "training.loss=NMSE" \
     "data.subset.train=1" \
     "data.subset.valid=1" \

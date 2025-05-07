@@ -149,9 +149,9 @@ def run(cfg):
         for k in range(N):
             path = save_dir + f"node_{k}/"
             nodes[k].receive(torch.load( path + "trained_model.pt"))
-            shadow_nodes[k].receive(torch.load( path + "shadow_trained_model.pt"))
+            shadow_nodes[k].receive(torch.load(path + "shadow_trained_model.pt"))
         global_valid_losses = torch.load(save_dir + f"global_valid_losses.pt",weights_only=False)
-        shadow_server.receive(save_dir + "shadow_trained_model.pt")
+        shadow_server.receive(torch.load(save_dir + "shadow_trained_model.pt"))
         global_model.load_state_dict(torch.load(save_dir + "trained_model.pt"))
 
     avg_losses = average_nodes(valid_losses)
@@ -168,13 +168,16 @@ def run(cfg):
                 path, f"valid_{key}.pdf", f"Training {key} of {save_name}, node_{k}", x_every=E)
     for key in eval_losses:
         plot_multi_losses({
-            f"avg valid {key}": avg_losses[key],
             f"mean valid {key}": mean_losses[key],
-            f"shadow avg valid {key}": shadow_avg_losses[key],
             f"shadow mean valid {key}": shadow_mean_losses[key],
             f"global valid {key}": global_valid_losses[key],
             },
             save_dir, f"valid_{key}.pdf", f"Training {key} of {save_name}", x_every=E)
+        plot_multi_losses({
+            f"avg valid {key}": avg_losses[key],
+            f"shadow avg valid {key}": shadow_avg_losses[key],
+            },
+            save_dir, f"avg_valid_{key}.pdf", f"Training {key} of {save_name}", x_every=E)
 
     #eval
     logger.info("Computing test metrics")

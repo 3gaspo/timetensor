@@ -165,6 +165,22 @@ class DefaultGlobalServer():
         pass
 
 
+class DefaultScheme():
+    def __init__(self, server, nodes, shadow_server=None, shadow_nodes=None):
+        self.server, self.shadow_server = server, shadow_server
+        self.nodes, self.shadow_nodes = nodes, shadow_nodes
+        self.N = len(self.nodes)
+    
+        self.valid_losses = {f"node_{k}": {} for k in range(self.N)}
+        self.shadow_valid_losses = {f"node_{k}": {} for k in range(self.N)}
+        self.global_valid_losses = {}
+
+    def compute_round(self, E):
+        pass
+    def compute_scheme(self, K, E=1):
+        pass
+
+
 def average_nodes(nodes_dict, weights=None):
     """averages dicts on nodes"""
     main_dict = {} #{loss_name: [nodes: losses]}

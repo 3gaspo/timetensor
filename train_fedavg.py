@@ -11,8 +11,11 @@ from src.timetensor.models import load_model
 from src.timetensor.pipeline import Learner, train_model, Loss
 from src.timetensor.federated import get_client_splits, Client, get_node_metrics, eval_nodes, average_nodes
 from src.timetensor.utils import save_results, append_in_dict, get_dirs
-from src.timetensor.fedavg import LocalFedAvg, GlobalFedAvg
 from src.timetensor.visu import plot_losses, plot_multi_losses
+
+from src.timetensor.fedavg import LocalFedAvg, GlobalFedAvg, FedAvgScheme
+from src.timetensor.fedrevin import LocalFedRevin, FedRevinScheme
+
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -42,7 +45,7 @@ def run(cfg):
     #save dirs
     output_dir = cfg.misc.output_dir
     save_name = cfg.misc.save_name
-    save_name, save_dir = get_dirs(output_dir, save_name, model_name, normalization)
+    save_name, save_dir = get_dirs(output_dir, save_name, model_name, normalization, criterion_name)
     if verbose:
         logger.info(f"Save directory : {save_dir}")
 
@@ -86,9 +89,13 @@ def run(cfg):
         model = load_model(model_name, shape, normalization, **kwargs)
         learner = Learner(model, criterion, lr, eval_losses, device=device)
         shadow_learner = Learner(copy.deepcopy(model), criterion, lr, eval_losses, device=device)    
-        node = LocalFedAvg(client, learner)
+        if normalization == 3:
+            node = LocalFedRevin(client, learner)
+            shadow_node = LocalFedRevin(shadow_client, shadow_learner)
+        else:
+            node = LocalFedAvg(client, learner)
+            shadow_node = LocalFedAvg(shadow_client, shadow_learner)
         nodes.append(node)
-        shadow_node = LocalFedAvg(shadow_client, shadow_learner)
         shadow_nodes.append(shadow_node)
         sizes.append(client.get_size())
             
@@ -102,29 +109,36 @@ def run(cfg):
     server = GlobalFedAvg(global_model)
 
     #FedAvg
-    E, K = cfg.fed.epochs, cfg.fed.rounds 
+    E, K = cfg.fed.epochs, cfg.fed.rounds
     if retrain:
-        valid_losses = {f"node_{k}": {} for k in range(N)}
-        shadow_valid_losses = {f"node_{k}": {} for k in range(N)}
-        global_valid_losses = {}
-        
-        logger.info(f"==Starting FedAvg==")
-        logger.info(f"epochs={E}, rounds={K}")
-        for k in range(K):
-            server.send(nodes) #send intial model to nodes
-            logger.info(f"--Computing round {k+1}--")
-            shadow_losses = shadow_server.compute_round(E)
-            append_in_dict(global_valid_losses, shadow_losses)
-            for i, local in enumerate(nodes):
-                logger.info(f"Computing {E} epochs for local {local.id}")
-                losses = local.compute_round(E) #computes E steps of local training
-                shadow_losses = shadow_nodes[i].compute_round(E)
-                append_in_dict(valid_losses[f"node_{i}"], losses)
-                append_in_dict(shadow_valid_losses[f"node_{i}"], shadow_losses)
-            logger.info(f"Aggregating")
-            server.receive(nodes) #averages updates 
-        server.send(nodes)
-        #add a local epoch for FedAvg+
+        if normalization == 3:
+            scheme = FedRevinScheme(server, nodes, shadow_server, shadow_nodes, cfg.fed.reset_revin)
+        else:
+            scheme = FedAvgScheme(server, nodes, shadow_server, shadow_nodes)
+
+        valid_losses, shadow_valid_losses, global_valid_losses = scheme.compute_scheme(K, E)
+
+        # valid_losses = {f"node_{k}": {} for k in range(N)}
+        # shadow_valid_losses = {f"node_{k}": {} for k in range(N)}
+        # global_valid_losses = {}
+
+        # logger.info(f"==Starting FedAvg==")
+        # logger.info(f"epochs={E}, rounds={K}")
+        # for k in range(K):
+        #     server.send(nodes) #send intial model to nodes
+        #     logger.info(f"--Computing round {k+1}--")
+        #     shadow_losses = shadow_server.compute_round(E) #to do : devrait être seulement 1 pour comparer à global averages. Mais probleme pour plot après
+        #     append_in_dict(global_valid_losses, shadow_losses)
+        #     for i, local in enumerate(nodes):
+        #         logger.info(f"Computing {E} epochs for local {local.id}")
+        #         losses = local.compute_round(E) #computes E steps of local training
+        #         shadow_losses = shadow_nodes[i].compute_round(E)
+        #         append_in_dict(valid_losses[f"node_{i}"], losses)
+        #         append_in_dict(shadow_valid_losses[f"node_{i}"], shadow_losses)
+        #     logger.info(f"Aggregating")
+        #     server.receive(nodes) #averages updates 
+        # server.send(nodes)
+        # #add a local epoch for FedAvg+
         logger.info(f"Finished")
 
         #save losses
@@ -140,7 +154,6 @@ def run(cfg):
         torch.save(global_valid_losses, save_dir + f"global_valid_losses.pt")
         torch.save(server.update, save_dir + "trained_model.pt")
         torch.save(shadow_server.client.get_weights(), save_dir + "shadow_trained_model.pt")
-
     else:
         valid_losses = torch.load(save_dir + f"node_valid_losses.pt", weights_only=False)
         shadow_valid_losses = torch.load(save_dir + f"shadow_node_valid_losses.pt", weights_only=False)
@@ -149,7 +162,7 @@ def run(cfg):
             nodes[k].receive(torch.load( path + "trained_model.pt"))
             shadow_nodes[k].receive(torch.load( path + "shadow_trained_model.pt"))
         global_valid_losses = torch.load(save_dir + f"global_valid_losses.pt",weights_only=False)
-        shadow_server.receive(save_dir + "shadow_trained_model.pt")
+        shadow_server.receive(torch.load(save_dir + "shadow_trained_model.pt"))
         global_model.load_state_dict(torch.load(save_dir + "trained_model.pt"))
 
     avg_losses = average_nodes(valid_losses)
@@ -166,13 +179,14 @@ def run(cfg):
                 path, f"valid_{key}.pdf", f"Training {key} of {save_name}, node_{k}", x_every=E)
     for key in eval_losses:
         plot_multi_losses({
-            f"avg valid {key}": avg_losses[key],
             f"mean valid {key}": mean_losses[key],
-            f"shadow avg valid {key}": shadow_avg_losses[key],
             f"shadow mean valid {key}": shadow_mean_losses[key],
-            f"global valid {key}": global_valid_losses[key],
-            },
+            f"global valid {key}": global_valid_losses[key]},
             save_dir, f"valid_{key}.pdf", f"Training {key} of {save_name}", x_every=E)
+        plot_multi_losses({
+            f"avg valid {key}": avg_losses[key],
+            f"shadow avg valid {key}": shadow_avg_losses[key]},
+            save_dir, f"avg_valid_{key}.pdf", f"Training {key} of {save_name}", x_every=E)
 
     #eval
     logger.info("Computing test metrics")
