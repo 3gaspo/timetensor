@@ -129,16 +129,42 @@ class linear(nn.Module):
 
 class sklinear():
     """linear layer on lags"""
-    def __init__(self):
+    def __init__(self, normalized=False, dim=0):
         self.reg = LinearRegression()
+        self.normalized = normalized
+        self.dim = dim
 
+    def norm(self, X, mean, std):
+        if self.normalized == "instance":
+            X = (X - mean) / std 
+        elif self.normalized == "relative":
+            mean = torch.where(mean != 0, mean, 1)
+            X = X / mean 
+        if len(X.shape)==3:
+            X = X[:, self.dim, :]
+        return X
+    def denorm(self, X, mean, std):
+        if self.normalized == "instance":
+            X = X * std + mean
+        elif self.normalized == "relative":
+            mean = torch.where(mean != 0, mean, 1)
+            X = X * mean 
+        if len(X.shape)==2:
+            X = X.unsqueeze(dim=1)
+        return X
+    
     def fit(self, Xtrain, ytrain):
+        mean, std = get_normal_stats(Xtrain)
+        Xtrain, ytrain = self.norm(Xtrain, mean, std), self.norm(ytrain, mean, std)
         self.reg.fit(Xtrain, ytrain)
 
     def __call__(self, X, context=None):
-        if len(X.shape) == 3:
-            X = X[:, 0, :]
-        return torch.tensor(self.reg.predict(X.cpu()))
+        mean, std = get_normal_stats(X)
+        X = self.norm(X, mean, std)
+        pred = torch.tensor(self.reg.predict(X.cpu()))
+        pred = pred.unsqueeze(dim=1)
+        pred = self.denorm(pred, mean.cpu(), std.cpu())
+        return pred
 
 
 def load_model(model_name, shape, normalization=0, **kwargs):
@@ -164,9 +190,7 @@ def load_model(model_name, shape, normalization=0, **kwargs):
     elif model_name == "DLinear":
         model = DLinear(lags, dim, horizon, kwargs.get("kernel_size",25))
     elif model_name == "sklinear":
-        model = sklinear()
-        if normalization > 0:
-            print("Normalization not supported for scikit learn model")
+        model = sklinear(kwargs.get("normalize_method"))
         return model
     elif model_name == "patch_tst":
         model = PatchTST(lags, horizon)

@@ -23,7 +23,7 @@ class FedRevinScheme(FedAvgScheme):
         super(FedRevinScheme, self).__init__(server, nodes, shadow_server, shadow_nodes)
         self.reset_revin = reset_revin
 
-    def compute_round(self, E):
+    def compute_round(self, E, verbose=1):
         self.server.send(self.nodes) #send global model to nodes
         
         if self.shadow_server is not None:
@@ -38,6 +38,8 @@ class FedRevinScheme(FedAvgScheme):
             if self.reset_revin:
                 self.nodes[k].reset_revin()
             losses = self.nodes[k].compute_round(E) #computes E steps of local training
+            if verbose:
+                print(f"==Epoch {k+1} done==")
             append_in_dict(self.valid_losses[f"node_{k}"], losses)
             
         self.server.receive(self.nodes) #averages updates

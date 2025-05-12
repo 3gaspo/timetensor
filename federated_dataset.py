@@ -1,3 +1,5 @@
+##Builds federated dataset from central dataset, including splits and subsets, and plots stats and examples
+
 import hydra
 import logging
 import os
@@ -5,7 +7,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-from src.timetensor.dataset import get_train_loaders#, TimeSeriesDataset, load_datasets
+from src.timetensor.dataset import get_train_loaders
 from src.timetensor.federated import get_client_splits, Client
 from src.timetensor.visu import scatter_stats, plot_stats, scatter_input_output
 from src.timetensor.utils import unroll_windows
@@ -16,7 +18,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 @hydra.main(version_base=None, config_path="config", config_name="config")
 def run(cfg):
     logger = logging.getLogger(__name__)
-    print("\n")
     logger.info("=====Running main script=====")
 
     #configs

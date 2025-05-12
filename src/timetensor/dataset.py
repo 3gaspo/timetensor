@@ -2,10 +2,11 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import os
+import copy
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
-    def __init__(self, values, datetimes, context=None, lags=48, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=False, seed=None):    
+    def __init__(self, values, datetimes, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=False, seed=None):    
         """
         values (N_individuals, dim_values, dates):  past target values 
         datetimes (dates): list of dates in datetime Y-m-d H:M:S format
@@ -43,7 +44,7 @@ class TimeSeriesDataset(Dataset):
         if self.by_date:
             return self.dates - (self.lags + self.horizon)
         else:
-            return self.N_individuals
+            return self.individuals
 
     def __getitem__(self, idx):
         if self.by_date:
@@ -60,7 +61,7 @@ class TimeSeriesDataset(Dataset):
                 values = self.values[indiv, :, idx : idx + self.lags + self.horizon] # (dim_values, lags+horizon)
                 if self.context is not None:
                     context = self.context[indiv, :, idx : idx + self.lags + self.horizon] # (dim_context, lags+horizon)
-                inputs = values[:, :self.lags] # (dim, lag)
+                inputs = values[:, :self.lags] # (dim, lags)
                 target = values[:, self.lags:] # (dim, horizon)
 
         else: #1 batch = batch of individuals, random date
@@ -75,7 +76,7 @@ class TimeSeriesDataset(Dataset):
                     context = self.context[:, :, t: t + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
             inputs = values[:, :self.lags] # (dim, lags)
             target = values[:, self.lags:] # (dim, horizon)
-
+        
         if self.context is not None:
             return inputs, context, target
         else:
@@ -83,13 +84,20 @@ class TimeSeriesDataset(Dataset):
 
 
 class Subset(Dataset):
-    def __init__(self, dataset, indices, mode="dates"):
-        self.dataset = dataset
+    def __init__(self, dataset, indices, subset_mode="dates"):
         self.indices = indices
-        self.mode = mode
-        self.lags, self.horizon = self.dataset.lags, self.dataset.horizon 
+        self.mode = subset_mode
+        self.lags, self.horizon = dataset.lags, dataset.horizon 
 
         if self.mode == "individuals":
+            if dataset.by_date:
+                self.dataset = copy.deepcopy(dataset)
+                self.dataset.values = self.dataset.values[self.indices]
+                self.dataset.individuals = len(self.indices)
+                if self.dataset.context is not None and self.dataset.context_by_individual:
+                    self.dataset.context = self.dataset.context[self.indices]
+            else:
+                self.dataset = dataset
             self.individuals = len(indices)
             self.dates = self.dataset.dates
             if self.dataset.context is not None:
@@ -98,23 +106,34 @@ class Subset(Dataset):
                 else:
                     self.contexts = self.dataset.contexts
         elif self.mode == "dates":
+            assert len(indices) > self.lags + self.horizon, "not enough dates for this lag and horizon"
+            if not dataset.by_date:
+                self.dataset = copy.deepcopy(dataset)
+                self.dataset.values = self.dataset.values[:, :, self.indices]
+                self.dataset.datetimes = self.dataset.datetimes[self.indices]
+                self.dataset.dates = len(indices)
+            else:
+                self.dataset = dataset
             self.individuals = self.dataset.individuals
             self.dates = len(indices)
             self.context = self.dataset.context
-        else: #TO DO : mode="dim"
-            raise ValueError(f"Unrecognized mode: {self.mode}")
+        
+        elif self.mode == "dim":
+            self.dataset = dataset
+            self.individuals = self.dataset.individuals
+            self.dates = self.dataset.dates
+            self.context = self.dataset.context
 
     def __getitem__(self, idx):
-        if (self.mode == "individuals" and self.dataset.by_date) or (self.mode == "dates" and not self.dataset.by_date):
-            return self.dataset[idx]
+        if self.mode == "dim":
+            return self.dataset[idx][:, self.indices, :]
+        elif (self.mode=="dates" and self.dataset.by_date) or (self.mode=="individuals" and not self.dataset.by_date):
+            return self.dataset[self.indices[idx]]
         else:
-            items =  self.dataset[self.indices[idx]]
-            try:
-                assert items[0].shape[2]==self.dataset.lags
-            except:
-                raise ValueError(f"error for subset={self.dataset.shape} at idx: {idx}={self.indices[idx]}")
-        return items
-    
+            return self.dataset[idx]
+        
+        
+
     def __len__(self):
         if self.dataset.by_date:
             if self.mode == "individuals":
@@ -186,25 +205,22 @@ def load_example(path="datasets/", prefix=""):
 
 
 
-def get_subset_indices(dataset, ratio, mode=None):
+def get_subset_indices(dataset, ratio, subset_mode=None):
     """returns subset of random indices for dataset"""
-    if (mode is None and dataset.by_date) or mode=="date": #sample dates
+    if (subset_mode is None and dataset.by_date) or subset_mode=="dates": #sample dates
         old_len = dataset.dates - dataset.lags - dataset.horizon
         new_len = int(old_len * ratio)
-        if new_len <= dataset.lags + dataset.horizon:
-            raise ValueError("Subset not big enough") 
+        assert new_len > dataset.lags + dataset.horizon, "Not enough dates"
         indices = np.random.choice(old_len, size=new_len, replace=False).tolist()
-
-    elif mode=="individuals": #sample individuals
-        new_len = int(dataset.N_individuals * ratio)
-        indices = np.random.choice(dataset.N_individuals, size=new_len, replace=False).tolist()
-        dataset.values = dataset.values[indices, :, :]
-        if dataset.context is not None:
-            dataset.context = dataset.context[indices, :, :]
-        dataset.datetimes = dataset.datetimes[indices]
-        dataset.N_individuals = new_len
+    elif (subset_mode is None and not dataset.by_date) or subset_mode=="individuals": #sample individuals
+        new_len = int(dataset.individuals * ratio)
+        assert new_len > 0, "Not enough individuals"
+        indices = np.random.choice(dataset.individuals, size=new_len, replace=False).tolist()
+    elif subset_mode == "dim":
+        assert type(ratio) == list and type(list[0])==int
+        return ratio
     else:
-        raise ValueError("Unrecognized mode: ", mode)
+        raise ValueError("Unrecognized mode: ", subset_mode)
     return indices
 
 
@@ -323,38 +339,38 @@ def temporal_split(values, context, datetimes, date_split=None, seed=None, path=
 
 
 def get_dataset_splits(path="datasets/", indiv_split=None, date_split=None, seed=None, save=False, context_by_individuals=False):
+    """splits data from path. If str splits, will load given split, if float will save new split"""
     values, context, datetimes = load_data(path) #load dataset
-    data_dict = train_test_split(values, context, datetimes, indiv_split, date_split, seed, context_by_individuals, path) #split randomly of according to paths
+    if not os.path.exists(path+"splits/"):
+        os.makedirs(path+"splits/")
+    split_path = path+"splits/"
+    data_dict = train_test_split(values, context, datetimes, indiv_split, date_split, seed, context_by_individuals, split_path) #split randomly of according to paths
 
     if save:
         for key, (values, context, datetimes) in data_dict.items():
-            torch.save(values, path + key + "_values.pt")
+            torch.save(values, split_path + key + "_values.pt")
             if context is not None:
-                torch.save(context, path + key + "_context.pt")
-            torch.save(datetimes, path + key + "_datetimes.pt")
+                torch.save(context, split_path + key + "_context.pt")
+            torch.save(datetimes, split_path + key + "_datetimes.pt")
     return data_dict
 
 
 
-def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets=None, path=""):
+def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets={}, path="", subset_mode="dates"):
     """returns dataloaders from data_dict as eventual subsets"""
     loaders_dict = {}
     for key, (values, context, datetimes) in data_dict.items():
         dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date)
         subset = subsets.get(key)
         if subset is not None and (type(subset)==str or (type(subset)==float and subset<1 and subset>0)):
-            if by_date:
-                mode = "dates"
-            else:
-                mode = "individuals"
             if type(subset)==str:
                 subset_indices = list(torch.load(subset, weights_only=False))
             elif type(subset)==float:
-                subset_indices = get_subset_indices(dataset, subset)
+                subset_indices = get_subset_indices(dataset, subset, subset_mode)
                 if not os.path.exists(path):
                     os.makedirs(path)
                 torch.save(subset_indices, path + f"{key}_subset_indices_{subset}.pt")
-            dataset = Subset(dataset, subset_indices, mode)
+            dataset = Subset(dataset, subset_indices, subset_mode)
 
         if key=="train":
             loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
@@ -375,13 +391,16 @@ def collate_fn(data):
         contexts = None
 
     inputs = torch.stack(inputs) #(bs, (individuals), dim, lookback)
-    inputs = inputs.view(-1, inputs.shape[-2], inputs.shape[-1]) #  (bs * (individuals), dim, lookback)
+    if len(inputs.shape)==4:
+        inputs = inputs.view(-1, inputs.shape[-2], inputs.shape[-1]) #  (bs * (individuals), dim, lookback)
 
     if contexts is not None:
         contexts = torch.stack(contexts)
-        contexts = contexts.view(-1, contexts.shape[-2], contexts.shape[-1]) 
+        if len(contexts.shape)==4:
+            contexts = contexts.view(-1, contexts.shape[-2], contexts.shape[-1]) 
     targets = torch.stack(targets)
-    targets = targets.view(-1, targets.shape[-2], targets.shape[-1])
+    if len(targets.shape)==4:
+        targets = targets.view(-1, targets.shape[-2], targets.shape[-1])
 
     return inputs, contexts, targets
 

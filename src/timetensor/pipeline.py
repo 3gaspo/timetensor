@@ -5,13 +5,13 @@ from time import perf_counter
 import numpy as np
 
 from .utils import get_normal_stats, average_loss, append_in_dict
-from .utils import unroll_windows, get_loader_array
+from .utils import unroll_windows
 from .utils import normalize
 
 class Loss():
-    def __init__(self, loss, mean=None, std=None, instance_norm=False):
+    def __init__(self, loss, mean=None, std=None, mode=None):
         self.loss = loss #e.g nn.MSELoss()
-        self.instance_norm = instance_norm
+        self.mode = mode
 
         self.mean = mean
         self.std = std
@@ -21,10 +21,14 @@ class Loss():
         if self.standard_norm:
             pred = normalize(pred, self.mean, self.std)
             y = normalize(y, self.mean, self.std)
-        if self.instance_norm:
-            assert (mean is not None and std is not None), "mean and std must be provided for instance normalization"
+        if self.mode == "instance":
+            assert (mean is not None and std is not None)
             pred = normalize(pred, mean, std)
             y = normalize(y, mean, std)
+        elif self.mode == "relative":
+            assert mean is not None
+            mean = torch.where(mean != 0, mean, 1)
+            pred, y = pred/mean, y/mean
         return self.loss(pred, y)
 
 
@@ -96,12 +100,12 @@ class Learner:
 
         return loss.item()
 
-    def fit(self, loader, dim=0):
+    def fit(self, loader):
         assert not self.pytorch
-        Xtrain, Ytrain = get_loader_array(loader)
+        Xtrain, Ytrain = unroll_windows(loader, shuffle=True)
         self.model.fit(Xtrain.cpu(), Ytrain.cpu())
 
-    def eval(self, loader, verbose=0, return_all=False):
+    def eval(self, loader, verbose=0, return_all=False, dim=0, normal=False):
         """evaluates model on loader and returns mean loss"""
         losses = {}
         t1 = perf_counter()
@@ -121,11 +125,9 @@ class Learner:
                             losses[loss_name] = []
                         losses[loss_name] += loss.tolist()
         else:
-            Xtest, Ytest = get_loader_array(loader) #reduces to dim=0
-            predictions = self.model(Xtest).unsqueeze(dim=1)
-            Xtest, Ytest =  Xtest.unsqueeze(dim=1), Ytest.unsqueeze(dim=1)
+            Xtest, Ytest = unroll_windows(loader)
+            predictions = self.model(Xtest)
             mean, std = get_normal_stats(Xtest)
-
             for loss_name, criterion in self.eval_losses.items():
                 loss = criterion(predictions, Ytest, mean, std).cpu()
                 losses[loss_name] = loss.tolist()
@@ -134,7 +136,6 @@ class Learner:
         if verbose:
             print(f"Evaluation done in {(t2-t1)/60:.3f} min")
         
-        #eval_dict = {key: torch.stack(losses[key]) for key in losses} # (ndates * individuals, dim, horizon)
         eval_dict = {key: torch.tensor(losses[key]) for key in losses} # (ndates * individuals, dim, horizon)
         if return_all:
             return eval_dict

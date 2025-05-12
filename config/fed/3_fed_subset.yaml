@@ -1,4 +1,4 @@
-nodes:
+nodes: ../datasets/electricity/nodes/indices/
 splits:
   - 0.5
   - 0.3

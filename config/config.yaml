@@ -1,14 +1,9 @@
 data:
   dataset: electricity
   format: csv
-  path: ../datasets/
-  indiv_split: ../datasets/indiv
-  date_split: ../datasets/date
-  subset:
-    train: 1 #../datasets/train_subset_indices_0.1.pt
-    valid: 1 #../datasets/valid_subset_indices_0.1.pt
-    valid2: 1 #../datasets/valid2_subset_indices_0.1.pt
-    test: 1 #../datasets/test_subset_indices_0.1.pt
+  path: ../datasets/electricity/
+  indiv_split: ../datasets/electricity/splits/indiv
+  date_split: ../datasets/electricity/splits/date
   seed:
   mean: 2500
   std: 15000
@@ -21,7 +16,7 @@ model:
 
 training:
   retrain: True
-  loss: NMSE
+  loss: MMSE
   bs: 4
   lr: 0.0001
   epochs: 1
@@ -31,15 +26,10 @@ misc:
   output_dir: ../outputs/
   benchmark: False
   save_name:
-  verbose: True
-  table_coeffs:
-    - -5
-    - 4
-    - 1
-    - -2
-    - 1
+  verbose: 1
 
 defaults:
   - _self_
   - model_configs: linear
   - fed: fed
+  - subset: full

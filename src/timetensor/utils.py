@@ -6,7 +6,6 @@ import hydra
 
 from .dataset import load_example, load_data
 
-
 def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_name=None):
     if save_name is None:
         save_name = model_name
@@ -29,6 +28,8 @@ def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_na
         file.write(f"{hydra_dir}") #save path of hydra logs to experiment dir
     if not os.path.exists(save_dir + "examples/"): #dir for example predictions
         os.makedirs(save_dir + "examples/")
+    if not os.path.exists(save_dir + "plots/"): #dir for example predictions
+        os.makedirs(save_dir + "plots/")
     return save_name, save_dir
 
 
@@ -97,7 +98,7 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, gamma=1, b
                 std = std*gamma
                 std = torch.where(std != 0, std, std_cst)
             nx = normalize(x, mean-beta, std)
-            ny = normalize(x, mean-beta, std)
+            ny = normalize(y, mean-beta, std)
             X.append(nx)
             Y.append(ny)
         else:
@@ -107,14 +108,17 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, gamma=1, b
             break
         i+=1
     if shuffle:
-        X, Y = np.random.shuffle(X), np.random.shuffle(Y)
+        idx = np.random.permutation(len(X))
+        X, Y = [X[i] for i in idx], [Y[i] for i in idx]
+        if shuffle:
+            X, Y = X[:cap], Y[:cap]
     return torch.concat(X), torch.concat(Y)
 
 
-def get_loader_array(loader, dim=0):
-    X, Y = unroll_windows(loader)
-    X, Y = X[:, dim, :], Y[:, dim, :]
-    return X, Y
+# def get_loader_array(loader, dim=0, normal=False):
+#     X, Y = unroll_windows(loader, shuffle=True, normal=normal)
+#     X, Y = X[:, dim, :], Y[:, dim, :]
+#     return X, Y
 
 def get_stats(values, stat, dim=0):
     """returns tensor of given stats for a loader
@@ -167,7 +171,7 @@ def save_results(value, path, name, model_name, metric_name):
             print(dico)
 
 
-def normalize(x, mean, std, std_cst=1):
+def normalize(x, mean, std):
     return (x - mean) / std
 
 

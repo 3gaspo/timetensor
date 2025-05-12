@@ -4,8 +4,11 @@ import random
 import pandas as pd
 import json
 from tabulate import tabulate
+import os
+import torch
 
-from .utils import get_stats
+from .utils import get_stats, fetch_example_data
+
 
 def plot_example(x, y, path="", name="example.pdf", title="Example"):
     """plots example data"""
@@ -20,6 +23,10 @@ def plot_example(x, y, path="", name="example.pdf", title="Example"):
     plt.title(title)
     fig.tight_layout()
     plt.savefig(path + name)
+
+def plot_named_example(path, name):
+    x, c, y, i, d  = fetch_example_data(path, name)
+    plot_example(x[0], y[0], path + f"/{name}/", f"example.pdf", "Example")
 
 
 def plot_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True, limits=None):
@@ -199,8 +206,11 @@ def print_nice_table(path, multipliers=None):
         data = json.load(file)
     df = pd.DataFrame(data)
     if multipliers is not None:
+        if type(multipliers) == str:
+            multipliers = multipliers.split(" ")
+            multipliers = [int(w) for w in multipliers]
         new_index = list(df.index)
-        for k in range(max(len(multipliers), df.shape[1])):
+        for k in range(min(len(multipliers), df.shape[1])):
             if multipliers[k] != 0:
                 df.iloc[k] = df.iloc[k] * 10**multipliers[k]
                 new_index[k] = new_index[k] + f" * 1e{multipliers[k]}"
@@ -217,3 +227,28 @@ def plot_weights(weights, path, name="weights.pdf", title='Model weights'):
     plt.ylabel('Outputs (horizon)')
     plt.title(title)
     plt.savefig(path + name)
+
+
+def plot_expe(path):
+    """plots losses for list of experiments in path"""
+    expe_names = [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name)) and name not in ["persistence", "repeat", "lookback"] and "sklinear" not in name]
+
+    if len(expe_names) >0:
+        losses_dict = {}
+        losses_dict2 = {}
+
+        for expe_name in expe_names:
+            valid_losses = torch.load(path + expe_name + "/" + "valid_losses.pt", weights_only=False)
+            valid_losses2 = torch.load(path + expe_name + "/" + "valid_losses2.pt", weights_only=False)
+
+
+            for loss_name in valid_losses:
+                if loss_name not in losses_dict:
+                    losses_dict[loss_name] = {}
+                    losses_dict2[loss_name] = {}
+                losses_dict[loss_name][expe_name] = valid_losses[loss_name]
+                losses_dict2[loss_name][expe_name] = valid_losses2[loss_name]
+
+        for loss_name in valid_losses:
+            plot_multi_losses(losses_dict[loss_name], path, f"{loss_name}_valid.pdf", f"Valid {loss_name}")
+            plot_multi_losses(losses_dict2[loss_name], path, f"{loss_name}_valid2.pdf", f"Valid2 {loss_name}")

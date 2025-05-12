@@ -8,8 +8,8 @@ import numpy as np
 from src.timetensor.dataset import get_dataset_splits, get_train_loaders
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import Learner, train_model, Loss
-from src.timetensor.visu import plot_losses, plot_errors, plot_horizon_errors, plot_pred, plot_weights, plot_stats
-from src.timetensor.utils import save_results, fetch_example_data, get_dirs, unroll_windows
+from src.timetensor.visu import plot_losses, plot_multi_losses, plot_errors, plot_horizon_errors, plot_pred, plot_weights, plot_stats
+from src.timetensor.utils import save_results, fetch_example_data, get_dirs, unroll_windows, get_normal_stats, normalize
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -31,20 +31,20 @@ def run(cfg):
     verbose, benchmark = cfg.misc.verbose, cfg.misc.benchmark
     if verbose:
         logger.info("Fetched main configs")
-        logger.info(f"Model {model_name}, normalization {normalization}, kwargs {kwargs}")
+        logger.info(f"Model {model_name}, normalization {normalization}, criterion {criterion_name}, kwargs {kwargs}")
 
 
     #save dirs
     output_dir = cfg.misc.output_dir
     save_name = cfg.misc.save_name
-    save_name, save_dir = get_dirs(output_dir, save_name, model_name, normalization)
+    save_name, save_dir = get_dirs(output_dir, save_name, model_name, normalization, criterion_name)
     if verbose:
         logger.info("Fetched output directories")
         logger.info(f"Save directory : {save_dir}")
 
     #data
     data_dict = get_dataset_splits(data_path, cfg.data.indiv_split, cfg.data.date_split, cfg.misc.seed, save=False)
-    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets=cfg.data.subset, path=data_path)
+    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets=cfg.subset.subsets, path=data_path+"subsets/")
     if verbose:
         logger.info("Fetched dataloaders")
 
@@ -66,18 +66,17 @@ def run(cfg):
     elif criterion_name == "MMSE":
         criterion = Loss(nn.MSELoss(), cfg.data.mean, cfg.data.std)
     elif criterion_name == "NMSE":
-        criterion = Loss(nn.MSELoss(), instance_norm=True)
+        criterion = Loss(nn.MSELoss(), mode="instance")
+    elif criterion_name == "RMSE":
+        criterion = Loss(nn.MSELoss(), mode="relative")
     else:
         print("Unknown criterion name")
         criterion = None
     eval_losses = {
-        "MSE":Loss(nn.MSELoss(reduction="none")),
-        "MMSE":Loss(nn.MSELoss(reduction="none"), cfg.data.mean, cfg.data.std),
-        "NMSE": Loss(nn.MSELoss(reduction="none"), instance_norm=True),
+        "MMSE": Loss(nn.MSELoss(reduction="none"), cfg.data.mean, cfg.data.std),
+        "RMSE": Loss(nn.MSELoss(reduction="none"), mode="relative"),
+        "MMAE": Loss(nn.L1Loss(reduction="none"), cfg.data.mean, cfg.data.std)
         }
-        # "MAE": Loss(nn.L1Loss(reduction="none")),
-        # "NMAE": Loss(nn.L1Loss(reduction="none"), instance_norm=True)
-        # }
 
     model = load_model(model_name, shape, normalization, **kwargs)
     if model_name in ["persistence", "repeat", "lookback"] and normalization!=3:
@@ -111,12 +110,18 @@ def run(cfg):
 
         #plots
         for loss_name in eval_losses:
-            plot_losses(train_losses, valid_losses[loss_name], valid_losses2[loss_name],  save_dir, f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}")
+            if loss_name == criterion_name:
+                plot_losses(train_losses, valid_losses[loss_name], valid_losses2[loss_name],  save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}")
+            else:
+                plot_multi_losses({"valid1": valid_losses[loss_name], "valid2":valid_losses2[loss_name]},  save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}")
         logger.info("Plotted losses")
 
     #eval
     logger.info("Computing test metrics")
-    test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1) #(ndates*nindividuals, dim, horizon)
+    if model_name=="sklinear" and normalization==2:
+        test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1, normal=True) #(ndates*nindividuals, dim, horizon)
+    else:
+        test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1) #(ndates*nindividuals, dim, horizon)
     torch.save(test_losses, save_dir + "test_losses.pt")
     if benchmark:
         test_dir = output_dir
@@ -127,22 +132,20 @@ def run(cfg):
         save_results(mean, test_dir, "mean_results.json", save_name, f"Test {loss_name}")
         save_results(std, test_dir, "std_results.json", save_name, f"Test {loss_name}")
 
-        plot_errors(test_losses[loss_name].sum(axis=1).mean(axis=1), save_dir, f"test_{loss_name}.pdf", f"Test {loss_name} of {save_name} : {mean}")
-        plot_horizon_errors(test_losses[loss_name].sum(axis=1).mean(axis=0), save_dir, f"horizon_{loss_name}.pdf", f"Test {loss_name} of {save_name} : {mean}")
+        plot_errors(test_losses[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"test_{loss_name}.pdf", f"Test {loss_name} of {save_name} : {mean}")
+        plot_horizon_errors(test_losses[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"horizon_{loss_name}.pdf", f"Test {loss_name} of {save_name} : {mean}")
     
-    #example
-    dico = fetch_example_data(data_path + "examples/", ["rand"])
+    #examples
+    dico = fetch_example_data(data_path + "examples/", [f"ex{k}" for k in range(1,6)])
     for data_name, data_tuple in dico.items():
         x, c, y = data_tuple[0].unsqueeze(0).to(device), data_tuple[1], data_tuple[2].unsqueeze(0).to(device)
         if c is not None:
             c = c.unsqueeze(0).to(device)
         pred = model(x,c)
-        if model_name == "sklinear":
-            pred = pred.unsqueeze(dim=1)
         plot_pred(x[0,0].cpu().detach().numpy(), y[0,0].cpu().detach().numpy(), pred[0,0].cpu().detach().numpy(), save_dir + "examples/", f"{data_name}_predictions.pdf", f"Example {data_name} prediction for {save_name}")        
     logger.info('Saved plots')
 
-    #visu
+    #weights
     if model_name in ["linear", "sklinear"]:
         if model_name == "sklinear":
             weights = learner.get_weights()
@@ -151,7 +154,7 @@ def run(cfg):
                 weights = model.model.fc.weight.detach().cpu().numpy()
             else:
                 weights = model.fc.weight.detach().cpu().numpy()
-        plot_weights(weights, save_dir, title=f'{save_name} weights')
+        plot_weights(weights, save_dir + "plots/", title=f'{save_name} weights')
     if model_name == "DLinear":
         if normalization!=0:
             linear_weights = model.model.Linear_Seasonal[0].weight.detach().cpu().numpy()
@@ -159,9 +162,10 @@ def run(cfg):
         else:
             linear_weights = model.Linear_Seasonal[0].weight.detach().cpu().numpy()
             season_weights = model.Linear_Trend[0].weight.detach().cpu().numpy()
-        plot_weights(linear_weights, save_dir, name="season_weights.pdf", title=f'{save_name} seasonal weights')
-        plot_weights(season_weights, save_dir, name="trend_weights.pdf", title=f'{save_name} trend weights')
+        plot_weights(linear_weights, save_dir + "plots/", name="season_weights.pdf", title=f'{save_name} seasonal weights')
+        plot_weights(season_weights, save_dir + "plots/", name="trend_weights.pdf", title=f'{save_name} trend weights')
 
+    #revin
     if normalization == 3:
         params = {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "gamma": model.gamma.data.detach().cpu().numpy()[0][0][0]}
         logger.info(f"Final revin parameters: {params}")
@@ -169,8 +173,8 @@ def run(cfg):
         runroll = unroll_windows(loaders_dict["train"], normal=True, beta=model.beta.data.detach().cpu().numpy()[0][0][0], gamma=model.gamma.data.detach().cpu().numpy()[0][0][0])
         x_dict = {"train": unroll[0]}
         rx_dict = {"train": runroll[0]}
-        plot_stats(x_dict, save_dir, name="normal_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-6,1e-6))
-        plot_stats(rx_dict, save_dir, name="revin_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-6,1e-6))
+        plot_stats(x_dict, save_dir + "plots/", name="normal_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-6,1e-6))
+        plot_stats(rx_dict, save_dir + "plots/", name="revin_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-6,1e-6))
 
 
     logger.info('End of script\n')

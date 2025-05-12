@@ -35,13 +35,17 @@ class Client:
 def client_split(values, context, datetimes, splits, shuffle=True, replace=False, seed=None, context_by_individuals=False, path=""):
     """splits individuals according to splits"""
     
-    N = len(splits)
-    if type(splits[0]) == str:
+    if type(splits) == str:
         indices_list = []
-        for split_path in splits:
-            indices = torch.load(split_path, weights_only=False)
+        node_paths = [splits+node_name for node_name in os.listdir(splits) if os.path.isdir(os.path.join(splits, node_name))]
+
+        for node_path in node_paths:
+            indices = torch.load(node_path, weights_only=False)
             indices_list.append(indices)
-    else:
+        N = len(indices_list)
+    
+    else: #list of floats
+        N = len(splits)
         if seed is not None:
             np.random.seed(seed)
         individuals = values.shape[0]

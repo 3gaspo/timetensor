@@ -50,7 +50,7 @@ class FedAvgScheme(DefaultScheme):
     def __init__(self, server, nodes, shadow_server=None, shadow_nodes=None):
         super(FedAvgScheme, self).__init__(server, nodes, shadow_server, shadow_nodes)
 
-    def compute_round(self, E):
+    def compute_round(self, E, verbose=0):
         self.server.send(self.nodes) #send global model to nodes
         
         if self.shadow_server is not None:
@@ -63,21 +63,30 @@ class FedAvgScheme(DefaultScheme):
                 append_in_dict(self.shadow_valid_losses[f"node_{k}"], shadow_losses)
 
             losses = self.nodes[k].compute_round(E) #computes E steps of local training
+            if verbose:
+                print(f"Epoch {k+1} done")
             append_in_dict(self.valid_losses[f"node_{k}"], losses)
             
         self.server.receive(self.nodes) #averages updates 
     
 
-    def compute_scheme(self, K, E=1, plus=None):
-        for k in range(K):
+    def compute_scheme(self, K, E=1, plus=None, verbose=1):
+        for t in range(K):
             self.compute_round(E)
+            if verbose:
+                print(f"Round {t+1} done")
         self.server.send(self.nodes)
 
         if plus:
-            if self.shadow_nodes is not None:
-                shadow_losses = self.shadow_nodes[k].compute_round(E)
-                append_in_dict(self.shadow_valid_losses[f"node_{k}"], shadow_losses)
-            losses = self.nodes[k].compute_round(E) #computes E steps of local training
-            append_in_dict(self.valid_losses[f"node_{k}"], losses)
-        
+            if self.shadow_server is not None:
+                shadow_losses = self.shadow_server.compute_round(E)
+                append_in_dict(self.global_valid_losses, shadow_losses)
+            for k in range(self.N):
+                if self.shadow_nodes is not None:
+                    shadow_losses = self.shadow_nodes[k].compute_round(E)
+                    append_in_dict(self.shadow_valid_losses[f"node_{k}"], shadow_losses)
+                    
+                losses = self.nodes[k].compute_round(E) #computes E steps of local training
+                append_in_dict(self.valid_losses[f"node_{k}"], losses)
+            print(f"Last fine-tuning done")
         return self.valid_losses, self.shadow_valid_losses, self.global_valid_losses
