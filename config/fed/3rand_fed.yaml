@@ -1,0 +1,15 @@
+nodes:
+  - 0.5
+  - 0.3
+  - 0.2
+splits:
+  - 0.5
+  - 0.3
+  - 0.2
+subsets:
+  train: 1
+  valid: 1
+  test: 1
+epochs: 3
+rounds: 5
+reset_revin: False

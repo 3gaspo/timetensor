@@ -224,7 +224,7 @@ def get_subset_indices(dataset, ratio, subset_mode=None):
     return indices
 
 
-def train_test_split(values, context, datetimes, indiv_split=None, date_split=None, seed=None, context_by_individuals=False, path=""):
+def train_test_split(values, context, datetimes, indiv_split=None, date_split=None, seed=None, context_by_individuals=False, path="", save=True):
     """returns dict of train/valid/test of provided values,context,datetimes
     split parameters can be in [0,1] or str path to indices
     """
@@ -241,8 +241,9 @@ def train_test_split(values, context, datetimes, indiv_split=None, date_split=No
             stop_date = int(date_split * dates)
             dates_idx1, dates_idx2 = list(range(stop_date)), list(range(stop_date, dates))
             dates1, dates2 = list(datetimes[:stop_date]), list(datetimes[stop_date:])
-            torch.save(dates_idx1, path + "date_split1.pt")
-            torch.save(dates_idx2, path + "date_split2.pt")
+            if save:
+                torch.save(dates_idx1, path + "date_split1.pt")
+                torch.save(dates_idx2, path + "date_split2.pt")
 
         if indiv_split is not None: #split individuals
             if type(indiv_split)==str:
@@ -252,8 +253,9 @@ def train_test_split(values, context, datetimes, indiv_split=None, date_split=No
                 stop_indiv = int(indiv_split * individuals)
                 indices = np.random.permutation(individuals)
                 indices1, indices2 = list(indices[:stop_indiv]), list(indices[stop_indiv:])
-                torch.save(indices1, path + "indiv_split1.pt")
-                torch.save(indices2, path + "indiv_split2.pt")
+                if save:
+                    torch.save(indices1, path + "indiv_split1.pt")
+                    torch.save(indices2, path + "indiv_split2.pt")
 
             values1 = values[indices1, :, :][: , :, dates_idx1]
             values2 = values[indices1, :, :][: , :, dates_idx2]
@@ -290,8 +292,9 @@ def train_test_split(values, context, datetimes, indiv_split=None, date_split=No
             stop_indiv = int(indiv_split * individuals)
             indices = np.random.permutation(individuals)
             indices1, indices2 = list(indices[:stop_indiv]), list(indices[stop_indiv:])
-            torch.save(indices1, path + "indiv_split1.pt")
-            torch.save(indices2, path + "indiv_split2.pt")
+            if save:
+                torch.save(indices1, path + "indiv_split1.pt")
+                torch.save(indices2, path + "indiv_split2.pt")
 
         values1 = values[indices1, :, :]
         values2 = values[indices2, :, :]
@@ -310,7 +313,7 @@ def train_test_split(values, context, datetimes, indiv_split=None, date_split=No
         return {"train":(values, context, datetimes)}
 
 
-def temporal_split(values, context, datetimes, date_split=None, seed=None, path=""):
+def temporal_split(values, context, datetimes, date_split=None, seed=None, path="", save=True):
     """returns dict of train/valid/test of provided values,context,datetimes
     """
     if seed is not None:
@@ -319,14 +322,18 @@ def temporal_split(values, context, datetimes, date_split=None, seed=None, path=
         if type(date_split)==str:
             dates_idx1, dates_idx2, dates_idx3 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False)), list(torch.load(date_split + "_split3.pt", weights_only=False)),
             dates1, dates2, dates3 = datetimes[dates_idx1], datetimes[dates_idx2], datetimes[dates_idx3]
-        elif type(date_split[0])==float: #split dates
+        elif type(date_split)==list and type(date_split[0])==float: #split dates
             dates = len(datetimes)
             stop_date1, stop_date2 = int(date_split[0] * dates), int((date_split[0] + date_split[1])*dates)
             dates_idx1, dates_idx2, dates_idx3 = list(range(stop_date1)), list(range(stop_date1, stop_date2)), list(range(stop_date2, dates))
             dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
-            torch.save(dates_idx1, path + "date_split1.pt")
-            torch.save(dates_idx2, path + "date_split2.pt")
-            torch.save(dates_idx3, path + "date_split3.pt")
+            if save:
+                torch.save(dates_idx1, path + "date_split1.pt")
+                torch.save(dates_idx2, path + "date_split2.pt")
+                torch.save(dates_idx3, path + "date_split3.pt")
+        else:
+            raise ValueError("Unrecognized data split")
+        
         if context is not None:
             context1 = context[:, :, :][: , :, dates_idx1]
             context2 = context[:, :, :][: , :, dates_idx2]
@@ -344,9 +351,9 @@ def get_dataset_splits(path="datasets/", indiv_split=None, date_split=None, seed
     if not os.path.exists(path+"splits/"):
         os.makedirs(path+"splits/")
     split_path = path+"splits/"
-    data_dict = train_test_split(values, context, datetimes, indiv_split, date_split, seed, context_by_individuals, split_path) #split randomly of according to paths
+    data_dict = train_test_split(values, context, datetimes, indiv_split, date_split, seed, context_by_individuals, split_path, save=True) #split randomly of according to paths, saves indexes
 
-    if save:
+    if save: #saves pt files
         for key, (values, context, datetimes) in data_dict.items():
             torch.save(values, split_path + key + "_values.pt")
             if context is not None:

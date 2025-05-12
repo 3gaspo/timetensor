@@ -29,27 +29,35 @@ def plot_named_example(path, name):
     plot_example(x[0], y[0], path + f"/{name}/", f"example.pdf", "Example")
 
 
-def plot_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True, limits=None):
+def plot_stats(values, path="", name="stats.pdf", dim=0, title=None, logscale=True, limits=None):
     """plots stats of datasets"""
     plt.clf()
     fig = plt.figure(figsize=(15,5))
-    for split_name, split_values in values_dict.items():
-        mean_values, total_mean = get_stats(split_values, "mean", dim)
-        if len(mean_values)>2000:
-            idx=random.sample(range(len(mean_values)),1000)
-            mean_values = mean_values[idx]
+    if type(values) is dict:
+        for split_name, split_values in values.items():
+            mean_values, total_mean = get_stats(split_values, "mean", dim)
+            if len(mean_values)>2000:
+                idx=random.sample(range(len(mean_values)),1000)
+                mean_values = mean_values[idx]
+            if logscale:
+                bins = np.logspace(-3, 3, 100)
+            else:
+                bins = 100
+            plt.hist(mean_values, bins=bins, range=limits, density=True, alpha=0.5, label= f"{split_name} - mean={total_mean:.2f}")
+            plt.legend()
+    else:
         if logscale:
-            bins = np.logspace(-2, 6, 100)
+            bins = np.logspace(-3, 3, 100)
         else:
             bins = 100
-        plt.hist(mean_values, bins=bins, range=limits, density=True, alpha=0.5, label= f"{split_name} - mean={total_mean:.2f}")
-
-    plt.legend()
+        plt.hist(values, bins=bins, range=limits, density=True, alpha=0.5)
+        
+    
     if title is None:
-        plt.title(f"Max mean distribution")
+        plt.title(f"Means distribution")
     else:
         plt.title(title)
-    plt.xlabel(f"mean")
+    plt.xlabel(f"means")
     if logscale:
         plt.xscale("log")
     plt.ylabel("Density")

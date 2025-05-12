@@ -115,11 +115,6 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, gamma=1, b
     return torch.concat(X), torch.concat(Y)
 
 
-# def get_loader_array(loader, dim=0, normal=False):
-#     X, Y = unroll_windows(loader, shuffle=True, normal=normal)
-#     X, Y = X[:, dim, :], Y[:, dim, :]
-#     return X, Y
-
 def get_stats(values, stat, dim=0):
     """returns tensor of given stats for a loader
     values (Nindiv, Ndim, Ndates)

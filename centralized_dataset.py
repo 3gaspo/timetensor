@@ -57,9 +57,9 @@ def run(cfg):
         data_dict = get_dataset_splits(data_path, cfg.data.indiv_split, cfg.data.date_split, cfg.misc.seed, save=False) #save will save the train test indices, in path
         
         #subsets
+        subsets={"train":0.1, "valid":0.1, "valid2":0.1, "test":0.1}
         for by_date in [True, False]:
             #will generate the subsets and save indices
-            subsets={"train":0.1, "valid":0.1, "valid2":0.1, "test":0.1}
             byname="by_date" if by_date else "by_indiv"
             subset_mode="dates" if by_date else "individuals"
             partial_loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date, subsets=subsets, subset_mode=subset_mode, path=data_path+f"subsets/{byname}/")
@@ -97,15 +97,15 @@ def run(cfg):
             if verbose:
                 logger.info("Plotting stats")
 
-            unrolls = {key: unroll_windows(loaders_dict[key]) for key in ["train", "valid"]}
-            nunrolls = {key: unroll_windows(loaders_dict[key], normal=True) for key in ["train", "valid"]}
-            x_dict = {key: unrolls[key][0] for key in unrolls}
-            y_dict = {key: unrolls[key][1] for key in unrolls}
-            nx_dict =  {key: nunrolls[key][0] for key in nunrolls}
-        
-            scatter_input_output(x_dict, y_dict, data_path+"plots/"+byname+"/", name=f"output_inputs.pdf")
-            scatter_stats(x_dict, data_path+"plots/"+byname+"/", name=f"inputs_stats.pdf", title="Inputs statistics")
-            plot_stats(nx_dict, data_path+"plots/"+byname+"/", name=f"normal_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-6,1e-6))
+            unrolls = {key: unroll_windows(loaders_dict[key]) for key in ["train", "test"]}
+            nunrolls = {key: unroll_windows(loaders_dict[key], normal=True) for key in ["train", "test"]}
+            x_dict, y_dict = {key: unrolls[key][0] for key in unrolls}, {key: unrolls[key][1] for key in unrolls}
+            nx_dict, ny_dict =  {key: nunrolls[key][0] for key in nunrolls}, {key: nunrolls[key][1] for key in nunrolls}
+
+            scatter_input_output(x_dict, y_dict, data_path+"plots/"+byname+"/", name="output_inputs.pdf")
+            scatter_stats(x_dict, data_path+"plots/"+byname+"/", name="inputs_stats.pdf", title="Inputs statistics")
+            plot_stats(nx_dict, data_path+"plots/"+byname+"/", name="normal_inputs.pdf", title="Normalized inputs distribution", logscale=False, limits=(-1e-6,1e-6))
+            plot_stats(ny_dict, data_path+"plots/"+byname+"/", name="normal_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-5,5))
 
     logger.info('End of script\n')
 

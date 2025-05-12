@@ -32,37 +32,34 @@ class Client:
         else:
             return None
 
-def client_split(values, context, datetimes, splits, shuffle=True, replace=False, seed=None, context_by_individuals=False, path=""):
+def client_split(values, context, datetimes, nodes, shuffle=True, seed=None, context_by_individuals=False, path=""):
     """splits individuals according to splits"""
     
-    if type(splits) == str:
-        indices_list = []
-        node_paths = [splits+node_name for node_name in os.listdir(splits) if os.path.isdir(os.path.join(splits, node_name))]
-
-        for node_path in node_paths:
-            indices = torch.load(node_path, weights_only=False)
-            indices_list.append(indices)
-        N = len(indices_list)
-    
-    else: #list of floats
-        N = len(splits)
+    individuals = values.shape[0]
+    if nodes is None:
+        N = individuals
+        indices_list = [[k] for k in range(individuals)]
+    elif type(nodes)==list and type(nodes[0])==float:
+        N = len(nodes)
         if seed is not None:
             np.random.seed(seed)
-        individuals = values.shape[0]
-
-        remaining = list(range(individuals))
+        if shuffle:
+            user_list = np.random.permutation(individuals)
+        else:
+            user_list = list(range(individuals))
         indices_list = []
+        frac1 = 0
         for k in range(N):
-            n = int(splits[k]*individuals) #local number of individuals
-            if shuffle:
-                indices = np.random.choice(remaining, n, replace=False)
-                if replace is False:
-                    remaining = [k for k in remaining if k not in indices]
-            else:
-                indices = remaining[:n]
-                remaining = remaining[n:]
+            frac2 = frac1+nodes[k]
+            indices = user_list[int(frac1*individuals):int(frac2*individuals)]
             indices_list.append(indices)
-            torch.save(indices, path + f"node_{k}_indices.pt")
+            frac1=frac2
+            torch.save(indices, path + "indices/" + f"node_{k}_indices.pt")
+    elif type(nodes) == str:
+        indices_list = [torch.load(nodes+node_name, weights_only=False) for node_name in os.listdir(nodes)]
+        N = len(indices_list)
+    else:
+        raise ValueError("Unrecognized nodes")
 
     if context_by_individuals:
         if context is None:
@@ -76,21 +73,19 @@ def client_split(values, context, datetimes, splits, shuffle=True, replace=False
             return {f"node_{i}":(values[indices_list[i], :, :], context, datetimes) for i in range(N)}
 
 
-def get_client_splits(path, splits, shuffle=True, replace=False, seed=None, context_by_individuals=False, save=False):
+def get_client_splits(data_path, nodes, splits, shuffle=True, seed=None, context_by_individuals=False, save=False, path=""):
     """splits is a dict with keys the splits for nodes (or path) and for each node the indiv and date splits (or paths)"""
-    values, context, datetimes = load_data(path)
-    node_dict =  client_split(values, context, datetimes, list(splits.keys()), shuffle, replace, seed, context_by_individuals, path)
+    values, context, datetimes = load_data(data_path)
+    node_dict =  client_split(values, context, datetimes, nodes, shuffle, seed, context_by_individuals, path)
 
     node_split_dict = {}
-    for k, (split, date_split) in enumerate(splits.items()):
-        values, context, datetimes = node_dict[f"node_{k}"]
-        subpath = path + f"node_{k}/"
-        if not os.path.exists(subpath):
-            os.makedirs(subpath)
-        # node_split_dict[f"node_{k}"] = train_test_split(values, context, datetimes, indiv_split, date_split, seed, context_by_individuals, subpath)
-        node_split_dict[f"node_{k}"] = temporal_split(values, context, datetimes, date_split, seed, subpath)
+    for node_name, (values, context, datetimes) in node_dict.items():
+        node_split_dict[node_name] = temporal_split(values, context, datetimes, splits, seed, save=True, path=path)
         if save:
-            for key, (values, context, datetimes) in node_split_dict[f"node_{k}"].items():
+            subpath = path + node_name + "/"
+            if not os.path.exists(subpath):
+                os.makedirs(subpath)
+            for key, (values, context, datetimes) in node_split_dict[node_name].items():
                 torch.save(values, subpath + key + "_values.pt")
                 if context is not None:
                     torch.save(context, subpath + key + "_context.pt")
