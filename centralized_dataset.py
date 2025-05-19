@@ -27,9 +27,10 @@ def run(cfg):
     if verbose:
         logger.info("Fetched configs")
 
-    rebuild_pt=True
-    new_example=False
-    replot=True
+    rebuild_pt=False
+    reshuffle=False
+    new_example=True
+    replot=False
     
     for byname in ["by_date", "by_indiv"]:
         for folder_name in ["plots/", "subsets/"]:
@@ -52,6 +53,7 @@ def run(cfg):
             t2 = perf_counter()
             logger.info(f"Build in {(t2-t1)/60:.3f} min")
 
+    if reshuffle:
         #splits
         data_dict = get_dataset_splits(data_path, cfg.data.indiv_split, cfg.data.date_split, cfg.misc.seed, save=False) #save will save the train test indices, in path
         logger.info(f"Splits values: {[(k, v[0].shape) for k,v in data_dict.items()]}")
@@ -67,8 +69,10 @@ def run(cfg):
             full_loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date)
             unrolls = {"full": unroll_windows(full_loaders_dict["train"]), "subset": unroll_windows(partial_loaders_dict["train"])}
             x_dict = {key: unrolls[key][0] for key in unrolls}
-            y_dict = {key: unrolls[key][1] for key in unrolls}            
-            scatter_input_output(x_dict, y_dict, data_path+"plots/"+byname+"/", name=f"subset.pdf")
+            y_dict = {key: unrolls[key][1] for key in unrolls}
+            
+            logscale=False if cfg.data.dataset == "synthetic" else True
+            scatter_input_output(x_dict, y_dict, data_path+"plots/"+byname+"/", name=f"subset.pdf", logscale=logscale)
             
     #example
     if new_example:
@@ -106,8 +110,9 @@ def run(cfg):
             x_dict, y_dict = {key: unrolls[key][0] for key in unrolls}, {key: unrolls[key][1] for key in unrolls}
             nx_dict, ny_dict =  {key: nunrolls[key][0] for key in nunrolls}, {key: nunrolls[key][1] for key in nunrolls}
 
-            scatter_input_output(x_dict, y_dict, data_path+"plots/"+byname+"/", name="output_inputs.pdf")
-            scatter_stats(x_dict, data_path+"plots/"+byname+"/", name="inputs_stats.pdf", title="Inputs statistics")
+            logscale=False if cfg.data.dataset == "synthetic" else True
+            scatter_input_output(x_dict, y_dict, data_path+"plots/"+byname+"/", name="output_inputs.pdf", logscale=logscale)
+            scatter_stats(x_dict, data_path+"plots/"+byname+"/", name="inputs_stats.pdf", title="Inputs statistics",logscale=logscale)
             plot_stats(nx_dict, data_path+"plots/"+byname+"/", name="normal_inputs.pdf", title="Normalized inputs distribution", logscale=False, limits=(-1e-6,1e-6))
             plot_stats(ny_dict, data_path+"plots/"+byname+"/", name="normal_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-5,5))
 

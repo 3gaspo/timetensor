@@ -20,9 +20,8 @@ class RevIN(nn.Module):
         self.last, self.denormalize= last, denormalize
 
     def norm(self, x):
+        self.mu, self.std = get_normal_stats(x, std_cst=self.eps)
         if self.last:
-            self.mu, self.std = get_normal_stats(x, std_cst=self.eps)
-        else:
             self.mu = x[:, :, -1].unsqueeze(2)
         x = (x - self.mu) / self.std # (B, dim, lags)
         x = x * self.gamma + self.beta
@@ -106,7 +105,17 @@ class persistence(nn.Module):
         past_values = x[:, :, -1].unsqueeze(2) # (B, dim, 1)
         output = past_values.repeat(1, 1, self.horizon) # (B, dim, horizon)
         return output
-    
+
+class expected(nn.Module):
+    """repeats single last value"""
+    def __init__(self, horizon):
+        super(expected, self).__init__()
+        self.horizon = horizon
+    def forward(self, x, context=None):
+        mean, _ = get_normal_stats(x)
+        output = mean.repeat(1, 1, self.horizon) # (B, dim, horizon)
+        return output
+
 class repeat(nn.Module):
     """returns last horizon values"""
     def __init__(self, horizon):
@@ -199,6 +208,8 @@ def load_model(model_name, shape, normalization=None, **kwargs):
         if idx is None:
             raise ValueError("Please provide lookback_idx for lookback model")
         model = lookback(idx, horizon)
+    elif model_name == "expected":
+        model = expected(horizon)
     elif model_name == "linear":
         model = linear(lags, dim, horizon)
     elif model_name == "DLinear":
@@ -224,5 +235,4 @@ def load_model(model_name, shape, normalization=None, **kwargs):
             return RevIN(model, dim, kwargs.get("std_cst", 1), denormalize=(normalization=="revin"))
         else:
             ValueError(f"Normalization not recognized : {normalization}")
-    else:
-        return model
+    return model

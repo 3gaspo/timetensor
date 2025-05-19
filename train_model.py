@@ -18,7 +18,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 @hydra.main(version_base=None, config_path="config", config_name="config")
 def run(cfg):
     logger = logging.getLogger(__name__)
-    print("\n")
     logger.info("=====Running main script=====")
 
     #configs
@@ -43,7 +42,7 @@ def run(cfg):
     #data   
     by_idx = cfg.data.by_idx
     data_dict = get_dataset_splits(data_path, cfg.data.indiv_split, cfg.data.date_split, cfg.misc.seed, save=False)
-    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=(by_idx=="date"), subsets=cfg.subset.subsets, path=data_path+"subsets/")
+    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=(by_idx=="dates"), subsets=cfg.subset.subsets, path=data_path+"subsets/")
     if verbose:
         logger.info("Fetched dataloaders")
 
@@ -69,16 +68,16 @@ def run(cfg):
     elif criterion_name == "RMSE":
         criterion = Loss(nn.MSELoss(), mode="relative")
     else:
-        print("Unknown criterion name")
+        logger.info("Unknown criterion name")
         criterion = None
     eval_losses = {
-        "MMSE": Loss(nn.MSELoss(reduction="none"), cfg.data.mean, cfg.data.std),
-        "RMSE": Loss(nn.MSELoss(reduction="none"), mode="relative"),
-        "MMAE": Loss(nn.L1Loss(reduction="none"), cfg.data.mean, cfg.data.std)
+        "MSE": Loss(nn.MSELoss(reduction="none")),
+        "NMSE": Loss(nn.MSELoss(reduction="none"), mode="instance"),
+        "RMSE": Loss(nn.MSELoss(reduction="none"), mode="relative")
         }
 
     model = load_model(model_name, shape, normalization, **kwargs)
-    if model_name in ["persistence", "repeat", "lookback"] and "revin" not in normalization:
+    if model_name in ["persistence", "repeat", "lookback", "expected"] and "revin" not in normalization:
         learner = Learner(model, criterion, lr, eval_losses, device=device, do_train=False)
         logger.info("No training needed")
     elif model_name == "sklinear":
@@ -88,10 +87,10 @@ def run(cfg):
         logger.info("End of training")
     else:
         learner = Learner(model, criterion, lr, eval_losses, device=device)
-        logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps={len(loaders_dict['train'])}")
+        logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps per epoch={len(loaders_dict['train'])}, epochs={epochs}")
         if retrain:
             logger.info("Starting training...")
-            train_losses, valid_losses, valid_losses2 = train_model(learner, loaders_dict, epochs=epochs)
+            train_losses, valid_losses, valid_losses2 = train_model(learner, loaders_dict, epochs=epochs, logger=logger)
             torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")
             torch.save(train_losses, save_dir + f"train_losses.pt")
             torch.save(valid_losses, save_dir + f"valid_losses.pt")
@@ -117,10 +116,11 @@ def run(cfg):
 
     #eval
     logger.info("Computing test metrics")
+    runs = 1 if by_idx="dates" else 5
     if model_name=="sklinear" and "instance" in normalization:
-        test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1, normal=True) #(ndates*nindividuals, dim, horizon)
+        test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1, normal=True, logger=logger) #(ndates*nindividuals, dim, horizon)
     else:
-        test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1) #(ndates*nindividuals, dim, horizon)
+        test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1, logger=logger) #(ndates*nindividuals, dim, horizon)
     torch.save(test_losses, save_dir + "test_losses.pt")
     if benchmark:
         test_dir = output_dir

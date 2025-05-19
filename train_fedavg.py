@@ -34,7 +34,7 @@ def run(cfg):
     model_name, retrain, kwargs = cfg.model.name, cfg.training.retrain, cfg.model_configs
     verbose, benchmark = cfg.misc.verbose, cfg.misc.benchmark
     nodes, splits, subsets = cfg.fed.nodes, cfg.fed.splits, cfg.fed.subsets
-    assert model_name not in ["persistence", "repeat", "lookback", "sklinear"], "Unsupported model for FedAvg"
+    assert model_name not in ["persistence", "repeat", "lookback", "sklinear", "expected"], "Unsupported model for FedAvg"
     if verbose:
         logger.info("Fetched main configs")
         logger.info(f"Model {model_name}, normalization {normalization}, criterion {criterion_name}, kwargs {kwargs}")

@@ -1,0 +1,196 @@
+nohup: ignoring input
+[2025-05-19 18:09:00,735][__main__][INFO] - =====Running main script=====
+[2025-05-19 18:09:00,735][__main__][INFO] - Fetched main configs
+[2025-05-19 18:09:00,736][__main__][INFO] - Model expected, normalization , criterion MMSE, kwargs {}
+[2025-05-19 18:09:00,744][__main__][INFO] - Save directory : ../outputs/benchmark/expected_dates/
+[2025-05-19 18:09:00,788][__main__][INFO] - Fetched dataloaders
+[2025-05-19 18:09:00,790][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-19 18:09:00,790][__main__][INFO] - Batch sizes : X=torch.Size([560, 1, 336]), y=torch.Size([560, 1, 24])
+[2025-05-19 18:09:00,858][__main__][INFO] - No training needed
+[2025-05-19 18:09:00,858][__main__][INFO] - Computing test metrics
+[2025-05-19 18:09:05,621][__main__][INFO] - Evaluation done in 0.079 min
+[2025-05-19 18:09:12,810][__main__][INFO] - Saved plots
+[2025-05-19 18:09:12,811][__main__][INFO] - End of script
+
+[2025-05-19 18:09:16,021][__main__][INFO] - =====Running main script=====
+[2025-05-19 18:09:16,022][__main__][INFO] - Fetched main configs
+[2025-05-19 18:09:16,022][__main__][INFO] - Model expected, normalization , criterion MMSE, kwargs {}
+[2025-05-19 18:09:16,028][__main__][INFO] - Save directory : ../outputs/benchmark/expected_dates_2/
+[2025-05-19 18:09:16,066][__main__][INFO] - Fetched dataloaders
+[2025-05-19 18:09:16,067][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-19 18:09:16,068][__main__][INFO] - Batch sizes : X=torch.Size([280, 1, 336]), y=torch.Size([280, 1, 24])
+[2025-05-19 18:09:16,138][__main__][INFO] - No training needed
+[2025-05-19 18:09:16,138][__main__][INFO] - Computing test metrics
+[2025-05-19 18:09:20,923][__main__][INFO] - Evaluation done in 0.080 min
+[2025-05-19 18:09:28,270][__main__][INFO] - Saved plots
+[2025-05-19 18:09:28,270][__main__][INFO] - End of script
+
+[2025-05-19 18:09:31,486][__main__][INFO] - =====Running main script=====
+[2025-05-19 18:09:31,487][__main__][INFO] - Fetched main configs
+[2025-05-19 18:09:31,487][__main__][INFO] - Model expected, normalization global, criterion MMSE, kwargs {}
+[2025-05-19 18:09:31,491][__main__][INFO] - Save directory : ../outputs/benchmark/expected_indiv/
+[2025-05-19 18:09:31,531][__main__][INFO] - Fetched dataloaders
+[2025-05-19 18:09:31,534][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-19 18:09:31,535][__main__][INFO] - Batch sizes : X=torch.Size([64, 1, 336]), y=torch.Size([64, 1, 24])
+[2025-05-19 18:09:31,593][__main__][INFO] - No training needed
+[2025-05-19 18:09:31,593][__main__][INFO] - Computing test metrics
+[2025-05-19 18:09:36,552][__main__][INFO] - Evaluation done in 0.083 min
+[2025-05-19 18:09:44,208][__main__][INFO] - Saved plots
+[2025-05-19 18:09:44,209][__main__][INFO] - End of script
+
+[2025-05-19 18:09:47,445][__main__][INFO] - =====Running main script=====
+[2025-05-19 18:09:47,445][__main__][INFO] - Fetched main configs
+[2025-05-19 18:09:47,445][__main__][INFO] - Model lookback, normalization global, criterion MMSE, kwargs {'lookback_idx': 0}
+[2025-05-19 18:09:47,456][__main__][INFO] - Save directory : ../outputs/benchmark/lookback/
+[2025-05-19 18:09:47,498][__main__][INFO] - Fetched dataloaders
+[2025-05-19 18:09:47,500][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-19 18:09:47,500][__main__][INFO] - Batch sizes : X=torch.Size([560, 1, 336]), y=torch.Size([560, 1, 24])
+[2025-05-19 18:09:47,569][__main__][INFO] - No training needed
+[2025-05-19 18:09:47,569][__main__][INFO] - Computing test metrics
+[2025-05-19 18:09:52,268][__main__][INFO] - Evaluation done in 0.078 min
+[2025-05-19 18:09:59,645][__main__][INFO] - Saved plots
+[2025-05-19 18:09:59,645][__main__][INFO] - End of script
+
+[2025-05-19 18:10:02,887][__main__][INFO] - =====Running main script=====
+[2025-05-19 18:10:02,887][__main__][INFO] - Fetched main configs
+[2025-05-19 18:10:02,888][__main__][INFO] - Model sklinear, normalization global, criterion MMSE, kwargs {'normalize_method': 'None'}
+[2025-05-19 18:10:02,894][__main__][INFO] - Save directory : ../outputs/benchmark/sklinear_global_MMSE/
+[2025-05-19 18:10:02,936][__main__][INFO] - Fetched dataloaders
+[2025-05-19 18:10:02,938][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-19 18:10:02,938][__main__][INFO] - Batch sizes : X=torch.Size([560, 1, 336]), y=torch.Size([560, 1, 24])
+[2025-05-19 18:10:03,009][__main__][INFO] - Starting scikit-learn fitting...
+[2025-05-19 18:10:22,284][__main__][INFO] - End of training
+[2025-05-19 18:10:22,284][__main__][INFO] - Computing test metrics
+[2025-05-19 18:10:26,237][__main__][INFO] - Evaluation done in 0.066 min
+[2025-05-19 18:10:34,094][__main__][INFO] - Saved plots
+[2025-05-19 18:10:34,386][__main__][INFO] - End of script
+
+[2025-05-19 18:10:37,779][__main__][INFO] - =====Running main script=====
+[2025-05-19 18:10:37,779][__main__][INFO] - Fetched main configs
+[2025-05-19 18:10:37,780][__main__][INFO] - Model sklinear, normalization global, criterion MMSE, kwargs {'normalize_method': 'None'}
+[2025-05-19 18:10:37,785][__main__][INFO] - Save directory : ../outputs/benchmark/sklinear_global_MMSE/
+[2025-05-19 18:10:37,821][__main__][INFO] - Fetched dataloaders
+[2025-05-19 18:10:37,823][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-19 18:10:37,823][__main__][INFO] - Batch sizes : X=torch.Size([560, 1, 336]), y=torch.Size([560, 1, 24])
+[2025-05-19 18:10:37,894][__main__][INFO] - Starting scikit-learn fitting...
+[2025-05-19 18:10:56,961][__main__][INFO] - End of training
+[2025-05-19 18:10:56,961][__main__][INFO] - Computing test metrics
+[2025-05-19 18:11:00,797][__main__][INFO] - Evaluation done in 0.064 min
+[2025-05-19 18:11:08,577][__main__][INFO] - Saved plots
+[2025-05-19 18:11:08,725][__main__][INFO] - End of script
+
+[2025-05-19 18:11:11,970][__main__][INFO] - =====Running main script=====
+[2025-05-19 18:11:11,970][__main__][INFO] - Fetched main configs
+[2025-05-19 18:11:11,971][__main__][INFO] - Model lookback, normalization revin, criterion MMSE, kwargs {'lookback_idx': 0}
+[2025-05-19 18:11:11,978][__main__][INFO] - Save directory : ../outputs/benchmark/lookback_dates_revin_MMSE_lr0.0001/
+[2025-05-19 18:11:12,024][__main__][INFO] - Fetched dataloaders
+[2025-05-19 18:11:12,025][__main__][INFO] - Training data shape : (140, 1, 1187)
+[2025-05-19 18:11:12,026][__main__][INFO] - Batch sizes : X=torch.Size([560, 1, 336]), y=torch.Size([560, 1, 24])
+[2025-05-19 18:11:13,901][__main__][INFO] - batch_size=4, learning_rate=0.0001, steps per epoch=207, epochs=1
+[2025-05-19 18:11:13,901][__main__][INFO] - Starting training...
+[2025-05-19 18:11:13,902][__main__][INFO] - Using device: cuda
+[2025-05-19 18:11:13,902][__main__][INFO] - Training 1 epochs of 207 batches (207 steps): , eval_freq: 10, print_freq: 50
+[2025-05-19 18:11:16,012][__main__][INFO] - Step 1 | valid1 MSE : 0.0006 | valid1 MMSE : 0.0006 | valid1 RMSE : 0.0002 | valid1 MMAE : 0.0189
+[2025-05-19 18:11:25,787][__main__][INFO] - Step 50 | valid1 MSE : 0.0006 | valid1 MMSE : 0.0006 | valid1 RMSE : 0.0002 | valid1 MMAE : 0.0189
+[2025-05-19 18:11:35,551][__main__][INFO] - Step 100 | valid1 MSE : 0.0006 | valid1 MMSE : 0.0006 | valid1 RMSE : 0.0002 | valid1 MMAE : 0.0189
+[2025-05-19 18:11:45,464][__main__][INFO] - Step 150 | valid1 MSE : 0.0006 | valid1 MMSE : 0.0006 | valid1 RMSE : 0.0002 | valid1 MMAE : 0.0189
+[2025-05-19 18:11:55,406][__main__][INFO] - Step 200 | valid1 MSE : 0.0006 | valid1 MMSE : 0.0006 | valid1 RMSE : 0.0002 | valid1 MMAE : 0.0189
+[2025-05-19 18:11:57,529][__main__][INFO] - Step 207 | valid1 MSE : 0.0006 | valid1 MMSE : 0.0006 | valid1 RMSE : 0.0002 | valid1 MMAE : 0.0189
+[2025-05-19 18:11:57,529][__main__][INFO] - Training done in 0.727 min
+[2025-05-19 18:11:57,544][__main__][INFO] - End of training
+[2025-05-19 18:11:58,556][__main__][INFO] - Plotted losses
+[2025-05-19 18:11:58,556][__main__][INFO] - Computing test metrics
+[2025-05-19 18:11:58,624][__main__][INFO] - Evaluation done in 0.001 min
+[2025-05-19 18:12:01,211][__main__][INFO] - Saved plots
+[2025-05-19 18:12:01,211][__main__][INFO] - Final revin parameters: {'beta': np.float32(3.3703043e-05), 'gamma': np.float32(0.9999969)}
+[2025-05-19 18:12:02,028][__main__][INFO] - End of script
+
+[2025-05-19 18:12:05,400][__main__][INFO] - =====Running main script=====
+[2025-05-19 18:12:05,401][__main__][INFO] - Fetched main configs
+[2025-05-19 18:12:05,401][__main__][INFO] - Model linear, normalization revin, criterion MMSE, kwargs {}
+[2025-05-19 18:12:05,407][__main__][INFO] - Save directory : ../outputs/benchmark/linear_dates_revin_MMSE_lr0.0001/
+[2025-05-19 18:12:05,448][__main__][INFO] - Fetched dataloaders
+[2025-05-19 18:12:05,450][__main__][INFO] - Training data shape : (140, 1, 1187)
+[2025-05-19 18:12:05,450][__main__][INFO] - Batch sizes : X=torch.Size([560, 1, 336]), y=torch.Size([560, 1, 24])
+[2025-05-19 18:12:06,469][__main__][INFO] - batch_size=4, learning_rate=0.0001, steps per epoch=207, epochs=1
+[2025-05-19 18:12:06,469][__main__][INFO] - Starting training...
+[2025-05-19 18:12:06,469][__main__][INFO] - Using device: cuda
+[2025-05-19 18:12:06,469][__main__][INFO] - Training 1 epochs of 207 batches (207 steps): , eval_freq: 10, print_freq: 50
+[2025-05-19 18:12:08,662][__main__][INFO] - Step 1 | valid1 MSE : 0.0178 | valid1 MMSE : 0.0178 | valid1 RMSE : 0.0082 | valid1 MMAE : 0.1050
+[2025-05-19 18:12:18,514][__main__][INFO] - Step 50 | valid1 MSE : 0.0087 | valid1 MMSE : 0.0087 | valid1 RMSE : 0.0042 | valid1 MMAE : 0.0733
+[2025-05-19 18:12:28,267][__main__][INFO] - Step 100 | valid1 MSE : 0.0053 | valid1 MMSE : 0.0053 | valid1 RMSE : 0.0026 | valid1 MMAE : 0.0568
+[2025-05-19 18:12:38,067][__main__][INFO] - Step 150 | valid1 MSE : 0.0038 | valid1 MMSE : 0.0038 | valid1 RMSE : 0.0018 | valid1 MMAE : 0.0470
+[2025-05-19 18:12:47,824][__main__][INFO] - Step 200 | valid1 MSE : 0.0030 | valid1 MMSE : 0.0030 | valid1 RMSE : 0.0013 | valid1 MMAE : 0.0410
+[2025-05-19 18:12:49,940][__main__][INFO] - Step 207 | valid1 MSE : 0.0029 | valid1 MMSE : 0.0029 | valid1 RMSE : 0.0013 | valid1 MMAE : 0.0403
+[2025-05-19 18:12:49,940][__main__][INFO] - Training done in 0.725 min
+[2025-05-19 18:12:49,987][__main__][INFO] - End of training
+[2025-05-19 18:12:50,952][__main__][INFO] - Plotted losses
+[2025-05-19 18:12:50,952][__main__][INFO] - Computing test metrics
+[2025-05-19 18:12:51,011][__main__][INFO] - Evaluation done in 0.001 min
+[2025-05-19 18:12:53,477][__main__][INFO] - Saved plots
+[2025-05-19 18:12:53,661][__main__][INFO] - Final revin parameters: {'beta': np.float32(-0.0012301493), 'gamma': np.float32(1.0079471)}
+/home/H61084/codes/timetensor/src/timetensor/visu.py:35: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`). Consider using `matplotlib.pyplot.close()`.
+  fig = plt.figure(figsize=(15,5))
+/home/H61084/venvs/timetensor/lib/python3.10/site-packages/numpy/lib/_histograms_impl.py:901: RuntimeWarning: invalid value encountered in divide
+  return n/db/n.sum(), bin_edges
+[2025-05-19 18:12:54,384][__main__][INFO] - End of script
+
+[2025-05-19 18:12:57,754][__main__][INFO] - =====Running main script=====
+[2025-05-19 18:12:57,754][__main__][INFO] - Fetched main configs
+[2025-05-19 18:12:57,754][__main__][INFO] - Model lookback, normalization revin, criterion MMSE, kwargs {'lookback_idx': 0}
+[2025-05-19 18:12:57,762][__main__][INFO] - Save directory : ../outputs/benchmark/lookback_individuals_revin_MMSE_lr0.0001/
+[2025-05-19 18:12:57,799][__main__][INFO] - Fetched dataloaders
+[2025-05-19 18:12:57,801][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-19 18:12:57,801][__main__][INFO] - Batch sizes : X=torch.Size([32, 1, 336]), y=torch.Size([32, 1, 24])
+[2025-05-19 18:12:58,815][__main__][INFO] - batch_size=32, learning_rate=0.0001, steps per epoch=5, epochs=10
+[2025-05-19 18:12:58,815][__main__][INFO] - Starting training...
+[2025-05-19 18:12:58,815][__main__][INFO] - Using device: cuda
+[2025-05-19 18:12:58,815][__main__][INFO] - Training 10 epochs of 5 batches (50 steps): , eval_freq: 10, print_freq: 50
+[2025-05-19 18:13:37,690][__main__][INFO] - Step 1 | valid1 MSE : 0.0006 | valid1 MMSE : 0.0006 | valid1 RMSE : 0.0002 | valid1 MMAE : 0.0191
+[2025-05-19 18:16:45,015][__main__][INFO] - Step 50 | valid1 MSE : 0.0006 | valid1 MMSE : 0.0006 | valid1 RMSE : 0.0002 | valid1 MMAE : 0.0191
+[2025-05-19 18:16:45,015][__main__][INFO] - Training done in 3.770 min
+[2025-05-19 18:16:45,046][__main__][INFO] - End of training
+[2025-05-19 18:16:46,125][__main__][INFO] - Plotted losses
+[2025-05-19 18:16:46,126][__main__][INFO] - Computing test metrics
+[2025-05-19 18:16:50,465][__main__][INFO] - Evaluation done in 0.072 min
+[2025-05-19 18:16:57,884][__main__][INFO] - Saved plots
+[2025-05-19 18:16:57,884][__main__][INFO] - Final revin parameters: {'beta': np.float32(-3.2852163e-06), 'gamma': np.float32(1.000004)}
+[2025-05-19 18:16:58,255][__main__][INFO] - End of script
+
+[2025-05-19 18:17:03,595][__main__][INFO] - =====Running main script=====
+[2025-05-19 18:17:03,596][__main__][INFO] - Fetched main configs
+[2025-05-19 18:17:03,596][__main__][INFO] - Model linear, normalization revin, criterion MMSE, kwargs {}
+[2025-05-19 18:17:03,602][__main__][INFO] - Save directory : ../outputs/benchmark/linear_individuals_revin_MMSE_lr0.0001/
+[2025-05-19 18:17:03,647][__main__][INFO] - Fetched dataloaders
+[2025-05-19 18:17:03,649][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-19 18:17:03,649][__main__][INFO] - Batch sizes : X=torch.Size([32, 1, 336]), y=torch.Size([32, 1, 24])
+[2025-05-19 18:17:05,650][__main__][INFO] - batch_size=32, learning_rate=0.0001, steps per epoch=5, epochs=10
+[2025-05-19 18:17:05,650][__main__][INFO] - Starting training...
+[2025-05-19 18:17:05,650][__main__][INFO] - Using device: cuda
+[2025-05-19 18:17:05,651][__main__][INFO] - Training 10 epochs of 5 batches (50 steps): , eval_freq: 10, print_freq: 50
+[2025-05-19 18:17:45,117][__main__][INFO] - Step 1 | valid1 MSE : 0.0186 | valid1 MMSE : 0.0186 | valid1 RMSE : 0.0088 | valid1 MMAE : 0.1071
+[2025-05-19 18:20:55,217][__main__][INFO] - Step 50 | valid1 MSE : 0.0089 | valid1 MMSE : 0.0089 | valid1 RMSE : 0.0044 | valid1 MMAE : 0.0737
+[2025-05-19 18:20:55,217][__main__][INFO] - Training done in 3.826 min
+[2025-05-19 18:20:55,233][__main__][INFO] - End of training
+[2025-05-19 18:20:56,324][__main__][INFO] - Plotted losses
+[2025-05-19 18:20:56,324][__main__][INFO] - Computing test metrics
+[2025-05-19 18:21:00,617][__main__][INFO] - Evaluation done in 0.072 min
+[2025-05-19 18:21:07,778][__main__][INFO] - Saved plots
+[2025-05-19 18:21:07,985][__main__][INFO] - Final revin parameters: {'beta': np.float32(-0.00024727016), 'gamma': np.float32(1.0025107)}
+/home/H61084/codes/timetensor/src/timetensor/visu.py:35: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`). Consider using `matplotlib.pyplot.close()`.
+  fig = plt.figure(figsize=(15,5))
+/home/H61084/venvs/timetensor/lib/python3.10/site-packages/numpy/lib/_histograms_impl.py:901: RuntimeWarning: invalid value encountered in divide
+  return n/db/n.sum(), bin_edges
+[2025-05-19 18:21:08,336][__main__][INFO] - End of script
+
++-----------------+------------------+--------------------+------------------+------------+------------------------+--------------------------------------+------------------------------------+--------------------------------------------+------------------------------------------+
+|                 |   expected_dates |   expected_dates_2 |   expected_indiv |   lookback |   sklinear_global_MMSE |   lookback_dates_revin_MMSE_lr0.0001 |   linear_dates_revin_MMSE_lr0.0001 |   lookback_individuals_revin_MMSE_lr0.0001 |   linear_individuals_revin_MMSE_lr0.0001 |
++=================+==================+====================+==================+============+========================+======================================+====================================+============================================+==========================================+
+| Test MSE * 1e6  |       13552.0147 |         13552.0147 |       13552.0110 |   572.5658 |             13556.2383 |                             556.4907 |                          2939.9220 |                                   572.5672 |                                8744.2631 |
++-----------------+------------------+--------------------+------------------+------------+------------------------+--------------------------------------+------------------------------------+--------------------------------------------+------------------------------------------+
+| Test MMSE * 1e2 |           1.3552 |             1.3552 |           1.3552 |     0.0573 |                 1.3556 |                               0.0556 |                             0.2940 |                                     0.0573 |                                   0.8744 |
++-----------------+------------------+--------------------+------------------+------------+------------------------+--------------------------------------+------------------------------------+--------------------------------------------+------------------------------------------+
+| Test RMSE * 1e3 |           6.6108 |             6.6108 |           6.6108 |     0.1675 |                 6.6284 |                               0.1624 |                             1.3636 |                                     0.1675 |                                   4.5427 |
++-----------------+------------------+--------------------+------------------+------------+------------------------+--------------------------------------+------------------------------------+--------------------------------------------+------------------------------------------+
+| Test MMAE       |           0.0913 |             0.0913 |           0.0913 |     0.0180 |                 0.0916 |                               0.0177 |                             0.0403 |                                     0.0180 |                                   0.0727 |
++-----------------+------------------+--------------------+------------------+------------+------------------------+--------------------------------------+------------------------------------+--------------------------------------------+------------------------------------------+

@@ -4,9 +4,9 @@ splits:
   - 0.3
   - 0.2
 subsets:
-  train: ../datasets/electricity/nodes_all/subsets/train_subset_indices_0.1.pt #0.1
-  valid: ../datasets/electricity/nodes_all/subsets/valid_subset_indices_0.1.pt #0.1
-  test: ../datasets/electricity/nodes_all/subsets/test_subset_indices_0.1.pt #0.1
+  train: ../datasets/synthetic/nodes_all/subsets/train_subset_indices_0.1.pt #0.1
+  valid: ../datasets/synthetic/nodes_all/subsets/valid_subset_indices_0.1.pt #0.1
+  test: ../datasets/synthetic/nodes_all/subsets/test_subset_indices_0.1.pt #0.1
 epochs: 1
 rounds: 2
 reset_revin: False

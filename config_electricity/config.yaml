@@ -1,13 +1,13 @@
 data:
-  dataset: synthetic
+  dataset: electricity
   format: csv
-  path: ../datasets/synthetic/
-  indiv_split: ../datasets/synthetic/splits/indiv #0.7 
-  date_split: ../datasets/synthetic/splits/date #0.7 
+  path: ../datasets/electricity/
+  indiv_split: ../datasets/electricity/splits/indiv
+  date_split: ../datasets/electricity/splits/date
   by_idx: dates
   seed:
-  mean: 560
-  std: 330
+  mean: 2500
+  std: 15000
 
 model:
   lags: 336
@@ -18,9 +18,9 @@ model:
 training:
   retrain: True
   loss: MMSE
-  bs: 32
+  bs: 128
   lr: 0.0001
-  epochs: 10
+  epochs: 100
 
 misc:
   seed:

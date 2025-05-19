@@ -6,7 +6,7 @@ import copy
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
-    def __init__(self, values, datetimes, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=False, seed=None):    
+    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=False, seed=None):    
         """
         values (N_individuals, dim_values, dates):  past target values 
         datetimes (dates): list of dates in datetime Y-m-d H:M:S format
@@ -20,6 +20,14 @@ class TimeSeriesDataset(Dataset):
         super(TimeSeriesDataset, self).__init__()
 
         self.values, self.context = values, context
+        if len(self.values.shape) == 1:
+            self.values = self.values.unsqueeze(0)
+        if len(self.values.shape) == 2:
+            self.values = self.values.unsqueeze(0)
+        if self.context is not None and len(self.context.shape) == 1:
+            self.context = self.context.unsqueeze(0)
+        if self.context is not None and len(self.context.shape) == 2:
+            self.context = self.context.unsqueeze(0)
         self.lags, self.horizon = lags, horizon 
             
         self.individuals, self.dim_values, self.dates = self.values.shape
@@ -27,7 +35,8 @@ class TimeSeriesDataset(Dataset):
             self.contexts, self.dim_context, _dates = self.context.shape
             assert _dates == self.dates, "not the same dates in values and context"        
         assert self.dates > self.lags + self.horizon, "not enough dates for this lag and horizon"
-        
+        if datetimes is None:
+            self.datetimes = np.array(range(0, datetimes))
         self.datetimes = np.array(datetimes)
         self.by_date = by_date
         self.return_all_individuals, self.context_by_individuals = return_all_individuals, context_by_individuals
@@ -188,12 +197,23 @@ def load_data(path="datasets/", prefix=""):
         prefix = ""
     if prefix != "":
         prefix = prefix + "_"
-    values = torch.load(path + prefix + "values.pt")
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
     if os.path.exists(path + prefix + "context.pt"):
-        context = torch.load(path + prefix + "context.pt")
+        context = torch.load(path + prefix + "context.pt")#, weights_only=False)
     else:
         context = None
-    datetimes = np.array(torch.load(path + prefix + "datetimes.pt", weights_only=False))
+    if len(values.shape) == 1:
+        values = values.unsqueeze(0)
+    if len(values.shape) == 2:
+        values = values.unsqueeze(0)
+    if context is not None and len(context.shape) == 1:
+        context = context.unsqueeze(0)
+    if context is not None and len(context.shape) == 2:
+        context = context.unsqueeze(0)
+    if os.path.exists(path + prefix + "datetimes.pt"):
+        datetimes = np.array(torch.load(path + prefix + "datetimes.pt", weights_only=False))
+    else:
+        datetimes = np.array(range(values.shape[-1]))
     return values, context, datetimes
 
 def load_example(path="datasets/", prefix=""):
@@ -375,7 +395,12 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subset
     """returns dataloaders from data_dict as eventual subsets"""
     loaders_dict = {}
     for key, (values, context, datetimes) in data_dict.items():
-        dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date)
+        if key=="train":
+           by_date_ = by_date
+        else:
+            by_date_ = True
+
+        dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date_)
         if subsets is not None:
             subset = subsets.get(key)
             if subset is not None and (type(subset)==str or (type(subset)==float and subset<1 and subset>0)):
@@ -391,7 +416,7 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subset
         if key=="train":
             loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
         else:
-            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+            loaders_dict[key] = DataLoader(dataset, batch_size=4, shuffle=False, collate_fn=collate_fn)
        
     return loaders_dict
 

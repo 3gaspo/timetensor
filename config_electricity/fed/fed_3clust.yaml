@@ -1,4 +1,4 @@
-nodes: ../datasets/synthetic/nodes_clusters/splits/indices/
+nodes: ../datasets/electricity/nodes_clusters/splits/indices/
 splits:
   - 0.5
   - 0.3

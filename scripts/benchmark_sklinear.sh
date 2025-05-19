@@ -1,0 +1,60 @@
+source .venv/bin/activate
+
+model_name=sklinear
+output_dir="../outputs/benchmark_${model_name}/"
+rm -rf "$output_dir"
+mkdir -p "$output_dir"
+
+
+python3 train_model.py \
+    "model.name=${model_name}" \
+    "model_configs=${model_name}" \
+    "misc.output_dir=$output_dir" \
+    "model.normalization=" \
+    "misc.benchmark=True" \
+    "training.bs=4" \
+    "data.by_idx=dates" \
+    "misc.save_name=${model_name}_subset" \
+    "subset=partial_bydate" 
+
+python3 train_model.py \
+    "model.name=${model_name}" \
+    "model_configs=${model_name}" \
+    "misc.output_dir=$output_dir" \
+    "model.normalization=" \
+    "misc.benchmark=True" \
+    "training.bs=4" \
+    "data.by_idx=dates" \
+    "misc.save_name=${model_name}_full"
+
+python3 train_model.py \
+    "model.name=${model_name}" \
+    "model_configs=${model_name}" \
+    "misc.output_dir=$output_dir" \
+    "model.normalization=" \
+    "misc.benchmark=True" \
+    "training.bs=2" \
+    "data.by_idx=dates" \
+    "misc.save_name=${model_name}_subset_instance" \
+    "subset=partial_bydate"  \
+    "model_configs.normalize_method=instance"
+
+python3 train_model.py \
+    "model.name=${model_name}" \
+    "model_configs=${model_name}" \
+    "misc.output_dir=$output_dir" \
+    "model.normalization=" \
+    "misc.benchmark=True" \
+    "training.bs=2" \
+    "data.by_idx=dates" \
+    "misc.save_name=${model_name}_full_instance" \
+    "model_configs.normalize_method=instance"
+
+
+
+python3 -c "from src.timetensor.visu import plot_expe;plot_expe('$output_dir')"
+
+multipliers="6 2 2 2"
+python3 -c "from src.timetensor.visu import print_nice_table;print_nice_table('${output_dir}mean_results.json', multipliers='$multipliers')"
+
+# nohup bash scripts/benchmark.sh > benchmark.log 2>&1 &

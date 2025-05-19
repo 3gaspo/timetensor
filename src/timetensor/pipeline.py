@@ -105,25 +105,26 @@ class Learner:
         Xtrain, Ytrain = unroll_windows(loader, shuffle=True)
         self.model.fit(Xtrain.cpu(), Ytrain.cpu())
 
-    def eval(self, loader, verbose=0, return_all=False):
+    def eval(self, loader, verbose=0, return_all=False, logger=None, runs=1):
         """evaluates model on loader and returns mean loss"""
         losses = {}
         t1 = perf_counter()
         if self.pytorch:
             self.model.eval()
             with torch.no_grad():
-                for X_batch, context_batch, y_batch in loader:
-                    X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
-                    if context_batch is not None:
-                        context_batch = context_batch.to(self.device)
-                    mean, std = get_normal_stats(X_batch)
-                    
-                    predictions = self.model(X_batch, context_batch) #normalization done (or not) inside model
-                    for loss_name, criterion in self.eval_losses.items():
-                        loss = criterion(predictions, y_batch, mean, std).cpu() # (bs * individuals, dim, horizon)
-                        if losses.get(loss_name) is None:
-                            losses[loss_name] = []
-                        losses[loss_name] += loss.tolist()
+                for run in range(runs):
+                    for X_batch, context_batch, y_batch in loader:
+                        X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
+                        if context_batch is not None:
+                            context_batch = context_batch.to(self.device)
+                        mean, std = get_normal_stats(X_batch)
+                        
+                        predictions = self.model(X_batch, context_batch) #normalization done (or not) inside model
+                        for loss_name, criterion in self.eval_losses.items():
+                            loss = criterion(predictions, y_batch, mean, std).cpu() # (bs * individuals, dim, horizon)
+                            if losses.get(loss_name) is None:
+                                losses[loss_name] = []
+                            losses[loss_name] += loss.tolist()
         else:
             Xtest, Ytest = unroll_windows(loader)
             predictions = self.model(Xtest)
@@ -134,7 +135,10 @@ class Learner:
         t2 = perf_counter()
 
         if verbose:
-            print(f"Evaluation done in {(t2-t1)/60:.3f} min")
+            if logger is not None:
+                logger.info(f"Evaluation done in {(t2-t1)/60:.3f} min")
+            else:
+                print(f"Evaluation done in {(t2-t1)/60:.3f} min")
         
         eval_dict = {key: torch.tensor(losses[key]) for key in losses} # (ndates * individuals, dim, horizon)
         if return_all:
@@ -145,19 +149,23 @@ class Learner:
 
 
 
-def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, verbose=1, do_eval=True):
+def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, verbose=1, do_eval=True, logger=None):
     """trains model in learner on loaders and returns train and valid losses"""
     
     #data
     train_loader = loaders_dict["train"]
     valid_loader = loaders_dict.get("valid")
     valid_loader2 = loaders_dict.get("valid2")
-    test_loader = loaders_dict.get("test")
-    steps = len(train_loader)
+    steps_per_epoch = len(train_loader)
+    total_steps = epochs * steps_per_epoch
 
     if verbose:
-        print(f"Using device: {learner.device}")
-        print(f"Number of steps (batches): {len(train_loader)}, eval_freq: {eval_freq}, print_freq: {print_freq}")
+        if logger is not None:
+            logger.info(f"Using device: {learner.device}")
+            logger.info(f"Training {epochs} epochs of {steps_per_epoch} batches ({total_steps} steps): , eval_freq: {eval_freq}, print_freq: {print_freq}")
+        else:
+            print(f"Using device: {learner.device}")
+            print(f"Training {epochs} epochs of {steps_per_epoch} batches ({total_steps} steps): , eval_freq: {eval_freq}, print_freq: {print_freq}")
 
     train_losses = []
     valid_losses = {}
@@ -172,7 +180,7 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
             loss = learner.compute_step(X_batch, context_batch, y_batch)
             train_losses.append(loss) #loss of batch
             
-            if do_eval and (step == 1 or step % eval_freq == 0 or step == steps):
+            if do_eval and (step == 1 or step % eval_freq == 0 or step == total_steps):
 
                 #valid eval
                 average_eval_dict = learner.eval(valid_loader)
@@ -180,14 +188,18 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
                 append_in_dict(valid_losses, average_eval_dict)
                 append_in_dict(valid_losses2, average_eval_dict2)
 
-                if verbose and (step == 1 or step % print_freq == 0 or step == steps):
-                    print(f"Step {step} | " + " | ".join([f"valid1 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict.items()]))
-        if verbose:
-            average_test_dict = learner.eval(test_loader)
-            print(f"==Epoch {epoch+1} | " + " | ".join([f"test {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_test_dict.items()]) + "==")
+                if verbose and (step == 1 or step % print_freq == 0 or step == total_steps):
+                    if logger is not None:
+                        logger.info(f"Step {step} | " + " | ".join([f"valid1 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict.items()]))
+                    else:
+                        print(f"Step {step} | " + " | ".join([f"valid1 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict.items()]))
+
     t2 = perf_counter()
     if verbose:
-        print(f"Training done in {(t2-t1)/60:.3f} min")
+        if logger is not None:
+            logger.info(f"Training done in {(t2-t1)/60:.3f} min")
+        else:
+            print(f"Training done in {(t2-t1)/60:.3f} min")
     return train_losses, valid_losses, valid_losses2
 
 
