@@ -48,15 +48,7 @@ class PatchTST(nn.Module):
     
     def forward(self, x, context=None):           
         x = x.transpose(2,1) # x: [Batch, Input length, Channel]
-        if self.decomposition:
-            res_init, trend_init = self.decomp_module(x)
-            res_init, trend_init = res_init.permute(0,2,1), trend_init.permute(0,2,1)  # x: [Batch, Channel, Input length]
-            res = self.model_res(res_init)
-            trend = self.model_trend(trend_init)
-            x = res + trend
-            x = x.permute(0,2,1)    # x: [Batch, Input length, Channel]
-        else:
-            x = x.permute(0,2,1)    # x: [Batch, Channel, Input length]
-            x = self.model(x)
-            x = x.permute(0,2,1)    # x: [Batch, Input length, Channel]
+        x = x.permute(0,2,1)    # x: [Batch, Channel, Input length]
+        x = self.model(x)
+        x = x.permute(0,2,1)    # x: [Batch, Input length, Channel]
         return x.transpose(2,1)

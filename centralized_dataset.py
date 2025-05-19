@@ -23,7 +23,6 @@ def run(cfg):
     data_path = cfg.data.path
     verbose = cfg.misc.verbose
     lags, horizon = cfg.model.lags, cfg.model.horizon
-    batch_size = cfg.training.bs
 
     if verbose:
         logger.info("Fetched configs")
@@ -60,8 +59,10 @@ def run(cfg):
         subsets={"train":0.1, "valid":0.1, "valid2":0.1, "test":0.1}
         for by_date in [True, False]:
             #will generate the subsets and save indices
-            byname="by_date" if by_date else "by_indiv"
-            subset_mode="dates"# if by_date else "individuals"
+            if by_date:
+                byname, subset_mode, batch_size ="by_date", "dates", 4
+            else:
+                byname, subset_mode, batch_size ="by_indiv", "individuals", 64
             partial_loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date, subsets=subsets, subset_mode=subset_mode, path=data_path+f"subsets/{byname}/")
             full_loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date)
             unrolls = {"full": unroll_windows(full_loaders_dict["train"]), "subset": unroll_windows(partial_loaders_dict["train"])}
@@ -79,7 +80,10 @@ def run(cfg):
     if replot:
         data_dict = get_dataset_splits(data_path, cfg.data.indiv_split, cfg.data.date_split, cfg.misc.seed, save=False) #save will save the train test indices, in path
         for by_date in [True, False]:
-            byname="by_date" if by_date else "by_indiv"
+            if by_date:
+                byname, subset_mode, batch_size ="by_date", "dates", 4
+            else:
+                byname, subset_mode, batch_size ="by_indiv", "individuals", 64
             loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date)
             
             #sizes

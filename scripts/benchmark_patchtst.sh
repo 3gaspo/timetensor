@@ -15,9 +15,8 @@ do
             "model.normalization=$normalization" \
             "training.loss=$loss" \
             "misc.benchmark=True" \
-            "subset=partial_byindiv" \
-            "training.bs=64" \
-            "training.epochs=10" \
+            "training.bs=32" \
+            "training.epochs=100" \
             "data.by_idx=indiv"
     done
 done
