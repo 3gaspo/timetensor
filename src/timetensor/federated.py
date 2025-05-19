@@ -80,7 +80,7 @@ def get_client_splits(data_path, nodes, splits, shuffle=True, seed=None, context
 
     node_split_dict = {}
     for node_name, (values, context, datetimes) in node_dict.items():
-        node_split_dict[node_name] = temporal_split(values, context, datetimes, splits, seed, save=True, path=path)
+        node_split_dict[node_name] = temporal_split(values, context, datetimes, splits, seed, save=False)
         if save:
             subpath = path + node_name + "/"
             if not os.path.exists(subpath):

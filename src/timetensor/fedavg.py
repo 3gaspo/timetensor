@@ -1,7 +1,6 @@
-import torch
 import numpy as np
 from .federated import DefaultGlobalServer, DefaultLocalServer, DefaultScheme
-from src.timetensor.utils import append_in_dict
+from .utils import append_in_dict
 
 class LocalFedAvg(DefaultLocalServer):
     def __init__(self, client, learner):
@@ -47,14 +46,18 @@ class GlobalFedAvg(DefaultGlobalServer):
 
 
 class FedAvgScheme(DefaultScheme):
-    def __init__(self, server, nodes, shadow_server=None, shadow_nodes=None):
+    def __init__(self, server, nodes, shadow_server=None, shadow_nodes=None, server_side="full"):
         super(FedAvgScheme, self).__init__(server, nodes, shadow_server, shadow_nodes)
+        self.server_side = server_side
 
     def compute_round(self, E, verbose=0):
         self.server.send(self.nodes) #send global model to nodes
         
         if self.shadow_server is not None:
-            shadow_losses = self.shadow_server.compute_round(E) #to do : devrait être seulement 1 pour comparer à global averages. Mais probleme pour plot après
+            if self.server_side == "full":
+                shadow_losses = self.shadow_server.compute_round(E)
+            elif self.server_side == "partial":
+                shadow_losses = self.shadow_server.compute_round(1)
             append_in_dict(self.global_valid_losses, shadow_losses)
         
         for k in range(self.N):
@@ -64,7 +67,7 @@ class FedAvgScheme(DefaultScheme):
 
             losses = self.nodes[k].compute_round(E) #computes E steps of local training
             if verbose:
-                print(f"Epoch {k+1} done")
+                print(f"Node {k} done")
             append_in_dict(self.valid_losses[f"node_{k}"], losses)
             
         self.server.receive(self.nodes) #averages updates 
@@ -72,15 +75,19 @@ class FedAvgScheme(DefaultScheme):
 
     def compute_scheme(self, K, E=1, plus=None, verbose=1):
         for t in range(K):
-            self.compute_round(E)
+            self.compute_round(E, verbose=False)
             if verbose:
                 print(f"Round {t+1} done")
         self.server.send(self.nodes)
 
         if plus:
             if self.shadow_server is not None:
-                shadow_losses = self.shadow_server.compute_round(E)
+                if self.server_side=="full":
+                    shadow_losses = self.shadow_server.compute_round(E)
+                elif self.server_side=="partial":
+                    shadow_losses = self.shadow_server.compute_round(1)
                 append_in_dict(self.global_valid_losses, shadow_losses)
+
             for k in range(self.N):
                 if self.shadow_nodes is not None:
                     shadow_losses = self.shadow_nodes[k].compute_round(E)
@@ -88,5 +95,6 @@ class FedAvgScheme(DefaultScheme):
                     
                 losses = self.nodes[k].compute_round(E) #computes E steps of local training
                 append_in_dict(self.valid_losses[f"node_{k}"], losses)
-            print(f"Last fine-tuning done")
+            if verbose:
+                print(f"Last fine-tuning done")
         return self.valid_losses, self.shadow_valid_losses, self.global_valid_losses

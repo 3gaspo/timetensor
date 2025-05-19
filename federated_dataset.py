@@ -21,18 +21,11 @@ def run(cfg):
 
     #configs
     data_path = cfg.data.path
-    #nodes, splits, subsets = cfg.fed.nodes, cfg.fed.splits, cfg.fed.subsets
     lags, horizon = cfg.model.lags, cfg.model.horizon
     batch_size = cfg.training.bs
     verbose = cfg.misc.verbose
     if verbose:
         logger.info("Fetched configs")
-        # if type(nodes)==int:
-        #     logger.info(f"Building {nodes} nodes")
-        # elif type(nodes)=="all":
-        #     logger.info(f"Found all users as nodes")
-        # else:
-        #     logger.info(f"Found a path to nodes at {nodes}")
     
     splits=[0.5, 0.3, 0.2]
     for node_split in ["clusters", "random_silo", "all"]:

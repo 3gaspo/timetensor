@@ -4,9 +4,9 @@ splits:
   - 0.3
   - 0.2
 subsets:
-  train: 0.1
-  valid: 0.1
-  test: 0.1
+  train: 1
+  valid: 1
+  test: 1
 epochs: 2
-rounds: 2
+rounds: 10
 reset_revin: False

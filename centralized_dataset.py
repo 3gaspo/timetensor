@@ -55,13 +55,13 @@ def run(cfg):
 
         #splits
         data_dict = get_dataset_splits(data_path, cfg.data.indiv_split, cfg.data.date_split, cfg.misc.seed, save=False) #save will save the train test indices, in path
-        
+        logger.info(f"Splits values: {[(k, v[0].shape) for k,v in data_dict.items()]}")
         #subsets
         subsets={"train":0.1, "valid":0.1, "valid2":0.1, "test":0.1}
         for by_date in [True, False]:
             #will generate the subsets and save indices
             byname="by_date" if by_date else "by_indiv"
-            subset_mode="dates" if by_date else "individuals"
+            subset_mode="dates"# if by_date else "individuals"
             partial_loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date, subsets=subsets, subset_mode=subset_mode, path=data_path+f"subsets/{byname}/")
             full_loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date)
             unrolls = {"full": unroll_windows(full_loaders_dict["train"]), "subset": unroll_windows(partial_loaders_dict["train"])}
@@ -85,13 +85,13 @@ def run(cfg):
             #sizes
             if verbose:
                 
-                logger.info(f"Sizes for {byname}")
+                logger.info(f"--Sizes for {byname}--")
                 logger.info(f"Training data : {loaders_dict['train'].dataset.shape}")
                 X, c, y = next(iter(loaders_dict["train"])) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
                 if c is not None:
-                    logger.info(f"Batch : X={X.shape}, c={c.shape}, y={y.shape}")
+                    logger.info(f"{len(loaders_dict['train'])} train batches : X={X.shape}, c={c.shape}, y={y.shape}")
                 else:
-                    logger.info(f"Batch : X={X.shape}, y={y.shape}")
+                    logger.info(f"{len(loaders_dict['train'])} train batches : X={X.shape}, y={y.shape}")
 
             #stats
             if verbose:

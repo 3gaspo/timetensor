@@ -1,7 +1,7 @@
 import torch
 
 from .fedavg import LocalFedAvg, FedAvgScheme
-from src.timetensor.utils import append_in_dict
+from .utils import append_in_dict
 
 
 class LocalFedRevin(LocalFedAvg):

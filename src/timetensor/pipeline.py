@@ -105,7 +105,7 @@ class Learner:
         Xtrain, Ytrain = unroll_windows(loader, shuffle=True)
         self.model.fit(Xtrain.cpu(), Ytrain.cpu())
 
-    def eval(self, loader, verbose=0, return_all=False, dim=0, normal=False):
+    def eval(self, loader, verbose=0, return_all=False):
         """evaluates model on loader and returns mean loss"""
         losses = {}
         t1 = perf_counter()

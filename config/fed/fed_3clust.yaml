@@ -1,7 +1,4 @@
-nodes:
-  - 0.5
-  - 0.3
-  - 0.2
+nodes: ../datasets/electricity/nodes_clusters/splits/indices/
 splits:
   - 0.5
   - 0.3
@@ -10,6 +7,6 @@ subsets:
   train: 1
   valid: 1
   test: 1
-epochs: 3
-rounds: 5
+epochs: 2
+rounds: 10
 reset_revin: False

@@ -9,16 +9,10 @@ from .dataset import load_example, load_data
 def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_name=None):
     if save_name is None:
         save_name = model_name
-        if normalization is not None and normalization>0:
-            if normalization==3 or model_name not in ["persistence", "repeat", "lookback"]:
-                if normalization == 1:
-                    save_name = save_name + f"_avgtrain"
-                elif normalization == 2:
-                    save_name = save_name + f"_instance"
-            if normalization == 3:
-                save_name = save_name + f"_revin"
+        if normalization is not None and model_name not in ["persistence", "repeat", "lookback"]:
+            save_name = save_name + "_" + normalization
         if criterion_name is not None:
-            if normalization==3 or model_name not in ["persistence", "repeat", "lookback"]:
+            if "revin" in normalization or model_name not in ["persistence", "repeat", "lookback"]:
                 save_name = save_name + "_" + criterion_name
     save_dir = output_dir + save_name + "/" #current experiment dir
     if not os.path.exists(save_dir):
@@ -186,7 +180,7 @@ def append_in_dict(dico1, dico2):
             dico1[key].append(value)
         elif type(value) == list:
             dico1[key] += value
-        elif type(value) == torch.tensor and len(T.shape)==0:
+        elif type(value) == torch.tensor and len(value.shape)==0:
             dico1[key] += value.item()
         else:
             print('problem')

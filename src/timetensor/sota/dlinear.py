@@ -1,10 +1,9 @@
+## Adapted from https://github.com/honeywell21/DLinear/blob/main/models/DLinear.py
+
+
 import torch
 import torch.nn as nn
 
-# from .patchtst import PatchTST
-from .utils import get_normal_stats
-
-#adapted from https://github.com/honeywell21/DLinear/blob/main/models/DLinear.py
 
 
 class moving_avg(nn.Module):

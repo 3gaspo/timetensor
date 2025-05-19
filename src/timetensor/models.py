@@ -1,14 +1,14 @@
 import torch
 import torch.nn as nn
 
-# from .patchtst import PatchTST
-from .dlinear import DLinear
+from .sota.patchtst.patch_tst import PatchTST
+from .sota.dlinear import DLinear
 from .utils import get_normal_stats
 from sklearn.linear_model import LinearRegression
 
 
 class RevIN(nn.Module):
-    def __init__(self, model, dim, eps=1):
+    def __init__(self, model, dim, eps=1, denormalize=True, last=False):
         """
         RevIN: Reversible Instance Normalization for Time Series Forecasting
         """
@@ -17,9 +17,13 @@ class RevIN(nn.Module):
         self.gamma = nn.Parameter(torch.ones(1, dim, 1))  #scale
         self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
         self.model = model
+        self.last, self.denormalize= last, denormalize
 
     def norm(self, x):
-        self.mu, self.std = get_normal_stats(x, std_cst=self.eps)
+        if self.last:
+            self.mu, self.std = get_normal_stats(x, std_cst=self.eps)
+        else:
+            self.mu = x[:, :, -1].unsqueeze(2)
         x = (x - self.mu) / self.std # (B, dim, lags)
         x = x * self.gamma + self.beta
         return x
@@ -31,18 +35,22 @@ class RevIN(nn.Module):
     def forward(self, x, c=None): #(B, dim, lags)
         x  = self.norm(x) #(B, dim, lags)
         pred = self.model(x, c) #(B, dim, horizon)
-        output = self.denorm(pred) #(B, dim, horizon)
+        if self.denormalize:
+            output = self.denorm(pred) #(B, dim, horizon)
+        else:
+            output = pred
         return output
 
 
 class Normalized(nn.Module):
-    def __init__(self, model, mean, std):
+    def __init__(self, model, mean, std, denormalize=True):
         """
         Normalizes input before predictions and denormalizes prediction
         """
         super(Normalized, self).__init__()
         self.model = model
         self.mean, self.std = mean, std
+        self.denormalize=denormalize
 
     def norm(self, x):
         x = (x - self.mean) / self.std # (B, dim, lags)
@@ -54,17 +62,21 @@ class Normalized(nn.Module):
     def forward(self, x, c=None): #(B, dim, lags)
         x  = self.norm(x) #(B, dim, lags)
         pred = self.model(x, c) #(B, dim, horizon)
-        output = self.denorm(pred) #(B, dim, horizon)
+        if self.denormalize:
+            output = self.denorm(pred) #(B, dim, horizon)
+        else:
+            output = pred
         return output
 
 class InstanceNormalized(nn.Module):
-    def __init__(self, model, eps=1):
+    def __init__(self, model, eps=1, denormalize=True,):
         """
         Normalizes input before predictions and denormalizes prediction
         """
         super(InstanceNormalized, self).__init__()
         self.eps = eps
         self.model = model
+        self.denormalize=denormalize
 
     def norm(self, x):
         self.mean, self.std = get_normal_stats(x, std_cst=self.eps)
@@ -77,9 +89,11 @@ class InstanceNormalized(nn.Module):
     def forward(self, x, c=None): #(B, dim, lags)
         x  = self.norm(x) #(B, dim, lags)
         pred = self.model(x, c) #(B, dim, horizon)
-        output = self.denorm(pred) #(B, dim, horizon)
+        if self.denormalize:
+            output = self.denorm(pred) #(B, dim, horizon)
+        else:
+            output = pred
         return output
-
 
     
 
@@ -167,7 +181,7 @@ class sklinear():
         return pred
 
 
-def load_model(model_name, shape, normalization=0, **kwargs):
+def load_model(model_name, shape, normalization=None, **kwargs):
     """loads models from str model name
     normalization:
         0/False
@@ -192,20 +206,23 @@ def load_model(model_name, shape, normalization=0, **kwargs):
     elif model_name == "sklinear":
         model = sklinear(kwargs.get("normalize_method"))
         return model
-    elif model_name == "patch_tst":
+    elif model_name == "PatchTST":
         model = PatchTST(lags, horizon)
     else:
         raise ValueError(f"Model name not recognized : {model_name}")
     
-    if normalization==1:
-        mean, std = kwargs.get("mean"), kwargs.get("std")
-        if mean is None or std is None:
-            mean = 2500
-            std = 15000
-        return Normalized(model, mean, std)
-    elif normalization==2:
-        return InstanceNormalized(model, kwargs.get("std_cst", 1))
-    elif normalization==3:
-        return RevIN(model, dim, kwargs.get("std_cst", 1))
+    if normalization is not None:
+        if normalization in ["global", "global_latent"]:
+            mean, std = kwargs.get("mean"), kwargs.get("std")
+            if mean is None or std is None:
+                mean = 2500
+                std = 15000
+            return Normalized(model, mean, std, denormalize=(normalization=="global"))
+        elif normalization in ["instance", "instance_latent"]:
+            return InstanceNormalized(model, kwargs.get("std_cst", 1), denormalize=(normalization=="instance"))
+        elif normalization in ["revin", "revin_latent"]:
+            return RevIN(model, dim, kwargs.get("std_cst", 1), denormalize=(normalization=="revin"))
+        else:
+            ValueError(f"Normalization not recognized : {normalization}")
     else:
         return model

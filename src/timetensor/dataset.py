@@ -52,31 +52,34 @@ class TimeSeriesDataset(Dataset):
                 values = self.values[:, :, idx : idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
                 if self.context is not None:
                     context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
-                inputs = values[:, :, :self.lags] # (individuals, dim, lags)
-                target = values[:, :, self.lags:] # (individuals, dim, horizon)
+
             else: #1 batch = 1 individual, batch of dates
                 if self.seed is not None:
                     np.random.seed(self.seed)
                 indiv = np.random.randint(self.individuals)
-                values = self.values[indiv, :, idx : idx + self.lags + self.horizon] # (dim_values, lags+horizon)
+                values = self.values[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
                 if self.context is not None:
-                    context = self.context[indiv, :, idx : idx + self.lags + self.horizon] # (dim_context, lags+horizon)
-                inputs = values[:, :self.lags] # (dim, lags)
-                target = values[:, self.lags:] # (dim, horizon)
+                    if self.context_by_individuals:
+                        context = self.context[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
+                    else:
+                        context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
+
+
 
         else: #1 batch = batch of individuals, random date
             if self.seed is not None:
                 np.random.seed(self.seed)
             t = np.random.randint(self.dates - self.lags - self.horizon)
-            values = self.values[idx, :, t: t + self.lags + self.horizon] # (dim_values, lags+horizon)
+            values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
             if self.context is not None:
                 if self.context_by_individuals:
-                    context = self.context[idx, :, t: t + self.lags + self.horizon] # (dim_context, lags+horizon)
+                    context = self.context[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
                 else:
                     context = self.context[:, :, t: t + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
-            inputs = values[:, :self.lags] # (dim, lags)
-            target = values[:, self.lags:] # (dim, horizon)
-        
+
+        inputs = values[:, :, :self.lags] # (individuals, dim, lags)
+        target = values[:, :, self.lags:] # (individuals, dim, horizon)
+
         if self.context is not None:
             return inputs, context, target
         else:
@@ -100,6 +103,7 @@ class Subset(Dataset):
                 self.dataset = dataset
             self.individuals = len(indices)
             self.dates = self.dataset.dates
+            self.dim_values = self.dataset.dim_values
             if self.dataset.context is not None:
                 if self.dataset.context_by_individuals:
                     self.contexts = self.individuals
@@ -117,12 +121,14 @@ class Subset(Dataset):
             self.individuals = self.dataset.individuals
             self.dates = len(indices)
             self.context = self.dataset.context
-        
+            self.dim_values = self.dataset.dim_values
+
         elif self.mode == "dim":
             self.dataset = dataset
             self.individuals = self.dataset.individuals
             self.dates = self.dataset.dates
             self.context = self.dataset.context
+            self.dim_values = len(self.indices)
 
     def __getitem__(self, idx):
         if self.mode == "dim":
@@ -139,7 +145,7 @@ class Subset(Dataset):
             if self.mode == "individuals":
                 return len(self.dataset)
             else:
-                return len(self.indices) - (self.dataset.lags + self.dataset.horizon)
+                return len(self.indices) - (self.lags + self.horizon)
         else:
             if self.mode == "individuals":
                 return len(self.indices)
@@ -149,14 +155,16 @@ class Subset(Dataset):
     @property
     def shape(self):
         if self.dataset.context is not None:
-            return (self.individuals, self.dataset.dim_values, self.dates), (self.contexts, self.dataset.dim_context, self.dates)
+            return (self.individuals, self.dim_values, self.dates), (self.contexts, self.dataset.dim_context, self.dates)
         else:
-            return (self.individuals, self.dataset.dim_values, self.dates)
+            return (self.individuals, self.dim_values, self.dates)
     @property
     def values(self):
-        if self.mode == "dates":
+        if self.mode == "dim":
+            return self.dataset.values[:, self.indices, :]
+        elif self.mode=="dates":
             return self.dataset.values[:, :, self.indices]
-        else:
+        elif self.mode=="individuals":
             return self.dataset.values[self.indices, :, :]
     @property
     def datetimes(self):
@@ -322,7 +330,7 @@ def temporal_split(values, context, datetimes, date_split=None, seed=None, path=
         if type(date_split)==str:
             dates_idx1, dates_idx2, dates_idx3 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False)), list(torch.load(date_split + "_split3.pt", weights_only=False)),
             dates1, dates2, dates3 = datetimes[dates_idx1], datetimes[dates_idx2], datetimes[dates_idx3]
-        elif type(date_split)==list and type(date_split[0])==float: #split dates
+        elif type(date_split[0])==float: #split dates
             dates = len(datetimes)
             stop_date1, stop_date2 = int(date_split[0] * dates), int((date_split[0] + date_split[1])*dates)
             dates_idx1, dates_idx2, dates_idx3 = list(range(stop_date1)), list(range(stop_date1, stop_date2)), list(range(stop_date2, dates))
@@ -368,16 +376,17 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subset
     loaders_dict = {}
     for key, (values, context, datetimes) in data_dict.items():
         dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date)
-        subset = subsets.get(key)
-        if subset is not None and (type(subset)==str or (type(subset)==float and subset<1 and subset>0)):
-            if type(subset)==str:
-                subset_indices = list(torch.load(subset, weights_only=False))
-            elif type(subset)==float:
-                subset_indices = get_subset_indices(dataset, subset, subset_mode)
-                if not os.path.exists(path):
-                    os.makedirs(path)
-                torch.save(subset_indices, path + f"{key}_subset_indices_{subset}.pt")
-            dataset = Subset(dataset, subset_indices, subset_mode)
+        if subsets is not None:
+            subset = subsets.get(key)
+            if subset is not None and (type(subset)==str or (type(subset)==float and subset<1 and subset>0)):
+                if type(subset)==str:
+                    subset_indices = list(torch.load(subset, weights_only=False))
+                elif type(subset)==float:
+                    subset_indices = get_subset_indices(dataset, subset, subset_mode)
+                    if not os.path.exists(path):
+                        os.makedirs(path)
+                    torch.save(subset_indices, path + f"{key}_subset_indices_{subset}.pt")
+                dataset = Subset(dataset, subset_indices, subset_mode)
 
         if key=="train":
             loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
@@ -397,17 +406,14 @@ def collate_fn(data):
         inputs, targets = zip(*data)
         contexts = None
 
-    inputs = torch.stack(inputs) #(bs, (individuals), dim, lookback)
-    if len(inputs.shape)==4:
-        inputs = inputs.view(-1, inputs.shape[-2], inputs.shape[-1]) #  (bs * (individuals), dim, lookback)
+    inputs = torch.stack(inputs) #(bs, individuals, dim, lookback)
+    inputs = inputs.view(-1, inputs.shape[-2], inputs.shape[-1]) #  (bs * individuals, dim, lookback)
 
     if contexts is not None:
         contexts = torch.stack(contexts)
-        if len(contexts.shape)==4:
-            contexts = contexts.view(-1, contexts.shape[-2], contexts.shape[-1]) 
+        contexts = contexts.view(-1, contexts.shape[-2], contexts.shape[-1]) 
     targets = torch.stack(targets)
-    if len(targets.shape)==4:
-        targets = targets.view(-1, targets.shape[-2], targets.shape[-1])
+    targets = targets.view(-1, targets.shape[-2], targets.shape[-1])
 
     return inputs, contexts, targets
 

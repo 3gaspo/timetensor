@@ -4,6 +4,7 @@ data:
   path: ../datasets/electricity/
   indiv_split: ../datasets/electricity/splits/indiv
   date_split: ../datasets/electricity/splits/date
+  by_idx: date
   seed:
   mean: 2500
   std: 15000
@@ -11,15 +12,15 @@ data:
 model:
   lags: 336
   horizon: 24
-  name: linear
-  normalization: 1
+  name: DLinear
+  normalization: global
 
 training:
   retrain: True
   loss: MMSE
-  bs: 4
+  bs: 128
   lr: 0.0001
-  epochs: 1
+  epochs: 100
 
 misc:
   seed:
@@ -30,6 +31,6 @@ misc:
 
 defaults:
   - _self_
-  - model_configs: linear
-  - fed: fed
+  - model_configs: DLinear
+  - fed: fed_all
   - subset: full

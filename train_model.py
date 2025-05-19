@@ -26,8 +26,7 @@ def run(cfg):
     lags, horizon = cfg.model.lags, cfg.model.horizon
     batch_size, lr, epochs = cfg.training.bs, cfg.training.lr, cfg.training.epochs
     criterion_name, normalization = cfg.training.loss, cfg.model.normalization
-    model_name, retrain = cfg.model.name, cfg.training.retrain
-    kwargs = cfg.model_configs
+    model_name, retrain, kwargs = cfg.model.name, cfg.training.retrain, cfg.model_configs
     verbose, benchmark = cfg.misc.verbose, cfg.misc.benchmark
     if verbose:
         logger.info("Fetched main configs")
@@ -39,12 +38,12 @@ def run(cfg):
     save_name = cfg.misc.save_name
     save_name, save_dir = get_dirs(output_dir, save_name, model_name, normalization, criterion_name)
     if verbose:
-        logger.info("Fetched output directories")
         logger.info(f"Save directory : {save_dir}")
 
-    #data
+    #data   
+    by_idx = cfg.data.by_idx
     data_dict = get_dataset_splits(data_path, cfg.data.indiv_split, cfg.data.date_split, cfg.misc.seed, save=False)
-    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets=cfg.subset.subsets, path=data_path+"subsets/")
+    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=(by_idx=="date"), subsets=cfg.subset.subsets, path=data_path+"subsets/")
     if verbose:
         logger.info("Fetched dataloaders")
 
@@ -79,7 +78,7 @@ def run(cfg):
         }
 
     model = load_model(model_name, shape, normalization, **kwargs)
-    if model_name in ["persistence", "repeat", "lookback"] and normalization!=3:
+    if model_name in ["persistence", "repeat", "lookback"] and "revin" not in normalization:
         learner = Learner(model, criterion, lr, eval_losses, device=device, do_train=False)
         logger.info("No training needed")
     elif model_name == "sklinear":
@@ -118,7 +117,7 @@ def run(cfg):
 
     #eval
     logger.info("Computing test metrics")
-    if model_name=="sklinear" and normalization==2:
+    if model_name=="sklinear" and "instance" in normalization:
         test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1, normal=True) #(ndates*nindividuals, dim, horizon)
     else:
         test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1) #(ndates*nindividuals, dim, horizon)
@@ -150,13 +149,13 @@ def run(cfg):
         if model_name == "sklinear":
             weights = learner.get_weights()
         else:
-            if normalization!=0:
+            if normalization is not None:
                 weights = model.model.fc.weight.detach().cpu().numpy()
             else:
                 weights = model.fc.weight.detach().cpu().numpy()
         plot_weights(weights, save_dir + "plots/", title=f'{save_name} weights')
     if model_name == "DLinear":
-        if normalization!=0:
+        if normalization is not None:
             linear_weights = model.model.Linear_Seasonal[0].weight.detach().cpu().numpy()
             season_weights = model.model.Linear_Trend[0].weight.detach().cpu().numpy()
         else:
@@ -166,7 +165,7 @@ def run(cfg):
         plot_weights(season_weights, save_dir + "plots/", name="trend_weights.pdf", title=f'{save_name} trend weights')
 
     #revin
-    if normalization == 3:
+    if "revin" in normalization:
         params = {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "gamma": model.gamma.data.detach().cpu().numpy()[0][0][0]}
         logger.info(f"Final revin parameters: {params}")
         unroll = unroll_windows(loaders_dict["train"], normal=True)

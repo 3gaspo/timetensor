@@ -218,7 +218,7 @@ def print_nice_table(path, multipliers=None):
             multipliers = multipliers.split(" ")
             multipliers = [int(w) for w in multipliers]
         new_index = list(df.index)
-        for k in range(min(len(multipliers), df.shape[1])):
+        for k in range(min(len(multipliers), df.shape[0])):
             if multipliers[k] != 0:
                 df.iloc[k] = df.iloc[k] * 10**multipliers[k]
                 new_index[k] = new_index[k] + f" * 1e{multipliers[k]}"
