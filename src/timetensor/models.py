@@ -22,7 +22,7 @@ class RevIN(nn.Module):
     def norm(self, x):
         self.mu, self.std = get_normal_stats(x, std_cst=self.eps)
         if self.last:
-            self.mu = x[:, :, -1].unsqueeze(2)
+            self.mu = x[:, :, -1].unsqueeze(2).detach()
         x = (x - self.mu) / self.std # (B, dim, lags)
         x = x * self.gamma + self.beta
         return x
@@ -222,16 +222,13 @@ def load_model(model_name, shape, normalization=None, **kwargs):
     else:
         raise ValueError(f"Model name not recognized : {model_name}")
     
-    if normalization is not None:
-        if normalization in ["global", "global_latent"]:
-            mean, std = kwargs.get("mean"), kwargs.get("std")
-            if mean is None or std is None:
-                mean = 2500
-                std = 15000
+    if normalization != "None":
+        if "global" in normalization:
+            mean, std = kwargs.get("mean", 2500), kwargs.get("std", 15000)
             return Normalized(model, mean, std, denormalize=(normalization=="global"))
-        elif normalization in ["instance", "instance_latent"]:
+        elif "instance" in normalization:
             return InstanceNormalized(model, kwargs.get("std_cst", 1), denormalize=(normalization=="instance"))
-        elif normalization in ["revin", "revin_latent"]:
+        elif "revin" in normalization:
             return RevIN(model, dim, kwargs.get("std_cst", 1), denormalize=(normalization=="revin"))
         else:
             ValueError(f"Normalization not recognized : {normalization}")

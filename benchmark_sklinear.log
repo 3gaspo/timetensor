@@ -1,0 +1,66 @@
+nohup: ignoring input
+[2025-05-20 09:49:57,546][__main__][INFO] - =====Running main script=====
+[2025-05-20 09:49:57,546][__main__][INFO] - Fetched main configs
+[2025-05-20 09:49:57,546][__main__][INFO] - Model sklinear, normalization , criterion MMSE, kwargs {'normalize_method': 'None'}
+[2025-05-20 09:49:57,551][__main__][INFO] - Save directory : ../outputs/benchmark_sklinear/sklinear_subset/
+[2025-05-20 09:49:57,592][__main__][INFO] - Fetched dataloaders
+[2025-05-20 09:49:57,594][__main__][INFO] - Training data shape : (140, 1, 1187)
+[2025-05-20 09:49:57,594][__main__][INFO] - Batch sizes : X=torch.Size([560, 1, 336]), y=torch.Size([560, 1, 24])
+[2025-05-20 09:49:57,664][__main__][INFO] - Starting scikit-learn fitting...
+[2025-05-20 09:49:59,584][__main__][INFO] - End of training
+[2025-05-20 09:49:59,585][__main__][INFO] - Computing test metrics
+[2025-05-20 09:49:59,798][__main__][INFO] - Evaluation done in 0.004 min
+[2025-05-20 09:50:02,300][__main__][INFO] - Saved plots
+[2025-05-20 09:50:02,643][__main__][INFO] - End of script
+
+[2025-05-20 09:50:05,958][__main__][INFO] - =====Running main script=====
+[2025-05-20 09:50:05,959][__main__][INFO] - Fetched main configs
+[2025-05-20 09:50:05,959][__main__][INFO] - Model sklinear, normalization , criterion MMSE, kwargs {'normalize_method': 'None'}
+[2025-05-20 09:50:05,964][__main__][INFO] - Save directory : ../outputs/benchmark_sklinear/sklinear_full/
+[2025-05-20 09:50:06,002][__main__][INFO] - Fetched dataloaders
+[2025-05-20 09:50:06,003][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-20 09:50:06,003][__main__][INFO] - Batch sizes : X=torch.Size([560, 1, 336]), y=torch.Size([560, 1, 24])
+[2025-05-20 09:50:06,074][__main__][INFO] - Starting scikit-learn fitting...
+[2025-05-20 09:50:29,149][__main__][INFO] - End of training
+[2025-05-20 09:50:29,150][__main__][INFO] - Computing test metrics
+[2025-05-20 09:50:32,326][__main__][INFO] - Evaluation done in 0.053 min
+[2025-05-20 09:50:38,904][__main__][INFO] - Saved plots
+[2025-05-20 09:50:39,051][__main__][INFO] - End of script
+
+[2025-05-20 09:50:42,525][__main__][INFO] - =====Running main script=====
+[2025-05-20 09:50:42,525][__main__][INFO] - Fetched main configs
+[2025-05-20 09:50:42,525][__main__][INFO] - Model sklinear, normalization , criterion MMSE, kwargs {'normalize_method': 'instance'}
+[2025-05-20 09:50:42,529][__main__][INFO] - Save directory : ../outputs/benchmark_sklinear/sklinear_subset_instance/
+[2025-05-20 09:50:42,568][__main__][INFO] - Fetched dataloaders
+[2025-05-20 09:50:42,570][__main__][INFO] - Training data shape : (140, 1, 1187)
+[2025-05-20 09:50:42,570][__main__][INFO] - Batch sizes : X=torch.Size([280, 1, 336]), y=torch.Size([280, 1, 24])
+[2025-05-20 09:50:42,630][__main__][INFO] - Starting scikit-learn fitting...
+[2025-05-20 09:50:44,463][__main__][INFO] - End of training
+[2025-05-20 09:50:44,463][__main__][INFO] - Computing test metrics
+[2025-05-20 09:50:44,658][__main__][INFO] - Evaluation done in 0.003 min
+[2025-05-20 09:50:47,251][__main__][INFO] - Saved plots
+[2025-05-20 09:50:47,539][__main__][INFO] - End of script
+
+[2025-05-20 09:50:51,048][__main__][INFO] - =====Running main script=====
+[2025-05-20 09:50:51,049][__main__][INFO] - Fetched main configs
+[2025-05-20 09:50:51,049][__main__][INFO] - Model sklinear, normalization , criterion MMSE, kwargs {'normalize_method': 'instance'}
+[2025-05-20 09:50:51,053][__main__][INFO] - Save directory : ../outputs/benchmark_sklinear/sklinear_full_instance/
+[2025-05-20 09:50:51,092][__main__][INFO] - Fetched dataloaders
+[2025-05-20 09:50:51,094][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-20 09:50:51,094][__main__][INFO] - Batch sizes : X=torch.Size([280, 1, 336]), y=torch.Size([280, 1, 24])
+[2025-05-20 09:50:51,166][__main__][INFO] - Starting scikit-learn fitting...
+[2025-05-20 09:51:17,842][__main__][INFO] - End of training
+[2025-05-20 09:51:17,843][__main__][INFO] - Computing test metrics
+[2025-05-20 09:51:21,318][__main__][INFO] - Evaluation done in 0.058 min
+[2025-05-20 09:51:30,589][__main__][INFO] - Saved plots
+[2025-05-20 09:51:30,912][__main__][INFO] - End of script
+
++-----------------+-------------------+-----------------+----------------------------+--------------------------+
+|                 |   sklinear_subset |   sklinear_full |   sklinear_subset_instance |   sklinear_full_instance |
++=================+===================+=================+============================+==========================+
+| Test MSE * 1e-3 |            0.1833 |          1.4763 |                     0.0089 |                   0.1849 |
++-----------------+-------------------+-----------------+----------------------------+--------------------------+
+| Test NMSE       |            0.1200 |          1.0117 |                     0.0049 |                   0.1154 |
++-----------------+-------------------+-----------------+----------------------------+--------------------------+
+| Test RMSE * 1e2 |            0.0761 |          0.6629 |                     0.0025 |                   0.0700 |
++-----------------+-------------------+-----------------+----------------------------+--------------------------+

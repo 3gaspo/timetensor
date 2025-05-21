@@ -54,7 +54,7 @@ python3 train_model.py \
 
 python3 -c "from src.timetensor.visu import plot_expe;plot_expe('$output_dir')"
 
-multipliers="6 2 2 2"
+multipliers="-3 0 2"
 python3 -c "from src.timetensor.visu import print_nice_table;print_nice_table('${output_dir}mean_results.json', multipliers='$multipliers')"
 
 # nohup bash scripts/benchmark.sh > benchmark.log 2>&1 &

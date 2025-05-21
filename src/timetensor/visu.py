@@ -239,7 +239,7 @@ def plot_weights(weights, path, name="weights.pdf", title='Model weights'):
 
 def plot_expe(path):
     """plots losses for list of experiments in path"""
-    expe_names = [name for name in os.listdir(path) if os.path.exists(path + "name/" + "valid_losses.pt")]
+    expe_names = [name for name in os.listdir(path) if os.path.exists(path + f"{name}/" + "valid_losses.pt")]
 
     if len(expe_names) >0:
         losses_dict = {}

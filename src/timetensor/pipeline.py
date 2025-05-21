@@ -26,9 +26,15 @@ class Loss():
             pred = normalize(pred, mean, std)
             y = normalize(y, mean, std)
         elif self.mode == "relative":
-            assert mean is not None
+            assert (mean is not None and std is not None)
             mean = torch.where(mean != 0, mean, 1)
             pred, y = pred/mean, y/mean
+        elif self.mode == "normalize_y":
+            assert (mean is not None and std is not None)
+            y = normalize(y, mean, std)
+        elif self.mode == "denormalize_pred":
+            assert (mean is not None and std is not None)
+            pred = pred*std + mean
         return self.loss(pred, y)
 
 
@@ -149,7 +155,7 @@ class Learner:
 
 
 
-def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, verbose=1, do_eval=True, logger=None):
+def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, verbose=1, do_eval=True, logger=None, eval_runs=1):
     """trains model in learner on loaders and returns train and valid losses"""
     
     #data
@@ -183,8 +189,8 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
             if do_eval and (step == 1 or step % eval_freq == 0 or step == total_steps):
 
                 #valid eval
-                average_eval_dict = learner.eval(valid_loader)
-                average_eval_dict2 = learner.eval(valid_loader2)
+                average_eval_dict = learner.eval(valid_loader, runs=eval_runs)
+                average_eval_dict2 = learner.eval(valid_loader2, runs=eval_runs)
                 append_in_dict(valid_losses, average_eval_dict)
                 append_in_dict(valid_losses2, average_eval_dict2)
 

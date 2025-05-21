@@ -1,0 +1,208 @@
+nohup: ignoring input
+[2025-05-20 17:17:01,318][__main__][INFO] - =====Running main script=====
+[2025-05-20 17:17:01,319][__main__][INFO] - Fetched main configs
+[2025-05-20 17:17:01,321][__main__][INFO] - Model linear, normalization None, criterion NMSE, kwargs {}
+[2025-05-20 17:17:01,342][__main__][INFO] - Save directory : ../outputs/benchmark_indiv/linear_None_NMSE/
+[2025-05-20 17:17:01,409][__main__][INFO] - Fetched dataloaders
+[2025-05-20 17:17:01,411][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-20 17:17:01,412][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 24])
+[2025-05-20 17:17:06,572][__main__][INFO] - batch_size=28, learning_rate=0.0001, steps per epoch=5, epochs=30
+[2025-05-20 17:17:06,572][__main__][INFO] - Starting training...
+[2025-05-20 17:17:06,572][__main__][INFO] - Using device: cuda
+[2025-05-20 17:17:06,574][__main__][INFO] - Training 30 epochs of 5 batches (150 steps): , eval_freq: 5, print_freq: 10
+[2025-05-20 17:21:51,115][__main__][INFO] - Step 1 | valid1 MSE : 505540.6250 | valid1 NMSE : 270.0641 | valid1 RMSE : 1.2723
+[2025-05-20 17:31:15,420][__main__][INFO] - Step 10 | valid1 MSE : 305253.0000 | valid1 NMSE : 163.1801 | valid1 RMSE : 0.7697
+[2025-05-20 17:40:43,884][__main__][INFO] - Step 20 | valid1 MSE : 163386.4062 | valid1 NMSE : 87.4702 | valid1 RMSE : 0.4137
+[2025-05-20 17:50:04,369][__main__][INFO] - Step 30 | valid1 MSE : 81547.4141 | valid1 NMSE : 43.7931 | valid1 RMSE : 0.2083
+[2025-05-20 17:59:26,385][__main__][INFO] - Step 40 | valid1 MSE : 39014.2578 | valid1 NMSE : 21.0953 | valid1 RMSE : 0.1015
+[2025-05-20 18:08:48,134][__main__][INFO] - Step 50 | valid1 MSE : 18461.2559 | valid1 NMSE : 10.1269 | valid1 RMSE : 0.0499
+[2025-05-20 18:18:06,006][__main__][INFO] - Step 60 | valid1 MSE : 9212.6133 | valid1 NMSE : 5.1890 | valid1 RMSE : 0.0267
+[2025-05-20 18:27:49,061][__main__][INFO] - Step 70 | valid1 MSE : 5132.3037 | valid1 NMSE : 3.0094 | valid1 RMSE : 0.0164
+[2025-05-20 18:37:30,702][__main__][INFO] - Step 80 | valid1 MSE : 3414.2463 | valid1 NMSE : 2.0941 | valid1 RMSE : 0.0121
+[2025-05-20 18:47:21,531][__main__][INFO] - Step 90 | valid1 MSE : 2557.5115 | valid1 NMSE : 1.6335 | valid1 RMSE : 0.0099
+[2025-05-20 18:57:03,620][__main__][INFO] - Step 100 | valid1 MSE : 2254.0312 | valid1 NMSE : 1.4709 | valid1 RMSE : 0.0091
+[2025-05-20 19:06:20,812][__main__][INFO] - Step 110 | valid1 MSE : 2151.7588 | valid1 NMSE : 1.4162 | valid1 RMSE : 0.0089
+[2025-05-20 19:15:47,960][__main__][INFO] - Step 120 | valid1 MSE : 2117.8621 | valid1 NMSE : 1.3975 | valid1 RMSE : 0.0088
+[2025-05-20 19:25:05,821][__main__][INFO] - Step 130 | valid1 MSE : 2100.1277 | valid1 NMSE : 1.3871 | valid1 RMSE : 0.0087
+[2025-05-20 19:34:31,609][__main__][INFO] - Step 140 | valid1 MSE : 2099.8618 | valid1 NMSE : 1.3861 | valid1 RMSE : 0.0087
+[2025-05-20 19:44:07,317][__main__][INFO] - Step 150 | valid1 MSE : 2089.1453 | valid1 NMSE : 1.3793 | valid1 RMSE : 0.0087
+[2025-05-20 19:44:07,318][__main__][INFO] - Training done in 147.012 min
+[2025-05-20 19:44:07,333][__main__][INFO] - End of training
+[2025-05-20 19:44:08,346][__main__][INFO] - Plotted losses
+[2025-05-20 19:44:08,346][__main__][INFO] - Computing test metrics
+[2025-05-20 19:44:36,672][__main__][INFO] - Evaluation done in 0.472 min
+[2025-05-20 19:45:16,019][__main__][INFO] - Saved plots
+[2025-05-20 19:45:16,229][__main__][INFO] - End of script
+
+[2025-05-20 19:45:22,262][__main__][INFO] - =====Running main script=====
+[2025-05-20 19:45:22,263][__main__][INFO] - Fetched main configs
+[2025-05-20 19:45:22,263][__main__][INFO] - Model DLinear, normalization None, criterion NMSE, kwargs {}
+[2025-05-20 19:45:22,269][__main__][INFO] - Save directory : ../outputs/benchmark_indiv/DLinear_None_NMSE/
+[2025-05-20 19:45:22,318][__main__][INFO] - Fetched dataloaders
+[2025-05-20 19:45:22,320][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-20 19:45:22,321][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 24])
+[2025-05-20 19:45:24,367][__main__][INFO] - batch_size=28, learning_rate=0.0001, steps per epoch=5, epochs=30
+[2025-05-20 19:45:24,367][__main__][INFO] - Starting training...
+[2025-05-20 19:45:24,367][__main__][INFO] - Using device: cuda
+[2025-05-20 19:45:24,367][__main__][INFO] - Training 30 epochs of 5 batches (150 steps): , eval_freq: 5, print_freq: 10
+[2025-05-20 19:50:33,827][__main__][INFO] - Step 1 | valid1 MSE : 450975.9375 | valid1 NMSE : 240.9241 | valid1 RMSE : 1.1354
+[2025-05-20 20:00:37,267][__main__][INFO] - Step 10 | valid1 MSE : 256854.9688 | valid1 NMSE : 137.3159 | valid1 RMSE : 0.6483
+[2025-05-20 20:10:38,399][__main__][INFO] - Step 20 | valid1 MSE : 119196.5391 | valid1 NMSE : 63.8485 | valid1 RMSE : 0.3027
+[2025-05-20 20:20:40,116][__main__][INFO] - Step 30 | valid1 MSE : 50512.5703 | valid1 NMSE : 27.1949 | valid1 RMSE : 0.1301
+[2025-05-20 20:30:39,144][__main__][INFO] - Step 40 | valid1 MSE : 20679.9883 | valid1 NMSE : 11.2723 | valid1 RMSE : 0.0551
+[2025-05-20 20:40:40,458][__main__][INFO] - Step 50 | valid1 MSE : 8783.8242 | valid1 NMSE : 4.9190 | valid1 RMSE : 0.0251
+[2025-05-20 20:50:37,982][__main__][INFO] - Step 60 | valid1 MSE : 4128.0693 | valid1 NMSE : 2.4287 | valid1 RMSE : 0.0133
+[2025-05-20 21:00:41,740][__main__][INFO] - Step 70 | valid1 MSE : 2557.5830 | valid1 NMSE : 1.5844 | valid1 RMSE : 0.0093
+[2025-05-20 21:10:37,521][__main__][INFO] - Step 80 | valid1 MSE : 2098.6384 | valid1 NMSE : 1.3333 | valid1 RMSE : 0.0080
+[2025-05-20 21:20:27,380][__main__][INFO] - Step 90 | valid1 MSE : 1925.8619 | valid1 NMSE : 1.2354 | valid1 RMSE : 0.0075
+[2025-05-20 21:30:40,137][__main__][INFO] - Step 100 | valid1 MSE : 1832.6486 | valid1 NMSE : 1.1801 | valid1 RMSE : 0.0072
+[2025-05-20 21:40:36,971][__main__][INFO] - Step 110 | valid1 MSE : 1797.5476 | valid1 NMSE : 1.1561 | valid1 RMSE : 0.0071
+[2025-05-20 21:50:26,478][__main__][INFO] - Step 120 | valid1 MSE : 1758.8457 | valid1 NMSE : 1.1309 | valid1 RMSE : 0.0069
+[2025-05-20 22:00:19,148][__main__][INFO] - Step 130 | valid1 MSE : 1738.0187 | valid1 NMSE : 1.1155 | valid1 RMSE : 0.0068
+[2025-05-20 22:10:13,942][__main__][INFO] - Step 140 | valid1 MSE : 1724.4207 | valid1 NMSE : 1.1045 | valid1 RMSE : 0.0067
+[2025-05-20 22:20:09,876][__main__][INFO] - Step 150 | valid1 MSE : 1707.9594 | valid1 NMSE : 1.0917 | valid1 RMSE : 0.0066
+[2025-05-20 22:20:09,877][__main__][INFO] - Training done in 154.758 min
+[2025-05-20 22:20:09,893][__main__][INFO] - End of training
+[2025-05-20 22:20:12,037][__main__][INFO] - Plotted losses
+[2025-05-20 22:20:12,037][__main__][INFO] - Computing test metrics
+[2025-05-20 22:20:49,677][__main__][INFO] - Evaluation done in 0.627 min
+[2025-05-20 22:21:30,906][__main__][INFO] - Saved plots
+[2025-05-20 22:21:31,356][__main__][INFO] - End of script
+
+[2025-05-20 22:21:55,176][__main__][INFO] - =====Running main script=====
+[2025-05-20 22:21:55,176][__main__][INFO] - Fetched main configs
+[2025-05-20 22:21:55,176][__main__][INFO] - Model PatchTST, normalization None, criterion NMSE, kwargs {}
+[2025-05-20 22:21:55,182][__main__][INFO] - Save directory : ../outputs/benchmark_indiv/PatchTST_None_NMSE/
+[2025-05-20 22:21:55,459][__main__][INFO] - Fetched dataloaders
+[2025-05-20 22:21:55,461][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-20 22:21:55,462][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 24])
+[2025-05-20 22:22:01,537][__main__][INFO] - batch_size=28, learning_rate=0.0001, steps per epoch=5, epochs=30
+[2025-05-20 22:22:01,537][__main__][INFO] - Starting training...
+[2025-05-20 22:22:01,537][__main__][INFO] - Using device: cuda
+[2025-05-20 22:22:01,537][__main__][INFO] - Training 30 epochs of 5 batches (150 steps): , eval_freq: 5, print_freq: 10
+[2025-05-20 22:31:19,783][__main__][INFO] - Step 1 | valid1 MSE : 394358.3750 | valid1 NMSE : 210.6739 | valid1 RMSE : 0.9928
+[2025-05-20 22:49:46,437][__main__][INFO] - Step 10 | valid1 MSE : 394251.5000 | valid1 NMSE : 210.8607 | valid1 RMSE : 0.9956
+[2025-05-20 23:08:43,101][__main__][INFO] - Step 20 | valid1 MSE : 394235.8750 | valid1 NMSE : 211.1876 | valid1 RMSE : 0.9998
+[2025-05-20 23:27:47,086][__main__][INFO] - Step 30 | valid1 MSE : 393661.5625 | valid1 NMSE : 211.3141 | valid1 RMSE : 1.0038
+[2025-05-20 23:46:32,713][__main__][INFO] - Step 40 | valid1 MSE : 392885.2188 | valid1 NMSE : 211.4626 | valid1 RMSE : 1.0089
+[2025-05-21 00:04:55,549][__main__][INFO] - Step 50 | valid1 MSE : 391685.1562 | valid1 NMSE : 211.5146 | valid1 RMSE : 1.0146
+[2025-05-21 00:23:38,908][__main__][INFO] - Step 60 | valid1 MSE : 390161.4062 | valid1 NMSE : 211.5099 | valid1 RMSE : 1.0209
+[2025-05-21 00:42:20,577][__main__][INFO] - Step 70 | valid1 MSE : 388687.2812 | valid1 NMSE : 211.4833 | valid1 RMSE : 1.0268
+[2025-05-21 01:00:45,040][__main__][INFO] - Step 80 | valid1 MSE : 387933.3438 | valid1 NMSE : 211.8515 | valid1 RMSE : 1.0347
+[2025-05-21 01:19:12,454][__main__][INFO] - Step 90 | valid1 MSE : 386421.6250 | valid1 NMSE : 211.8000 | valid1 RMSE : 1.0405
+[2025-05-21 01:37:47,213][__main__][INFO] - Step 100 | valid1 MSE : 385572.0938 | valid1 NMSE : 211.9704 | valid1 RMSE : 1.0465
+[2025-05-21 01:56:10,563][__main__][INFO] - Step 110 | valid1 MSE : 384868.2500 | valid1 NMSE : 212.2682 | valid1 RMSE : 1.0537
+[2025-05-21 02:14:42,331][__main__][INFO] - Step 120 | valid1 MSE : 383787.9688 | valid1 NMSE : 212.3305 | valid1 RMSE : 1.0596
+[2025-05-21 02:33:26,258][__main__][INFO] - Step 130 | valid1 MSE : 384091.3438 | valid1 NMSE : 213.0485 | valid1 RMSE : 1.0681
+[2025-05-21 02:51:47,210][__main__][INFO] - Step 140 | valid1 MSE : 382441.6250 | valid1 NMSE : 212.7737 | valid1 RMSE : 1.0725
+[2025-05-21 03:10:27,185][__main__][INFO] - Step 150 | valid1 MSE : 385068.7812 | valid1 NMSE : 214.5327 | valid1 RMSE : 1.0845
+[2025-05-21 03:10:27,186][__main__][INFO] - Training done in 288.427 min
+[2025-05-21 03:10:27,236][__main__][INFO] - End of training
+[2025-05-21 03:10:28,177][__main__][INFO] - Plotted losses
+[2025-05-21 03:10:28,177][__main__][INFO] - Computing test metrics
+[2025-05-21 03:11:57,323][__main__][INFO] - Evaluation done in 1.486 min
+[2025-05-21 03:12:36,844][__main__][INFO] - Saved plots
+[2025-05-21 03:12:36,844][__main__][INFO] - End of script
+
+[2025-05-21 03:12:42,460][__main__][INFO] - =====Running main script=====
+[2025-05-21 03:12:42,461][__main__][INFO] - Fetched main configs
+[2025-05-21 03:12:42,461][__main__][INFO] - Model linear, normalization revin_latent, criterion NMSE_ground, kwargs {}
+[2025-05-21 03:12:42,474][__main__][INFO] - Save directory : ../outputs/benchmark_indiv/linear_revin_latent_NMSE_ground/
+[2025-05-21 03:12:42,520][__main__][INFO] - Fetched dataloaders
+[2025-05-21 03:12:42,521][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-21 03:12:42,521][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 24])
+[2025-05-21 03:12:44,363][__main__][INFO] - batch_size=28, learning_rate=0.0001, steps per epoch=5, epochs=30
+[2025-05-21 03:12:44,363][__main__][INFO] - Starting training...
+[2025-05-21 03:12:44,363][__main__][INFO] - Using device: cuda
+[2025-05-21 03:12:44,363][__main__][INFO] - Training 30 epochs of 5 batches (150 steps): , eval_freq: 5, print_freq: 10
+[2025-05-21 03:17:41,125][__main__][INFO] - Step 1 | valid1 MSE : 395934.2188 | valid1 NMSE : 211.5038 | valid1 RMSE : 0.9966
+[2025-05-21 03:27:45,401][__main__][INFO] - Step 10 | valid1 MSE : 395935.0938 | valid1 NMSE : 211.5037 | valid1 RMSE : 0.9966
+[2025-05-21 03:37:22,907][__main__][INFO] - Step 20 | valid1 MSE : 395932.0000 | valid1 NMSE : 211.5014 | valid1 RMSE : 0.9966
+[2025-05-21 03:47:08,831][__main__][INFO] - Step 30 | valid1 MSE : 395928.3438 | valid1 NMSE : 211.4987 | valid1 RMSE : 0.9966
+[2025-05-21 03:56:52,939][__main__][INFO] - Step 40 | valid1 MSE : 395923.4375 | valid1 NMSE : 211.4954 | valid1 RMSE : 0.9966
+[2025-05-21 04:06:27,472][__main__][INFO] - Step 50 | valid1 MSE : 395917.5938 | valid1 NMSE : 211.4916 | valid1 RMSE : 0.9965
+[2025-05-21 04:16:16,877][__main__][INFO] - Step 60 | valid1 MSE : 395913.0000 | valid1 NMSE : 211.4885 | valid1 RMSE : 0.9965
+[2025-05-21 04:25:53,467][__main__][INFO] - Step 70 | valid1 MSE : 395908.6250 | valid1 NMSE : 211.4858 | valid1 RMSE : 0.9965
+[2025-05-21 04:35:33,264][__main__][INFO] - Step 80 | valid1 MSE : 395906.7500 | valid1 NMSE : 211.4842 | valid1 RMSE : 0.9965
+[2025-05-21 04:45:17,486][__main__][INFO] - Step 90 | valid1 MSE : 395905.4062 | valid1 NMSE : 211.4831 | valid1 RMSE : 0.9965
+[2025-05-21 04:55:00,373][__main__][INFO] - Step 100 | valid1 MSE : 395903.9062 | valid1 NMSE : 211.4818 | valid1 RMSE : 0.9965
+[2025-05-21 05:04:33,679][__main__][INFO] - Step 110 | valid1 MSE : 395901.0625 | valid1 NMSE : 211.4798 | valid1 RMSE : 0.9964
+[2025-05-21 05:14:20,018][__main__][INFO] - Step 120 | valid1 MSE : 395899.0625 | valid1 NMSE : 211.4782 | valid1 RMSE : 0.9964
+[2025-05-21 05:23:55,188][__main__][INFO] - Step 130 | valid1 MSE : 395895.2500 | valid1 NMSE : 211.4756 | valid1 RMSE : 0.9964
+[2025-05-21 05:33:33,465][__main__][INFO] - Step 140 | valid1 MSE : 395893.7812 | valid1 NMSE : 211.4745 | valid1 RMSE : 0.9964
+[2025-05-21 05:43:14,495][__main__][INFO] - Step 150 | valid1 MSE : 395894.0625 | valid1 NMSE : 211.4744 | valid1 RMSE : 0.9964
+[2025-05-21 05:43:14,496][__main__][INFO] - Training done in 150.502 min
+[2025-05-21 05:43:14,521][__main__][INFO] - End of training
+[2025-05-21 05:43:15,502][__main__][INFO] - Plotted losses
+[2025-05-21 05:43:15,502][__main__][INFO] - Computing test metrics
+[2025-05-21 05:43:46,610][__main__][INFO] - Evaluation done in 0.518 min
+[2025-05-21 05:44:25,604][__main__][INFO] - Saved plots
+[2025-05-21 05:44:25,791][__main__][INFO] - Final revin parameters: {'beta': np.float32(-0.01836827), 'gamma': np.float32(1.0042387)}
+/home/H61084/venvs/timetensor/lib/python3.10/site-packages/numpy/lib/_histograms_impl.py:901: RuntimeWarning: invalid value encountered in divide
+  return n/db/n.sum(), bin_edges
+[2025-05-21 05:44:26,162][__main__][INFO] - End of script
+
+[2025-05-21 05:44:31,855][__main__][INFO] - =====Running main script=====
+[2025-05-21 05:44:31,856][__main__][INFO] - Fetched main configs
+[2025-05-21 05:44:31,856][__main__][INFO] - Model DLinear, normalization revin_latent, criterion NMSE_ground, kwargs {}
+[2025-05-21 05:44:31,863][__main__][INFO] - Save directory : ../outputs/benchmark_indiv/DLinear_revin_latent_NMSE_ground/
+[2025-05-21 05:44:31,913][__main__][INFO] - Fetched dataloaders
+[2025-05-21 05:44:31,916][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-21 05:44:31,916][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 24])
+[2025-05-21 05:44:33,988][__main__][INFO] - batch_size=28, learning_rate=0.0001, steps per epoch=5, epochs=30
+[2025-05-21 05:44:33,988][__main__][INFO] - Starting training...
+[2025-05-21 05:44:33,988][__main__][INFO] - Using device: cuda
+[2025-05-21 05:44:33,988][__main__][INFO] - Training 30 epochs of 5 batches (150 steps): , eval_freq: 5, print_freq: 10
+[2025-05-21 05:49:43,656][__main__][INFO] - Step 1 | valid1 MSE : 395933.4688 | valid1 NMSE : 211.5035 | valid1 RMSE : 0.9966
+[2025-05-21 05:59:49,497][__main__][INFO] - Step 10 | valid1 MSE : 395928.2188 | valid1 NMSE : 211.5000 | valid1 RMSE : 0.9966
+[2025-05-21 06:09:50,189][__main__][INFO] - Step 20 | valid1 MSE : 395923.8438 | valid1 NMSE : 211.4968 | valid1 RMSE : 0.9966
+[2025-05-21 06:20:00,419][__main__][INFO] - Step 30 | valid1 MSE : 395917.9375 | valid1 NMSE : 211.4930 | valid1 RMSE : 0.9965
+[2025-05-21 06:30:08,874][__main__][INFO] - Step 40 | valid1 MSE : 395913.5312 | valid1 NMSE : 211.4901 | valid1 RMSE : 0.9965
+[2025-05-21 06:40:12,104][__main__][INFO] - Step 50 | valid1 MSE : 395909.0312 | valid1 NMSE : 211.4869 | valid1 RMSE : 0.9965
+[2025-05-21 06:50:25,075][__main__][INFO] - Step 60 | valid1 MSE : 395905.0312 | valid1 NMSE : 211.4843 | valid1 RMSE : 0.9965
+[2025-05-21 07:00:31,428][__main__][INFO] - Step 70 | valid1 MSE : 395900.0000 | valid1 NMSE : 211.4809 | valid1 RMSE : 0.9964
+[2025-05-21 07:10:39,117][__main__][INFO] - Step 80 | valid1 MSE : 395896.0625 | valid1 NMSE : 211.4783 | valid1 RMSE : 0.9964
+[2025-05-21 07:20:52,043][__main__][INFO] - Step 90 | valid1 MSE : 395893.4688 | valid1 NMSE : 211.4762 | valid1 RMSE : 0.9964
+[2025-05-21 07:31:07,948][__main__][INFO] - Step 100 | valid1 MSE : 395888.6875 | valid1 NMSE : 211.4729 | valid1 RMSE : 0.9964
+[2025-05-21 07:41:13,187][__main__][INFO] - Step 110 | valid1 MSE : 395883.7812 | valid1 NMSE : 211.4693 | valid1 RMSE : 0.9964
+[2025-05-21 07:51:35,110][__main__][INFO] - Step 120 | valid1 MSE : 395879.0000 | valid1 NMSE : 211.4659 | valid1 RMSE : 0.9963
+[2025-05-21 08:01:38,394][__main__][INFO] - Step 130 | valid1 MSE : 395875.0312 | valid1 NMSE : 211.4628 | valid1 RMSE : 0.9963
+[2025-05-21 08:11:51,800][__main__][INFO] - Step 140 | valid1 MSE : 395872.7812 | valid1 NMSE : 211.4604 | valid1 RMSE : 0.9963
+[2025-05-21 08:21:57,137][__main__][INFO] - Step 150 | valid1 MSE : 395868.4688 | valid1 NMSE : 211.4572 | valid1 RMSE : 0.9963
+[2025-05-21 08:21:57,139][__main__][INFO] - Training done in 157.386 min
+[2025-05-21 08:21:57,157][__main__][INFO] - End of training
+[2025-05-21 08:21:58,487][__main__][INFO] - Plotted losses
+[2025-05-21 08:21:58,487][__main__][INFO] - Computing test metrics
+[2025-05-21 08:22:31,609][__main__][INFO] - Evaluation done in 0.552 min
+[2025-05-21 08:23:11,023][__main__][INFO] - Saved plots
+[2025-05-21 08:23:11,401][__main__][INFO] - Final revin parameters: {'beta': np.float32(0.022305723), 'gamma': np.float32(1.0034928)}
+/home/H61084/venvs/timetensor/lib/python3.10/site-packages/numpy/lib/_histograms_impl.py:901: RuntimeWarning: invalid value encountered in divide
+  return n/db/n.sum(), bin_edges
+[2025-05-21 08:23:11,767][__main__][INFO] - End of script
+
+[2025-05-21 08:23:25,017][__main__][INFO] - =====Running main script=====
+[2025-05-21 08:23:25,017][__main__][INFO] - Fetched main configs
+[2025-05-21 08:23:25,017][__main__][INFO] - Model PatchTST, normalization revin_latent, criterion NMSE_ground, kwargs {}
+[2025-05-21 08:23:25,023][__main__][INFO] - Save directory : ../outputs/benchmark_indiv/PatchTST_revin_latent_NMSE_ground/
+[2025-05-21 08:23:25,100][__main__][INFO] - Fetched dataloaders
+[2025-05-21 08:23:25,102][__main__][INFO] - Training data shape : (140, 1, 12230)
+[2025-05-21 08:23:25,102][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 24])
+[2025-05-21 08:23:30,175][__main__][INFO] - batch_size=28, learning_rate=0.0001, steps per epoch=5, epochs=30
+[2025-05-21 08:23:30,175][__main__][INFO] - Starting training...
+[2025-05-21 08:23:30,175][__main__][INFO] - Using device: cuda
+[2025-05-21 08:23:30,175][__main__][INFO] - Training 30 epochs of 5 batches (150 steps): , eval_freq: 5, print_freq: 10
+[2025-05-21 08:32:58,063][__main__][INFO] - Step 1 | valid1 MSE : 395988.2500 | valid1 NMSE : 211.5372 | valid1 RMSE : 0.9968
+[2025-05-21 08:51:33,298][__main__][INFO] - Step 10 | valid1 MSE : 395942.2812 | valid1 NMSE : 211.5033 | valid1 RMSE : 0.9966
+[2025-05-21 09:10:11,628][__main__][INFO] - Step 20 | valid1 MSE : 395880.1875 | valid1 NMSE : 211.4606 | valid1 RMSE : 0.9963
+[2025-05-21 09:28:59,948][__main__][INFO] - Step 30 | valid1 MSE : 395817.0312 | valid1 NMSE : 211.4187 | valid1 RMSE : 0.9961
+[2025-05-21 09:51:48,182][__main__][INFO] - Step 40 | valid1 MSE : 395735.3750 | valid1 NMSE : 211.3633 | valid1 RMSE : 0.9957
+[2025-05-21 10:10:30,937][__main__][INFO] - Step 50 | valid1 MSE : 395642.3750 | valid1 NMSE : 211.2987 | valid1 RMSE : 0.9953
+[2025-05-21 10:32:02,797][__main__][INFO] - Step 60 | valid1 MSE : 395538.0000 | valid1 NMSE : 211.2273 | valid1 RMSE : 0.9948
+[2025-05-21 10:51:23,136][__main__][INFO] - Step 70 | valid1 MSE : 395429.1562 | valid1 NMSE : 211.1517 | valid1 RMSE : 0.9943
+[2025-05-21 11:10:28,556][__main__][INFO] - Step 80 | valid1 MSE : 395297.6562 | valid1 NMSE : 211.0626 | valid1 RMSE : 0.9938
+[2025-05-21 11:29:01,486][__main__][INFO] - Step 90 | valid1 MSE : 395118.5625 | valid1 NMSE : 210.9424 | valid1 RMSE : 0.9930
+[2025-05-21 11:47:43,175][__main__][INFO] - Step 100 | valid1 MSE : 394894.0625 | valid1 NMSE : 210.7924 | valid1 RMSE : 0.9921
+[2025-05-21 12:06:31,822][__main__][INFO] - Step 110 | valid1 MSE : 394589.3125 | valid1 NMSE : 210.5923 | valid1 RMSE : 0.9909
+Terminated
+Terminated
+Terminated

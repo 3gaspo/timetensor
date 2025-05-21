@@ -196,7 +196,7 @@ def run(cfg):
 
     #weights
     if model_name == "DLinear":
-        if normalization is not None:
+        if normalization != "None":
             linear_weights = global_model.model.Linear_Seasonal[0].weight.detach().cpu().numpy()
             season_weights = global_model.model.Linear_Trend[0].weight.detach().cpu().numpy()
         else:

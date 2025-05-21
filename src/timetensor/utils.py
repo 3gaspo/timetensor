@@ -9,7 +9,7 @@ from .dataset import load_example, load_data
 def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_name=None):
     if save_name is None:
         save_name = model_name
-        if normalization is not None and ("revin" in normalization or model_name not in ["persistence", "repeat", "lookback", "expected"]):
+        if "revin" in normalization or model_name not in ["persistence", "repeat", "lookback", "expected"]:
             save_name = save_name + "_" + normalization
         if criterion_name is not None:
             if "revin" in normalization or model_name not in ["persistence", "repeat", "lookback", "expected"]:

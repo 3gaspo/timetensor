@@ -26,6 +26,7 @@ def run(cfg):
     batch_size, lr, epochs = cfg.training.bs, cfg.training.lr, cfg.training.epochs
     criterion_name, normalization = cfg.training.loss, cfg.model.normalization
     model_name, retrain, kwargs = cfg.model.name, cfg.training.retrain, cfg.model_configs
+    eval_freq, print_freq = cfg.training.eval_freq, cfg.training.print_freq
     verbose, benchmark = cfg.misc.verbose, cfg.misc.benchmark
     if verbose:
         logger.info("Fetched main configs")
@@ -67,14 +68,24 @@ def run(cfg):
         criterion = Loss(nn.MSELoss(), mode="instance")
     elif criterion_name == "RMSE":
         criterion = Loss(nn.MSELoss(), mode="relative")
+    elif criterion_name == "normalize_y":
+        criterion = Loss(nn.MSELoss(), mode="normalize_y")
+    elif criterion_name == "denormalize_pred":
+        criterion = Loss(nn.MSELoss(), mode="denormalize_pred")
     else:
         logger.info("Unknown criterion name")
         criterion = None
-    eval_losses = {
-        "MSE": Loss(nn.MSELoss(reduction="none")),
-        "NMSE": Loss(nn.MSELoss(reduction="none"), mode="instance"),
-        "RMSE": Loss(nn.MSELoss(reduction="none"), mode="relative")
-        }
+    if criterion_name == "normalize_y":
+        eval_losses = {
+            "NMSE": Loss(nn.MSELoss(reduction="none"), mode= "normalize_y"),
+            "MSE": Loss(nn.MSELoss(reduction="none"), mode="denormalize_pred"),
+            }
+    else:
+        eval_losses = {
+            "MSE": Loss(nn.MSELoss(reduction="none")),
+            "NMSE": Loss(nn.MSELoss(reduction="none"), mode="instance"),
+            "RMSE": Loss(nn.MSELoss(reduction="none"), mode="relative")
+            }
 
     model = load_model(model_name, shape, normalization, **kwargs)
     if model_name in ["persistence", "repeat", "lookback", "expected"] and "revin" not in normalization:
@@ -90,7 +101,8 @@ def run(cfg):
         logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps per epoch={len(loaders_dict['train'])}, epochs={epochs}")
         if retrain:
             logger.info("Starting training...")
-            train_losses, valid_losses, valid_losses2 = train_model(learner, loaders_dict, epochs=epochs, logger=logger)
+            eval_runs = 1 if by_idx=="dates" else 10
+            train_losses, valid_losses, valid_losses2 = train_model(learner, loaders_dict, epochs=epochs, logger=logger, eval_runs=eval_runs, eval_freq=eval_freq, print_freq=print_freq)
             torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")
             torch.save(train_losses, save_dir + f"train_losses.pt")
             torch.save(valid_losses, save_dir + f"valid_losses.pt")
@@ -108,19 +120,19 @@ def run(cfg):
 
         #plots
         for loss_name in eval_losses:
-            if loss_name == criterion_name:
-                plot_losses(train_losses, valid_losses[loss_name], valid_losses2[loss_name],  save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}")
+            if loss_name == criterion_name or (loss_name=="NMSE" and "NMSE" in criterion_name):
+                plot_losses(train_losses, valid_losses[loss_name], valid_losses2[loss_name],  save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}", eval_freq=eval_freq)
             else:
                 plot_multi_losses({"valid1": valid_losses[loss_name], "valid2":valid_losses2[loss_name]},  save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}")
         logger.info("Plotted losses")
 
     #eval
     logger.info("Computing test metrics")
-    runs = 1 if by_idx="dates" else 5
+    runs = 1 if by_idx=="dates" else 10
     if model_name=="sklinear" and "instance" in normalization:
-        test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1, normal=True, logger=logger) #(ndates*nindividuals, dim, horizon)
+        test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1, normal=True, logger=logger, runs=runs) #(ndates*nindividuals, dim, horizon)
     else:
-        test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1, logger=logger) #(ndates*nindividuals, dim, horizon)
+        test_losses = learner.eval(loaders_dict["test"], return_all=True, verbose=1, logger=logger, runs=runs) #(ndates*nindividuals, dim, horizon)
     torch.save(test_losses, save_dir + "test_losses.pt")
     if benchmark:
         test_dir = output_dir
@@ -149,13 +161,13 @@ def run(cfg):
         if model_name == "sklinear":
             weights = learner.get_weights()
         else:
-            if normalization is not None:
+            if normalization != "None":
                 weights = model.model.fc.weight.detach().cpu().numpy()
             else:
                 weights = model.fc.weight.detach().cpu().numpy()
         plot_weights(weights, save_dir + "plots/", title=f'{save_name} weights')
     if model_name == "DLinear":
-        if normalization is not None:
+        if normalization != "None":
             linear_weights = model.model.Linear_Seasonal[0].weight.detach().cpu().numpy()
             season_weights = model.model.Linear_Trend[0].weight.detach().cpu().numpy()
         else:

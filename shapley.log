@@ -1,0 +1,6 @@
+nohup: ignoring input
+[2025-05-21 12:22:53,256][__main__][INFO] - =====Running main script=====
+[2025-05-21 12:22:53,257][__main__][INFO] - Fetched main configs
+[2025-05-21 12:22:53,584][__main__][INFO] - Starting scikit-learn fitting...
+[2025-05-21 12:22:53,722][__main__][INFO] - End of training
+[2025-05-21 12:22:53,731][__main__][INFO] - Loaded game
