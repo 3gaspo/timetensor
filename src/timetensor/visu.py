@@ -115,21 +115,20 @@ def scatter_input_output(x_dict, y_dict, path="", name="stats.pdf", dim=0, title
     plt.savefig(path + name)
 
 
-def plot_losses(train_losses, valid_losses=None, valid_losses2=None, path="", name="losses.pdf", title="Losses", logscale=True, eval_freq=10):
+def plot_losses(train_losses, valid_losses_dict=None, path="", name="losses.pdf", title="Losses", logscale=True, eval_freq=10):
     """plots losses during training"""
     plt.clf()
     fig = plt.figure(figsize=(10,5))
-    if valid_losses is not None:
+    if valid_losses_dict is not None:
         plt.plot(range(1, len(train_losses)+1), train_losses, label="train")
-        T = [1]
-        k = 1
-        while len(T) < len(valid_losses)-1:
-            T.append(eval_freq * k)
-            k+=1
-        T.append(len(train_losses))
-        plt.plot(T, valid_losses, label="valid")
-        if valid_losses2 is not None:
-            plt.plot(T, valid_losses2, label="valid2")
+        for key, values in valid_losses_dict.items():
+            T = [1]
+            k = 1
+            while len(T) < len(values)-1:
+                T.append(eval_freq * k)
+                k+=1
+            T.append(len(train_losses))
+            plt.plot(T, values, label="valid")
         plt.legend()
     else:
         plt.plot(range(1, len(train_losses)+1), train_losses)
@@ -239,24 +238,28 @@ def plot_weights(weights, path, name="weights.pdf", title='Model weights'):
 
 def plot_expe(path):
     """plots losses for list of experiments in path"""
-    expe_names = [name for name in os.listdir(path) if os.path.exists(path + f"{name}/" + "valid_losses.pt")]
+    expe_names = [name for name in os.listdir(path) if os.path.exists(path + f"{name}/" + "valid_losses1.pt")]
 
     if len(expe_names) >0:
-        losses_dict = {}
+        losses_dict1 = {}
         losses_dict2 = {}
+        losses_dict3 = {}
 
         for expe_name in expe_names:
-            valid_losses = torch.load(path + expe_name + "/" + "valid_losses.pt", weights_only=False)
+            valid_losses1 = torch.load(path + expe_name + "/" + "valid_losses1.pt", weights_only=False)
             valid_losses2 = torch.load(path + expe_name + "/" + "valid_losses2.pt", weights_only=False)
+            valid_losses3 = torch.load(path + expe_name + "/" + "valid_losses3.pt", weights_only=False)
 
-
-            for loss_name in valid_losses:
-                if loss_name not in losses_dict:
-                    losses_dict[loss_name] = {}
+            for loss_name in valid_losses1:
+                if loss_name not in losses_dict1:
+                    losses_dict1[loss_name] = {}
                     losses_dict2[loss_name] = {}
-                losses_dict[loss_name][expe_name] = valid_losses[loss_name]
+                    losses_dict3[loss_name] = {}
+                losses_dict1[loss_name][expe_name] = valid_losses1[loss_name]
                 losses_dict2[loss_name][expe_name] = valid_losses2[loss_name]
+                losses_dict3[loss_name][expe_name] = valid_losses3[loss_name]
 
-        for loss_name in valid_losses:
-            plot_multi_losses(losses_dict[loss_name], path, f"{loss_name}_valid.pdf", f"Valid {loss_name}")
+        for loss_name in valid_losses1:
+            plot_multi_losses(losses_dict1[loss_name], path, f"{loss_name}_valid1.pdf", f"Valid {loss_name}")
             plot_multi_losses(losses_dict2[loss_name], path, f"{loss_name}_valid2.pdf", f"Valid2 {loss_name}")
+            plot_multi_losses(losses_dict3[loss_name], path, f"{loss_name}_valid3.pdf", f"Valid3 {loss_name}")

@@ -55,8 +55,9 @@ def run(cfg):
     background = BackgroundDataset(dataset)
     players = {f"lag_{k}": (0, 0, k) for k in range(lags)}
     game = Game(model, players, background)
-    logger.info("Loaded game")
-    shapley_values = game.get_shapley_values(dataset[0], 1, 1, replace=True, aggregate=False, split=False)
+    logger.info(f"Loaded game with {game.players} players and {len(game.background)} examples")
+
+    shapley_values = game.get_shapley_values(dataset[0][0], (0,0),  2, 3, replace=True, aggregate=False, split=False, logger=logger)
     logger.info("Computed shap")
 
     plt.figure()

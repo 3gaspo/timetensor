@@ -1,0 +1,24 @@
+training:
+  retrain: True
+  loss: MSE
+  bs: 28
+  lr: 0.0001
+  epochs: 10
+  eval_freq: 10
+  print_freq: 10
+
+task:
+  lags: 336
+  horizon: 24
+
+misc:
+  seed:
+  output_dir: ../outputs/new/
+  benchmark: True
+  save_name:
+  verbose: 1
+
+defaults:
+  - _self_
+  - data: synthetic_6way_new
+  - model: PatchTST

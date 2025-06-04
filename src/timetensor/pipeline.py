@@ -160,8 +160,9 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
     
     #data
     train_loader = loaders_dict["train"]
-    valid_loader = loaders_dict.get("valid")
+    valid_loader1 = loaders_dict.get("valid1")
     valid_loader2 = loaders_dict.get("valid2")
+    valid_loader3 = loaders_dict.get("valid3")
     steps_per_epoch = len(train_loader)
     total_steps = epochs * steps_per_epoch
 
@@ -174,8 +175,9 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
             print(f"Training {epochs} epochs of {steps_per_epoch} batches ({total_steps} steps): , eval_freq: {eval_freq}, print_freq: {print_freq}")
 
     train_losses = []
-    valid_losses = {}
+    valid_losses1 = {}
     valid_losses2 = {}
+    valid_losses3= {}
     t1 = perf_counter()
 
     #training
@@ -189,24 +191,32 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
             if do_eval and (step == 1 or step % eval_freq == 0 or step == total_steps):
 
                 #valid eval
-                average_eval_dict = learner.eval(valid_loader, runs=eval_runs)
-                average_eval_dict2 = learner.eval(valid_loader2, runs=eval_runs)
-                append_in_dict(valid_losses, average_eval_dict)
+                if valid_loader1 is not None:
+                    average_eval_dict1 = learner.eval(valid_loader1, runs=eval_runs)
+                    
+                if valid_loader2 is not None:
+                    average_eval_dict2 = learner.eval(valid_loader2, runs=eval_runs)
+                if valid_loader3 is not None:
+                    average_eval_dict3 = learner.eval(valid_loader3, runs=eval_runs)
+                append_in_dict(valid_losses1, average_eval_dict1)
                 append_in_dict(valid_losses2, average_eval_dict2)
+                append_in_dict(valid_losses3, average_eval_dict3)
 
                 if verbose and (step == 1 or step % print_freq == 0 or step == total_steps):
                     if logger is not None:
-                        logger.info(f"Step {step} | " + " | ".join([f"valid1 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict.items()]))
+                        logger.info(f"Step {step} | " + " | ".join([f"valid1 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict1.items()]))
                     else:
-                        print(f"Step {step} | " + " | ".join([f"valid1 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict.items()]))
+                        print(f"Step {step} | " + " | ".join([f"valid1 {loss_name} : {loss_value:.4f}" for loss_name, loss_value in average_eval_dict1.items()]))
 
     t2 = perf_counter()
     if verbose:
         if logger is not None:
-            logger.info(f"Training done in {(t2-t1)/60:.3f} min")
+            T = t2-t1
+            logger.info(f"Training done in {T/60:.3f} min")
+            logger.info(f"Average time per step: {T/total_steps:.3f} s")
         else:
             print(f"Training done in {(t2-t1)/60:.3f} min")
-    return train_losses, valid_losses, valid_losses2
+    return train_losses, valid_losses1, valid_losses2, valid_losses3
 
 
 

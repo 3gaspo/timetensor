@@ -8,7 +8,7 @@ from sklearn.linear_model import LinearRegression
 
 
 class RevIN(nn.Module):
-    def __init__(self, model, dim, eps=1, denormalize=True, last=False):
+    def __init__(self, model, dim, eps=1, last=False, latent=False):
         """
         RevIN: Reversible Instance Normalization for Time Series Forecasting
         """
@@ -17,7 +17,7 @@ class RevIN(nn.Module):
         self.gamma = nn.Parameter(torch.ones(1, dim, 1))  #scale
         self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
         self.model = model
-        self.last, self.denormalize= last, denormalize
+        self.last, self.latent= last, latent
 
     def norm(self, x):
         self.mu, self.std = get_normal_stats(x, std_cst=self.eps)
@@ -34,22 +34,53 @@ class RevIN(nn.Module):
     def forward(self, x, c=None): #(B, dim, lags)
         x  = self.norm(x) #(B, dim, lags)
         pred = self.model(x, c) #(B, dim, horizon)
-        if self.denormalize:
-            output = self.denorm(pred) #(B, dim, horizon)
-        else:
+        if self.latent:
             output = pred
+        else:
+            output = self.denorm(pred) #(B, dim, horizon)
+        return output
+    
+
+class mIN(nn.Module):
+    def __init__(self, model, dim, eps=1, last=False, latent=False):
+        """
+        RevIN: Reversible Instance Normalization for Time Series Forecasting
+        """
+        super(mIN, self).__init__()
+        self.dim, self.eps = dim, eps
+        self.alpha = nn.Parameter(torch.ones(1, dim, 1))  #scale
+        self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
+        self.model = model
+        self.last, self.latent = last, latent
+
+    def norm(self, x):
+        self.mu, self.std = get_normal_stats(x, std_cst=self.eps)
+        if self.last:
+            self.mu = x[:, :, -1].unsqueeze(2).detach()
+        x = (x - self.mu) / self.std # (B, dim, lags)
+        return x
+    def denorm(self, y):
+        if self.latent:
+            y = y * self.alpha + self.beta
+        else:
+            y = y * (self.std * self.alpha) + (self.mu + self.beta) #(B, dim, horizon)
+        return y
+    
+    def forward(self, x, c=None): #(B, dim, lags)
+        x  = self.norm(x) #(B, dim, lags)
+        pred = self.model(x, c) #(B, dim, horizon)
+        output = self.denorm(pred) #(B, dim, horizon)
         return output
 
 
 class Normalized(nn.Module):
-    def __init__(self, model, mean, std, denormalize=True):
+    def __init__(self, model, mean, std):
         """
         Normalizes input before predictions and denormalizes prediction
         """
         super(Normalized, self).__init__()
         self.model = model
         self.mean, self.std = mean, std
-        self.denormalize=denormalize
 
     def norm(self, x):
         x = (x - self.mean) / self.std # (B, dim, lags)
@@ -61,21 +92,18 @@ class Normalized(nn.Module):
     def forward(self, x, c=None): #(B, dim, lags)
         x  = self.norm(x) #(B, dim, lags)
         pred = self.model(x, c) #(B, dim, horizon)
-        if self.denormalize:
-            output = self.denorm(pred) #(B, dim, horizon)
-        else:
-            output = pred
+        output = self.denorm(pred) #(B, dim, horizon)
         return output
 
 class InstanceNormalized(nn.Module):
-    def __init__(self, model, eps=1, denormalize=True,):
+    def __init__(self, model, eps=1, latent=True):
         """
         Normalizes input before predictions and denormalizes prediction
         """
         super(InstanceNormalized, self).__init__()
         self.eps = eps
         self.model = model
-        self.denormalize=denormalize
+        self.latent=latent
 
     def norm(self, x):
         self.mean, self.std = get_normal_stats(x, std_cst=self.eps)
@@ -88,10 +116,10 @@ class InstanceNormalized(nn.Module):
     def forward(self, x, c=None): #(B, dim, lags)
         x  = self.norm(x) #(B, dim, lags)
         pred = self.model(x, c) #(B, dim, horizon)
-        if self.denormalize:
-            output = self.denorm(pred) #(B, dim, horizon)
-        else:
+        if self.latent:
             output = pred
+        else:
+            output = self.denorm(pred) #(B, dim, horizon)
         return output
 
     
@@ -225,11 +253,13 @@ def load_model(model_name, shape, normalization=None, **kwargs):
     if normalization != "None":
         if "global" in normalization:
             mean, std = kwargs.get("mean", 2500), kwargs.get("std", 15000)
-            return Normalized(model, mean, std, denormalize=(normalization=="global"))
+            return Normalized(model, mean, std)
         elif "instance" in normalization:
-            return InstanceNormalized(model, kwargs.get("std_cst", 1), denormalize=(normalization=="instance"))
+            return InstanceNormalized(model, kwargs.get("std_cst", 1), kwargs.get("latent", False))
         elif "revin" in normalization:
-            return RevIN(model, dim, kwargs.get("std_cst", 1), denormalize=(normalization=="revin"))
+            return RevIN(model, dim, kwargs.get("std_cst", 1), kwargs.get("last", False), kwargs.get("latent", False))
+        elif normalization == "mIN":
+            return mIN(model, dim, kwargs.get("std_cst", 1), kwargs.get("last", False), kwargs.get("latent", False))
         else:
             ValueError(f"Normalization not recognized : {normalization}")
     return model

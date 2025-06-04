@@ -1,0 +1,5 @@
+name: PatchTST
+normalization: instance
+configs:
+ last: False
+ latent: False

@@ -14,28 +14,30 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
-@hydra.main(version_base=None, config_path="config", config_name="config")
+@hydra.main(version_base=None, config_path="configs", config_name="config")
 def run(cfg):
     logger = logging.getLogger(__name__)
     logger.info("=====Running data script=====")
 
     #configs
     data_path = cfg.data.path
-    verbose = cfg.misc.verbose
-    lags, horizon = cfg.model.lags, cfg.model.horizon
-
-    if verbose:
-        logger.info("Fetched configs")
+    lags, horizon = cfg.task.lags, cfg.task.horizon
+    indiv_split, date_split = cfg.data.indiv_split, cfg.data.date_split
+    verbose, seed = cfg.misc.verbose, cfg.misc.seed
 
     rebuild_pt=False
-    reshuffle=False
+    reshuffle=True
     new_example=True
-    replot=False
+    replot=True
     
     for byname in ["by_date", "by_indiv"]:
         for folder_name in ["plots/", "subsets/"]:
             if not os.path.exists(data_path + folder_name + byname + "/"):
                 os.makedirs(data_path + folder_name + byname + "/")
+
+    if verbose:
+        logger.info("Fetched configs")
+        logger.info(f"Splits: indivs {indiv_split}, dates {date_split}")
 
     #dataset
     if rebuild_pt:
@@ -47,7 +49,7 @@ def run(cfg):
             from src.timetensor.electricity import fetch_data  #adapt path if script in another working directory
             fetcher = lambda path: fetch_data(path, raw_format=cfg.data.format, years=None, hourly=None)
         else:
-            "Dataset name not recognized"
+            raise ValueError("Dataset name not recognized")
         build_dataset(fetcher, data_path) #builds dataset values from raw data and saves as .pt
         if verbose:
             t2 = perf_counter()
@@ -55,17 +57,19 @@ def run(cfg):
 
     if reshuffle:
         #splits
-        data_dict = get_dataset_splits(data_path, cfg.data.indiv_split, cfg.data.date_split, cfg.misc.seed, save=False) #save will save the train test indices, in path
-        logger.info(f"Splits values: {[(k, v[0].shape) for k,v in data_dict.items()]}")
+        data_dict = get_dataset_splits(data_path, type_split=6, indiv_split= indiv_split, date_split= date_split, seed=seed, save=False) #save will save the train test indices, in path
+        logger.info(f"{[(k, v[0].shape) for k,v in data_dict.items()]}")
         #subsets
-        subsets={"train":0.1, "valid":0.1, "valid2":0.1, "test":0.1}
+        subsets={k: 0.1 for k in ["train", "valid1", "valid2", "valid3"]}
+        for key in ["test1", "test2"]:
+            subsets[key] = 0.5
         for by_date in [True, False]:
             #will generate the subsets and save indices
             if by_date:
-                byname, subset_mode, batch_size ="by_date", "dates", 4
+                byname, subset_mode, batch_size ="by_date", "dates", 2
             else:
-                byname, subset_mode, batch_size ="by_indiv", "individuals", 64
-            partial_loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date, subsets=subsets, subset_mode=subset_mode, path=data_path+f"subsets/{byname}/")
+                byname, subset_mode, batch_size ="by_indiv", "individuals", 28
+            partial_loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date, subsets=subsets, subset_mode=subset_mode, save_path=data_path+f"subsets/{byname}/")
             full_loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date)
             unrolls = {"full": unroll_windows(full_loaders_dict["train"]), "subset": unroll_windows(partial_loaders_dict["train"])}
             x_dict = {key: unrolls[key][0] for key in unrolls}
@@ -82,12 +86,12 @@ def run(cfg):
         plot_named_example(data_path + "/examples/", "rand")
 
     if replot:
-        data_dict = get_dataset_splits(data_path, cfg.data.indiv_split, cfg.data.date_split, cfg.misc.seed, save=False) #save will save the train test indices, in path
+        data_dict = get_dataset_splits(data_path, type_split=6, indiv_split= indiv_split, date_split= date_split, seed= seed, save=False) #save will save the train test indices, in path
         for by_date in [True, False]:
             if by_date:
-                byname, subset_mode, batch_size ="by_date", "dates", 4
+                byname, subset_mode, batch_size ="by_date", "dates", 2
             else:
-                byname, subset_mode, batch_size ="by_indiv", "individuals", 64
+                byname, subset_mode, batch_size ="by_indiv", "individuals", 28
             loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date)
             
             #sizes
@@ -105,8 +109,8 @@ def run(cfg):
             if verbose:
                 logger.info("Plotting stats")
 
-            unrolls = {key: unroll_windows(loaders_dict[key]) for key in ["train", "test"]}
-            nunrolls = {key: unroll_windows(loaders_dict[key], normal=True) for key in ["train", "test"]}
+            unrolls = {key: unroll_windows(loaders_dict[key]) for key in ["train", "test1", "test2"]}
+            nunrolls = {key: unroll_windows(loaders_dict[key], normal=True) for key in ["train", "test1", "test2"]}
             x_dict, y_dict = {key: unrolls[key][0] for key in unrolls}, {key: unrolls[key][1] for key in unrolls}
             nx_dict, ny_dict =  {key: nunrolls[key][0] for key in nunrolls}, {key: nunrolls[key][1] for key in nunrolls}
 

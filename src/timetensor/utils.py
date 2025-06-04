@@ -7,13 +7,15 @@ import hydra
 from .dataset import load_example, load_data
 
 def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_name=None):
+    
+    get_training = ("revin" in normalization) or (normalization=="mIN") or (model_name not in ["persistence", "repeat", "lookback", "expected"])
+    
     if save_name is None:
         save_name = model_name
-        if "revin" in normalization or model_name not in ["persistence", "repeat", "lookback", "expected"]:
+        if get_training and (normalization is not None) and (normalization != "None"):
             save_name = save_name + "_" + normalization
-        if criterion_name is not None:
-            if "revin" in normalization or model_name not in ["persistence", "repeat", "lookback", "expected"]:
-                save_name = save_name + "_" + criterion_name
+        if get_training and (criterion_name is not None) and ("sklinear" not in model_name):
+            save_name = save_name + "_" + criterion_name
     save_dir = output_dir + save_name + "/" #current experiment dir
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -80,7 +82,7 @@ def fetch_example_data(path="datasets/examples", names="rand"):
         return load_example(path + names + "/")
 
 
-def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, gamma=1, beta=0, std_cst=1):
+def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, std_cst=1):
     """unrolls (x,y) examples of dataloaders (typically individuals*dates examples)"""
     X = []
     Y = []
@@ -88,8 +90,8 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, gamma=1, b
     for x, c, y in dataloader:
         if normal:
             mean, std = get_normal_stats(x)
-            if gamma is not None:
-                std = std*gamma
+            if alpha is not None:
+                std = std*alpha
                 std = torch.where(std != 0, std, std_cst)
             nx = normalize(x, mean-beta, std)
             ny = normalize(y, mean-beta, std)

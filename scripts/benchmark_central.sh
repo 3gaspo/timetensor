@@ -4,6 +4,24 @@ output_dir="../outputs/benchmark_tst/"
 rm -rf "$output_dir"
 mkdir -p "$output_dir"
 
+model_name=expected
+python3 train_model.py \
+    "model.name=${model_name}" \
+    "model_configs=${model_name}" \
+    "misc.output_dir=$output_dir" \
+    "misc.benchmark=True" \
+    "data.by_idx=individuals" \
+    "misc.save_name=${model_name}"
+
+model_name=sklinear
+python3 train_model.py \
+    "model.name=${model_name}" \
+    "model_configs=${model_name}" \
+    "misc.output_dir=$output_dir" \
+    "misc.benchmark=True" \
+    "data.by_idx=individuals" \
+    "misc.save_name=${model_name}"
+
 by_idx=individuals
 for model_name in PatchTST
 do
