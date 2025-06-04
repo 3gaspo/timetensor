@@ -26,8 +26,8 @@ def run(cfg):
     verbose, seed = cfg.misc.verbose, cfg.misc.seed
 
     rebuild_pt=False
-    reshuffle=True
-    new_example=True
+    reshuffle=False
+    new_example=False
     replot=True
     
     for byname in ["by_date", "by_indiv"]:
@@ -108,13 +108,15 @@ def run(cfg):
             #stats
             if verbose:
                 logger.info("Plotting stats")
+            logscale=False if cfg.data.dataset == "synthetic" else True
+
+            scatter_stats({key: loaders_dict[key].dataset.values for key in ["train", "test1", "test2"]}, data_path+"plots/"+byname+"/", name="global_stats.pdf", title="User statistics",logscale=logscale)
 
             unrolls = {key: unroll_windows(loaders_dict[key]) for key in ["train", "test1", "test2"]}
             nunrolls = {key: unroll_windows(loaders_dict[key], normal=True) for key in ["train", "test1", "test2"]}
             x_dict, y_dict = {key: unrolls[key][0] for key in unrolls}, {key: unrolls[key][1] for key in unrolls}
             nx_dict, ny_dict =  {key: nunrolls[key][0] for key in nunrolls}, {key: nunrolls[key][1] for key in nunrolls}
 
-            logscale=False if cfg.data.dataset == "synthetic" else True
             scatter_input_output(x_dict, y_dict, data_path+"plots/"+byname+"/", name="output_inputs.pdf", logscale=logscale)
             scatter_stats(x_dict, data_path+"plots/"+byname+"/", name="inputs_stats.pdf", title="Inputs statistics",logscale=logscale)
             plot_stats(nx_dict, data_path+"plots/"+byname+"/", name="normal_inputs.pdf", title="Normalized inputs distribution", logscale=False, limits=(-1e-6,1e-6))

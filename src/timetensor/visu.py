@@ -10,7 +10,7 @@ import torch
 from .utils import get_stats, fetch_example_data
 
 
-def plot_example(x, y, path="", name="example.pdf", title="Example"):
+def plot_example(x, y, path="", name="example.pdf", title="Example", axis=True):
     """plots example data"""
     plt.clf()
     lag = len(x)
@@ -20,6 +20,9 @@ def plot_example(x, y, path="", name="example.pdf", title="Example"):
     plt.plot(range(lag, lag+horizon), y, label="Horizon")
     plt.axvline(x=lag, color='black', linestyle='--')
     plt.legend(bbox_to_anchor=(0.5, -0.15), ncol=3, loc='center', fontsize=14)
+    if not axis:
+      plt.axis('off')
+      plt.title(None)
     plt.title(title)
     fig.tight_layout()
     plt.savefig(path + name)
@@ -27,6 +30,30 @@ def plot_example(x, y, path="", name="example.pdf", title="Example"):
 def plot_named_example(path, name):
     x, c, y, i, d  = fetch_example_data(path, name)
     plot_example(x[0], y[0], path + f"/{name}/", f"example.pdf", "Example")
+
+
+def plot_global_stats(values, path="", dim=0):
+    """plots stats of datasets"""
+    plt.clf()
+    fig = plt.figure(figsize=(15,5))
+    
+    global_mean = values[:, dim, :].mean()
+    local_means = values[:, dim, :].mean(dim=-1)
+    plt.hist(local_means, bins=np.logspace(0, 6))
+    plt.xscale("log")
+    plt.xlabel("kWh")
+    plt.ylabel("Counts")        
+    plt.title(f"Distribution of users means (total avg: {global_mean:.2f} kWh)")
+    plt.savefig(path + "global_means.pdf")
+
+    global_std = values[:, dim, :].std()
+    local_std = values[:, dim, :].std(dim=-1)
+    plt.hist(local_std, bins=np.logspace(0, 6))
+    plt.xscale("log")
+    plt.xlabel("kWh")
+    plt.ylabel("Counts")        
+    plt.title(f"Distribution of users std (total avg: {global_std:.2f} kWh)")
+    plt.savefig(path + "global_stds.pdf")
 
 
 def plot_stats(values, path="", name="stats.pdf", dim=0, title=None, logscale=True, limits=None):
@@ -149,7 +176,6 @@ def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", l
     if x_every is not None:
         for k in range(1, (len(losses)+1)//x_every):
             plt.axvline(k*x_every, linestyle="--", color="red")
-
     if logscale:
       plt.yscale('log')
     plt.xlabel("Steps")
@@ -183,7 +209,7 @@ def plot_horizon_errors(losses, path="", name="horizon.pdf", title="Mean errors 
     plt.savefig(path + name)
 
 
-def plot_pred(x, y, pred, path="", name="prediction.pdf", title="Predictions"):
+def plot_pred(x, y, pred, path="", name="prediction.pdf", title="Predictions", axis=True):
     """plots example prediction"""
     plt.clf()
     lag = len(x)
@@ -194,6 +220,9 @@ def plot_pred(x, y, pred, path="", name="prediction.pdf", title="Predictions"):
     plt.plot(range(lag, lag+horizon), y, label="Horizon")
     plt.axvline(x=lag, color='black', linestyle='--')
     plt.legend(bbox_to_anchor=(0.5, -0.15), ncol=3, loc='center', fontsize=14)
+    if not axis:
+      plt.axis('off')
+      plt.title(None)
     plt.title(title)
     fig.tight_layout()
     plt.savefig(path + name)

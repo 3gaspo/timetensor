@@ -20,5 +20,5 @@ misc:
 
 defaults:
   - _self_
-  - data: synthetic_6way_new
+  - data: electricity_6way
   - model: PatchTST
