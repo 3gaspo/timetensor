@@ -8,8 +8,8 @@ training:
   print_freq: 10
 
 task:
-  lags: 336
-  horizon: 24
+  lags: 100 #336
+  horizon: 20 #24
 
 misc:
   seed:
@@ -20,5 +20,5 @@ misc:
 
 defaults:
   - _self_
-  - data: electricity_6way
+  - data: sim_6way_new
   - model: PatchTST

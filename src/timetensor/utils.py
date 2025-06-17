@@ -82,7 +82,7 @@ def fetch_example_data(path="datasets/examples", names="rand"):
         return load_example(path + names + "/")
 
 
-def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, std_cst=1):
+def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, mIN=False, std_cst=1e-6):
     """unrolls (x,y) examples of dataloaders (typically individuals*dates examples)"""
     X = []
     Y = []
@@ -93,8 +93,12 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, b
             if alpha is not None:
                 std = std*alpha
                 std = torch.where(std != 0, std, std_cst)
-            nx = normalize(x, mean-beta, std)
-            ny = normalize(y, mean-beta, std)
+            if mIN:
+                nx = normalize(x, mean*beta, std)
+                ny = normalize(y, mean*beta, std)
+            else:
+                nx = normalize(x, mean-beta, std)
+                ny = normalize(y, mean-beta, std)
             X.append(nx)
             Y.append(ny)
         else:
@@ -131,7 +135,7 @@ def get_stats(values, stat, dim=0):
     return values_stat, total_stat #(Nindiv), (1)
 
 
-def get_normal_stats(x, std_cst=1):
+def get_normal_stats(x, std_cst=1e-6):
   """
   X: tensor (B, dim, features)
   normalize for each B

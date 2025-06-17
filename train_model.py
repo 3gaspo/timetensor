@@ -178,11 +178,11 @@ def run(cfg):
         plot_weights(season_weights, save_dir + "plots/", name="trend_weights.pdf", title=f'{save_name} trend weights')
 
     #mIN
-    if normalization == "mIN":
+    if normalization in ["revin","mIN"]:
         params = {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
         logger.info(f"Final mIN parameters: {params}")
         unroll = unroll_windows(loaders_dict["train"], normal=True)
-        runroll = unroll_windows(loaders_dict["train"], normal=True, beta=model.beta.data.detach().cpu().numpy()[0][0][0], alpha=model.alpha.data.detach().cpu().numpy()[0][0][0])
+        runroll = unroll_windows(loaders_dict["train"], normal=True, beta=model.beta.data.detach().cpu().numpy()[0][0][0], alpha=model.alpha.data.detach().cpu().numpy()[0][0][0], mIN = normalization=="mIN")
         x_dict = {"train": unroll[0]}
         rx_dict = {"train": runroll[0]}
         plot_stats(x_dict, save_dir + "plots/", name="normal_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-4,1e-4))

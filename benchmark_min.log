@@ -1,0 +1,153 @@
+nohup: ignoring input
+[2025-06-17 19:59:41,157][__main__][INFO] - =====Running main script=====
+[2025-06-17 19:59:41,162][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_min/expected/
+[2025-06-17 19:59:41,162][__main__][INFO] - Model expected, normalization None, criterion MSE, kwargs {}
+[2025-06-17 19:59:41,238][__main__][INFO] - Fetched dataloaders
+[2025-06-17 19:59:41,240][__main__][INFO] - Training data shape : (70, 1, 1000)
+[2025-06-17 19:59:41,240][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 100]), y=torch.Size([28, 1, 20])
+[2025-06-17 19:59:41,314][__main__][INFO] - No training needed
+[2025-06-17 19:59:41,314][__main__][INFO] - Computing test metrics
+[2025-06-17 19:59:42,503][__main__][INFO] - Evaluation done in 0.020 min
+[2025-06-17 19:59:42,797][__main__][INFO] - Evaluation done in 0.003 min
+[2025-06-17 19:59:44,987][__main__][INFO] - Saved plots
+[2025-06-17 19:59:44,987][__main__][INFO] - End of script
+
+[2025-06-17 19:59:48,635][__main__][INFO] - =====Running main script=====
+[2025-06-17 19:59:48,640][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_min/sklinear/
+[2025-06-17 19:59:48,641][__main__][INFO] - Model sklinear, normalization instance, criterion MSE, kwargs {}
+[2025-06-17 19:59:48,803][__main__][INFO] - Fetched dataloaders
+[2025-06-17 19:59:48,806][__main__][INFO] - Training data shape : (70, 1, 1000)
+[2025-06-17 19:59:48,806][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 100]), y=torch.Size([28, 1, 20])
+[2025-06-17 19:59:48,870][__main__][INFO] - Starting scikit-learn fitting...
+[2025-06-17 19:59:48,980][__main__][INFO] - End of training
+[2025-06-17 19:59:48,980][__main__][INFO] - Computing test metrics
+[2025-06-17 19:59:49,284][__main__][INFO] - Evaluation done in 0.005 min
+[2025-06-17 19:59:49,570][__main__][INFO] - Evaluation done in 0.002 min
+[2025-06-17 19:59:51,977][__main__][INFO] - Saved plots
+[2025-06-17 19:59:52,212][__main__][INFO] - End of script
+
+[2025-06-17 19:59:56,212][__main__][INFO] - =====Running main script=====
+[2025-06-17 19:59:56,216][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_min/PatchTST_MSE/
+[2025-06-17 19:59:56,217][__main__][INFO] - Model PatchTST, normalization None, criterion MSE, kwargs {'last': False, 'latent': False}
+[2025-06-17 19:59:56,285][__main__][INFO] - Fetched dataloaders
+[2025-06-17 19:59:56,287][__main__][INFO] - Training data shape : (70, 1, 1000)
+[2025-06-17 19:59:56,287][__main__][INFO] - Batch sizes : X=torch.Size([10, 1, 100]), y=torch.Size([10, 1, 20])
+[2025-06-17 20:00:03,316][__main__][INFO] - batch_size=10, learning_rate=0.0001, steps per epoch=7, epochs=100
+[2025-06-17 20:00:03,316][__main__][INFO] - Starting training...
+[2025-06-17 20:00:03,316][__main__][INFO] - Using device: cuda
+[2025-06-17 20:00:03,316][__main__][INFO] - Training 100 epochs of 7 batches (700 steps): , eval_freq: 50, print_freq: 100
+[2025-06-17 20:00:10,205][__main__][INFO] - Step 1 | valid1 MSE : 899.7817 | valid1 NMSE : 1269.5018
+[2025-06-17 20:00:21,472][__main__][INFO] - Step 100 | valid1 MSE : 574.7902 | valid1 NMSE : 811.8885
+[2025-06-17 20:00:32,651][__main__][INFO] - Step 200 | valid1 MSE : 354.6174 | valid1 NMSE : 501.7284
+[2025-06-17 20:00:43,770][__main__][INFO] - Step 300 | valid1 MSE : 389.7897 | valid1 NMSE : 551.1958
+[2025-06-17 20:00:54,910][__main__][INFO] - Step 400 | valid1 MSE : 307.4362 | valid1 NMSE : 435.0195
+[2025-06-17 20:01:05,997][__main__][INFO] - Step 500 | valid1 MSE : 171.5342 | valid1 NMSE : 243.4396
+[2025-06-17 20:01:17,259][__main__][INFO] - Step 600 | valid1 MSE : 66.0100 | valid1 NMSE : 94.2328
+[2025-06-17 20:01:28,351][__main__][INFO] - Step 700 | valid1 MSE : 51.3010 | valid1 NMSE : 73.2367
+[2025-06-17 20:01:28,351][__main__][INFO] - Training done in 1.417 min
+[2025-06-17 20:01:28,354][__main__][INFO] - Average time per step: 0.121 s
+[2025-06-17 20:01:28,450][__main__][INFO] - End of training
+[2025-06-17 20:01:29,113][__main__][INFO] - Plotted losses
+[2025-06-17 20:01:29,113][__main__][INFO] - Computing test metrics
+[2025-06-17 20:01:29,945][__main__][INFO] - Evaluation done in 0.014 min
+[2025-06-17 20:01:30,727][__main__][INFO] - Evaluation done in 0.011 min
+[2025-06-17 20:01:32,605][__main__][INFO] - Saved plots
+[2025-06-17 20:01:32,606][__main__][INFO] - End of script
+
+[2025-06-17 20:01:38,020][__main__][INFO] - =====Running main script=====
+[2025-06-17 20:01:38,037][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_min/PatchTST_instance_MSE/
+[2025-06-17 20:01:38,037][__main__][INFO] - Model PatchTST, normalization instance, criterion MSE, kwargs {'last': False, 'latent': False}
+[2025-06-17 20:01:38,133][__main__][INFO] - Fetched dataloaders
+[2025-06-17 20:01:38,134][__main__][INFO] - Training data shape : (70, 1, 1000)
+[2025-06-17 20:01:38,135][__main__][INFO] - Batch sizes : X=torch.Size([10, 1, 100]), y=torch.Size([10, 1, 20])
+[2025-06-17 20:01:39,874][__main__][INFO] - batch_size=10, learning_rate=0.0001, steps per epoch=7, epochs=100
+[2025-06-17 20:01:39,874][__main__][INFO] - Starting training...
+[2025-06-17 20:01:39,874][__main__][INFO] - Using device: cuda
+[2025-06-17 20:01:39,874][__main__][INFO] - Training 100 epochs of 7 batches (700 steps): , eval_freq: 50, print_freq: 100
+[2025-06-17 20:01:45,604][__main__][INFO] - Step 1 | valid1 MSE : 1.2607 | valid1 NMSE : 1.7760
+[2025-06-17 20:01:57,544][__main__][INFO] - Step 100 | valid1 MSE : 0.0469 | valid1 NMSE : 0.0665
+[2025-06-17 20:02:09,377][__main__][INFO] - Step 200 | valid1 MSE : 0.0269 | valid1 NMSE : 0.0382
+[2025-06-17 20:02:21,212][__main__][INFO] - Step 300 | valid1 MSE : 0.0202 | valid1 NMSE : 0.0287
+[2025-06-17 20:02:33,019][__main__][INFO] - Step 400 | valid1 MSE : 0.0189 | valid1 NMSE : 0.0268
+[2025-06-17 20:02:44,706][__main__][INFO] - Step 500 | valid1 MSE : 0.0176 | valid1 NMSE : 0.0249
+[2025-06-17 20:02:56,606][__main__][INFO] - Step 600 | valid1 MSE : 0.0177 | valid1 NMSE : 0.0251
+[2025-06-17 20:03:08,372][__main__][INFO] - Step 700 | valid1 MSE : 0.0187 | valid1 NMSE : 0.0265
+[2025-06-17 20:03:08,372][__main__][INFO] - Training done in 1.475 min
+[2025-06-17 20:03:08,373][__main__][INFO] - Average time per step: 0.126 s
+[2025-06-17 20:03:08,563][__main__][INFO] - End of training
+[2025-06-17 20:03:09,268][__main__][INFO] - Plotted losses
+[2025-06-17 20:03:09,268][__main__][INFO] - Computing test metrics
+[2025-06-17 20:03:10,132][__main__][INFO] - Evaluation done in 0.014 min
+[2025-06-17 20:03:10,969][__main__][INFO] - Evaluation done in 0.012 min
+[2025-06-17 20:03:12,885][__main__][INFO] - Saved plots
+[2025-06-17 20:03:12,885][__main__][INFO] - End of script
+
+[2025-06-17 20:03:17,495][__main__][INFO] - =====Running main script=====
+[2025-06-17 20:03:17,538][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_min/PatchTST_revin_MSE/
+[2025-06-17 20:03:17,538][__main__][INFO] - Model PatchTST, normalization revin, criterion MSE, kwargs {'last': False, 'latent': False}
+[2025-06-17 20:03:17,625][__main__][INFO] - Fetched dataloaders
+[2025-06-17 20:03:17,626][__main__][INFO] - Training data shape : (70, 1, 1000)
+[2025-06-17 20:03:17,626][__main__][INFO] - Batch sizes : X=torch.Size([10, 1, 100]), y=torch.Size([10, 1, 20])
+[2025-06-17 20:03:19,083][__main__][INFO] - batch_size=10, learning_rate=0.0001, steps per epoch=7, epochs=100
+[2025-06-17 20:03:19,083][__main__][INFO] - Starting training...
+[2025-06-17 20:03:19,083][__main__][INFO] - Using device: cuda
+[2025-06-17 20:03:19,084][__main__][INFO] - Training 100 epochs of 7 batches (700 steps): , eval_freq: 50, print_freq: 100
+[2025-06-17 20:03:25,029][__main__][INFO] - Step 1 | valid1 MSE : 1.3047 | valid1 NMSE : 1.8520
+[2025-06-17 20:03:37,171][__main__][INFO] - Step 100 | valid1 MSE : 0.0423 | valid1 NMSE : 0.0603
+[2025-06-17 20:03:49,164][__main__][INFO] - Step 200 | valid1 MSE : 0.0244 | valid1 NMSE : 0.0348
+[2025-06-17 20:04:01,186][__main__][INFO] - Step 300 | valid1 MSE : 0.0208 | valid1 NMSE : 0.0296
+[2025-06-17 20:04:13,142][__main__][INFO] - Step 400 | valid1 MSE : 0.0177 | valid1 NMSE : 0.0253
+[2025-06-17 20:04:25,037][__main__][INFO] - Step 500 | valid1 MSE : 0.0185 | valid1 NMSE : 0.0264
+[2025-06-17 20:04:37,150][__main__][INFO] - Step 600 | valid1 MSE : 0.0161 | valid1 NMSE : 0.0229
+[2025-06-17 20:04:49,129][__main__][INFO] - Step 700 | valid1 MSE : 0.0165 | valid1 NMSE : 0.0236
+[2025-06-17 20:04:49,129][__main__][INFO] - Training done in 1.501 min
+[2025-06-17 20:04:49,131][__main__][INFO] - Average time per step: 0.129 s
+[2025-06-17 20:04:49,286][__main__][INFO] - End of training
+[2025-06-17 20:04:50,578][__main__][INFO] - Plotted losses
+[2025-06-17 20:04:50,578][__main__][INFO] - Computing test metrics
+[2025-06-17 20:04:51,455][__main__][INFO] - Evaluation done in 0.015 min
+[2025-06-17 20:04:52,297][__main__][INFO] - Evaluation done in 0.012 min
+[2025-06-17 20:04:54,395][__main__][INFO] - Saved plots
+[2025-06-17 20:04:54,396][__main__][INFO] - Final mIN parameters: {'beta': np.float32(-0.0042485846), 'alpha': np.float32(1.030065)}
+/home/H61084/venvs/timetensor/lib/python3.10/site-packages/numpy/lib/_histograms_impl.py:901: RuntimeWarning: invalid value encountered in divide
+  return n/db/n.sum(), bin_edges
+[2025-06-17 20:04:54,842][__main__][INFO] - End of script
+
+[2025-06-17 20:05:00,632][__main__][INFO] - =====Running main script=====
+[2025-06-17 20:05:00,761][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_min/PatchTST_mIN_MSE/
+[2025-06-17 20:05:00,761][__main__][INFO] - Model PatchTST, normalization mIN, criterion MSE, kwargs {'last': False, 'latent': False}
+[2025-06-17 20:05:00,946][__main__][INFO] - Fetched dataloaders
+[2025-06-17 20:05:00,947][__main__][INFO] - Training data shape : (70, 1, 1000)
+[2025-06-17 20:05:00,948][__main__][INFO] - Batch sizes : X=torch.Size([10, 1, 100]), y=torch.Size([10, 1, 20])
+[2025-06-17 20:05:02,399][__main__][INFO] - batch_size=10, learning_rate=0.0001, steps per epoch=7, epochs=100
+[2025-06-17 20:05:02,399][__main__][INFO] - Starting training...
+[2025-06-17 20:05:02,399][__main__][INFO] - Using device: cuda
+[2025-06-17 20:05:02,399][__main__][INFO] - Training 100 epochs of 7 batches (700 steps): , eval_freq: 50, print_freq: 100
+[2025-06-17 20:05:08,149][__main__][INFO] - Step 1 | valid1 MSE : 1.3419 | valid1 NMSE : 1.8973
+[2025-06-17 20:05:20,162][__main__][INFO] - Step 100 | valid1 MSE : 0.0409 | valid1 NMSE : 0.0577
+[2025-06-17 20:05:32,054][__main__][INFO] - Step 200 | valid1 MSE : 0.0244 | valid1 NMSE : 0.0344
+[2025-06-17 20:05:43,923][__main__][INFO] - Step 300 | valid1 MSE : 0.0196 | valid1 NMSE : 0.0277
+[2025-06-17 20:05:55,790][__main__][INFO] - Step 400 | valid1 MSE : 0.0181 | valid1 NMSE : 0.0255
+[2025-06-17 20:06:07,504][__main__][INFO] - Step 500 | valid1 MSE : 0.0173 | valid1 NMSE : 0.0245
+[2025-06-17 20:06:19,449][__main__][INFO] - Step 600 | valid1 MSE : 0.0171 | valid1 NMSE : 0.0243
+[2025-06-17 20:06:31,242][__main__][INFO] - Step 700 | valid1 MSE : 0.0157 | valid1 NMSE : 0.0222
+[2025-06-17 20:06:31,242][__main__][INFO] - Training done in 1.481 min
+[2025-06-17 20:06:31,245][__main__][INFO] - Average time per step: 0.127 s
+[2025-06-17 20:06:31,476][__main__][INFO] - End of training
+[2025-06-17 20:06:32,539][__main__][INFO] - Plotted losses
+[2025-06-17 20:06:32,539][__main__][INFO] - Computing test metrics
+[2025-06-17 20:06:33,412][__main__][INFO] - Evaluation done in 0.015 min
+[2025-06-17 20:06:34,251][__main__][INFO] - Evaluation done in 0.012 min
+[2025-06-17 20:06:36,266][__main__][INFO] - Saved plots
+[2025-06-17 20:06:36,267][__main__][INFO] - Final mIN parameters: {'beta': np.float32(1.0021915), 'alpha': np.float32(0.97093415)}
+/home/H61084/venvs/timetensor/lib/python3.10/site-packages/numpy/lib/_histograms_impl.py:901: RuntimeWarning: invalid value encountered in divide
+  return n/db/n.sum(), bin_edges
+[2025-06-17 20:06:36,648][__main__][INFO] - End of script
+
++-----------+------------+------------+----------------+-------------------------+----------------------+--------------------+
+|           |   expected |   sklinear |   PatchTST_MSE |   PatchTST_instance_MSE |   PatchTST_revin_MSE |   PatchTST_mIN_MSE |
++===========+============+============+================+=========================+======================+====================+
+| Test MSE  |     1.3286 |     0.0500 |        42.6018 |                  0.0188 |               0.0165 |             0.0162 |
++-----------+------------+------------+----------------+-------------------------+----------------------+--------------------+
+| Test NMSE |     1.8850 |     0.0709 |        61.1558 |                  0.0267 |               0.0236 |             0.0230 |
++-----------+------------+------------+----------------+-------------------------+----------------------+--------------------+

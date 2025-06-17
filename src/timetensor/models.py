@@ -8,13 +8,13 @@ from sklearn.linear_model import LinearRegression
 
 
 class RevIN(nn.Module):
-    def __init__(self, model, dim, eps=1, last=False, latent=False):
+    def __init__(self, model, dim, eps=1e-6, last=False, latent=False):
         """
         RevIN: Reversible Instance Normalization for Time Series Forecasting
         """
         super(RevIN, self).__init__()
         self.dim, self.eps = dim, eps
-        self.gamma = nn.Parameter(torch.ones(1, dim, 1))  #scale
+        self.alpha = nn.Parameter(torch.ones(1, dim, 1))  #scale
         self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
         self.model = model
         self.last, self.latent= last, latent
@@ -24,10 +24,10 @@ class RevIN(nn.Module):
         if self.last:
             self.mu = x[:, :, -1].unsqueeze(2).detach()
         x = (x - self.mu) / self.std # (B, dim, lags)
-        x = x * self.gamma + self.beta
+        x = x * self.alpha + self.beta
         return x
     def denorm(self, y):
-        y = (y - self.beta) / torch.where(self.gamma != 0, self.gamma, self.eps) #(B, dim, horizon)
+        y = (y - self.beta) / torch.where(self.alpha != 0, self.alpha, self.eps) #(B, dim, horizon)
         y = y * self.std + self.mu
         return y
     
@@ -42,14 +42,14 @@ class RevIN(nn.Module):
     
 
 class mIN(nn.Module):
-    def __init__(self, model, dim, eps=1, last=False, latent=False):
+    def __init__(self, model, dim, eps=1e-6, last=False, latent=False):
         """
         RevIN: Reversible Instance Normalization for Time Series Forecasting
         """
         super(mIN, self).__init__()
         self.dim, self.eps = dim, eps
         self.alpha = nn.Parameter(torch.ones(1, dim, 1))  #scale
-        self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
+        self.beta = nn.Parameter(torch.ones(1, dim, 1))  #shift
         self.model = model
         self.last, self.latent = last, latent
 
@@ -63,7 +63,7 @@ class mIN(nn.Module):
         if self.latent:
             y = y * self.alpha + self.beta
         else:
-            y = y * (self.std * self.alpha) + (self.mu + self.beta) #(B, dim, horizon)
+            y = y * (self.std * self.alpha) + (self.mu * self.beta) #(B, dim, horizon)
         return y
     
     def forward(self, x, c=None): #(B, dim, lags)
@@ -96,7 +96,7 @@ class Normalized(nn.Module):
         return output
 
 class InstanceNormalized(nn.Module):
-    def __init__(self, model, eps=1, latent=True):
+    def __init__(self, model, eps=1e-6, latent=True):
         """
         Normalizes input before predictions and denormalizes prediction
         """

@@ -27,7 +27,7 @@ def run(cfg):
 
     rebuild_pt=False
     reshuffle=False
-    new_example=False
+    new_example=True
     replot=True
     
     for byname in ["by_date", "by_indiv"]:
@@ -71,6 +71,17 @@ def run(cfg):
                 byname, subset_mode, batch_size ="by_indiv", "individuals", 28
             partial_loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date, subsets=subsets, subset_mode=subset_mode, save_path=data_path+f"subsets/{byname}/")
             full_loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date)
+            
+            if verbose:
+                logger.info(f"--Sizes for {byname}--")
+                logger.info(f"Training data : {full_loaders_dict['train'].dataset.shape}")
+                X, c, y = next(iter(loaders_dict["train"])) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
+                if c is not None:
+                    logger.info(f"{len(loaders_dict['train'])} train batches : X={X.shape}, c={c.shape}, y={y.shape}")
+                else:
+                    logger.info(f"{len(loaders_dict['train'])} train batches : X={X.shape}, y={y.shape}")
+
+            
             unrolls = {"full": unroll_windows(full_loaders_dict["train"]), "subset": unroll_windows(partial_loaders_dict["train"])}
             x_dict = {key: unrolls[key][0] for key in unrolls}
             y_dict = {key: unrolls[key][1] for key in unrolls}
@@ -87,40 +98,25 @@ def run(cfg):
 
     if replot:
         data_dict = get_dataset_splits(data_path, type_split=6, indiv_split= indiv_split, date_split= date_split, seed= seed, save=False) #save will save the train test indices, in path
-        for by_date in [True, False]:
-            if by_date:
-                byname, subset_mode, batch_size ="by_date", "dates", 2
-            else:
-                byname, subset_mode, batch_size ="by_indiv", "individuals", 28
-            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date)
-            
-            #sizes
-            if verbose:
-                
-                logger.info(f"--Sizes for {byname}--")
-                logger.info(f"Training data : {loaders_dict['train'].dataset.shape}")
-                X, c, y = next(iter(loaders_dict["train"])) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
-                if c is not None:
-                    logger.info(f"{len(loaders_dict['train'])} train batches : X={X.shape}, c={c.shape}, y={y.shape}")
-                else:
-                    logger.info(f"{len(loaders_dict['train'])} train batches : X={X.shape}, y={y.shape}")
+        byname, subset_mode, batch_size ="by_date", "dates", 2
+        loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True)
 
-            #stats
-            if verbose:
-                logger.info("Plotting stats")
-            logscale=False if cfg.data.dataset == "synthetic" else True
+        #stats
+        if verbose:
+            logger.info("Plotting stats")
+        logscale=False if cfg.data.dataset == "synthetic" else True
 
-            scatter_stats({key: loaders_dict[key].dataset.values for key in ["train", "test1", "test2"]}, data_path+"plots/"+byname+"/", name="global_stats.pdf", title="User statistics",logscale=logscale)
+        scatter_stats({key: loaders_dict[key].dataset.values for key in ["train", "test1", "test2"]}, data_path+"plots/"+byname+"/", name="global_stats.pdf", title="User statistics",logscale=logscale)
 
-            unrolls = {key: unroll_windows(loaders_dict[key]) for key in ["train", "test1", "test2"]}
-            nunrolls = {key: unroll_windows(loaders_dict[key], normal=True) for key in ["train", "test1", "test2"]}
-            x_dict, y_dict = {key: unrolls[key][0] for key in unrolls}, {key: unrolls[key][1] for key in unrolls}
-            nx_dict, ny_dict =  {key: nunrolls[key][0] for key in nunrolls}, {key: nunrolls[key][1] for key in nunrolls}
+        unrolls = {key: unroll_windows(loaders_dict[key]) for key in ["train", "test1", "test2"]}
+        nunrolls = {key: unroll_windows(loaders_dict[key], normal=True) for key in ["train", "test1", "test2"]}
+        x_dict, y_dict = {key: unrolls[key][0] for key in unrolls}, {key: unrolls[key][1] for key in unrolls}
+        nx_dict, ny_dict =  {key: nunrolls[key][0] for key in nunrolls}, {key: nunrolls[key][1] for key in nunrolls}
 
-            scatter_input_output(x_dict, y_dict, data_path+"plots/"+byname+"/", name="output_inputs.pdf", logscale=logscale)
-            scatter_stats(x_dict, data_path+"plots/"+byname+"/", name="inputs_stats.pdf", title="Inputs statistics",logscale=logscale)
-            plot_stats(nx_dict, data_path+"plots/"+byname+"/", name="normal_inputs.pdf", title="Normalized inputs distribution", logscale=False, limits=(-1e-6,1e-6))
-            plot_stats(ny_dict, data_path+"plots/"+byname+"/", name="normal_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-5,5))
+        scatter_input_output(x_dict, y_dict, data_path+"plots/"+byname+"/", name="output_inputs.pdf", logscale=logscale)
+        scatter_stats(x_dict, data_path+"plots/"+byname+"/", name="inputs_stats.pdf", title="Inputs statistics",logscale=logscale)
+        plot_stats(nx_dict, data_path+"plots/"+byname+"/", name="normal_inputs.pdf", title="Normalized inputs distribution", logscale=False, limits=(-1e-6,1e-6))
+        plot_stats(ny_dict, data_path+"plots/"+byname+"/", name="normal_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-5,5))
 
     logger.info('End of script\n')
 
