@@ -1,5 +1,5 @@
-dataset: synthetic
-path: ../datasets/synthetic/
+dataset: sim
+path: ../datasets/sim/
 
 indiv_split: 0.7 
 date_split:
@@ -17,7 +17,7 @@ subsets:
   test1: 1
   test2: 1
 
-nodes: ../datasets/synthetic/nodes/
+nodes: ../datasets/sim/nodes/
 
 mean: 560
 std: 330

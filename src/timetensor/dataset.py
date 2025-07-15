@@ -252,27 +252,41 @@ def get_subset_indices(dataset, ratio, subset_mode=None):
     return indices
 
 
-def split_3_way(values, context, datetimes, date_split, seed=None, save_path="", save=True):
+def split_3_way(values, context, datetimes, date_splits, seed=None, save_path="", save=True):
     """returns dict of train/valid/test of provided values,context,datetimes
     """
     if seed is not None:
         np.random.seed(seed)
-    assert (date_split is not None) and (type(date_split)==str or (type(date_split)==float and date_split<1))
+    dates = len(datetimes)
 
-    if type(date_split)==str:
-        dates_idx1, dates_idx2 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False))
-        dates1, dates2, dates3 = datetimes[dates_idx1], datetimes[dates_idx2], datetimes[dates_idx3]
-    elif type(date_split[0])==float: #split dates
-        dates = len(datetimes)
-        stop_date1, stop_date2 = int(date_split[0] * dates), int((date_split[0] + date_split[1])*dates)
+    #assert (date_splits is not None) and (type(date_split)==str or (type(date_split)==float and date_split<1))
+    split_dir = save_path + str(date_splits) + "/"
+    if not os.path.exists(split_dir):
+        os.makedirs(split_dir)
+
+    # if type(date_split)==str:
+    #     dates_idx1, dates_idx2 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False))
+    #     dates1, dates2, dates3 = datetimes[dates_idx1], datetimes[dates_idx2], datetimes[dates_idx3]
+    # elif type(date_split[0])==float: #split dates
+        stop_date1, stop_date2 = int(date_splits[0] * dates), int((date_splits[0] + date_splits[1])*dates)
         dates_idx1, dates_idx2, dates_idx3 = list(range(stop_date1)), list(range(stop_date1, stop_date2)), list(range(stop_date2, dates))
         dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
-        if save:
-            torch.save(dates_idx1, save_path + "date_split1.pt")
-            torch.save(dates_idx2, save_path + "date_split2.pt")
-            torch.save(dates_idx3, save_path + "date_split3.pt")
+
+        torch.save(dates_idx1, split_dir + "date_split1.pt")
+        torch.save(dates_idx2, split_dir + "date_split2.pt")
+        torch.save(dates_idx3, split_dir + "date_split3.pt")
     else:
-        raise ValueError("Unrecognized data split")
+        stop_date1, stop_date2 = int(date_splits[0] * dates), int((date_splits[0] + date_splits[1])*dates)
+        dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
+        dates_idx1 = torch.load(split_dir + "date_split1.pt")
+        dates_idx2 = torch.load(split_dir + "date_split2.pt")
+        dates_idx3 = torch.load(split_dir + "date_split3.pt")
+    # if save:
+    #     torch.save(dates_idx1, save_path + "date_split1.pt")
+    #     torch.save(dates_idx2, save_path + "date_split2.pt")
+    #     torch.save(dates_idx3, save_path + "date_split3.pt")
+    # else:
+    #     raise ValueError("Unrecognized data split")
     
     if context is not None:
         context1 = context[:, :, :][: , :, dates_idx1]
@@ -283,38 +297,51 @@ def split_3_way(values, context, datetimes, date_split, seed=None, save_path="",
     return {"train": (values[:,:,dates_idx1], context1, dates1), "valid":(values[:,:,dates_idx2], context2, dates2), "test":(values[:,:,dates_idx3], context3, dates3)}    
 
 
-def split_4_way(values, context, datetimes, indiv_split, date_split, seed=None, context_by_individuals=False, save_path="", save=True):
+def split_4_way(values, context, datetimes, indiv_split, date_splits, seed=None, context_by_individuals=False, save_path="", save=True):
     """returns dict of train/valid/test of provided values,context,datetimes
     split parameters can be in [0,1] or str path to indices
     """
     if seed is not None:
         np.random.seed(seed)
-    assert (indiv_split is not None) and (type(indiv_split)==str or (type(indiv_split)==float and indiv_split<1))
-    assert (date_split is not None) and (type(date_split)==str or (type(date_split)==float and date_split<1))
+    dates = len(datetimes)
 
-    if type(date_split)==str:
-        dates_idx1, dates_idx2 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False))
-        dates1, dates2 = datetimes[dates_idx1], datetimes[dates_idx2]
-    else: #split dates
-        dates = len(datetimes)
-        stop_date = int(date_split * dates)
+    #assert (indiv_split is not None) and (type(indiv_split)==str or (type(indiv_split)==float and indiv_split<1))
+    ##assert (date_split is not None) and (type(date_split)==str or (type(date_split)==float and date_split<1))
+    split_dir = save_path + str(indiv_split) + ";" + str(date_splits) + "/"
+    if not os.path.exists(split_dir):
+        os.makedirs(split_dir)
+
+    # if type(date_split)==str:
+    #     dates_idx1, dates_idx2 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False))
+    #     dates1, dates2 = datetimes[dates_idx1], datetimes[dates_idx2]
+    # else: #split dates
+        stop_date = int(date_splits * dates)
         dates_idx1, dates_idx2 = list(range(stop_date)), list(range(stop_date, dates))
         dates1, dates2 = list(datetimes[:stop_date]), list(datetimes[stop_date:])
         if save:
-            torch.save(dates_idx1, save_path + "date_split1.pt")
-            torch.save(dates_idx2, save_path + "date_split2.pt")
-
-    if type(indiv_split)==str:
-        indices1, indices2 = list(torch.load(indiv_split + "_split1.pt", weights_only=False)), list(torch.load(indiv_split + "_split2.pt", weights_only=False))
-    else: 
+            torch.save(dates_idx1, split_dir + "date_split1.pt")
+            torch.save(dates_idx2, split_dir + "date_split2.pt")
+        
         individuals = values.shape[0]
         stop_indiv = int(indiv_split * individuals)
         indices = np.random.permutation(individuals)
         indices1, indices2 = list(indices[:stop_indiv]), list(indices[stop_indiv:])
         if save:
-            torch.save(indices1, save_path + "indiv_split1.pt")
-            torch.save(indices2, save_path + "indiv_split2.pt")
+            torch.save(indices1, split_dir + "indiv_split1.pt")
+            torch.save(indices2, split_dir + "indiv_split2.pt")
+    
+    else:
+        stop_date = int(date_splits * dates)
+        dates1, dates2 = list(datetimes[:stop_date]), list(datetimes[stop_date:])
+        dates_idx1 = torch.load(split_dir + "date_split1.pt")
+        dates_idx2 = torch.load(split_dir + "date_split2.pt")
+        indices1 = list(torch.load(split_dir + "indiv_split1.pt", weights_only=False))
+        indices2 = list(torch.load(split_dir + "indiv_split2.pt", weights_only=False))
 
+    # if type(indiv_split)==str:
+    #     indices1, indices2 = list(torch.load(indiv_split + "_split1.pt", weights_only=False)), list(torch.load(indiv_split + "_split2.pt", weights_only=False))
+    # else: 
+        
     values1 = values[indices1, :, :][: , :, dates_idx1]
     values2 = values[indices1, :, :][: , :, dates_idx2]
     values3 = values[indices2, :, :][: , :, dates_idx1]
@@ -341,32 +368,46 @@ def split_6_way(values, context, datetimes, indiv_split, date_splits, seed=None,
     """
     if seed is not None:
         np.random.seed(seed)
-    assert (indiv_split is not None) and (type(indiv_split)==str or (type(indiv_split)==float and indiv_split<1))
-    assert (date_splits is not None) and (type(date_splits)==str or (type(date_splits[0])==float and np.sum(date_splits)==1))
+    dates = len(datetimes)
 
-    if type(date_splits)==str:
-        dates_idx1, dates_idx2, dates_idx3 = [list(torch.load(date_splits + f"_split{k}.pt", weights_only=False)) for k in range(3)]
-        dates1, dates2, dates3 = datetimes[dates_idx1], datetimes[dates_idx2], datetimes[dates_idx3]
-    else: #split dates
+    # assert (indiv_split is not None) and (type(indiv_split)==str or (type(indiv_split)==float and indiv_split<1))
+    # assert (date_splits is not None) and (type(date_splits)==str or (type(date_splits[0])==float and np.sum(date_splits)==1))
+    split_dir = save_path + str(indiv_split) + ";" + str(date_splits) + "/"
+    if not os.path.exists(split_dir):
+        os.makedirs(split_dir)
+
+    # if type(date_splits)==str:
+    #     dates_idx1, dates_idx2, dates_idx3 = [list(torch.load(date_splits + f"_split{k}.pt", weights_only=False)) for k in range(3)]
+    #     dates1, dates2, dates3 = datetimes[dates_idx1], datetimes[dates_idx2], datetimes[dates_idx3]
+    # else: #split dates
         dates = len(datetimes)
         stop_date1, stop_date2 = int(date_splits[0] * dates), int((date_splits[0] + date_splits[1])*dates)
         dates_idx1, dates_idx2, dates_idx3 = list(range(stop_date1)), list(range(stop_date1, stop_date2)), list(range(stop_date2, dates))
         dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
         if save:
-            torch.save(dates_idx1, save_path + "date_split1.pt")
-            torch.save(dates_idx2, save_path + "date_split2.pt")
-            torch.save(dates_idx3, save_path + "date_split3.pt")
+            torch.save(dates_idx1, split_dir + "date_split1.pt")
+            torch.save(dates_idx2, split_dir + "date_split2.pt")
+            torch.save(dates_idx3, split_dir + "date_split3.pt")
 
-    if type(indiv_split)==str:
-        indices1, indices2 = list(torch.load(indiv_split + "_split1.pt", weights_only=False)), list(torch.load(indiv_split + "_split2.pt", weights_only=False))
-    else: 
+    # if type(indiv_split)==str:
+    #     indices1, indices2 = list(torch.load(indiv_split + "_split1.pt", weights_only=False)), list(torch.load(indiv_split + "_split2.pt", weights_only=False))
+    # else: 
         individuals = values.shape[0]
         stop_indiv = int(indiv_split * individuals)
         indices = np.random.permutation(individuals)
         indices1, indices2 = list(indices[:stop_indiv]), list(indices[stop_indiv:])
         if save:
-            torch.save(indices1, save_path + "indiv_split1.pt")
-            torch.save(indices2, save_path + "indiv_split2.pt")
+            torch.save(indices1, split_dir + "indiv_split1.pt")
+            torch.save(indices2, split_dir + "indiv_split2.pt")
+
+    else:
+        stop_date1, stop_date2 = int(date_splits[0] * dates), int((date_splits[0] + date_splits[1])*dates)
+        dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
+        dates_idx1 = torch.load(split_dir + "date_split1.pt")
+        dates_idx2 = torch.load(split_dir + "date_split2.pt")
+        dates_idx3 = torch.load(split_dir + "date_split3.pt")
+        indices1 = list(torch.load(split_dir + "indiv_split1.pt", weights_only=False))
+        indices2 = list(torch.load(split_dir + "indiv_split2.pt", weights_only=False))
 
     values1 = values[indices1, :, :][: , :, dates_idx1]
     values2 = values[indices1, :, :][: , :, dates_idx2]
@@ -403,99 +444,8 @@ def split_6_way(values, context, datetimes, indiv_split, date_splits, seed=None,
     return dico
 
 
-# def train_test_split(values, context, datetimes, indiv_split=None, date_split=None, seed=None, context_by_individuals=False, path="", save=True):
-#     """returns dict of train/valid/test of provided values,context,datetimes
-#     split parameters can be in [0,1] or str path to indices
-#     """
 
-#     if seed is not None:
-#         np.random.seed(seed)
-
-#     if date_split is not None:
-#         if type(date_split)==str:
-#             dates_idx1, dates_idx2 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False))
-#             dates1, dates2 = datetimes[dates_idx1], datetimes[dates_idx2]
-#         elif type(date_split)==float and date_split<1: #split dates
-#             dates = len(datetimes)
-#             stop_date = int(date_split * dates)
-#             dates_idx1, dates_idx2 = list(range(stop_date)), list(range(stop_date, dates))
-#             dates1, dates2 = list(datetimes[:stop_date]), list(datetimes[stop_date:])
-#             if save:
-#                 torch.save(dates_idx1, path + "date_split1.pt")
-#                 torch.save(dates_idx2, path + "date_split2.pt")
-
-#         if indiv_split is not None: #split individuals
-#             if type(indiv_split)==str:
-#                 indices1, indices2 = list(torch.load(indiv_split + "_split1.pt", weights_only=False)), list(torch.load(indiv_split + "_split2.pt", weights_only=False))
-#             elif type(indiv_split)==float and indiv_split<1: 
-#                 individuals = values.shape[0]
-#                 stop_indiv = int(indiv_split * individuals)
-#                 indices = np.random.permutation(individuals)
-#                 indices1, indices2 = list(indices[:stop_indiv]), list(indices[stop_indiv:])
-#                 if save:
-#                     torch.save(indices1, path + "indiv_split1.pt")
-#                     torch.save(indices2, path + "indiv_split2.pt")
-
-#             values1 = values[indices1, :, :][: , :, dates_idx1]
-#             values2 = values[indices1, :, :][: , :, dates_idx2]
-#             values3 = values[indices2, :, :][: , :, dates_idx1]
-#             values4 = values[indices2, :, :][: , :, dates_idx2]
-#             if context is not None:
-#                 if context_by_individuals:
-#                     context1 = context[indices1, :, :][: , :, dates_idx1]
-#                     context2 = context[indices1, :, :][: , :, dates_idx2]
-#                     context3 = context[indices2, :, :][: , :, dates_idx1]
-#                     context4 = context[indices2, :, :][: , :, dates_idx2]
-#                 else:
-#                     context1 = context[:, :, :][: , :, dates_idx1]
-#                     context2 = context[:, :, :][: , :, dates_idx2]
-#                     context3 = context[:, :, :][: , :, dates_idx1]
-#                     context4 = context[:, :, :][: , :, dates_idx2]
-#             else:
-#                 context1, context2, context3, context4 = None, None, None, None
-#             return {"train":(values1, context1, dates1), "valid":(values2, context2, dates2), "valid2":(values3, context3, dates1), "test": (values4, context4, dates2)}
-
-#         else:
-#             if context is not None:
-#                 context1 = context[:, :, :][: , :, dates_idx1]
-#                 context2 = context[:, :, :][: , :, dates_idx2]
-#             else:
-#                 context1, context2 = None, None
-#             return {"train": (values[:, :, dates_idx1], context1, dates1), "test":(values[:,:,dates_idx2], context2, dates2)}
-
-#     elif indiv_split is not None:
-#         if type(indiv_split)==str:
-#             indices1, indices2 = list(torch.load(indiv_split + "_split1.pt", weights_only=False)), list(torch.load(indiv_split + "_split2.pt", weights_only=False))
-#         elif type(indiv_split)==float and indiv_split<1: 
-#             individuals = values.shape[0]
-#             stop_indiv = int(indiv_split * individuals)
-#             indices = np.random.permutation(individuals)
-#             indices1, indices2 = list(indices[:stop_indiv]), list(indices[stop_indiv:])
-#             if save:
-#                 torch.save(indices1, path + "indiv_split1.pt")
-#                 torch.save(indices2, path + "indiv_split2.pt")
-
-#         values1 = values[indices1, :, :]
-#         values2 = values[indices2, :, :]
-#         if context is not None:
-#             if context_by_individuals:
-#                 context1 = context[indices1, :, :]
-#                 context2 = context[indices2, :, :]
-#             else:
-#                 context1 = context[:, :, :]
-#                 context2 = context[:, :, :]
-#         else:
-#             context1, context2 = None, None
-#         return {"train":(values1, context1, dates1), "test" :(values2, context2, dates2)}
-    
-#     else:
-#         return {"train":(values, context, datetimes)}
-
-
-
-
-
-def get_dataset_splits(path="datasets/", type_split=4, indiv_split=None, date_split=None, seed=None, save=False, context_by_individuals=False, save_path=None):
+def get_dataset_splits(path="datasets/", indiv_split=None, date_splits=None, seed=None, save=False, context_by_individuals=True, save_path=None):
     """splits data from path. If str splits, will load given split, if float will save new split"""
     values, context, datetimes = load_data(path) #load dataset
     if not os.path.exists(path+"splits/"):
@@ -504,12 +454,21 @@ def get_dataset_splits(path="datasets/", type_split=4, indiv_split=None, date_sp
         split_path = path+"splits/"
     else:
         split_path = save_path
+    if type(date_splits) == str:
+        date_splits = date_splits.split(";")
+        date_splits = [float(txt) for txt in date_splits]
+    if indiv_split is None:
+        type_split = 3
+    elif len(date_splits) == 2:
+        type_split = 4
+    else:
+        type_split = 6
     if type_split == 3:
-        data_dict = split_3_way(values, context, datetimes, date_split, seed, context_by_individuals, split_path, save=True)
+        data_dict = split_3_way(values, context, datetimes, date_splits, seed, context_by_individuals, split_path, save=True)
     elif type_split == 4:
-        data_dict = split_4_way(values, context, datetimes, indiv_split, date_split, seed, context_by_individuals, split_path, save=True)
+        data_dict = split_4_way(values, context, datetimes, indiv_split, date_splits[0], seed, context_by_individuals, split_path, save=True)
     elif type_split == 6:
-        data_dict = split_6_way(values, context, datetimes, indiv_split, date_split, seed, context_by_individuals, split_path, save=True)
+        data_dict = split_6_way(values, context, datetimes, indiv_split, date_splits, seed, context_by_individuals, split_path, save=True)
     else:
         raise ValueError(f"Unrecognized type_split: {type_split}")
     if save: #saves pt files
@@ -522,25 +481,45 @@ def get_dataset_splits(path="datasets/", type_split=4, indiv_split=None, date_sp
 
 
 
-def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets={}, save_path="", subset_mode="dates"):
+def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets=None, save_path="", subset_mode="dates", context_by_individuals=True):
     """returns dataloaders from data_dict as eventual subsets"""
     loaders_dict = {}
+    
+    if subsets is not None:
+        subsets = subsets.split(";")
+        subsets = [float(txt) for txt in subsets]
+        subset_dir = save_path + subset_mode + str(subsets) + "/"
+        if not os.path.exists(subset_dir):
+            os.makedirs(subset_dir)
+            make_subsets=True
+        else:
+            make_subsets=False
+
+        if len(subsets)==3:
+            subsets = {"train": subsets[0], "valid": subsets[1], "test": subsets[2]}
+        elif len(subsets)==4:
+            subsets = {"train": subsets[0], "valid1": subsets[1], "valid2": subsets[2], "test": subsets[3]}
+        else:
+            subsets = {"train": subsets[0], "valid1": subsets[1], "valid2": subsets[2], "valid3": subsets[3], "test1": subsets[4], "test2": subsets[5]}
+    
     for key, (values, context, datetimes) in data_dict.items():
         if key == "train":
-                dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date)
+                dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date, context_by_individuals=context_by_individuals)
         else:
-            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True)
+            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True, context_by_individuals=context_by_individuals)
         
         if subsets is not None:
             subset = subsets.get(key)
-            if subset is not None and (type(subset)==str or (type(subset)==float and subset<1 and subset>0)):
-                if type(subset)==str:
-                    subset_indices = list(torch.load(subset, weights_only=False))
-                elif type(subset)==float:
+            # if subset is not None and (type(subset)==str or (type(subset)==float and subset<1 and subset>0)):
+            #     if type(subset)==str:
+            #         subset_indices = list(torch.load(subset, weights_only=False))
+                # elif type(subset)==float:
+            if subset != 1:
+                if make_subsets:
                     subset_indices = get_subset_indices(dataset, subset, subset_mode)
-                    if not os.path.exists(save_path):
-                        os.makedirs(save_path)
-                    torch.save(subset_indices, save_path + f"{key}_subset_indices_{subset}.pt")
+                    torch.save(subset_indices, subset_dir + f"{key}_subset.pt")
+                else:
+                    subset_indices = list(torch.load(subset, weights_only=False))
                 dataset = Subset(dataset, subset_indices, subset_mode)
 
         if key=="train":

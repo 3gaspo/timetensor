@@ -1,0 +1,5 @@
+name: instance
+configs:
+  eps: 1
+  last: False
+  latent: False

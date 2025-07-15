@@ -1,3 +1,4 @@
 name: sklinear
-normalization: instance
-configs:
+# normalization: None
+# configs:
+#   eps: 1

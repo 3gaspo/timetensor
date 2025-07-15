@@ -10,6 +10,18 @@ import torch
 from .utils import get_stats, fetch_example_data
 
 
+def plot_serie(x, path="", name="series.pdf", title="Time series", axis=True):
+    """plots example data"""
+    plt.clf()
+    fig = plt.figure(figsize=(20,5))
+    plt.plot(range(len(x)), x)
+    if not axis:
+      plt.axis('off')
+      plt.title(None)
+    plt.title(title)
+    fig.tight_layout()
+    plt.savefig(path + name)
+
 def plot_example(x, y, path="", name="example.pdf", title="Example", axis=True):
     """plots example data"""
     plt.clf()
@@ -167,12 +179,14 @@ def plot_losses(train_losses, valid_losses_dict=None, path="", name="losses.pdf"
     fig.tight_layout()
     plt.savefig(path + name)
 
-def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", logscale=True, x_every=None):
+def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", logscale=True, x_every=None, eval_freq=10):
     """plots losses during training"""
     plt.clf()
     fig = plt.figure(figsize=(10,5))
     for expe_name, losses in losses_dict.items():
-        plt.plot(range(1, len(losses)+1), losses, label=f"{expe_name}")
+        T = [1] + [k*eval_freq for k in range(1,len(losses))]
+        #plt.plot(range(1, len(losses)+1), losses, label=f"{expe_name}")
+        plt.plot(T, losses, label=f"{expe_name}")
     if x_every is not None:
         for k in range(1, (len(losses)+1)//x_every):
             plt.axvline(k*x_every, linestyle="--", color="red")
@@ -236,11 +250,15 @@ def pd_to_latex(path):
     print(latex_output)
 
 
-def print_nice_table(path, multipliers=None):
+def print_nice_table(path, multipliers=None, names=None):
     """print table from dataframe in path"""
     with open(path) as file:
         data = json.load(file)
     df = pd.DataFrame(data)
+    if names=="None":
+        names=None
+    if names is not None:
+        df = df[names]
     if multipliers is not None:
         if type(multipliers) == str:
             multipliers = multipliers.split(" ")
@@ -265,9 +283,18 @@ def plot_weights(weights, path, name="weights.pdf", title='Model weights'):
     plt.savefig(path + name)
 
 
-def plot_expe(path):
+def plot_expe(losses_path, eval_freq=10, names=None, save_path=None):
     """plots losses for list of experiments in path"""
-    expe_names = [name for name in os.listdir(path) if os.path.exists(path + f"{name}/" + "valid_losses1.pt")]
+    if type(eval_freq)==str:
+        eval_freq=int(eval_freq)
+    if names=="None":
+        names=None
+    if save_path is None:
+        save_path = losses_path+"plots/"
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+
+    expe_names = [name for name in os.listdir(losses_path) if (names is None and os.path.exists(losses_path + f"{name}/" + "valid_losses1.pt")) or (names is not None and name in names)]
 
     if len(expe_names) >0:
         losses_dict1 = {}
@@ -275,9 +302,9 @@ def plot_expe(path):
         losses_dict3 = {}
 
         for expe_name in expe_names:
-            valid_losses1 = torch.load(path + expe_name + "/" + "valid_losses1.pt", weights_only=False)
-            valid_losses2 = torch.load(path + expe_name + "/" + "valid_losses2.pt", weights_only=False)
-            valid_losses3 = torch.load(path + expe_name + "/" + "valid_losses3.pt", weights_only=False)
+            valid_losses1 = torch.load(losses_path + expe_name + "/" + "valid_losses1.pt", weights_only=False)
+            valid_losses2 = torch.load(losses_path + expe_name + "/" + "valid_losses2.pt", weights_only=False)
+            valid_losses3 = torch.load(losses_path + expe_name + "/" + "valid_losses3.pt", weights_only=False)
 
             for loss_name in valid_losses1:
                 if loss_name not in losses_dict1:
@@ -289,6 +316,6 @@ def plot_expe(path):
                 losses_dict3[loss_name][expe_name] = valid_losses3[loss_name]
 
         for loss_name in valid_losses1:
-            plot_multi_losses(losses_dict1[loss_name], path, f"{loss_name}_valid1.pdf", f"Valid {loss_name}")
-            plot_multi_losses(losses_dict2[loss_name], path, f"{loss_name}_valid2.pdf", f"Valid2 {loss_name}")
-            plot_multi_losses(losses_dict3[loss_name], path, f"{loss_name}_valid3.pdf", f"Valid3 {loss_name}")
+            plot_multi_losses(losses_dict1[loss_name], save_path, f"{loss_name}_valid1.pdf", f"Valid {loss_name}", eval_freq=eval_freq)
+            plot_multi_losses(losses_dict2[loss_name], save_path, f"{loss_name}_valid2.pdf", f"Valid2 {loss_name}", eval_freq=eval_freq)
+            plot_multi_losses(losses_dict3[loss_name], save_path, f"{loss_name}_valid3.pdf", f"Valid3 {loss_name}", eval_freq=eval_freq)

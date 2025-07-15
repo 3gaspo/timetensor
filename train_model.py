@@ -7,8 +7,8 @@ import torch.nn as nn
 from src.timetensor.dataset import get_dataset_splits, get_train_loaders
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import Learner, train_model, Loss
-from src.timetensor.visu import plot_losses, plot_multi_losses, plot_errors, plot_horizon_errors, plot_pred, plot_weights, plot_stats
-from src.timetensor.utils import save_results, fetch_example_data, get_dirs, unroll_windows
+from src.timetensor.visu import plot_losses, plot_multi_losses, plot_errors, plot_horizon_errors, plot_pred, plot_weights, plot_stats, plot_named_example, plot_serie
+from src.timetensor.utils import save_results, fetch_example_data, get_dirs, unroll_windows, set_random_data
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -22,25 +22,24 @@ def run(cfg):
     #configs
     data_path = cfg.data.path
     lags, horizon = cfg.task.lags, cfg.task.horizon
-    indiv_split, date_split = cfg.data.indiv_split, cfg.data.date_split
+    indiv_split, date_splits = cfg.data.indiv_split, cfg.data.date_splits
     subsets = cfg.data.subsets
     batch_size, lr, epochs, criterion_name = cfg.training.bs, cfg.training.lr, cfg.training.epochs, cfg.training.loss
     retrain, eval_freq, print_freq = cfg.training.retrain, cfg.training.eval_freq, cfg.training.print_freq
-    model_name, normalization, kwargs = cfg.model.name, cfg.model.normalization, cfg.model.configs
+    model_name, normalization, kwargs = cfg.model.name, cfg.normalization.name, cfg.model.configs
     if kwargs is None:
         kwargs = {}
     verbose, benchmark, output_dir, save_name, seed = cfg.misc.verbose, cfg.misc.benchmark, cfg.misc.output_dir, cfg.misc.save_name, cfg.misc.seed
 
-    save_name, save_dir = get_dirs(output_dir, save_name, model_name, normalization, criterion_name)
+    save_name, save_dir = get_dirs(output_dir, save_name, model_name, normalization, criterion_name, subsets["sizes"])
     if verbose:
         logger.info(f"Fetched main configs, save directory : {save_dir}")
         logger.info(f"Model {model_name}, normalization {normalization}, criterion {criterion_name}, kwargs {kwargs}")
 
     #data   
     by_idx = cfg.data.by_idx
-    type_split = 6
-    data_dict = get_dataset_splits(data_path, type_split, indiv_split, date_split, seed, save=False)
-    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=(by_idx=="dates"), subsets=subsets, subset_mode=subsets["mode"], save_path=data_path+"subsets/")
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, seed, save=False)
+    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=(by_idx=="dates"), subsets=subsets["sizes"], subset_mode=subsets["mode"], save_path=data_path+"subsets/")
     if verbose:
         logger.info("Fetched dataloaders")
 
@@ -80,11 +79,13 @@ def run(cfg):
     else:
         eval_losses = {
             "MSE": Loss(nn.MSELoss(reduction="none")),
+            "MAE": Loss(nn.L1Loss(reduction="none")),
             "NMSE": Loss(nn.MSELoss(reduction="none"), mode="instance"), 
-            }#"RMSE": Loss(nn.MSELoss(reduction="none"), mode="relative")
+            "RMSE": Loss(nn.MSELoss(reduction="none"), mode="relative")
+        }
 
-    model = load_model(model_name, shape, normalization, **kwargs)
-    if model_name in ["persistence", "repeat", "lookback", "expected"] and "revin" not in normalization and normalization != "mIN":
+    model = load_model(model_name, shape, cfg.normalization, **kwargs)
+    if model_name in ["persistence", "repeat", "lookback", "expected"] and normalization not in ["revin", "mIN"]:
         learner = Learner(model, criterion, lr, eval_losses, device=device, do_train=False)
         logger.info("No training needed")
     elif model_name == "sklinear":
@@ -97,12 +98,17 @@ def run(cfg):
         logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps per epoch={len(loaders_dict['train'])}, epochs={epochs}")
         if retrain:
             logger.info("Starting training...")
-            train_losses, valid_losses1, valid_losses2, valid_losses3 = train_model(learner, loaders_dict, epochs=epochs, logger=logger, eval_runs=1, eval_freq=eval_freq, print_freq=print_freq)
+            if normalization in ["revin", "mIN"]:
+                weight_follow = lambda model: {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
+            else:
+                weight_follow=None
+            train_losses, valid_losses1, valid_losses2, valid_losses3, followed_weights = train_model(learner, loaders_dict, epochs=epochs, logger=logger, eval_runs=1, eval_freq=eval_freq, print_freq=print_freq, weight_follow=weight_follow)
             torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")
             torch.save(train_losses, save_dir + f"train_losses.pt")
             torch.save(valid_losses1, save_dir + f"valid_losses1.pt")
             torch.save(valid_losses2, save_dir + f"valid_losses2.pt")
             torch.save(valid_losses3, save_dir + f"valid_losses3.pt")
+            torch.save(followed_weights, save_dir + f"followed_weights.pt")
             logger.info("End of training")
         else:
             weights = torch.load(save_dir + "trained_model.pt")
@@ -113,14 +119,16 @@ def run(cfg):
             valid_losses1 = torch.load(save_dir + f"valid_losses1.pt", weights_only=False)
             valid_losses2 = torch.load(save_dir + f"valid_losses2.pt", weights_only=False)
             valid_losses3 = torch.load(save_dir + f"valid_losses3.pt", weights_only=False)
-
+            followed_weights = torch.load(save_dir + f"followed_weights.pt", weights_only=False)
         #plots
         for loss_name in eval_losses:
             valid_dict = {"valid1": valid_losses1[loss_name], "valid2": valid_losses2[loss_name], "valid3": valid_losses3[loss_name]}
             if loss_name == criterion_name or (loss_name=="NMSE" and "NMSE" in criterion_name):
                 plot_losses(train_losses, valid_dict, save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}", eval_freq=eval_freq)
             else:
-                plot_multi_losses(valid_dict,  save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}")
+                plot_multi_losses(valid_dict,  save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}", eval_freq=eval_freq)
+        for weight_name in followed_weights:
+            plot_serie(followed_weights[weight_name], save_dir + "plots/", f"{weight_name}.pdf", title=f"{weight_name} during training")
         logger.info("Plotted losses")
 
     #eval
@@ -148,7 +156,11 @@ def run(cfg):
         plot_horizon_errors(test_losses2[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test2_horizon_{loss_name}.pdf", f"Test 2 {loss_name} of {save_name} : {mean}")
     
     #examples
-    dico = fetch_example_data(data_path + "examples/", ["rand"])#[f"ex{k}" for k in range(1,6)])
+    ex_dir = data_path + "examples/" + f"{lags}_{horizon}/"
+    if not os.path.exists(ex_dir):
+        set_random_data(data_path, lags, horizon, name="rand")
+        plot_named_example(ex_dir, f"rand")
+    dico = fetch_example_data(ex_dir)
     for data_name, data_tuple in dico.items():
         x, c, y = data_tuple[0].unsqueeze(0).to(device), data_tuple[1], data_tuple[2].unsqueeze(0).to(device)
         if c is not None:

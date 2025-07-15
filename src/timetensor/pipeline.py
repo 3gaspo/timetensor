@@ -9,32 +9,34 @@ from .utils import unroll_windows
 from .utils import normalize
 
 class Loss():
-    def __init__(self, loss, mean=None, std=None, mode=None):
+    def __init__(self, loss, mean=None, std=None, mode=None, eps=1):
         self.loss = loss #e.g nn.MSELoss()
         self.mode = mode
 
         self.mean = mean
         self.std = std
         self.standard_norm = (mean is not None and std is not None)
+        self.eps = eps
 
     def __call__(self, pred, y, mean=None, std=None):
         if self.standard_norm:
-            pred = normalize(pred, self.mean, self.std)
-            y = normalize(y, self.mean, self.std)
+            pred = normalize(pred, self.mean, self.std, self.eps)
+            y = normalize(y, self.mean, self.std, self.eps)
         if self.mode == "instance":
             assert (mean is not None and std is not None)
-            pred = normalize(pred, mean, std)
-            y = normalize(y, mean, std)
+            pred = normalize(pred, mean, std, self.eps)
+            y = normalize(y, mean, std, self.eps)
         elif self.mode == "relative":
             assert (mean is not None and std is not None)
-            mean = torch.where(mean != 0, mean, 1)
+            #mean = torch.where(mean != 0, mean, self.eps)
+            mean = torch.abs(mean) + self.eps
             pred, y = pred/mean, y/mean
         elif self.mode == "normalize_y":
             assert (mean is not None and std is not None)
-            y = normalize(y, mean, std)
+            y = normalize(y, mean, std, self.eps)
         elif self.mode == "denormalize_pred":
             assert (mean is not None and std is not None)
-            pred = pred*std + mean
+            pred = pred*(std+self.eps) + mean
         return self.loss(pred, y)
 
 
@@ -155,7 +157,7 @@ class Learner:
 
 
 
-def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, verbose=1, do_eval=True, logger=None, eval_runs=1):
+def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, verbose=1, do_eval=True, logger=None, eval_runs=1, weight_follow=None):
     """trains model in learner on loaders and returns train and valid losses"""
     
     #data
@@ -178,6 +180,7 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
     valid_losses1 = {}
     valid_losses2 = {}
     valid_losses3= {}
+    weights = {}
     t1 = perf_counter()
 
     #training
@@ -201,6 +204,8 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
                 append_in_dict(valid_losses1, average_eval_dict1)
                 append_in_dict(valid_losses2, average_eval_dict2)
                 append_in_dict(valid_losses3, average_eval_dict3)
+                if weight_follow is not None:
+                    append_in_dict(weights, weight_follow(learner.model))
 
                 if verbose and (step == 1 or step % print_freq == 0 or step == total_steps):
                     if logger is not None:
@@ -216,7 +221,7 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
             logger.info(f"Average time per step: {T/total_steps:.3f} s")
         else:
             print(f"Training done in {(t2-t1)/60:.3f} min")
-    return train_losses, valid_losses1, valid_losses2, valid_losses3
+    return train_losses, valid_losses1, valid_losses2, valid_losses3, weights
 
 
 

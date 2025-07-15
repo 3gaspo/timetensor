@@ -75,11 +75,11 @@ def run(cfg):
             if verbose:
                 logger.info(f"--Sizes for {byname}--")
                 logger.info(f"Training data : {full_loaders_dict['train'].dataset.shape}")
-                X, c, y = next(iter(loaders_dict["train"])) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
+                X, c, y = next(iter(full_loaders_dict["train"])) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
                 if c is not None:
-                    logger.info(f"{len(loaders_dict['train'])} train batches : X={X.shape}, c={c.shape}, y={y.shape}")
+                    logger.info(f"{len(full_loaders_dict['train'])} train batches : X={X.shape}, c={c.shape}, y={y.shape}")
                 else:
-                    logger.info(f"{len(loaders_dict['train'])} train batches : X={X.shape}, y={y.shape}")
+                    logger.info(f"{len(full_loaders_dict['train'])} train batches : X={X.shape}, y={y.shape}")
 
             
             unrolls = {"full": unroll_windows(full_loaders_dict["train"]), "subset": unroll_windows(partial_loaders_dict["train"])}
@@ -94,8 +94,9 @@ def run(cfg):
         if verbose:
             logger.info("Setting new example")
         set_random_data(data_path, lags, horizon, name="rand")
-        plot_named_example(data_path + "/examples/", "rand")
+        plot_named_example(data_path + "/examples/" + f"{lags}_{horizon}/", "rand")
 
+    #plots
     if replot:
         data_dict = get_dataset_splits(data_path, type_split=6, indiv_split= indiv_split, date_split= date_split, seed= seed, save=False) #save will save the train test indices, in path
         byname, subset_mode, batch_size ="by_date", "dates", 2

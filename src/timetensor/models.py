@@ -7,30 +7,15 @@ from .utils import get_normal_stats
 from sklearn.linear_model import LinearRegression
 
 
-class RevIN(nn.Module):
-    def __init__(self, model, dim, eps=1e-6, last=False, latent=False):
-        """
-        RevIN: Reversible Instance Normalization for Time Series Forecasting
-        """
-        super(RevIN, self).__init__()
-        self.dim, self.eps = dim, eps
-        self.alpha = nn.Parameter(torch.ones(1, dim, 1))  #scale
-        self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
+class DefaultNorm(nn.Module):
+    def __init__(self, model, latent=False):
+        super(DefaultNorm, self).__init__()
         self.model = model
-        self.last, self.latent= last, latent
-
+        self.latent = latent
     def norm(self, x):
-        self.mu, self.std = get_normal_stats(x, std_cst=self.eps)
-        if self.last:
-            self.mu = x[:, :, -1].unsqueeze(2).detach()
-        x = (x - self.mu) / self.std # (B, dim, lags)
-        x = x * self.alpha + self.beta
-        return x
+        pass
     def denorm(self, y):
-        y = (y - self.beta) / torch.where(self.alpha != 0, self.alpha, self.eps) #(B, dim, horizon)
-        y = y * self.std + self.mu
-        return y
-    
+        pass
     def forward(self, x, c=None): #(B, dim, lags)
         x  = self.norm(x) #(B, dim, lags)
         pred = self.model(x, c) #(B, dim, horizon)
@@ -39,47 +24,11 @@ class RevIN(nn.Module):
         else:
             output = self.denorm(pred) #(B, dim, horizon)
         return output
-    
 
-class mIN(nn.Module):
-    def __init__(self, model, dim, eps=1e-6, last=False, latent=False):
-        """
-        RevIN: Reversible Instance Normalization for Time Series Forecasting
-        """
-        super(mIN, self).__init__()
-        self.dim, self.eps = dim, eps
-        self.alpha = nn.Parameter(torch.ones(1, dim, 1))  #scale
-        self.beta = nn.Parameter(torch.ones(1, dim, 1))  #shift
-        self.model = model
-        self.last, self.latent = last, latent
-
-    def norm(self, x):
-        self.mu, self.std = get_normal_stats(x, std_cst=self.eps)
-        if self.last:
-            self.mu = x[:, :, -1].unsqueeze(2).detach()
-        x = (x - self.mu) / self.std # (B, dim, lags)
-        return x
-    def denorm(self, y):
-        if self.latent:
-            y = y * self.alpha + self.beta
-        else:
-            y = y * (self.std * self.alpha) + (self.mu * self.beta) #(B, dim, horizon)
-        return y
-    
-    def forward(self, x, c=None): #(B, dim, lags)
-        x  = self.norm(x) #(B, dim, lags)
-        pred = self.model(x, c) #(B, dim, horizon)
-        output = self.denorm(pred) #(B, dim, horizon)
-        return output
-
-
-class Normalized(nn.Module):
-    def __init__(self, model, mean, std):
-        """
-        Normalizes input before predictions and denormalizes prediction
-        """
-        super(Normalized, self).__init__()
-        self.model = model
+class GlobalNorm(DefaultNorm):
+    def __init__(self, model, mean, std, latent=False):
+        """Norm/Denorm using fixed mean and std"""
+        super(GlobalNorm, self).__init__(model, latent=latent)
         self.mean, self.std = mean, std
 
     def norm(self, x):
@@ -88,41 +37,125 @@ class Normalized(nn.Module):
     def denorm(self, y):
         y = y * self.std + self.mean
         return y
-    
+
+
+class InstanceNorm(DefaultNorm):
+    def __init__(self, model, eps=1, last=False, latent=True, **kwargs):
+        """Norm/Denorm using per instance mean and std"""
+        super(InstanceNorm, self).__init__(model, latent=latent)
+        self.eps, self.last = eps, last
+    def norm(self, x):
+        self.mean, self.std = get_normal_stats(x)#, std_cst=self.eps)
+        x = (x - self.mean) / (self.std+self.eps) # (B, dim, lags)
+        return x
+    def denorm(self, y):
+        y = y * (self.std+self.eps) + self.mean
+        return y
+
+class RevIN(DefaultNorm):
+    def __init__(self, model, dim, eps=1, latent=False, **kwargs):
+        """RevIN: Reversible Instance Normalization for Time Series Forecasting"""
+        super(RevIN, self).__init__(model, latent=latent)
+        self.dim, self.eps, self.last = dim, eps
+        self.alpha = nn.Parameter(torch.ones(1, dim, 1))  #scale
+        self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
+
+    def norm(self, x):
+        self.mu, self.std = get_normal_stats(x)#, std_cst=self.eps)
+        x = (x - self.mu) / (self.std+self.eps) # (B, dim, lags)
+        x = x * self.alpha + self.beta
+        return x
+    def denorm(self, y):
+        y = (y - self.beta) / self.alpha #torch.where(self.alpha != 0, self.alpha, self.eps) #(B, dim, horizon)
+        if self.latent:
+            return y
+        y = y * (self.std+self.eps) + self.mu
+        return y    
     def forward(self, x, c=None): #(B, dim, lags)
         x  = self.norm(x) #(B, dim, lags)
         pred = self.model(x, c) #(B, dim, horizon)
         output = self.denorm(pred) #(B, dim, horizon)
         return output
+    
 
-class InstanceNormalized(nn.Module):
-    def __init__(self, model, eps=1e-6, latent=True):
-        """
-        Normalizes input before predictions and denormalizes prediction
-        """
-        super(InstanceNormalized, self).__init__()
-        self.eps = eps
+class mIN(DefaultNorm):
+    def __init__(self, model, dim, eps=1, last=False, init_alpha=None, init_beta=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, mode=0,  latent=False, **kwargs):
+        """mIN: Modulated Instance Normalization"""
+        super(mIN, self).__init__(model, latent=latent)
+        self.dim, self.eps = dim, eps
+
+        if fixed_alpha:
+            if init_alpha is not None:
+                self.register_buffer("alpha", torch.full((1, self.dim, 1), init_alpha))
+            else:
+                self.register_buffer("alpha", torch.ones(1, self.dim, 1))
+        else:
+            if init_alpha is not None:
+                self.alpha = nn.Parameter(torch.full((1, self.dim, 1), init_alpha))
+            else:
+                self.alpha = nn.Parameter(torch.ones(1, self.dim, 1))  #scale
+        if fixed_beta:
+            if init_beta is not None:
+                self.register_buffer("beta", torch.full((1, self.dim, 1), init_beta))
+            else:
+                self.register_buffer("beta", torch.zeros((1, self.dim, 1)))
+        else:
+            if init_beta is not None:
+                self.beta = nn.Parameter(torch.full((1, self.dim, 1), init_beta))
+            else:
+                self.beta = nn.Parameter(torch.zeros(1, self.dim, 1))  #shift
+
+        self.gamma =  nn.Parameter(torch.ones(1, self.dim, 1))
+        self.omega = nn.Parameter(torch.zeros(1, self.dim, 1))
+        self.use_gamma = use_gamma
+        self.mode = mode
+        self.last, self.latent = last, latent
+
         self.model = model
-        self.latent=latent
+
+    def set_modules(self, alpha=None, beta=None):
+        if alpha is not None:
+            self.register_buffer("alpha", torch.full((1, self.dim, 1), alpha))
+        if beta is not None:
+            self.register_buffer("beta", torch.full((1, self.dim, 1), beta))
 
     def norm(self, x):
-        self.mean, self.std = get_normal_stats(x, std_cst=self.eps)
-        x = (x - self.mean) / self.std # (B, dim, lags)
+        self.mu, self.std = get_normal_stats(x)#, std_cst=self.eps)
+        if self.last:
+            self.mu = x[:, :, -1].unsqueeze(2).detach()
+        x = (x - self.mu) / (self.std+self.eps)
+        if self.use_gamma:
+            x = self.gamma * x + self.omega
         return x
-    def denorm(self, y):
-        y = y * self.std + self.mean
+    
+    def denorm(self, y, alpha=None, beta=None):
+        if alpha is None:
+            alpha = self.alpha
+        if beta is None:
+            beta = self.beta
+        
+        if self.mode == 0:
+            y = y * alpha + beta
+            if self.latent:
+                return y
+            y = (self.std+self.eps)  * y + self.mu 
+        elif self.mode == 1:
+            y = ((self.std+self.eps) * alpha) * y + (self.mu + beta) 
+        elif self.mode == 2:
+            y = (self.std+self.eps) * y + self.mu 
+            y = alpha * y + beta
         return y
     
     def forward(self, x, c=None): #(B, dim, lags)
         x  = self.norm(x) #(B, dim, lags)
         pred = self.model(x, c) #(B, dim, horizon)
-        if self.latent:
-            output = pred
+        if c is not None:
+            output = self.denorm(pred, beta=c[:, :, 0].unsqueeze(1)) #(B, dim, horizon)
         else:
             output = self.denorm(pred) #(B, dim, horizon)
         return output
 
-    
+
 
 class persistence(nn.Module):
     """repeats single last value"""
@@ -180,32 +213,35 @@ class linear(nn.Module):
 
 class sklinear():
     """linear layer on lags"""
-    def __init__(self, normalized=False, dim=0):
+    def __init__(self, normalized=False, dim=0, eps=1):
         self.reg = LinearRegression()
         self.normalized = normalized
         self.dim = dim
+        self.eps = eps
 
     def norm(self, X, mean, std):
         if self.normalized == "instance":
-            X = (X - mean) / std 
+            X = (X - mean) / (std+self.eps)
         elif self.normalized == "relative":
-            mean = torch.where(mean != 0, mean, 1)
+            #mean = torch.where(mean != 0, mean, 1)
+            mean = torch.abs(mean) + self.eps
             X = X / mean 
         if len(X.shape)==3:
             X = X[:, self.dim, :]
         return X
     def denorm(self, X, mean, std):
         if self.normalized == "instance":
-            X = X * std + mean
+            X = X * (std+self.eps) + mean
         elif self.normalized == "relative":
-            mean = torch.where(mean != 0, mean, 1)
-            X = X * mean 
+            #mean = torch.where(mean != 0, mean, 1)
+            mean = torch.abs(mean) + self.eps
+            X = X * mean
         if len(X.shape)==2:
             X = X.unsqueeze(dim=1)
         return X
     
     def fit(self, Xtrain, ytrain):
-        mean, std = get_normal_stats(Xtrain)
+        mean, std = get_normal_stats(Xtrain)#, std_cst=self.eps)
         Xtrain, ytrain = self.norm(Xtrain, mean, std), self.norm(ytrain, mean, std)
         self.reg.fit(Xtrain, ytrain)
 
@@ -218,7 +254,7 @@ class sklinear():
         return pred
 
 
-def load_model(model_name, shape, normalization=None, **kwargs):
+def load_model(model_name, shape, normalization, **kwargs):
     """loads models from str model name
     normalization:
         0/False
@@ -226,6 +262,8 @@ def load_model(model_name, shape, normalization=None, **kwargs):
         2: by instance
         3: revin
     """
+    if type(normalization) != str:
+        normalization, norm_kwargs = normalization.name, normalization.configs
     lags, dim, horizon = shape[0], shape[1], shape[2]
     if model_name == "persistence":
         model = persistence(horizon)
@@ -243,23 +281,24 @@ def load_model(model_name, shape, normalization=None, **kwargs):
     elif model_name == "DLinear":
         model = DLinear(lags, dim, horizon, kwargs.get("kernel_size",25))
     elif model_name == "sklinear":
-        model = sklinear(kwargs.get("normalize_method"))
-        return model
+        model = sklinear(normalization, eps=kwargs.get("eps",1))
     elif model_name == "PatchTST":
         model = PatchTST(lags, horizon)
     else:
         raise ValueError(f"Model name not recognized : {model_name}")
     
-    if normalization != "None":
-        if "global" in normalization:
+    get_training = normalization in ["mIN", "revin"] or (model_name not in ["persistence", "repeat", "lookback", "expected"])
+
+    if normalization != "None" and get_training and model_name != "sklinear":
+        if normalization == "global":
             mean, std = kwargs.get("mean", 2500), kwargs.get("std", 15000)
-            return Normalized(model, mean, std)
-        elif "instance" in normalization:
-            return InstanceNormalized(model, kwargs.get("std_cst", 1), kwargs.get("latent", False))
-        elif "revin" in normalization:
-            return RevIN(model, dim, kwargs.get("std_cst", 1), kwargs.get("last", False), kwargs.get("latent", False))
+            return GlobalNorm(model, mean, std)
+        elif normalization == "instance":
+            return InstanceNorm(model, **norm_kwargs)
+        elif normalization == "revin":
+            return RevIN(model, dim,  **norm_kwargs)
         elif normalization == "mIN":
-            return mIN(model, dim, kwargs.get("std_cst", 1), kwargs.get("last", False), kwargs.get("latent", False))
+            return mIN(model, dim, **norm_kwargs)
         else:
             ValueError(f"Normalization not recognized : {normalization}")
     return model

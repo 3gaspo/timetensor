@@ -6,7 +6,7 @@ import hydra
 
 from .dataset import load_example, load_data
 
-def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_name=None):
+def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_name=None, subset=None):
     
     get_training = ("revin" in normalization) or (normalization=="mIN") or (model_name not in ["persistence", "repeat", "lookback", "expected"])
     
@@ -16,6 +16,8 @@ def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_na
             save_name = save_name + "_" + normalization
         if get_training and (criterion_name is not None) and ("sklinear" not in model_name):
             save_name = save_name + "_" + criterion_name
+        if get_training and subset is not None and subset != 1:
+            save_name = save_name + "_" + str(subset)
     save_dir = output_dir + save_name + "/" #current experiment dir
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -61,7 +63,7 @@ def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_
         else:
             context = context[:, :, rand_date : rand_date+lag+horizon]
     
-    ex_dir = path + "examples/" + name + "/"
+    ex_dir = path + "examples/" + f"{lag}_{horizon}/" + name + "/"
     if not os.path.exists(ex_dir):
         os.makedirs(ex_dir)
     torch.save(inputs, ex_dir + "input.pt")
@@ -71,18 +73,20 @@ def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_
     torch.save((rand_indiv, datetimes[rand_date]), ex_dir + "indivdate.pt")
 
 
-def fetch_example_data(path="datasets/examples", names="rand"):
+def fetch_example_data(path="datasets/examples/", names=None):
     """fetches example data"""
-    if type(names) == list:
-        dico = {}
-        for name in names:
-            dico[name] = load_example(path + name + "/")
-        return dico
-    else:
+    if names is None:
+        names = [name for name in os.listdir(path)]
+    elif type(names) == str:
         return load_example(path + names + "/")
+    dico = {}
+    for name in names:
+        dico[name] = load_example(path + name + "/")
+    return dico
 
 
-def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, mIN=False, std_cst=1e-6):
+
+def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, mIN=False):#, std_cst=1e-6):
     """unrolls (x,y) examples of dataloaders (typically individuals*dates examples)"""
     X = []
     Y = []
@@ -92,7 +96,7 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, b
             mean, std = get_normal_stats(x)
             if alpha is not None:
                 std = std*alpha
-                std = torch.where(std != 0, std, std_cst)
+                #std = torch.where(std != 0, std, std_cst)
             if mIN:
                 nx = normalize(x, mean*beta, std)
                 ny = normalize(y, mean*beta, std)
@@ -135,15 +139,15 @@ def get_stats(values, stat, dim=0):
     return values_stat, total_stat #(Nindiv), (1)
 
 
-def get_normal_stats(x, std_cst=1e-6):
+def get_normal_stats(x):#, std_cst=1e-6):
   """
   X: tensor (B, dim, features)
   normalize for each B
   """
   mean = x.mean(dim=-1, keepdim=True).detach()
   std =  x.std(dim=-1, keepdim=True).detach()
-  std = torch.where(std != 0, std, std_cst)
-  
+  #std = torch.where(std != 0, std, std_cst)
+
   return mean, std
 
 
@@ -166,8 +170,8 @@ def save_results(value, path, name, model_name, metric_name):
             print(dico)
 
 
-def normalize(x, mean, std):
-    return (x - mean) / std
+def normalize(x, mean, std, eps=1):
+    return (x - mean) / (std + eps)
 
 
 def average_loss(eval_losses):
@@ -182,13 +186,9 @@ def append_in_dict(dico1, dico2):
     for key, value in dico2.items():
         if key not in dico1:
             dico1[key] = []
-        if type(value) == float:
-            dico1[key].append(value)
-        elif type(value) == list:
+        if type(value) == list:
             dico1[key] += value
         elif type(value) == torch.tensor and len(value.shape)==0:
             dico1[key] += value.item()
         else:
-            print('problem')
-            print(type(value))
-            print(value.shape)
+            dico1[key].append(value)
