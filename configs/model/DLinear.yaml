@@ -1,0 +1,3 @@
+name: DLinear
+configs:
+  kernel_size: 25

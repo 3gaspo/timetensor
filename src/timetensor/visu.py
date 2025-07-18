@@ -273,6 +273,49 @@ def print_nice_table(path, multipliers=None, names=None):
     print(table)
 
 
+def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True):
+    """print table from dataframe in path"""
+    # if type(n_paths)==str:
+    #     n_paths=int(n_paths)
+    paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths)]
+    dfs = []
+    for path in paths:
+        with open(path) as file:
+            data = json.load(file)
+        df = pd.DataFrame(data)
+        if names=="None":
+            names=None
+        if names is not None:
+            df = df[names]
+        dfs.append(df)
+
+    df_mean = pd.concat(dfs).groupby(level=0).mean()
+    df_std = 3*pd.concat(dfs).groupby(level=0).std()
+
+    if multipliers is not None:
+        if type(multipliers) == str:
+            multipliers = multipliers.split(" ")
+            multipliers = [int(w) for w in multipliers]
+        new_index = list(df_mean.index)
+        for k in range(min(len(multipliers), df_mean.shape[0])):
+            if multipliers[k] != 0:
+                df_mean.iloc[k] = df_mean.iloc[k] * 10**multipliers[k]
+                df_std.iloc[k] = df_std.iloc[k] * 10**multipliers[k]
+                new_index[k] = new_index[k] + f" * 1e{multipliers[k]}"
+        df_mean.index = new_index
+        df_std.index = new_index
+
+    if show_std:
+        df_formatted = df_mean.copy()
+        for col in df_mean.columns:
+            df_formatted[col] = df_mean[col].map("{:.4f}".format) + " ± " + df_std[col].map("{:.4f}".format)
+    else:
+        df_formatted = df_mean.applymap("{:.4f}".format)
+
+    table = tabulate(df_formatted, headers='keys', tablefmt='grid', showindex=True)
+    print(table)
+
+
 def plot_weights(weights, path, name="weights.pdf", title='Model weights'):
     plt.figure()
     plt.imshow(weights, aspect='auto', cmap='viridis')

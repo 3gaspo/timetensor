@@ -40,7 +40,36 @@ class Loss():
         return self.loss(pred, y)
 
 
-
+def get_losses(criterion_name, mean=None, std=None):
+    """returns criterion and relevant eval losses from specified criterion name"""
+    if criterion_name == "MSE":
+        criterion = Loss(nn.MSELoss())
+    elif criterion_name == "MMSE":
+        criterion = Loss(nn.MSELoss(), mean, std)
+    elif criterion_name == "NMSE":
+        criterion = Loss(nn.MSELoss(), mode="instance")
+    elif criterion_name == "RMSE":
+        criterion = Loss(nn.MSELoss(), mode="relative")
+    elif criterion_name == "normalize_y":
+        criterion = Loss(nn.MSELoss(), mode="normalize_y")
+    elif criterion_name == "denormalize_pred":
+        criterion = Loss(nn.MSELoss(), mode="denormalize_pred")
+    else:
+        raise ValueError("Unknown criterion name")
+    if criterion_name == "normalize_y":
+        eval_losses = {
+            "NMSE": Loss(nn.MSELoss(reduction="none"), mode= "normalize_y"),
+            "MSE": Loss(nn.MSELoss(reduction="none"), mode="denormalize_pred"),
+            }
+    else:
+        eval_losses = {
+            "MSE": Loss(nn.MSELoss(reduction="none")),
+            "MAE": Loss(nn.L1Loss(reduction="none")),
+            "NMSE": Loss(nn.MSELoss(reduction="none"), mode="instance"), 
+            "RMSE": Loss(nn.MSELoss(reduction="none"), mode="relative")
+        }
+    return criterion, eval_losses
+    
 
 class Learner:
     def __init__(self, model, criterion, lr, eval_losses, device=None, optimizer=None, scheduler=None, do_train=True, pytorch=True):

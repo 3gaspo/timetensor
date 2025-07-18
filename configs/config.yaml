@@ -1,4 +1,6 @@
 training:
+  init:
+  freeze_core: False
   retrain: True
   loss: MSE
   bs: 28

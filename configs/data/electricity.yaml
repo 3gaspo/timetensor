@@ -4,6 +4,7 @@ path: ../datasets/electricity/
 indiv_split: 0.7 
 date_splits: 0.5;0.3;0.2
 by_idx: individuals
+reshuffle: False
 
 subsets:
   mode: dates

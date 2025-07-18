@@ -42,9 +42,6 @@ class DLinear(nn.Module):
         for i in range(self.dim):
             self.Linear_Seasonal.append(nn.Linear(self.lags,self.horizon))
             self.Linear_Trend.append(nn.Linear(self.lags,self.horizon))
-            # Use this two lines if you want to visualize the weights
-            # self.Linear_Seasonal[i].weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
-            # self.Linear_Trend[i].weight = nn.Parameter((1/self.seq_len)*torch.ones([self.pred_len,self.seq_len]))
 
     def forward(self, x, context=None): #x (bs, dim, lags)
         seasonal_init, trend_init = self.decomposition(x)

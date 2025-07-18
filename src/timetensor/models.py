@@ -56,7 +56,7 @@ class RevIN(DefaultNorm):
     def __init__(self, model, dim, eps=1, latent=False, **kwargs):
         """RevIN: Reversible Instance Normalization for Time Series Forecasting"""
         super(RevIN, self).__init__(model, latent=latent)
-        self.dim, self.eps, self.last = dim, eps
+        self.dim, self.eps = dim, eps
         self.alpha = nn.Parameter(torch.ones(1, dim, 1))  #scale
         self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
 
@@ -289,7 +289,7 @@ def load_model(model_name, shape, normalization, **kwargs):
     
     get_training = normalization in ["mIN", "revin"] or (model_name not in ["persistence", "repeat", "lookback", "expected"])
 
-    if normalization != "None" and get_training and model_name != "sklinear":
+    if normalization is not None and normalization != "None" and get_training and model_name != "sklinear":
         if normalization == "global":
             mean, std = kwargs.get("mean", 2500), kwargs.get("std", 15000)
             return GlobalNorm(model, mean, std)

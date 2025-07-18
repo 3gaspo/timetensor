@@ -6,10 +6,13 @@ import hydra
 
 from .dataset import load_example, load_data
 
-def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_name=None, subset=None):
+def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_name=None, subsets=None):
     
     get_training = ("revin" in normalization) or (normalization=="mIN") or (model_name not in ["persistence", "repeat", "lookback", "expected"])
-    
+    if subsets is not None:
+        subset = float(subsets.split(";")[0])
+    else:
+        subset=None
     if save_name is None:
         save_name = model_name
         if get_training and (normalization is not None) and (normalization != "None"):

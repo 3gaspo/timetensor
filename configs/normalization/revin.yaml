@@ -1,4 +1,4 @@
-name: instance
+name: revin
 configs:
   eps: 1
   latent: False

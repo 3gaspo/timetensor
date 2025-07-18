@@ -1,4 +1,4 @@
-name: instance
+name: mIN
 configs:
   eps: 1
   last: False
