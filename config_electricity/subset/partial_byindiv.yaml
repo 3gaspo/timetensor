@@ -1,5 +1,0 @@
-subsets:
-  train: ../datasets/electricity/subsets/by_indiv/train_subset_indices_0.1.pt
-  valid: ../datasets/electricity/subsets/by_indiv/valid_subset_indices_0.1.pt
-  valid2: ../datasets/electricity/subsets/by_indiv/valid2_subset_indices_0.1.pt
-  test: ../datasets/electricity/subsets/by_indiv/test_subset_indices_0.1.pt
