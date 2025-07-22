@@ -1,8 +1,8 @@
 import hydra
 import logging
-import torch
-import torch.nn as nn
+import numpy as np
 import matplotlib.pyplot as plt
+from time import perf_counter
 
 from src.timetensor.dataset import TimeSeriesDataset, load_data
 from src.timetensor.dataset import get_dataset_splits, get_train_loaders
@@ -16,52 +16,44 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
-@hydra.main(version_base=None, config_path="config", config_name="config")
+@hydra.main(version_base=None, config_path="configs", config_name="config")
 def run(cfg):
     logger = logging.getLogger(__name__)
     logger.info("=====Running main script=====")
 
     #configs
     data_path = cfg.data.path
-    lags, horizon = cfg.model.lags, cfg.model.horizon
-    batch_size, lr = cfg.training.bs, cfg.training.lr
-    normalization = cfg.model.normalization
-    model_name, kwargs = cfg.model.name, cfg.model_configs
+    lags, horizon = cfg.task.lags, cfg.task.horizon
     verbose = cfg.misc.verbose
     if verbose:
         logger.info("Fetched main configs")
 
     #data   
-    by_idx = "individuals"
-    data_dict = get_dataset_splits(data_path, cfg.data.indiv_split, cfg.data.date_split, cfg.misc.seed, save=False)
-    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=(by_idx=="dates"), subsets=cfg.subset.subsets, path=data_path+"subsets/")
-    #sizes
-    X, c, y = next(iter(loaders_dict["train"])) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
-    shape = [X.shape[2], X.shape[1], y.shape[2]]
-    #training
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    criterion = Loss(nn.MSELoss())
-    eval_losses = {"MSE": Loss(nn.MSELoss(reduction="none"))}
-    model_name = "sklinear"
-    model = load_model(model_name, shape, normalization, **kwargs)
-    logger.info("Starting scikit-learn fitting...")
-    learner = Learner(model, criterion, lr, eval_losses, device=device, pytorch=False)
-    learner.fit(loaders_dict["train"])
-    logger.info("End of training")
+    values, _, _ = load_data(data_path)
+    dataset = TimeSeriesDataset(values, lags=lags, horizon=horizon, by_date=False)
+    
+    #model
+    shape = (lags, values.shape[1], horizon)
+    model = load_model("lookback", shape, "None")
     
     #game
-    values, context, datetimes = load_data(data_path) #load dataset
-    dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=False)
     background = BackgroundDataset(dataset)
     players = {f"lag_{k}": (0, 0, k) for k in range(lags)}
     game = Game(model, players, background)
     logger.info(f"Loaded game with {game.players} players and {len(game.background)} examples")
 
-    shapley_values = game.get_shapley_values(dataset[0][0], (0,0),  2, 3, replace=True, aggregate=False, split=False, logger=logger)
-    logger.info("Computed shap")
+    ncoalitions=10
+    nexamples=10
+    logger.info("Computing shap")
+    t1 = perf_counter()
+    shapley_values = game.get_shapley_values(dataset[0][0], ncoalitions, nexamples, replace=True, aggregate=False, split=False, logger=logger)
+    t2 = perf_counter()
+    logger.info(f"Done in {(t2-t1)/60:.2f} min")
 
-    plt.figure()
-    plt.plot(shapley_values.values())
+
+    shapley_values = np.array(list(shapley_values.values()))
+    plt.figure(figsize=(10,10))
+    plt.imshow(shapley_values[:50, 0, :].T)
     plt.savefig("shap.pdf")
 
     logger.info('End of script\n')

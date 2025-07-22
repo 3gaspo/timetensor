@@ -23,17 +23,15 @@ def get_coalition_weight(coalition, team, players):
 
 class BackgroundDataset():
     """dataset which returns a random value when called"""
-    def __init__(self, dataset, seed=None):
+    def __init__(self, dataset):
         self.dataset = dataset
         self.size = len(dataset)
-        self.seed = seed
 
     def __len__(self):
         return len(self.dataset)
     
     def get_data(self):
-        if self.seed is not None:
-            np.random.seed(self.seed)
+        """returns random data point from background"""
         idx = np.random.randint(self.size)
         output = self.dataset[idx]
         return output[0]
@@ -59,7 +57,7 @@ class Game:
     """game of players=features"""
     def __init__(self, model, players, background):
         """players is dict {player_name, idx}"""
-        self.player_names = players.keys() #name of features
+        self.player_names = list(players.keys()) #name of features
         self.players = len(players)
         self.players_idx = list(players.values())
         self.players_ids = list(range(self.players))
@@ -84,13 +82,13 @@ class Game:
         """returns x_S+team and x_S for coalition S, with different background replacements (split or not)"""
         remaining = np.array([player for player in self.players_ids if player not in team and player not in coalition])
         team_ids = np.array(team)
-        backgroud_values = self.background.get_batch(size)
+        backgroud_values = self.background.get_batch(size) # [size (individuals, dim, lags)]
         if split:
             second_backgroud_values = self.background.get_batch(size)
         replaced_values_team = []
         replaced_values_no_team = []
         for k in range(size):
-            replaced_team = copy.deepcopy(x)
+            replaced_team = copy.deepcopy(x) # (individuals, dim, lags)
             for player in remaining:
                 replaced_team[self.players_idx[player]] = backgroud_values[k][self.players_idx[player]]
             replaced_values_team.append(replaced_team)
@@ -110,38 +108,41 @@ class Game:
             sampled_coalitions = [[], [player for player in self.players_idx if player not in team]]
         else:
             sampled_coalitions = self.sample_excluding_coalitions(team, ncoalitions, replace)
-        replaced_values_team, replaced_values_no_team = {tuple(coalition): None for coalition in sampled_coalitions}, {tuple(coalition): None for coalition in sampled_coalitions}
+        replaced_values_team = {tuple(coalition): None for coalition in sampled_coalitions}
+        replaced_values_no_team = copy.deepcopy(replaced_values_team)
         for coalition in sampled_coalitions:
             #logger.info(f"Replacing coalition {coalition}")
-            replaced_team, replaced_no_team = self.replace(x, team, coalition, nexamples, split)
-            replaced_values_team[tuple(coalition)] = replaced_team
+            replaced_team, replaced_no_team = self.replace(x, team, coalition, nexamples, split) #(nexamples, individuals, dim, lags)
+            replaced_values_team[tuple(coalition)] = replaced_team 
             replaced_values_no_team[tuple(coalition)] = replaced_no_team
         return sampled_coalitions, replaced_values_team, replaced_values_no_team
     
-    def sample_predictions(self, x, idx, team, ncoalitions, nexamples, replace=True, aggregate=False, split=False, logger=None):
+    def sample_predictions(self, x, team, ncoalitions, nexamples, replace=True, aggregate=False, split=False, logger=None):
         sampled_coalitions, replaced_values_team, replaced_values_no_team = self.sample_replacements(x, team, ncoalitions, nexamples, replace, aggregate, split, logger=logger)
         deltas = {tuple(coalition): None for coalition in sampled_coalitions}
-        print("sampled coalitions: ", len(sampled_coalitions))
         for coalition in sampled_coalitions:
-            #logger.info(f"Predicting coalition {coalition}")
-            x_team, x_no_team = replaced_values_team[tuple(coalition)], replaced_values_no_team[tuple(coalition)]
-            predictions_team = self.model(x_team) # (nexamples, dim, horizon)
-            predictions_no_team = self.model(x_no_team) # (nexamples, dim, horizon) #idx (1, 1)
-            value = torch.mean(predictions_team - predictions_no_team, dim=0)[:, idx] #(1)
-            deltas[tuple(coalition)] = value
-            print(value.shape)
+            x_team, x_no_team = replaced_values_team[tuple(coalition)], replaced_values_no_team[tuple(coalition)] #(nexamples, individuals, dim, lags)
+            x_team = x_team.view(-1, x_team.shape[-2], x_team.shape[-1]) #  (nexamples, individuals, dim, lags)
+            x_no_team = x_no_team.view(-1, x_no_team.shape[-2], x_no_team.shape[-1]) #  (nexamples, individuals, dim, lags)
+
+            predictions_team = self.model(x_team) # (nexample, dim, horizon) 
+            predictions_no_team = self.model(x_no_team) #  (nexample, dim, horizon)  #could be joined with above
+            values = torch.mean(predictions_team - predictions_no_team, dim=0) #(dim, horizon)
+            deltas[tuple(coalition)] = np.array(values)
         return sampled_coalitions, deltas
 
-    def get_shapley_value(self, x, idx, team, ncoalitions, nexamples, replace=True, aggregate=False, split=False, return_coalitions=False, logger=None):
-        sampled_coalitions, deltas = self.sample_predictions(x, idx, team, ncoalitions, nexamples, replace, aggregate, split, logger=logger)
+    def get_shapley_value(self, x, team, ncoalitions, nexamples, replace=True, aggregate=False, split=False, return_coalitions=False, logger=None):
+        sampled_coalitions, deltas = self.sample_predictions(x, team, ncoalitions, nexamples, replace, aggregate, split, logger=logger)  #{noacliation: (dim, horizon)}      
+        shapley_values = np.mean(list(deltas.values()), axis=0) #(dim, horizon)
+        
         if return_coalitions:
-            return np.mean(deltas.values()), sampled_coalitions
-        return np.mean(list(deltas.values()))
+            return shapley_values, sampled_coalitions
+        return shapley_values
     
-    def get_shapley_values(self, x, idx, ncoalitions, nexamples, replace=True, aggregate=False, split=False, logger=None):
+    def get_shapley_values(self, x, ncoalitions, nexamples, replace=True, aggregate=False, split=False, logger=None):
         shapley_values = {player: None for player in self.player_names}
-        for k in range(self.players):
-            logger.info(f"Computing shapley of {k}")
+        for k in range(self.players): #for now not simultaneously
+            #logger.info(f"Computing shapley of {k}")
             team = [k]
-            shapley_values[self.player_names[k]] = self.get_shapley_value(x, idx, team, ncoalitions, nexamples, replace, aggregate, split, logger=logger)
+            shapley_values[self.player_names[k]] = self.get_shapley_value(x, team, ncoalitions, nexamples, replace, aggregate, split, logger=logger)
         return shapley_values

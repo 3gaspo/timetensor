@@ -21,6 +21,7 @@ def plot_serie(x, path="", name="series.pdf", title="Time series", axis=True):
     plt.title(title)
     fig.tight_layout()
     plt.savefig(path + name)
+    plt.close()
 
 def plot_example(x, y, path="", name="example.pdf", title="Example", axis=True):
     """plots example data"""
@@ -38,6 +39,7 @@ def plot_example(x, y, path="", name="example.pdf", title="Example", axis=True):
     plt.title(title)
     fig.tight_layout()
     plt.savefig(path + name)
+    plt.close()
 
 def plot_named_example(path, name):
     x, c, y, i, d  = fetch_example_data(path, name)
@@ -66,6 +68,7 @@ def plot_global_stats(values, path="", dim=0):
     plt.ylabel("Counts")        
     plt.title(f"Distribution of users std (total avg: {global_std:.2f} kWh)")
     plt.savefig(path + "global_stds.pdf")
+    plt.close()
 
 
 def plot_stats(values, path="", name="stats.pdf", dim=0, title=None, logscale=True, limits=None):
@@ -101,6 +104,7 @@ def plot_stats(values, path="", name="stats.pdf", dim=0, title=None, logscale=Tr
         plt.xscale("log")
     plt.ylabel("Density")
     plt.savefig(path + name)
+    plt.close()
 
 
 def scatter_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True):
@@ -126,6 +130,7 @@ def scatter_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, log
         plt.yscale("log")
     plt.ylabel("std")
     plt.savefig(path + name)
+    plt.close()
 
 def scatter_input_output(x_dict, y_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True):
     """plots stats of datasets"""
@@ -152,6 +157,7 @@ def scatter_input_output(x_dict, y_dict, path="", name="stats.pdf", dim=0, title
         plt.xscale("log")
         plt.yscale("log")
     plt.savefig(path + name)
+    plt.close()
 
 
 def plot_losses(train_losses, valid_losses_dict=None, path="", name="losses.pdf", title="Losses", logscale=True, eval_freq=10):
@@ -178,6 +184,7 @@ def plot_losses(train_losses, valid_losses_dict=None, path="", name="losses.pdf"
     plt.title(title)
     fig.tight_layout()
     plt.savefig(path + name)
+    plt.close()
 
 def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", logscale=True, x_every=None, eval_freq=10):
     """plots losses during training"""
@@ -198,6 +205,7 @@ def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", l
     plt.legend()
     fig.tight_layout()
     plt.savefig(path + name)
+    plt.close()
 
 
 def plot_errors(losses, path="", name="errors.pdf", title="Loss distribution"):
@@ -210,6 +218,7 @@ def plot_errors(losses, path="", name="errors.pdf", title="Loss distribution"):
     plt.xlabel("Losses")
     plt.ylabel("Frequency")
     plt.savefig(path + name)
+    plt.close()
 
 
 def plot_horizon_errors(losses, path="", name="horizon.pdf", title="Mean errors by horizon"):
@@ -221,6 +230,7 @@ def plot_horizon_errors(losses, path="", name="horizon.pdf", title="Mean errors 
     plt.xlabel("Horizon")
     plt.ylabel("Mean error")
     plt.savefig(path + name)
+    plt.close()
 
 
 def plot_pred(x, y, pred, path="", name="prediction.pdf", title="Predictions", axis=True):
@@ -240,6 +250,7 @@ def plot_pred(x, y, pred, path="", name="prediction.pdf", title="Predictions", a
     plt.title(title)
     fig.tight_layout()
     plt.savefig(path + name)
+    plt.close()
 
 
 
@@ -273,11 +284,9 @@ def print_nice_table(path, multipliers=None, names=None):
     print(table)
 
 
-def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True):
+def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True, baseline=None):
     """print table from dataframe in path"""
-    # if type(n_paths)==str:
-    #     n_paths=int(n_paths)
-    paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths)]
+    paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
     dfs = []
     for path in paths:
         with open(path) as file:
@@ -287,10 +296,13 @@ def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None
             names=None
         if names is not None:
             df = df[names]
+
+        if baseline is not None and baseline in df.columns:
+            df = df.subtract(df[baseline], axis=0)
         dfs.append(df)
 
     df_mean = pd.concat(dfs).groupby(level=0).mean()
-    df_std = 3*pd.concat(dfs).groupby(level=0).std()
+    df_std = pd.concat(dfs).groupby(level=0).std()
 
     if multipliers is not None:
         if type(multipliers) == str:
@@ -315,6 +327,41 @@ def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None
     table = tabulate(df_formatted, headers='keys', tablefmt='grid', showindex=True)
     print(table)
 
+#import seaborn as sns
+
+def get_boxplots(dir_name, file_name, n_paths, col="MSE", names=None, baseline=None, save_path=""):
+    """print table from dataframe in path"""
+    paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
+    dfs = []
+    for path in paths:
+        with open(path) as file:
+            data = json.load(file)
+        df = pd.DataFrame(data)
+        if names=="None":
+            names=None
+        if names is not None:
+            df = df[names]
+        df = df.loc[col]
+        if baseline is not None:
+            assert (baseline in df.columns)
+            df = df.subtract(df[baseline], axis=0)
+        dfs.append(df)
+
+    df_values = pd.concat(dfs, axis=1)
+    #df_long = pd.concat(dfs, axis=1).reset_index().melt(id_vars='index', var_name='Method', value_name=col)
+
+    plt.figure(figsize=(10, 6))
+    plt.boxplot(df_values.values.T, labels=df_values.index)
+    #sns.boxplot(data=df_long, x='Method', y=col)
+    plt.title(f"Experiment results")
+    plt.xlabel("Experiment")
+    plt.ylabel(f"{col}")
+    plt.xticks(rotation=45)
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(save_path + "boxplot.pdf")
+    plt.close()
+
 
 def plot_weights(weights, path, name="weights.pdf", title='Model weights'):
     plt.figure()
@@ -324,6 +371,7 @@ def plot_weights(weights, path, name="weights.pdf", title='Model weights'):
     plt.ylabel('Outputs (horizon)')
     plt.title(title)
     plt.savefig(path + name)
+    plt.close()
 
 
 def plot_expe(losses_path, eval_freq=10, names=None, save_path=None):

@@ -36,7 +36,7 @@ class TimeSeriesDataset(Dataset):
             assert _dates == self.dates, "not the same dates in values and context"        
         assert self.dates > self.lags + self.horizon, "not enough dates for this lag and horizon"
         if datetimes is None:
-            self.datetimes = np.array(range(0, datetimes))
+            self.datetimes = np.array(range(0, self.dates))
         self.datetimes = np.array(datetimes)
         self.by_date = by_date
         self.return_all_individuals, self.context_by_individuals = return_all_individuals, context_by_individuals

@@ -1,0 +1,10 @@
+name: cmIN
+configs:
+  eps: 1
+  last: False
+  latent: False
+  init_betas:
+  fixed_beta: False
+  init_alphas:
+  fixed_alpha: False
+  use_gamma: False

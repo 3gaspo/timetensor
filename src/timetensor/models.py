@@ -149,12 +149,68 @@ class mIN(DefaultNorm):
     def forward(self, x, c=None): #(B, dim, lags)
         x  = self.norm(x) #(B, dim, lags)
         pred = self.model(x, c) #(B, dim, horizon)
-        if c is not None:
-            output = self.denorm(pred, beta=c[:, :, 0].unsqueeze(1)) #(B, dim, horizon)
-        else:
-            output = self.denorm(pred) #(B, dim, horizon)
+        output = self.denorm(pred) #(B, dim, horizon)
         return output
 
+
+class cmIN(mIN):
+    def __init__(self, model, dim, eps=1, last=False, init_alphas=None, init_betas=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, mode=0,  latent=False, **kwargs):
+        """mIN: Modulated Instance Normalization"""
+        super(cmIN, self).__init__(model, dim, eps, last, use_gamma=use_gamma, mode=mode,  latent=latent, **kwargs)
+
+        assert init_alphas is not None and init_betas is not None
+
+        if type(init_alphas)==int:
+            self.init_alphas = [1 for k in range(init_alphas)]
+        else:
+            init_alphas = init_alphas.split(";")
+            self.init_alphas = [float(value) for value in init_alphas]
+            
+        if type(init_betas)==int:
+            self.init_betas = [0 for k in range(init_betas)]
+        else:
+            init_betas = init_betas.split(";")
+            self.init_betas = [float(value) for value in init_betas]
+
+
+        if fixed_alpha:
+            for k in range(len(self.init_alphas)):
+                self.register_buffer(f"alpha_{k}", torch.full((1, self.dim, 1), self.init_alphas[k]))
+        else:
+            self.alphas = nn.ParameterList([nn.Parameter(torch.full((1, self.dim, 1), self.init_alphas[k])) for k in range(len(init_alphas))])
+            
+        if fixed_beta:
+            for k in range(len(self.init_betas)):
+                self.register_buffer(f"beta_{k}", torch.full((1, self.dim, 1), self.init_betas[k]))
+
+        else:
+            self.betas = nn.ParameterList([nn.Parameter(torch.full((1, self.dim, 1), self.init_betas[k])) for k in range(len(init_betas))])
+
+    def denorm(self, y, cluster):
+        if self.fixed_alpha:
+            alpha = torch.stack([getattr(self, f"alpha_{int(k)}") for k in cluster])
+            beta  = torch.stack([getattr(self, f"beta_{int(k)}") for k in cluster])
+        else:
+            alpha = torch.stack([self.alphas[int(k)] for k in cluster])
+            beta  = torch.stack([self.betas[int(k)] for k in cluster])
+        
+        if self.mode == 0:
+            y = y * alpha + beta
+            if self.latent:
+                return y
+            y = (self.std+self.eps)  * y + self.mu 
+        elif self.mode == 1:
+            y = ((self.std+self.eps) * alpha) * y + (self.mu + beta) 
+        elif self.mode == 2:
+            y = (self.std+self.eps) * y + self.mu 
+            y = alpha * y + beta
+        return y
+    
+    def forward(self, x, c=None): #(B, dim, lags)
+        x  = self.norm(x) #(B, dim, lags)
+        pred = self.model(x, c) #(B, dim, horizon)
+        output = self.denorm(pred, c[:, 0, 0]) #(B, dim, horizon)
+        return output
 
 
 class persistence(nn.Module):
@@ -270,10 +326,7 @@ def load_model(model_name, shape, normalization, **kwargs):
     elif model_name == "repeat":
         model = repeat(horizon)
     elif model_name == "lookback":
-        idx = kwargs.get("lookback_idx")
-        if idx is None:
-            raise ValueError("Please provide lookback_idx for lookback model")
-        model = lookback(idx, horizon)
+        model = lookback(kwargs.get("lookback_idx",0), horizon)
     elif model_name == "expected":
         model = expected(horizon)
     elif model_name == "linear":

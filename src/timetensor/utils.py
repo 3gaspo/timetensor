@@ -15,12 +15,15 @@ def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_na
         subset=None
     if save_name is None:
         save_name = model_name
-        if get_training and (normalization is not None) and (normalization != "None"):
-            save_name = save_name + "_" + normalization
+        if get_training and (normalization is not None):
+            if normalization != "None":
+                save_name = save_name + "_" + normalization
         if get_training and (criterion_name is not None) and ("sklinear" not in model_name):
-            save_name = save_name + "_" + criterion_name
-        if get_training and subset is not None and subset != 1:
-            save_name = save_name + "_" + str(subset)
+            if criterion_name != "MSE":
+                save_name = save_name + "_" + criterion_name
+        if get_training and subset is not None:
+            if subset != 1:
+                save_name = save_name + "_" + str(subset)
     save_dir = output_dir + save_name + "/" #current experiment dir
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
