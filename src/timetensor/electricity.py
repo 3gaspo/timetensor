@@ -46,7 +46,7 @@ def fetch_csv_data(path, years=None, return_df=False):
         return consumptions, datetimes
 
 
-def fetch_data(path, raw_format="csv", output_format="torch", years=None, hourly=False):
+def fetch_data(path, raw_format="csv", output_format="torch", years=None, hourly=False, return_df=False):
     """fetches correct dataset"""
     if output_format == "pandas":
         if raw_format == "txt":
@@ -57,9 +57,9 @@ def fetch_data(path, raw_format="csv", output_format="torch", years=None, hourly
             raise ValueError("Format of raw dataset not recognized")
     else:
         if raw_format == "txt":
-            consumptions, datetimes = fetch_txt_data(path, years, hourly, return_df)
+            consumptions, datetimes = fetch_txt_data(path, years, hourly)
         elif raw_format == "csv":
-            consumptions, datetimes = fetch_csv_data(path, return_df, years)
+            consumptions, datetimes = fetch_csv_data(path, years)
         else:
             raise ValueError("Format of raw dataset not recognized")
         return consumptions, None, datetimes

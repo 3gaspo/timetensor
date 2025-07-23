@@ -166,39 +166,45 @@ def plot_stats(data, save_path="", save_name="stats.pdf", show=False, per_user=T
     """plots means and stds. data must be pandas dataframe or dict of df"""
     if type(data) != dict:
         data = {"data":data}
+        do_hue=True
 
+    keys, means_list, stds_list = [], [], []
     for key, df in data.items():
         if per_user:
             means = df.mean(axis=0)
             stds = df.std(axis=0)
         else:
-            means = data.rolling(window=lookback).mean()[lookback:].stack().sample(samples)
-            stds = data.rolling(window=lookback).std()[lookback:].stack().sample(samples)
+            means = df.rolling(window=lookback).mean()[lookback:].stack().sample(samples)
+            stds = df.rolling(window=lookback).std()[lookback:].stack().sample(samples)
 
-        stats_df = pd.DataFrame({
-            'user': df.columns,
-            'log(mean)': np.log(means),
-            'log(std)': np.log(stds),})
+        keys += [key for k in range(len(means))]
+        means_list += np.log(np.where(means >0, means, means+1e-8)).tolist()
+        stds_list += np.log(np.where(stds >0, stds, stds+1e-8)).tolist()
 
-        sns.set_theme(style="white")
+    stats_df = pd.DataFrame({
+        'key': keys,
+        'log(mean)': means_list,
+        'log(std)': stds_list})
 
-        g = sns.jointplot(
-            data=stats_df,
-            x='log(mean)',
-            y='log(std)',
-            kind='scatter',
-            palette='Set1',
-            marginal_kws=dict(common_norm=False, fill=True, alpha=0.5),
-        )
+    sns.set_theme(style="white")
 
-        g.plot_joint(sns.kdeplot, fill=False, alpha=0.3, label=key)
+    g = sns.jointplot(
+        data=stats_df,
+        x='log(mean)',
+        y='log(std)',
+        hue='key',
+        kind='scatter',
+        palette='Set1',
+        marginal_kws=dict(common_norm=False, fill=True, alpha=0.5)
+    )
+
+    g.plot_joint(sns.kdeplot, hue='split', fill=False, alpha=0.3)
 
     if title is None:
         plt.suptitle("Statistics distribution", y=1.02)
     else:
         plt.suptitle(title)
     plt.tight_layout()
-    plt.legend()
     if show:
         plt.show()
     else:

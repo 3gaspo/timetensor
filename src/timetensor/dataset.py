@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import os
+import shutil
 import copy
 import pandas as pd
 
@@ -56,9 +57,9 @@ class TimeSeriesDataset(Dataset):
         else:
             return self.individuals
 
-    def get_df(self):
-        df = pd.DataFrame(self.values, index=self.datetimes)
-
+    def get_df(self, dim=0):
+        return pd.DataFrame(self.values[:, 0, :].transpose(0,1), index=self.datetimes)
+        
     def __getitem__(self, idx):
         if self.by_date:
             if self.return_all_individuals: #1 batch = all individuals, batch of dates
@@ -260,7 +261,7 @@ def split_3_way(values, context, datetimes, date_splits, save_path="", reshuffle
     split_dir = save_path + str(date_splits) + "/"
     if not os.path.exists(split_dir) or reshuffle:
         if reshuffle:
-            os.rmdir(split_dir)
+            shutil.rmtree(split_dir)
             os.makedirs(split_dir)
         else:
             os.makedirs(split_dir)
@@ -309,7 +310,7 @@ def split_4_way(values, context, datetimes, indiv_split, date_splits, context_by
     split_dir = save_path + str(indiv_split) + ";" + str(date_splits) + "/"
     if not os.path.exists(split_dir) or reshuffle:
         if reshuffle:
-            os.rmdir(split_dir)
+            shutil.rmtree(split_dir)
             os.makedirs(split_dir)
         else:
             os.makedirs(split_dir)
@@ -376,7 +377,7 @@ def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by
     split_dir = save_path + str(indiv_split) + ";" + str(date_splits) + "/"
     if not os.path.exists(split_dir) or reshuffle:
         if reshuffle:
-            os.rmdir(split_dir)
+            shutil.rmtree(split_dir)
             os.makedirs(split_dir)
         else:
             os.makedirs(split_dir)
