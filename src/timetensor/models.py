@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression
 
 class DefaultNorm(nn.Module):
     def __init__(self, model, latent=False):
-        super(DefaultNorm, self).__init__()
+        super().__init__()
         self.model = model
         self.latent = latent
     def norm(self, x):
@@ -28,7 +28,7 @@ class DefaultNorm(nn.Module):
 class GlobalNorm(DefaultNorm):
     def __init__(self, model, mean, std, latent=False):
         """Norm/Denorm using fixed mean and std"""
-        super(GlobalNorm, self).__init__(model, latent=latent)
+        super().__init__(model, latent=latent)
         self.mean, self.std = mean, std
 
     def norm(self, x):
@@ -42,7 +42,7 @@ class GlobalNorm(DefaultNorm):
 class InstanceNorm(DefaultNorm):
     def __init__(self, model, eps=1, last=False, latent=True, **kwargs):
         """Norm/Denorm using per instance mean and std"""
-        super(InstanceNorm, self).__init__(model, latent=latent)
+        super().__init__(model, latent=latent)
         self.eps, self.last = eps, last
     def norm(self, x):
         self.mean, self.std = get_normal_stats(x)#, std_cst=self.eps)
@@ -55,7 +55,7 @@ class InstanceNorm(DefaultNorm):
 class RevIN(DefaultNorm):
     def __init__(self, model, dim, eps=1, latent=False, **kwargs):
         """RevIN: Reversible Instance Normalization for Time Series Forecasting"""
-        super(RevIN, self).__init__(model, latent=latent)
+        super().__init__(model, latent=latent)
         self.dim, self.eps = dim, eps
         self.alpha = nn.Parameter(torch.ones(1, dim, 1))  #scale
         self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
@@ -81,7 +81,7 @@ class RevIN(DefaultNorm):
 class mIN(DefaultNorm):
     def __init__(self, model, dim, eps=1, last=False, init_alpha=None, init_beta=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, mode=0,  latent=False, **kwargs):
         """mIN: Modulated Instance Normalization"""
-        super(mIN, self).__init__(model, latent=latent)
+        super().__init__(model, latent=latent)
         self.dim, self.eps = dim, eps
 
         if fixed_alpha:
@@ -156,7 +156,7 @@ class mIN(DefaultNorm):
 class cmIN(mIN):
     def __init__(self, model, dim, eps=1, last=False, init_alphas=None, init_betas=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, mode=0,  latent=False, **kwargs):
         """mIN: Modulated Instance Normalization"""
-        super(cmIN, self).__init__(model, dim, eps, last, use_gamma=use_gamma, mode=mode,  latent=latent, **kwargs)
+        super().__init__(model, dim, eps, last, use_gamma=use_gamma, mode=mode,  latent=latent, **kwargs)
 
         assert init_alphas is not None and init_betas is not None
 
@@ -216,7 +216,7 @@ class cmIN(mIN):
 class persistence(nn.Module):
     """repeats single last value"""
     def __init__(self, horizon):
-        super(persistence, self).__init__()
+        super().__init__()
         self.horizon = horizon
     def forward(self, x, context=None):
         past_values = x[:, :, -1].unsqueeze(2) # (B, dim, 1)
@@ -226,7 +226,7 @@ class persistence(nn.Module):
 class expected(nn.Module):
     """repeats single last value"""
     def __init__(self, horizon):
-        super(expected, self).__init__()
+        super().__init__()
         self.horizon = horizon
     def forward(self, x, context=None):
         mean, _ = get_normal_stats(x)
@@ -236,7 +236,7 @@ class expected(nn.Module):
 class repeat(nn.Module):
     """returns last horizon values"""
     def __init__(self, horizon):
-        super(repeat, self).__init__()
+        super().__init__()
         self.horizon = horizon
     def forward(self, x, context=None):
         output = x[:, :, -self.horizon:] # (B, dim, horizon)
@@ -245,7 +245,7 @@ class repeat(nn.Module):
 class lookback(nn.Module):
     """repeats past horizon (at idx)"""
     def __init__(self, idx, horizon):
-        super(lookback, self).__init__()
+        super().__init__()
         self.idx  = idx
         self.horizon = horizon
     def forward(self, x, context=None):
@@ -255,7 +255,7 @@ class lookback(nn.Module):
 class linear(nn.Module):
     """linear layer on lags"""
     def __init__(self, lags, dim, horizon):
-        super(linear, self).__init__()
+        super().__init__()
         self.lags, self.dim, self.horizon  = lags, dim, horizon
         self.fc = nn.Linear(lags * dim, horizon * dim)
     def forward(self, x, context=None):

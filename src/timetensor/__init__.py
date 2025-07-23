@@ -3,3 +3,7 @@ from . import utils
 from . import visu
 from . import electricity
 from . import models
+from . import analysis
+from . import fedavg
+from . import fedrevin
+from . import xpc

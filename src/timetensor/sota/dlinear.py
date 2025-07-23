@@ -1,10 +1,7 @@
 ## Adapted from https://github.com/honeywell21/DLinear/blob/main/models/DLinear.py
 
-
 import torch
 import torch.nn as nn
-
-
 
 class moving_avg(nn.Module):
     def __init__(self, kernel_size, stride):

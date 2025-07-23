@@ -6,9 +6,12 @@ import json
 from tabulate import tabulate
 import os
 import torch
+import ipywidgets as widgets
+from IPython.display import display
+import seaborn as sns
 
-from .utils import get_stats, fetch_example_data
-
+from .utils import fetch_example_data #, get_stats
+from .analysis import get_betas
 
 def plot_serie(x, path="", name="series.pdf", title="Time series", axis=True):
     """plots example data"""
@@ -46,118 +49,196 @@ def plot_named_example(path, name):
     plot_example(x[0], y[0], path + f"/{name}/", f"example.pdf", "Example")
 
 
-def plot_global_stats(values, path="", dim=0):
-    """plots stats of datasets"""
-    plt.clf()
-    fig = plt.figure(figsize=(15,5))
+# def plot_global_stats(values, path="", dim=0):
+#     """plots stats of datasets"""
+#     plt.clf()
+#     fig = plt.figure(figsize=(15,5))
     
-    global_mean = values[:, dim, :].mean()
-    local_means = values[:, dim, :].mean(dim=-1)
-    plt.hist(local_means, bins=np.logspace(0, 6))
-    plt.xscale("log")
-    plt.xlabel("kWh")
-    plt.ylabel("Counts")        
-    plt.title(f"Distribution of users means (total avg: {global_mean:.2f} kWh)")
-    plt.savefig(path + "global_means.pdf")
+#     global_mean = values[:, dim, :].mean()
+#     local_means = values[:, dim, :].mean(dim=-1)
+#     plt.hist(local_means, bins=np.logspace(0, 6))
+#     plt.xscale("log")
+#     plt.xlabel("kWh")
+#     plt.ylabel("Counts")        
+#     plt.title(f"Distribution of users means (total avg: {global_mean:.2f} kWh)")
+#     plt.savefig(path + "global_means.pdf")
 
-    global_std = values[:, dim, :].std()
-    local_std = values[:, dim, :].std(dim=-1)
-    plt.hist(local_std, bins=np.logspace(0, 6))
-    plt.xscale("log")
-    plt.xlabel("kWh")
-    plt.ylabel("Counts")        
-    plt.title(f"Distribution of users std (total avg: {global_std:.2f} kWh)")
-    plt.savefig(path + "global_stds.pdf")
+#     global_std = values[:, dim, :].std()
+#     local_std = values[:, dim, :].std(dim=-1)
+#     plt.hist(local_std, bins=np.logspace(0, 6))
+#     plt.xscale("log")
+#     plt.xlabel("kWh")
+#     plt.ylabel("Counts")        
+#     plt.title(f"Distribution of users std (total avg: {global_std:.2f} kWh)")
+#     plt.savefig(path + "global_stds.pdf")
+#     plt.close()
+
+
+# def plot_stats(values, path="", name="stats.pdf", dim=0, title=None, logscale=True, limits=None):
+#     """plots stats of datasets"""
+#     plt.clf()
+#     fig = plt.figure(figsize=(15,5))
+#     if type(values) is dict:
+#         for split_name, split_values in values.items():
+#             mean_values, total_mean = get_stats(split_values, "mean", dim)
+#             if len(mean_values)>2000:
+#                 idx=random.sample(range(len(mean_values)),1000)
+#                 mean_values = mean_values[idx]
+#             if logscale:
+#                 bins = np.logspace(-3, 3, 100)
+#             else:
+#                 bins = 100
+#             plt.hist(mean_values, bins=bins, range=limits, density=True, alpha=0.5, label= f"{split_name} - mean={total_mean:.2f}")
+#             plt.legend()
+#     else:
+#         if logscale:
+#             bins = np.logspace(-3, 3, 100)
+#         else:
+#             bins = 100
+#         plt.hist(values, bins=bins, range=limits, density=True, alpha=0.5)
+        
+    
+#     if title is None:
+#         plt.title(f"Means distribution")
+#     else:
+#         plt.title(title)
+#     plt.xlabel(f"means")
+#     if logscale:
+#         plt.xscale("log")
+#     plt.ylabel("Density")
+#     plt.savefig(path + name)
+#     plt.close()
+
+
+# def scatter_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True):
+#     """plots stats of datasets"""
+#     plt.clf()
+#     fig = plt.figure(figsize=(10,5))
+#     for split_name, split_values in values_dict.items():
+#         std_values, total_std = get_stats(split_values, "std", dim)
+#         mean_values, total_mean = get_stats(split_values, "mean", dim)
+#         if len(mean_values)>2000:
+#             idx=random.sample(range(len(mean_values)),1000)
+#             mean_values, std_values = mean_values[idx], std_values[idx]
+#         plt.scatter(mean_values, std_values, label= f"{split_name} - std={total_std:.2f}, mean={total_mean:.2f}", s=10)
+
+#     plt.legend()
+#     if title is None:
+#         plt.title(f"Distributions")
+#     else:
+#         plt.title(title)
+#     plt.xlabel(f"mean")
+#     if logscale:
+#         plt.xscale("log")
+#         plt.yscale("log")
+#     plt.ylabel("std")
+#     plt.savefig(path + name)
+#     plt.close()
+
+# def scatter_input_output(x_dict, y_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True):
+#     """plots stats of datasets"""
+#     plt.clf()
+#     fig = plt.figure(figsize=(10,5))
+#     for key in x_dict:
+#         xmean_values, xtotal_mean = get_stats(x_dict[key], "mean", dim)
+#         ymean_values, ytotal_mean = get_stats(y_dict[key], "mean", dim)
+
+#         if len(xmean_values)>2000:
+#             idx=random.sample(range(len(xmean_values)),1000)
+#             xmean_values, ymean_values = xmean_values[idx], ymean_values[idx]
+
+#         plt.scatter(xmean_values, ymean_values, label= f"{key} - mean_x={xtotal_mean:.2f}, mean_y={ytotal_mean:.2f}", s=10)
+
+#     plt.legend()
+#     if title is None:
+#         plt.title(f"Output/Input mean distributions")
+#     else:
+#         plt.title(title)
+#     plt.xlabel(f"Input means")
+#     plt.ylabel("Output means")
+#     if logscale:
+#         plt.xscale("log")
+#         plt.yscale("log")
+#     plt.savefig(path + name)
+#     plt.close()
+
+def plot_stats(data, save_path="", save_name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None):
+    """plots means and stds. data must be pandas dataframe or dict of df"""
+    if type(data) != dict:
+        data = {"data":data}
+
+    for key, df in data.items():
+        if per_user:
+            means = df.mean(axis=0)
+            stds = df.std(axis=0)
+        else:
+            means = data.rolling(window=lookback).mean()[lookback:].stack().sample(samples)
+            stds = data.rolling(window=lookback).std()[lookback:].stack().sample(samples)
+
+        stats_df = pd.DataFrame({
+            'user': df.columns,
+            'log(mean)': np.log(means),
+            'log(std)': np.log(stds),})
+
+        sns.set_theme(style="white")
+
+        g = sns.jointplot(
+            data=stats_df,
+            x='log(mean)',
+            y='log(std)',
+            kind='scatter',
+            palette='Set1',
+            marginal_kws=dict(common_norm=False, fill=True, alpha=0.5),
+        )
+
+        g.plot_joint(sns.kdeplot, fill=False, alpha=0.3, label=key)
+
+    if title is None:
+        plt.suptitle("Statistics distribution", y=1.02)
+    else:
+        plt.suptitle(title)
+    plt.tight_layout()
+    plt.legend()
+    if show:
+        plt.show()
+    else:
+        plt.savefig(save_path+save_name)
     plt.close()
 
 
-def plot_stats(values, path="", name="stats.pdf", dim=0, title=None, logscale=True, limits=None):
-    """plots stats of datasets"""
-    plt.clf()
-    fig = plt.figure(figsize=(15,5))
-    if type(values) is dict:
-        for split_name, split_values in values.items():
-            mean_values, total_mean = get_stats(split_values, "mean", dim)
-            if len(mean_values)>2000:
-                idx=random.sample(range(len(mean_values)),1000)
-                mean_values = mean_values[idx]
-            if logscale:
-                bins = np.logspace(-3, 3, 100)
-            else:
-                bins = 100
-            plt.hist(mean_values, bins=bins, range=limits, density=True, alpha=0.5, label= f"{split_name} - mean={total_mean:.2f}")
-            plt.legend()
-    else:
-        if logscale:
-            bins = np.logspace(-3, 3, 100)
+
+
+def plot_means(data, save_path="", save_name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None):
+
+    if type(data) != dict:
+        data = {"data":data}
+
+    for key, df in data.items():
+        if per_user:
+            means = df.mean(axis=0)
         else:
-            bins = 100
-        plt.hist(values, bins=bins, range=limits, density=True, alpha=0.5)
-        
-    
+            means = data.rolling(window=lookback).mean()[lookback:].stack().sample(samples)
+
+        sns.kdeplot(means, fill=True, log_scale=True, label=f"{key} (avg:{means.mean():.2f})")
+
     if title is None:
         plt.title(f"Means distribution")
     else:
         plt.title(title)
-    plt.xlabel(f"means")
-    if logscale:
-        plt.xscale("log")
-    plt.ylabel("Density")
-    plt.savefig(path + name)
-    plt.close()
-
-
-def scatter_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True):
-    """plots stats of datasets"""
-    plt.clf()
-    fig = plt.figure(figsize=(10,5))
-    for split_name, split_values in values_dict.items():
-        std_values, total_std = get_stats(split_values, "std", dim)
-        mean_values, total_mean = get_stats(split_values, "mean", dim)
-        if len(mean_values)>2000:
-            idx=random.sample(range(len(mean_values)),1000)
-            mean_values, std_values = mean_values[idx], std_values[idx]
-        plt.scatter(mean_values, std_values, label= f"{split_name} - std={total_std:.2f}, mean={total_mean:.2f}", s=10)
-
+    plt.xlabel("Values")
+    plt.ylabel("Counts")
     plt.legend()
-    if title is None:
-        plt.title(f"Distributions")
+
+    if show:
+        plt.show()
     else:
-        plt.title(title)
-    plt.xlabel(f"mean")
-    if logscale:
-        plt.xscale("log")
-        plt.yscale("log")
-    plt.ylabel("std")
-    plt.savefig(path + name)
+        plt.savefig(save_path+save_name)
     plt.close()
 
-def scatter_input_output(x_dict, y_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True):
-    """plots stats of datasets"""
-    plt.clf()
-    fig = plt.figure(figsize=(10,5))
-    for key in x_dict:
-        xmean_values, xtotal_mean = get_stats(x_dict[key], "mean", dim)
-        ymean_values, ytotal_mean = get_stats(y_dict[key], "mean", dim)
 
-        if len(xmean_values)>2000:
-            idx=random.sample(range(len(xmean_values)),1000)
-            xmean_values, ymean_values = xmean_values[idx], ymean_values[idx]
+def plot_box(data, users, dates):
+    plt.imshow(data.values.T[:users, :dates])
 
-        plt.scatter(xmean_values, ymean_values, label= f"{key} - mean_x={xtotal_mean:.2f}, mean_y={ytotal_mean:.2f}", s=10)
-
-    plt.legend()
-    if title is None:
-        plt.title(f"Output/Input mean distributions")
-    else:
-        plt.title(title)
-    plt.xlabel(f"Input means")
-    plt.ylabel("Output means")
-    if logscale:
-        plt.xscale("log")
-        plt.yscale("log")
-    plt.savefig(path + name)
-    plt.close()
 
 
 def plot_losses(train_losses, valid_losses_dict=None, path="", name="losses.pdf", title="Losses", logscale=True, eval_freq=10):
@@ -327,7 +408,6 @@ def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None
     table = tabulate(df_formatted, headers='keys', tablefmt='grid', showindex=True)
     print(table)
 
-#import seaborn as sns
 
 def get_boxplots(dir_name, file_name, n_paths, col="MSE", names=None, baseline=None, save_path=""):
     """print table from dataframe in path"""
@@ -347,12 +427,12 @@ def get_boxplots(dir_name, file_name, n_paths, col="MSE", names=None, baseline=N
             df = df.subtract(df[baseline], axis=0)
         dfs.append(df)
 
-    df_values = pd.concat(dfs, axis=1)
-    #df_long = pd.concat(dfs, axis=1).reset_index().melt(id_vars='index', var_name='Method', value_name=col)
+    #df_values = pd.concat(dfs, axis=1)
+    df_long = pd.concat(dfs, axis=1).reset_index().melt(id_vars='index', var_name='Method', value_name=col)
 
     plt.figure(figsize=(10, 6))
-    plt.boxplot(df_values.values.T, labels=df_values.index)
-    #sns.boxplot(data=df_long, x='Method', y=col)
+    #plt.boxplot(df_values.values.T, labels=df_values.index)
+    sns.boxplot(data=df_long, x='Method', y=col)
     plt.title(f"Experiment results")
     plt.xlabel("Experiment")
     plt.ylabel(f"{col}")
@@ -410,3 +490,53 @@ def plot_expe(losses_path, eval_freq=10, names=None, save_path=None):
             plot_multi_losses(losses_dict1[loss_name], save_path, f"{loss_name}_valid1.pdf", f"Valid {loss_name}", eval_freq=eval_freq)
             plot_multi_losses(losses_dict2[loss_name], save_path, f"{loss_name}_valid2.pdf", f"Valid2 {loss_name}", eval_freq=eval_freq)
             plot_multi_losses(losses_dict3[loss_name], save_path, f"{loss_name}_valid3.pdf", f"Valid3 {loss_name}", eval_freq=eval_freq)
+
+
+
+def visu_widget(data, lookback, horizon, eps=1e-6):
+
+    alphas, betas = get_betas(data, lookback, horizon, eps)
+    dataframes = {'original': data, 'alpha': alphas, 'beta': betas}
+    dataframe_names = list(dataframes.keys())
+    column_names = list(data.columns)
+
+    dataframe_dropdown = widgets.Dropdown(
+        options=dataframe_names,
+        value=dataframe_names[0],
+        description='Select DataFrame:'
+    )
+    column_dropdown = widgets.Dropdown(
+        options=column_names,
+        value=column_names[0],
+        description='Select Column:'
+    )
+
+    next_button = widgets.Button(description="Next Column")
+    output = widgets.Output()
+
+    def update_plot(dataframe_name, column_name):
+        with output:
+            output.clear_output(wait=True)
+            df = dataframes[dataframe_name]
+            plt.figure(figsize=(12, 6))
+            plt.plot(df[column_name])
+            plt.title(f'{dataframe_name} time Series for user {column_name}')
+            plt.xlabel('Index')
+            plt.ylabel('Value')
+            plt.grid(True)
+            plt.show()
+
+    def on_dropdown_change(change):
+        update_plot(dataframe_dropdown.value, column_dropdown.value)
+
+    def on_next_button_click(b):
+        current_column_index = column_names.index(column_dropdown.value)
+        next_column_index = (current_column_index + 1) % len(column_names)
+        column_dropdown.value = column_names[next_column_index]
+
+    dataframe_dropdown.observe(on_dropdown_change, names='value')
+    column_dropdown.observe(on_dropdown_change, names='value')
+    next_button.on_click(on_next_button_click)
+
+    display(dataframe_dropdown, column_dropdown, next_button, output)
+    update_plot(dataframe_dropdown.value, column_dropdown.value)

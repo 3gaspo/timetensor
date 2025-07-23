@@ -3,6 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import os
 import copy
+import pandas as pd
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
@@ -17,7 +18,7 @@ class TimeSeriesDataset(Dataset):
         return_all_individuals (bool): return all individuals or a random
         context_by_individuals(bool):  return one context per individual or all
         """
-        super(TimeSeriesDataset, self).__init__()
+        super().__init__()
 
         self.values, self.context = values, context
         if len(self.values.shape) == 1:
@@ -55,6 +56,9 @@ class TimeSeriesDataset(Dataset):
         else:
             return self.individuals
 
+    def get_df(self):
+        df = pd.DataFrame(self.values, index=self.datetimes)
+
     def __getitem__(self, idx):
         if self.by_date:
             if self.return_all_individuals: #1 batch = all individuals, batch of dates
@@ -70,8 +74,6 @@ class TimeSeriesDataset(Dataset):
                         context = self.context[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
                     else:
                         context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
-
-
 
         else: #1 batch = batch of individuals, random date
             t = np.random.randint(self.dates - self.lags - self.horizon)
@@ -91,8 +93,10 @@ class TimeSeriesDataset(Dataset):
             return inputs, target
 
 
-class Subset(Dataset):
+class TimeSeriesSubset(Dataset):
     def __init__(self, dataset, indices, subset_mode="dates"):
+        super().__init__()
+
         self.indices = indices
         self.mode = subset_mode
         self.lags, self.horizon = dataset.lags, dataset.horizon 
@@ -143,8 +147,6 @@ class Subset(Dataset):
         else:
             return self.dataset[idx]
         
-        
-
     def __len__(self):
         if self.dataset.by_date:
             if self.mode == "individuals":
@@ -163,6 +165,7 @@ class Subset(Dataset):
             return (self.individuals, self.dim_values, self.dates), (self.contexts, self.dataset.dim_context, self.dates)
         else:
             return (self.individuals, self.dim_values, self.dates)
+
     @property
     def values(self):
         if self.mode == "dim":
@@ -521,7 +524,7 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subset
                     torch.save(subset_indices, subset_dir + f"{key}_subset.pt")
                 else:
                     subset_indices = list(torch.load(subset, weights_only=False))
-                dataset = Subset(dataset, subset_indices, subset_mode)
+                dataset = TimeSeriesSubset(dataset, subset_indices, subset_mode)
 
         if key=="train":
             loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)

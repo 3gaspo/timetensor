@@ -1,0 +1,79 @@
+import hydra
+import logging
+import os
+from time import perf_counter
+
+from src.timetensor.dataset import get_train_loaders, build_dataset, get_dataset_splits, get_sizes
+from src.timetensor.utils import set_random_data
+from src.timetensor.visu import plot_named_example, plot_stats
+
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+
+@hydra.main(version_base=None, config_path="configs", config_name="config")
+def run(cfg):
+    logger = logging.getLogger(__name__)
+    logger.info("=====Running data script=====")
+
+    #configs
+    data_path, dataset_name = cfg.data.path, cfg.data.dataset
+    lags, horizon = cfg.task.lags, cfg.task.horizon
+    indiv_split, date_splits = cfg.data.indiv_split, cfg.data.date_splits
+    batch_size = cfg.training.bs
+    for suffix in ["plots/", "examples/"]:
+        if not os.path.exists(data_path+suffix):
+            os.makedirs(data_path+suffix)
+    
+    rebuild_pt = True
+    reshuffle = True
+    new_example = True
+    replot = True
+
+    logger.info("Fetched configs")
+
+    #dataset
+    if rebuild_pt:
+        logger.info("Rebuilding dataset")
+        t1 = perf_counter()
+        if dataset_name == "electricity":
+            from src.timetensor.electricity import fetch_data  #adapt path if script in another working directory
+            fetcher = lambda path: fetch_data(path, raw_format="csv")
+        else:
+            raise ValueError("Dataset name not recognized")
+        build_dataset(fetcher, data_path) #saves values, context, datetimes as .pt
+        t2 = perf_counter()
+        logger.info(f"Build in {(t2-t1)/60:.3f} min")
+
+    #splits
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, context_by_individuals=True, reshuffle=reshuffle)
+    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True)
+    logger.info(f"{[(k, v[0].shape) for k,v in data_dict.items()]}")
+    
+    #sizes
+    _, shape_str, batch_str = get_sizes(loaders_dict["train"], str_info=True)
+    logger.info(shape_str)
+    logger.info(batch_str)
+
+    #example
+    if new_example:
+        logger.info("Setting new example")
+        ex_dir = data_path + "examples/" + f"{lags}_{horizon}/"
+        set_random_data(data_path, lags, horizon, name="rand")
+        plot_named_example(ex_dir, f"rand")
+    
+ 
+    #plots
+    plot_dir = data_path + "plots/"
+    full_df = fetch_data(data_path, raw_format="csv", output_format="pandas")
+    df_dict = {key: loaders_dict[key].dataset.get_df() for key in loaders_dict if key in ["train", "test1", "test2"]}
+    
+    plot_stats(full_df, plot_dir, save_name="per_user_stats.pdf", per_user=True, title=f"{dataset_name} user statistics")
+    plot_stats(full_df, plot_dir, save_name="per_user_stats.pdf", per_user=True, title=f"{dataset_name} user statistics")
+    plot_stats(df_dict, plot_dir, save_name="split_stats.pdf", per_user=False, lookback=lags, samples=1000, title=f"{dataset_name} input statistics")
+
+    logger.info('End of script\n')
+
+if __name__ == "__main__":
+    run()
+
