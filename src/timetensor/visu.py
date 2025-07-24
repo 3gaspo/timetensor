@@ -11,7 +11,7 @@ from IPython.display import display
 import seaborn as sns
 
 from .utils import fetch_example_data #, get_stats
-from .analysis import get_betas
+from .analysis import get_gammas
 
 def plot_serie(x, path="", name="series.pdf", title="Time series", axis=True):
     """plots example data"""
@@ -166,7 +166,6 @@ def plot_stats(data, save_path="", save_name="stats.pdf", show=False, per_user=T
     """plots means and stds. data must be pandas dataframe or dict of df"""
     if type(data) != dict:
         data = {"data":data}
-        do_hue=True
 
     keys, means_list, stds_list = [], [], []
     for key, df in data.items():
@@ -177,9 +176,9 @@ def plot_stats(data, save_path="", save_name="stats.pdf", show=False, per_user=T
             means = df.rolling(window=lookback).mean()[lookback:].stack().sample(samples)
             stds = df.rolling(window=lookback).std()[lookback:].stack().sample(samples)
 
-        keys += [key for k in range(len(means))]
-        means_list += np.log(np.where(means >0, means, means+1e-8)).tolist()
-        stds_list += np.log(np.where(stds >0, stds, stds+1e-8)).tolist()
+        keys += [key + f" (mean: {means.median():.2f} | std: {stds.median():.2f})" for k in range(len(means))]
+        means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
+        stds_list += np.log(np.where(stds>0, stds, 1e-8)).tolist()
 
     stats_df = pd.DataFrame({
         'key': keys,
@@ -198,7 +197,7 @@ def plot_stats(data, save_path="", save_name="stats.pdf", show=False, per_user=T
         marginal_kws=dict(common_norm=False, fill=True, alpha=0.5)
     )
 
-    g.plot_joint(sns.kdeplot, hue='split', fill=False, alpha=0.3)
+    g.plot_joint(sns.kdeplot, hue='key', fill=False, alpha=0.3)
 
     if title is None:
         plt.suptitle("Statistics distribution", y=1.02)
@@ -210,8 +209,6 @@ def plot_stats(data, save_path="", save_name="stats.pdf", show=False, per_user=T
     else:
         plt.savefig(save_path+save_name)
     plt.close()
-
-
 
 
 def plot_means(data, save_path="", save_name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None):
@@ -501,7 +498,7 @@ def plot_expe(losses_path, eval_freq=10, names=None, save_path=None):
 
 def visu_widget(data, lookback, horizon, eps=1e-6):
 
-    alphas, betas = get_betas(data, lookback, horizon, eps)
+    alphas, betas = get_gammas(data, lookback, horizon, eps)
     dataframes = {'original': data, 'alpha': alphas, 'beta': betas}
     dataframe_names = list(dataframes.keys())
     column_names = list(data.columns)

@@ -54,7 +54,6 @@ def get_temporal_features(date):
 
 def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_by_individual=False, prefix=""):
     """gets a random individual and random window from dataset"""
-    
     values, context, datetimes = load_data(path, prefix)
 
     individuals, dim, dates = values.shape

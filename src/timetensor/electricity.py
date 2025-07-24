@@ -37,6 +37,7 @@ def fetch_csv_data(path, years=None, return_df=False):
     df = df.rename(columns={"OT":"320"})
     if years is not None:
         df = df[df.index.year.isin(years)]
+    df.columns = range(df.shape[1])
     if return_df:
         return df
     else:
