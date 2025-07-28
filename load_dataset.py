@@ -2,9 +2,10 @@ import hydra
 import logging
 import os
 from time import perf_counter
+import pandas as pd
 
 from src.timetensor.dataset import get_train_loaders, build_dataset, get_dataset_splits, get_sizes
-from src.timetensor.utils import set_random_data
+from src.timetensor.utils import set_random_data, load_data
 from src.timetensor.visu import plot_named_example, plot_stats, plot_means
 
 import warnings
@@ -35,6 +36,11 @@ def run(cfg):
     #dataset
     if dataset_name == "electricity":
         from src.timetensor.electricity import fetch_data  #adapt path if script in another working directory
+    elif "sim" in dataset_name:
+        def fetch_data(data_path, raw_format=None, output_format=None):
+            values, _, _ = load_data(data_path)
+            df = pd.DataFrame(values.squeeze(1).numpy().T)
+            return df
     else:
             raise ValueError("Dataset name not recognized")
     if rebuild_pt:

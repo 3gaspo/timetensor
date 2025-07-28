@@ -179,10 +179,10 @@ def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookb
         if remove_cte:
             keep_idx = np.where(stds>0)[0]
         else:
-            keep_idx = means.index
-        keys += [key + f" (mean: {means[keep_idx].median():.2f} | std: {stds[keep_idx].median():.2f})" for k in range(len(means[keep_idx]))]
-        means_list += np.log(np.where(means[keep_idx]>0, means[keep_idx], 1e-8)).tolist()
-        stds_list += np.log(stds[keep_idx]).tolist() #np.where(stds>0, stds, 1e-8)).tolist()
+            keep_idx = np.array(means.index)
+        keys += [key + f" (mean: {means.iloc[keep_idx].median():.2f} | std: {stds.iloc[keep_idx].median():.2f})" for k in range(len(means.iloc[keep_idx]))]
+        means_list += np.log(np.where(means.iloc[keep_idx]>0, means.iloc[keep_idx], 1e-8)).tolist()
+        stds_list += np.log(stds.iloc[keep_idx]).tolist() #np.where(stds>0, stds, 1e-8)).tolist()
 
     stats_df = pd.DataFrame({
         'key': keys,
@@ -232,9 +232,9 @@ def plot_means(data, path="", name="stats.pdf", show=False, per_user=True, lookb
         if remove_cte:
             keep_idx = np.where(stds>0)[0]
         else:
-            keep_idx = means.index
-        keys += [key + f" (mean: {means[keep_idx].median():.2f} | std: {stds[keep_idx].median():.2f})" for k in range(len(means[keep_idx]))]
-        means_list += np.log(np.where(means[keep_idx]>0, means[keep_idx], 1e-8)).tolist()
+            keep_idx = np.array(means.index)
+        keys += [key + f" (mean: {means.iloc[keep_idx].median():.2f} | std: {stds.iloc[keep_idx].median():.2f})" for k in range(len(means.iloc[keep_idx]))]
+        means_list += np.log(np.where(means.iloc[keep_idx]>0, means.iloc[keep_idx], 1e-8)).tolist()
     
     means_df = pd.DataFrame({
         'key': keys,

@@ -265,12 +265,12 @@ def split_3_way(values, context, datetimes, date_splits, save_path="", reshuffle
 
     #assert (date_splits is not None) and (type(date_split)==str or (type(date_split)==float and date_split<1))
     split_dir = save_path + str(date_splits) + "/"
-    if not os.path.exists(split_dir) or reshuffle:
-        if reshuffle:
+    if reshuffle:
+        if os.path.exists(split_dir):
             shutil.rmtree(split_dir)
-            os.makedirs(split_dir)
-        else:
-            os.makedirs(split_dir)
+        os.makedirs(split_dir)
+    elif not os.path.exists(split_dir):
+        os.makedirs(split_dir)
 
     # if type(date_split)==str:
     #     dates_idx1, dates_idx2 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False))
@@ -314,12 +314,12 @@ def split_4_way(values, context, datetimes, indiv_split, date_splits, context_by
     #assert (indiv_split is not None) and (type(indiv_split)==str or (type(indiv_split)==float and indiv_split<1))
     ##assert (date_split is not None) and (type(date_split)==str or (type(date_split)==float and date_split<1))
     split_dir = save_path + str(indiv_split) + ";" + str(date_splits) + "/"
-    if not os.path.exists(split_dir) or reshuffle:
-        if reshuffle:
+    if reshuffle:
+        if os.path.exists(split_dir):
             shutil.rmtree(split_dir)
-            os.makedirs(split_dir)
-        else:
-            os.makedirs(split_dir)
+        os.makedirs(split_dir)
+    elif not os.path.exists(split_dir):
+        os.makedirs(split_dir)
 
 
     # if type(date_split)==str:
@@ -381,12 +381,12 @@ def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by
     # assert (indiv_split is not None) and (type(indiv_split)==str or (type(indiv_split)==float and indiv_split<1))
     # assert (date_splits is not None) and (type(date_splits)==str or (type(date_splits[0])==float and np.sum(date_splits)==1))
     split_dir = save_path + str(indiv_split) + ";" + str(date_splits) + "/"
-    if not os.path.exists(split_dir) or reshuffle:
-        if reshuffle:
+    if reshuffle:
+        if os.path.exists(split_dir):
             shutil.rmtree(split_dir)
-            os.makedirs(split_dir)
-        else:
-            os.makedirs(split_dir)
+        os.makedirs(split_dir)
+    elif not os.path.exists(split_dir):
+        os.makedirs(split_dir)
 
 
     # if type(date_splits)==str:
