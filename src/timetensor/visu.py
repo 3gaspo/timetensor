@@ -274,7 +274,7 @@ def plot_losses(train_losses, valid_losses_dict=None, path="", name="losses.pdf"
                 T.append(eval_freq * k)
                 k+=1
             T.append(len(train_losses))
-            plt.plot(T, values, label="valid")
+            plt.plot(T, values, label=key)
         plt.legend()
     else:
         plt.plot(range(1, len(train_losses)+1), train_losses)

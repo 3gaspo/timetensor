@@ -78,6 +78,7 @@ def run(cfg):
         plot_stats(df_dict, plot_dir, name="split_stats.pdf", per_user=True, title=f"{dataset_name} splits statistics", remove_cte=True)
         plot_stats(full_df, plot_dir, name="input_stats.pdf", per_user=False, lookback=lags, samples=1000, title=f"{dataset_name} input statistics", remove_cte=True)
 
+        df_dict = {key: loaders_dict[key].dataset.get_df() for key in loaders_dict if key in ["train", "test1"]}
         plot_means(df_dict, plot_dir, name="split_means.pdf", per_user=True, title=f"{dataset_name} splits means")
         plot_means(df_dict, plot_dir, name="input_means.pdf", per_user=False, title=f"{dataset_name} input means")
 

@@ -189,11 +189,11 @@ class cmIN(mIN):
             y = (y - self.omega) / self.gamma 
             
         if self.fixed_alpha:
-            alpha = torch.stack([getattr(self, f"alpha_{int(k)}") for k in cluster])
-            beta  = torch.stack([getattr(self, f"beta_{int(k)}") for k in cluster])
+            alpha = torch.cat([getattr(self, f"alpha_{int(k)}") for k in cluster]) 
+            beta  = torch.cat([getattr(self, f"beta_{int(k)}") for k in cluster])
         else:
-            alpha = torch.stack([self.alphas[int(k)] for k in cluster])
-            beta  = torch.stack([self.betas[int(k)] for k in cluster])
+            alpha = torch.cat([self.alphas[int(k)] for k in cluster])
+            beta  = torch.cat([self.betas[int(k)] for k in cluster])
         
         if self.mode == 0:
             y = y * alpha + beta

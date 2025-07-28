@@ -268,14 +268,9 @@ def split_3_way(values, context, datetimes, date_splits, save_path="", reshuffle
     if reshuffle:
         if os.path.exists(split_dir):
             shutil.rmtree(split_dir)
-        os.makedirs(split_dir)
-    elif not os.path.exists(split_dir):
+    if not os.path.exists(split_dir):
         os.makedirs(split_dir)
 
-    # if type(date_split)==str:
-    #     dates_idx1, dates_idx2 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False))
-    #     dates1, dates2, dates3 = datetimes[dates_idx1], datetimes[dates_idx2], datetimes[dates_idx3]
-    # elif type(date_split[0])==float: #split dates
         stop_date1, stop_date2 = int(date_splits[0] * dates), int((date_splits[0] + date_splits[1])*dates)
         dates_idx1, dates_idx2, dates_idx3 = list(range(stop_date1)), list(range(stop_date1, stop_date2)), list(range(stop_date2, dates))
         dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
@@ -317,15 +312,10 @@ def split_4_way(values, context, datetimes, indiv_split, date_splits, context_by
     if reshuffle:
         if os.path.exists(split_dir):
             shutil.rmtree(split_dir)
-        os.makedirs(split_dir)
-    elif not os.path.exists(split_dir):
+    if not os.path.exists(split_dir):
         os.makedirs(split_dir)
 
 
-    # if type(date_split)==str:
-    #     dates_idx1, dates_idx2 = list(torch.load(date_split + "_split1.pt", weights_only=False)), list(torch.load(date_split + "_split2.pt", weights_only=False))
-    #     dates1, dates2 = datetimes[dates_idx1], datetimes[dates_idx2]
-    # else: #split dates
         stop_date = int(date_splits * dates)
         dates_idx1, dates_idx2 = list(range(stop_date)), list(range(stop_date, dates))
         dates1, dates2 = list(datetimes[:stop_date]), list(datetimes[stop_date:])
@@ -384,15 +374,9 @@ def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by
     if reshuffle:
         if os.path.exists(split_dir):
             shutil.rmtree(split_dir)
-        os.makedirs(split_dir)
-    elif not os.path.exists(split_dir):
+    if not os.path.exists(split_dir):
         os.makedirs(split_dir)
 
-
-    # if type(date_splits)==str:
-    #     dates_idx1, dates_idx2, dates_idx3 = [list(torch.load(date_splits + f"_split{k}.pt", weights_only=False)) for k in range(3)]
-    #     dates1, dates2, dates3 = datetimes[dates_idx1], datetimes[dates_idx2], datetimes[dates_idx3]
-    # else: #split dates
         dates = len(datetimes)
         stop_date1, stop_date2 = int(date_splits[0] * dates), int((date_splits[0] + date_splits[1])*dates)
         dates_idx1, dates_idx2, dates_idx3 = list(range(stop_date1)), list(range(stop_date1, stop_date2)), list(range(stop_date2, dates))
@@ -401,9 +385,6 @@ def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by
         torch.save(dates_idx2, split_dir + "date_split2.pt")
         torch.save(dates_idx3, split_dir + "date_split3.pt")
 
-    # if type(indiv_split)==str:
-    #     indices1, indices2 = list(torch.load(indiv_split + "_split1.pt", weights_only=False)), list(torch.load(indiv_split + "_split2.pt", weights_only=False))
-    # else: 
         individuals = values.shape[0]
         stop_indiv = int(indiv_split * individuals)
         indices = np.random.permutation(individuals)

@@ -151,7 +151,7 @@ def plot_centroids(centroids, show=False, path="", name="centroids.pdf"):
     plt.close()
 
 
-def plot_heterogeneity(df, show=False, save_path="", name="heterogeneity.pdf"):
+def plot_heterogeneity(df, show=False, path="", name="heterogeneity.pdf"):
     heterogeneities = []
     N_clusters = [1, 2, 3, 4, 5, 10, 20, df.shape[1]//10, df.shape[1]//5, df.shape[1]//2, df.shape[1]]
     N_clusters = np.sort(N_clusters)
@@ -167,34 +167,36 @@ def plot_heterogeneity(df, show=False, save_path="", name="heterogeneity.pdf"):
     if show:
         plt.show()
     else:    
-        plt.savefig(save_path + name)
+        plt.savefig(path + name)
     plt.close()
 
 
 
-def plot_gamma(df, save_path="", save_name="stats.pdf", show=False, per_user=True, lookback=336, horizon=48, samples=1000, title=None):
+def plot_gamma(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, horizon=48, samples=1000, title=None, remove_cte=True):
     """plots means and stds. data must be pandas dataframe or dict of df"""
-    if type(df) != dict:
-        alphas_df, betas_df = get_gammas(df, lookback, horizon)
-        data = {"data":(alphas_df, betas_df)}
-    else:
-       data = {}
-       for key, split_df in df.items():
-            alphas_df, betas_df = get_gammas(split_df, lookback, horizon)
-            data[key] = (alphas_df, betas_df)
+    if type(data) != dict:
+        data = {"data":data}
 
     keys, alpha_means_list, beta_means_list = [], [], []
-    for key, (alphas, betas) in data.items():
+    for key, df in data.items():
+        alphas, betas = get_gammas(df, lookback, horizon)
+
         if per_user:
             alpha_means = alphas.median(axis=0)
             beta_means = betas.median(axis=0)
+            stds = df.std(axis=0)
         else:
             alpha_means = alphas.stack().sample(samples)
             beta_means = betas.stack().sample(samples)
+            stds = df.rolling(window=lookback).std()[lookback:].stack().sample(samples)
 
-        keys += [key + f" (alpha: {alpha_means.median():.2f} | beta: {beta_means.median():.2f})" for k in range(len(alpha_means))]
-        alpha_means_list += alpha_means.tolist()
-        beta_means_list += beta_means.tolist()
+        if remove_cte:
+            keep_idx = np.where(stds>0)[0]
+        else:
+            keep_idx = np.array(stds.index)
+        keys += [key + f" (alpha: {alpha_means.iloc[keep_idx].median():.2f} | beta: {beta_means.iloc[keep_idx].median():.2f})" for k in range(len(alpha_means.iloc[keep_idx]))]
+        alpha_means_list += alpha_means.iloc[keep_idx].tolist()
+        beta_means_list += beta_means.iloc[keep_idx].tolist()
 
     stats_df = pd.DataFrame({
         'key': keys,
@@ -223,5 +225,5 @@ def plot_gamma(df, save_path="", save_name="stats.pdf", show=False, per_user=Tru
     if show:
         plt.show()
     else:
-        plt.savefig(save_path+save_name)
+        plt.savefig(path+name)
     plt.close()
