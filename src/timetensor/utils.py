@@ -37,19 +37,19 @@ def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_na
     return save_name, save_dir
 
 
-def get_temporal_features(date):
-    """returns list of size context(=3) for a given date"""
-    features = []
-    hour, weekday, posan = date.hour, date.weekday(), date.timetuple().tm_yday
+# def get_temporal_features(date):
+#     """returns list of size context(=3) for a given date"""
+#     features = []
+#     hour, weekday, posan = date.hour, date.weekday(), date.timetuple().tm_yday
 
-    features.append(np.cos((2*np.pi / 23) * hour)) # cos(hour)
-    features.append(np.sin((2*np.pi / 23) * hour)) # sin
-    features.append(np.cos((2*np.pi / 6)* weekday)) # cos(weekday)
-    features.append(np.sin((2*np.pi / 6)* weekday)) # sin
-    features.append(np.cos((2*np.pi / 365) * posan)) # cos(position in year)
-    features.append(np.sin((2*np.pi / 365) * posan)) # sin
+#     features.append(np.cos((2*np.pi / 23) * hour)) # cos(hour)
+#     features.append(np.sin((2*np.pi / 23) * hour)) # sin
+#     features.append(np.cos((2*np.pi / 6)* weekday)) # cos(weekday)
+#     features.append(np.sin((2*np.pi / 6)* weekday)) # sin
+#     features.append(np.cos((2*np.pi / 365) * posan)) # cos(position in year)
+#     features.append(np.sin((2*np.pi / 365) * posan)) # sin
 
-    return features
+#     return features
 
 
 def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_by_individual=False, prefix=""):
@@ -93,21 +93,18 @@ def fetch_example_data(path="datasets/examples/", names=None):
 
 def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, mIN=False):#, std_cst=1e-6):
     """unrolls (x,y) examples of dataloaders (typically individuals*dates examples)"""
+    ###TODO: remove std=0 windows for sklearn fitting
     X = []
     Y = []
     i = 0
     for x, c, y in dataloader:
         if normal:
             mean, std = get_normal_stats(x)
-            if alpha is not None:
-                std = std*alpha
-                #std = torch.where(std != 0, std, std_cst)
+            nx = normalize(x, mean, std)
+            ny = normalize(y, mean, std)
             if mIN:
-                nx = normalize(x, mean*beta, std)
-                ny = normalize(y, mean*beta, std)
-            else:
-                nx = normalize(x, mean-beta, std)
-                ny = normalize(y, mean-beta, std)
+                nx = beta*nx + alpha
+                ny = beta*ny + alpha
             X.append(nx)
             Y.append(ny)
         else:
@@ -124,24 +121,24 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, b
     return torch.concat(X), torch.concat(Y)
 
 
-def get_stats(values, stat, dim=0):
-    """returns tensor of given stats for a loader
-    values (Nindiv, Ndim, Ndates)
-    """
-    if stat == "mean":
-        values_stat = values.mean(axis=-1) #(Nindiv, Ndim)
-        total_stat = values.mean()
-    elif stat == "max":
-        values_stat, _ = values.max(axis=-1) #(Nindiv, Ndim)
-        total_stat = values.max()
-    elif stat == "std":
-        values_stat = values.std(axis=-1) #(Nindiv, Ndim)
-        total_stat = values.std()
-    else:
-        raise ValueError("Unrecognized stat name")
-    if dim is not None:
-        values_stat = values_stat[:, dim]
-    return values_stat, total_stat #(Nindiv), (1)
+# def get_stats(values, stat, dim=0):
+#     """returns tensor of given stats for a loader
+#     values (Nindiv, Ndim, Ndates)
+#     """
+#     if stat == "mean":
+#         values_stat = values.mean(axis=-1) #(Nindiv, Ndim)
+#         total_stat = values.mean()
+#     elif stat == "max":
+#         values_stat, _ = values.max(axis=-1) #(Nindiv, Ndim)
+#         total_stat = values.max()
+#     elif stat == "std":
+#         values_stat = values.std(axis=-1) #(Nindiv, Ndim)
+#         total_stat = values.std()
+#     else:
+#         raise ValueError("Unrecognized stat name")
+#     if dim is not None:
+#         values_stat = values_stat[:, dim]
+#     return values_stat, total_stat #(Nindiv), (1)
 
 
 def get_normal_stats(x):#, std_cst=1e-6):

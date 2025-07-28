@@ -8,3 +8,4 @@ configs:
   init_alphas:
   fixed_alpha: False
   use_gamma: False
+  inverse_gamma: False

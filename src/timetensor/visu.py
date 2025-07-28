@@ -162,7 +162,7 @@ def plot_named_example(path, name):
 #     plt.savefig(path + name)
 #     plt.close()
 
-def plot_stats(data, save_path="", save_name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None):
+def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None, remove_cte=True):
     """plots means and stds. data must be pandas dataframe or dict of df"""
     if type(data) != dict:
         data = {"data":data}
@@ -175,10 +175,14 @@ def plot_stats(data, save_path="", save_name="stats.pdf", show=False, per_user=T
         else:
             means = df.rolling(window=lookback).mean()[lookback:].stack().sample(samples)
             stds = df.rolling(window=lookback).std()[lookback:].stack().sample(samples)
-
-        keys += [key + f" (mean: {means.median():.2f} | std: {stds.median():.2f})" for k in range(len(means))]
-        means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
-        stds_list += np.log(np.where(stds>0, stds, 1e-8)).tolist()
+        
+        if remove_cte:
+            keep_idx = np.where(stds>0)[0]
+        else:
+            keep_idx = means.index
+        keys += [key + f" (mean: {means[keep_idx].median():.2f} | std: {stds[keep_idx].median():.2f})" for k in range(len(means[keep_idx]))]
+        means_list += np.log(np.where(means[keep_idx]>0, means[keep_idx], 1e-8)).tolist()
+        stds_list += np.log(stds[keep_idx]).tolist() #np.where(stds>0, stds, 1e-8)).tolist()
 
     stats_df = pd.DataFrame({
         'key': keys,
@@ -207,35 +211,48 @@ def plot_stats(data, save_path="", save_name="stats.pdf", show=False, per_user=T
     if show:
         plt.show()
     else:
-        plt.savefig(save_path+save_name)
+        plt.savefig(path+name)
     plt.close()
 
 
-def plot_means(data, save_path="", save_name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None):
+def plot_means(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None, remove_cte=True):
 
     if type(data) != dict:
         data = {"data":data}
 
+    keys, means_list = [], []
     for key, df in data.items():
         if per_user:
             means = df.mean(axis=0)
+            stds = df.std(axis=0)
         else:
-            means = data.rolling(window=lookback).mean()[lookback:].stack().sample(samples)
-
-        sns.kdeplot(means, fill=True, log_scale=True, label=f"{key} (avg:{means.mean():.2f})")
+            means = df.rolling(window=lookback).mean()[lookback:].stack().sample(samples)
+            stds = df.rolling(window=lookback).std()[lookback:].stack().sample(samples)
+        
+        if remove_cte:
+            keep_idx = np.where(stds>0)[0]
+        else:
+            keep_idx = means.index
+        keys += [key + f" (mean: {means[keep_idx].median():.2f} | std: {stds[keep_idx].median():.2f})" for k in range(len(means[keep_idx]))]
+        means_list += np.log(np.where(means[keep_idx]>0, means[keep_idx], 1e-8)).tolist()
+    
+    means_df = pd.DataFrame({
+        'key': keys,
+        'log(mean)': means_list,})
+    
+    sns.kdeplot(means_df, x="log(mean)", hue="key", fill=True)#, log_scale=False), #label=f"{key} (avg:{means.mean():.2f})")
 
     if title is None:
         plt.title(f"Means distribution")
     else:
         plt.title(title)
     plt.xlabel("Values")
-    plt.ylabel("Counts")
-    plt.legend()
-
+    plt.ylabel("Density")
+    plt.tight_layout()
     if show:
         plt.show()
     else:
-        plt.savefig(save_path+save_name)
+        plt.savefig(path+name)
     plt.close()
 
 
@@ -412,11 +429,12 @@ def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None
     print(table)
 
 
-def get_boxplots(dir_name, file_name, n_paths, col="MSE", names=None, baseline=None, save_path=""):
+def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", names=None, baseline=None, save_path=""):
     """print table from dataframe in path"""
     paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
-    dfs = []
-    for path in paths:
+    
+    box_df = []
+    for k, path in enumerate(paths):
         with open(path) as file:
             data = json.load(file)
         df = pd.DataFrame(data)
@@ -428,14 +446,17 @@ def get_boxplots(dir_name, file_name, n_paths, col="MSE", names=None, baseline=N
         if baseline is not None:
             assert (baseline in df.columns)
             df = df.subtract(df[baseline], axis=0)
-        dfs.append(df)
+        
+        for algo, value in df.items():
+            box_df.append({"Algorithm": algo, f"{col}": value, "seed":k})
 
     #df_values = pd.concat(dfs, axis=1)
-    df_long = pd.concat(dfs, axis=1).reset_index().melt(id_vars='index', var_name='Method', value_name=col)
+    #df_long = pd.concat(dfs, axis=1).reset_index().melt(id_vars='index', var_name='Method', value_name=col)
+    box_df = pd.DataFrame(box_df)
 
     plt.figure(figsize=(10, 6))
     #plt.boxplot(df_values.values.T, labels=df_values.index)
-    sns.boxplot(data=df_long, x='Method', y=col)
+    sns.boxplot(data=box_df, x='Algorithm', y=col)#, hue="seed")
     plt.title(f"Experiment results")
     plt.xlabel("Experiment")
     plt.ylabel(f"{col}")

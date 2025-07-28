@@ -49,46 +49,13 @@ def run(cfg):
     #sizes
     shape, shape_str, batch_str = get_sizes(loaders_dict["train"], str_info=True)
     X, c, y = next(iter(loaders_dict["train"])) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
-    # shape = [X.shape[2], X.shape[1], y.shape[2]]
     if verbose:
         logger.info(shape_str)
         logger.info(batch_str)
-        
-        # if c is not None:
-        #     logger.info(f"Batch sizes : X={X.shape}, c={c.shape}, y={y.shape}")
-        # else:
-        #     logger.info(f"Batch sizes : X={X.shape}, y={y.shape}")
 
     #training
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     criterion, eval_losses = get_losses(criterion_name, mean=None, std=None)
-    # if criterion_name == "MSE":
-    #     criterion = Loss(nn.MSELoss())
-    # elif criterion_name == "MMSE":
-    #     criterion = Loss(nn.MSELoss(), cfg.data.mean, cfg.data.std)
-    # elif criterion_name == "NMSE":
-    #     criterion = Loss(nn.MSELoss(), mode="instance")
-    # elif criterion_name == "RMSE":
-    #     criterion = Loss(nn.MSELoss(), mode="relative")
-    # elif criterion_name == "normalize_y":
-    #     criterion = Loss(nn.MSELoss(), mode="normalize_y")
-    # elif criterion_name == "denormalize_pred":
-    #     criterion = Loss(nn.MSELoss(), mode="denormalize_pred")
-    # else:
-    #     logger.info("Unknown criterion name")
-    #     criterion = None
-    # if criterion_name == "normalize_y":
-    #     eval_losses = {
-    #         "NMSE": Loss(nn.MSELoss(reduction="none"), mode= "normalize_y"),
-    #         "MSE": Loss(nn.MSELoss(reduction="none"), mode="denormalize_pred"),
-    #         }
-    # else:
-    #     eval_losses = {
-    #         "MSE": Loss(nn.MSELoss(reduction="none")),
-    #         "MAE": Loss(nn.L1Loss(reduction="none")),
-    #         "NMSE": Loss(nn.MSELoss(reduction="none"), mode="instance"), 
-    #         "RMSE": Loss(nn.MSELoss(reduction="none"), mode="relative")
-    #     }
 
     model = load_model(model_name, shape, cfg.normalization, **kwargs)
     if init_path is not None:
@@ -145,11 +112,6 @@ def run(cfg):
                 model.load_state_dict(weights)
             model.to(device)
             learner.reset_model(weights)
-            # train_losses = torch.load(save_dir + f"train_losses.pt",weights_only=False)
-            # valid_losses1 = torch.load(save_dir + f"valid_losses1.pt", weights_only=False)
-            # valid_losses2 = torch.load(save_dir + f"valid_losses2.pt", weights_only=False)
-            # valid_losses3 = torch.load(save_dir + f"valid_losses3.pt", weights_only=False)
-            # followed_weights = torch.load(save_dir + f"followed_weights.pt", weights_only=False)
 
 
     #eval
@@ -218,8 +180,8 @@ def run(cfg):
         runroll = unroll_windows(loaders_dict["train"], normal=True, beta=model.beta.data.detach().cpu().numpy()[0][0][0], alpha=model.alpha.data.detach().cpu().numpy()[0][0][0], mIN = normalization=="mIN")
         x_dict = {"train": unroll[0]}
         rx_dict = {"train": runroll[0]}
-        plot_stats(x_dict, save_dir + "plots/", name="normal_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-4,1e-4))
-        plot_stats(rx_dict, save_dir + "plots/", name="mIN_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-4,1e-4))
+        plot_stats(x_dict, save_dir + "plots/", "normal_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-4,1e-4))
+        plot_stats(rx_dict, save_dir + "plots/", "mIN_outputs.pdf", title="Normalized outputs distribution", logscale=False, limits=(-1e-4,1e-4))
 
 
     logger.info('End of script\n')

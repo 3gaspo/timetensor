@@ -79,7 +79,7 @@ class RevIN(DefaultNorm):
     
 
 class mIN(DefaultNorm):
-    def __init__(self, model, dim, eps=1, last=False, init_alpha=None, init_beta=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, mode=0,  latent=False, **kwargs):
+    def __init__(self, model, dim, eps=1, last=False, init_alpha=None, init_beta=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, mode=0,  latent=False, **kwargs):
         """mIN: Modulated Instance Normalization"""
         super().__init__(model, latent=latent)
         self.dim, self.eps = dim, eps
@@ -107,7 +107,7 @@ class mIN(DefaultNorm):
 
         self.gamma =  nn.Parameter(torch.ones(1, self.dim, 1))
         self.omega = nn.Parameter(torch.zeros(1, self.dim, 1))
-        self.use_gamma = use_gamma
+        self.use_gamma, self.inverse_gamma = use_gamma, inverse_gamma
         self.mode = mode
         self.last, self.latent = last, latent
 
@@ -128,22 +128,19 @@ class mIN(DefaultNorm):
             x = self.gamma * x + self.omega
         return x
     
-    def denorm(self, y, alpha=None, beta=None):
-        if alpha is None:
-            alpha = self.alpha
-        if beta is None:
-            beta = self.beta
-        
+    def denorm(self, y):
+        if self.inverse_gamma:
+            y = (y - self.omega) / self.gamma 
         if self.mode == 0:
-            y = y * alpha + beta
+            y = y * self.alpha + self.beta
             if self.latent:
                 return y
             y = (self.std+self.eps)  * y + self.mu 
         elif self.mode == 1:
-            y = ((self.std+self.eps) * alpha) * y + (self.mu + beta) 
+            y = ((self.std+self.eps) * self.alpha) * y + (self.mu + self.beta) 
         elif self.mode == 2:
             y = (self.std+self.eps) * y + self.mu 
-            y = alpha * y + beta
+            y = self.alpha * y + self.beta
         return y
     
     def forward(self, x, c=None): #(B, dim, lags)
@@ -154,39 +151,43 @@ class mIN(DefaultNorm):
 
 
 class cmIN(mIN):
-    def __init__(self, model, dim, eps=1, last=False, init_alphas=None, init_betas=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, mode=0,  latent=False, **kwargs):
+    def __init__(self, model, dim, eps=1, last=False, init_alphas=None, init_betas=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, mode=0,  latent=False, **kwargs):
         """mIN: Modulated Instance Normalization"""
-        super().__init__(model, dim, eps, last, use_gamma=use_gamma, mode=mode,  latent=latent, **kwargs)
+        super().__init__(model, dim, eps, last, use_gamma=use_gamma, inverse_gamma=inverse_gamma, mode=mode,  latent=latent, **kwargs)
 
         assert init_alphas is not None and init_betas is not None
 
         if type(init_alphas)==int:
-            self.init_alphas = [1 for k in range(init_alphas)]
+            self.init_alphas = [1.0 for k in range(init_alphas)]
         else:
             init_alphas = init_alphas.split(";")
             self.init_alphas = [float(value) for value in init_alphas]
             
         if type(init_betas)==int:
-            self.init_betas = [0 for k in range(init_betas)]
+            self.init_betas = [0.0 for k in range(init_betas)]
         else:
             init_betas = init_betas.split(";")
             self.init_betas = [float(value) for value in init_betas]
 
-
-        if fixed_alpha:
+        self.fixed_alpha = fixed_alpha
+        if self.fixed_alpha:
             for k in range(len(self.init_alphas)):
                 self.register_buffer(f"alpha_{k}", torch.full((1, self.dim, 1), self.init_alphas[k]))
         else:
-            self.alphas = nn.ParameterList([nn.Parameter(torch.full((1, self.dim, 1), self.init_alphas[k])) for k in range(len(init_alphas))])
-            
-        if fixed_beta:
+            self.alphas = nn.ParameterList([nn.Parameter(torch.full((1, self.dim, 1), self.init_alphas[k])) for k in range(len(self.init_alphas))])
+        
+        self.fixed_beta = fixed_beta
+        if self.fixed_beta:
             for k in range(len(self.init_betas)):
                 self.register_buffer(f"beta_{k}", torch.full((1, self.dim, 1), self.init_betas[k]))
 
         else:
-            self.betas = nn.ParameterList([nn.Parameter(torch.full((1, self.dim, 1), self.init_betas[k])) for k in range(len(init_betas))])
+            self.betas = nn.ParameterList([nn.Parameter(torch.full((1, self.dim, 1), self.init_betas[k])) for k in range(len(self.init_betas))])
 
     def denorm(self, y, cluster):
+        if self.inverse_gamma:
+            y = (y - self.omega) / self.gamma 
+            
         if self.fixed_alpha:
             alpha = torch.stack([getattr(self, f"alpha_{int(k)}") for k in cluster])
             beta  = torch.stack([getattr(self, f"beta_{int(k)}") for k in cluster])
@@ -352,6 +353,8 @@ def load_model(model_name, shape, normalization, **kwargs):
             return RevIN(model, dim,  **norm_kwargs)
         elif normalization == "mIN":
             return mIN(model, dim, **norm_kwargs)
+        elif normalization == "cmIN":
+            return cmIN(model, dim, **norm_kwargs)
         else:
             ValueError(f"Normalization not recognized : {normalization}")
     return model

@@ -63,14 +63,17 @@ def run(cfg):
         plot_named_example(ex_dir, f"rand")
     
     #plots
-    plot_dir = data_path + "plots/"
-    full_df = fetch_data(data_path, raw_format="csv", output_format="pandas")
-    df_dict = {key: loaders_dict[key].dataset.get_df() for key in loaders_dict if key in ["train", "test1", "test2"]}
-    
-    plot_stats(full_df, plot_dir, save_name="per_user_stats.pdf", per_user=True, title=f"{dataset_name} user statistics")
-    plot_stats(df_dict, plot_dir, save_name="split_stats.pdf", per_user=True, title=f"{dataset_name} splits statistics")
-    plot_means(df_dict, plot_dir, save_name="split_means.pdf", per_user=True, title=f"{dataset_name} splits means")
-    plot_stats(full_df, plot_dir, save_name="input_stats.pdf", per_user=False, lookback=lags, samples=1000, title=f"{dataset_name} input statistics")
+    if replot:
+        plot_dir = data_path + "plots/"
+        full_df = fetch_data(data_path, raw_format="csv", output_format="pandas")
+        df_dict = {key: loaders_dict[key].dataset.get_df() for key in loaders_dict if key in ["train", "test1", "test2"]}
+        
+        plot_stats(full_df, plot_dir, name="per_user_stats.pdf", per_user=True, title=f"{dataset_name} user statistics", remove_cte=True)
+        plot_stats(df_dict, plot_dir, name="split_stats.pdf", per_user=True, title=f"{dataset_name} splits statistics", remove_cte=True)
+        plot_stats(full_df, plot_dir, name="input_stats.pdf", per_user=False, lookback=lags, samples=1000, title=f"{dataset_name} input statistics", remove_cte=True)
+
+        plot_means(df_dict, plot_dir, name="split_means.pdf", per_user=True, title=f"{dataset_name} splits means")
+        plot_means(df_dict, plot_dir, name="input_means.pdf", per_user=False, title=f"{dataset_name} input means")
 
     logger.info('End of script\n')
 

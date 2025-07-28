@@ -8,7 +8,7 @@ import pandas as pd
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
-    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=False):    
+    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=False, skip_cte=True):    
         """
         values (N_individuals, dim_values, dates):  past target values 
         datetimes (dates): list of dates in datetime Y-m-d H:M:S format
@@ -42,7 +42,7 @@ class TimeSeriesDataset(Dataset):
         self.datetimes = np.array(datetimes)
         self.by_date = by_date
         self.return_all_individuals, self.context_by_individuals = return_all_individuals, context_by_individuals
-
+        self.skip_cte = skip_cte
 
     @property
     def shape(self):
@@ -79,6 +79,12 @@ class TimeSeriesDataset(Dataset):
         else: #1 batch = batch of individuals, random date
             t = np.random.randint(self.dates - self.lags - self.horizon)
             values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
+            if self.skip_cte:
+                std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach() # (1, dim_values)
+                while std == torch.zeros(1, self.dim_values):
+                    t = np.random.randint(self.dates - self.lags - self.horizon)
+                    values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0)
+                    std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach() # (1, dim_values)
             if self.context is not None:
                 if self.context_by_individuals:
                     context = self.context[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
@@ -476,12 +482,7 @@ def get_dataset_splits(path="datasets/", indiv_split=None, date_splits=None, con
         data_dict = split_6_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals, split_path, reshuffle=reshuffle)
     else:
         raise ValueError(f"Unrecognized type_split: {type_split}")
-    # if save: #saves pt files
-    #     for key, (values, context, datetimes) in data_dict.items():
-    #         torch.save(values, split_path + key + "_values.pt")
-    #         if context is not None:
-    #             torch.save(context, split_path + key + "_context.pt")
-    #         torch.save(datetimes, split_path + key + "_datetimes.pt")
+
     return data_dict
 
 
