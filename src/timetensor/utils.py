@@ -73,7 +73,7 @@ def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_
         os.makedirs(ex_dir)
     torch.save(inputs, ex_dir + "input.pt")
     if context is not None:
-        torch.save(inputs, ex_dir + "context.pt")
+        torch.save(context, ex_dir + "context.pt")
     torch.save(target, ex_dir + "target.pt")
     torch.save((rand_indiv, datetimes[rand_date]), ex_dir + "indivdate.pt")
 

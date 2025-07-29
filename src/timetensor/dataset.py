@@ -8,7 +8,7 @@ import pandas as pd
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
-    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=False, skip_cte=True):    
+    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=True, skip_cte=True):    
         """
         values (N_individuals, dim_values, dates):  past target values 
         datetimes (dates): list of dates in datetime Y-m-d H:M:S format
@@ -80,11 +80,11 @@ class TimeSeriesDataset(Dataset):
             t = np.random.randint(self.dates - self.lags - self.horizon)
             values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
             if self.skip_cte:
-                std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach() # (1, dim_values)
-                while std == torch.zeros(1, self.dim_values):
+                std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach() # (1, dim_values, 1)
+                while std == torch.zeros((1, self.dim_values, 1)):
                     t = np.random.randint(self.dates - self.lags - self.horizon)
                     values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0)
-                    std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach() # (1, dim_values)
+                    std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach()
             if self.context is not None:
                 if self.context_by_individuals:
                     context = self.context[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
@@ -300,7 +300,7 @@ def split_3_way(values, context, datetimes, date_splits, save_path="", reshuffle
     return {"train": (values[:,:,dates_idx1], context1, dates1), "valid":(values[:,:,dates_idx2], context2, dates2), "test":(values[:,:,dates_idx3], context3, dates3)}    
 
 
-def split_4_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals=False, save_path="", reshuffle=False):
+def split_4_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals=True, save_path="", reshuffle=False):
     """returns dict of train/valid/test of provided values,context,datetimes
     split parameters can be in [0,1] or str path to indices
     """
@@ -361,7 +361,7 @@ def split_4_way(values, context, datetimes, indiv_split, date_splits, context_by
     return {"train":(values1, context1, dates1), "valid":(values2, context2, dates2), "valid2":(values3, context3, dates1), "test": (values4, context4, dates2)}
 
 
-def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals=False, save_path="", reshuffle=False):
+def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals=True, save_path="", reshuffle=False):
     """returns dict of train/valid/test of provided values,context,datetimes
     split parameters can be in [0,1] or str path to indices
     """

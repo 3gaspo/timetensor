@@ -32,7 +32,7 @@ class Client:
         else:
             return None
 
-def client_split(values, context, datetimes, nodes, shuffle=True, seed=None, context_by_individuals=False, path=""):
+def client_split(values, context, datetimes, nodes, shuffle=True, seed=None, context_by_individuals=True, path=""):
     """splits individuals according to splits"""
     
     individuals = values.shape[0]
@@ -73,7 +73,7 @@ def client_split(values, context, datetimes, nodes, shuffle=True, seed=None, con
             return {f"node_{i}":(values[indices_list[i], :, :], context, datetimes) for i in range(N)}
 
 
-def get_client_splits(data_path, nodes, splits, shuffle=True, seed=None, context_by_individuals=False, save=False, path=""):
+def get_client_splits(data_path, nodes, splits, shuffle=True, seed=None, context_by_individuals=True, save=False, path=""):
     """splits is a dict with keys the splits for nodes (or path) and for each node the indiv and date splits (or paths)"""
     values, context, datetimes = load_data(data_path)
     node_dict =  client_split(values, context, datetimes, nodes, shuffle, seed, context_by_individuals, path)

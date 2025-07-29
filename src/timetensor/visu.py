@@ -382,6 +382,7 @@ def print_nice_table(path, multipliers=None, names=None):
                 new_index[k] = new_index[k] + f" * 1e{multipliers[k]}"
         df.index = new_index
     table = tabulate(df, headers='keys', tablefmt='grid', showindex=True, floatfmt=".4f")
+    print(f"Table of {path}")
     print(table)
 
 
@@ -426,10 +427,11 @@ def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None
         df_formatted = df_mean.applymap("{:.4f}".format)
 
     table = tabulate(df_formatted, headers='keys', tablefmt='grid', showindex=True)
+    print(f"Table of {file_name}")
     print(table)
 
 
-def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", names=None, baseline=None, save_path=""):
+def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", save_path="", save_name="boxplot.pdf", names=None, baseline=None):
     """print table from dataframe in path"""
     paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
     
@@ -463,7 +465,7 @@ def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", names=None, basel
     plt.xticks(rotation=45)
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig(save_path + "boxplot.pdf")
+    plt.savefig(save_path + save_name)
     plt.close()
 
 
