@@ -1,5 +1,5 @@
 name: instance
 configs:
-  eps: 1
+  eps: 1e-6
   last: False
   latent: False

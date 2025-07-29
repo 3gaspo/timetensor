@@ -270,7 +270,7 @@ class linear(nn.Module):
 
 class sklinear():
     """linear layer on lags"""
-    def __init__(self, normalized=False, dim=0, eps=1e-6):
+    def __init__(self, normalized=False, dim=0, eps=1e-6, **kwargs):
         self.reg = LinearRegression()
         self.normalized = normalized
         self.dim = dim
@@ -335,7 +335,7 @@ def load_model(model_name, shape, normalization, **kwargs):
     elif model_name == "DLinear":
         model = DLinear(lags, dim, horizon, kwargs.get("kernel_size",25))
     elif model_name == "sklinear":
-        model = sklinear(normalization, eps=kwargs.get("eps",1e-6))
+        model = sklinear(normalization, **norm_kwargs)
     elif model_name == "PatchTST":
         model = PatchTST(lags, horizon)
     else:

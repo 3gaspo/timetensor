@@ -1,12 +1,2 @@
 name: PatchTST
 configs:
-
-# normalization: instance
-# configs:
-#   last: False
-#   latent: False
-#   init_beta:
-#   fixed_beta: False
-#   init_alpha:
-#   fixed_alpha: False
-#   use_gamma: False

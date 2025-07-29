@@ -29,7 +29,7 @@ for loss in MSE NMSE
 do
     for model_name in linear DLinear
     do
-        for normalization in None instance
+        for normalization in None instance relative
         do
             python3 train_model.py \
                 "model=${model_name}" \
@@ -46,6 +46,23 @@ do
         done
     done
 done
+
+model_name=sklinear
+for normalization in None instance relative
+    python3 train_model.py \
+        "model=${model_name}" \
+        "misc.output_dir=$output_dir" \
+        "normalization=$normalization" \
+        "training.loss=$loss" \
+        "misc.benchmark=True" \
+        "training.lr=$lr" \
+        "training.epochs=$epochs" \
+        "training.eval_freq=100" \
+        "training.print_freq=100" \
+        "data=$data" \
+        "data.reshuffle=False"
+done
+
 
 python3 -c "from src.timetensor.visu import plot_expe;plot_expe('$output_dir', $eval_freq)"
 
