@@ -539,7 +539,7 @@ def collate_fn(data):
     return inputs, contexts, targets
 
 
-def aggregate_loaders(loaders, context_by_individuals=False, by_date=True):
+def aggregate_loaders(loaders, context_by_individuals=True, by_date=True):
     if (not context_by_individuals) and by_date: #other cases tODO
         values_list = []
         for loader in loaders:

@@ -52,7 +52,7 @@ def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_na
 #     return features
 
 
-def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_by_individual=False, prefix=""):
+def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_by_individuals=True, prefix=""):
     """gets a random individual and random window from dataset"""
     values, context, datetimes = load_data(path, prefix)
 
@@ -63,7 +63,7 @@ def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_
     inputs = values[rand_indiv, :, rand_date : rand_date+lag]
     target = values[rand_indiv, :, rand_date+lag : rand_date+lag+horizon]
     if context is not None:
-        if context_by_individual:
+        if context_by_individuals:
             context = context[rand_indiv, :, rand_date : rand_date+lag+horizon]
         else:
             context = context[:, :, rand_date : rand_date+lag+horizon]
