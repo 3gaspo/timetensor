@@ -9,7 +9,7 @@ from .utils import unroll_windows
 from .utils import normalize
 
 class Loss():
-    def __init__(self, loss, mean=None, std=None, mode=None, eps=1):
+    def __init__(self, loss, mean=None, std=None, mode=None, eps=1e-6):
         self.loss = loss #e.g nn.MSELoss()
         self.mode = mode
 

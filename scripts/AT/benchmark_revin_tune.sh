@@ -12,7 +12,7 @@ loss=MSE
 lr=0.0001
 epochs=200
 
-for seed in 1 2 3
+for seed in 1 2 3 4 5
 do
     output_dir="${main_output_dir}seed_$seed/"
     
@@ -26,7 +26,7 @@ do
         "training.bs=10" \
         "training.lr=$lr" \
         "training.epochs=$epochs" \
-        "training.eval_freq=50" \
+        "training.eval_freq=100" \
         "training.print_freq=100" \
         "data=$data" \
         "task.lags=100" \

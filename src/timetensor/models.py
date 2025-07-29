@@ -40,7 +40,7 @@ class GlobalNorm(DefaultNorm):
 
 
 class InstanceNorm(DefaultNorm):
-    def __init__(self, model, eps=1, last=False, latent=True, **kwargs):
+    def __init__(self, model, eps=1e-6, last=False, latent=True, **kwargs):
         """Norm/Denorm using per instance mean and std"""
         super().__init__(model, latent=latent)
         self.eps, self.last = eps, last
@@ -53,7 +53,7 @@ class InstanceNorm(DefaultNorm):
         return y
 
 class RevIN(DefaultNorm):
-    def __init__(self, model, dim, eps=1, latent=False, **kwargs):
+    def __init__(self, model, dim, eps=1e-6, latent=False, **kwargs):
         """RevIN: Reversible Instance Normalization for Time Series Forecasting"""
         super().__init__(model, latent=latent)
         self.dim, self.eps = dim, eps
@@ -79,7 +79,7 @@ class RevIN(DefaultNorm):
     
 
 class mIN(DefaultNorm):
-    def __init__(self, model, dim, eps=1, last=False, init_alpha=None, init_beta=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, mode=0,  latent=False, **kwargs):
+    def __init__(self, model, dim, eps=1e-6, last=False, init_alpha=None, init_beta=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, mode=0,  latent=False, **kwargs):
         """mIN: Modulated Instance Normalization"""
         super().__init__(model, latent=latent)
         self.dim, self.eps = dim, eps
@@ -151,7 +151,7 @@ class mIN(DefaultNorm):
 
 
 class cmIN(mIN):
-    def __init__(self, model, dim, eps=1, last=False, init_alphas=None, init_betas=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, mode=0,  latent=False, **kwargs):
+    def __init__(self, model, dim, eps=1e-6, last=False, init_alphas=None, init_betas=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, mode=0,  latent=False, **kwargs):
         """mIN: Modulated Instance Normalization"""
         super().__init__(model, dim, eps, last, use_gamma=use_gamma, inverse_gamma=inverse_gamma, mode=mode,  latent=latent, **kwargs)
 
@@ -270,7 +270,7 @@ class linear(nn.Module):
 
 class sklinear():
     """linear layer on lags"""
-    def __init__(self, normalized=False, dim=0, eps=1):
+    def __init__(self, normalized=False, dim=0, eps=1e-6):
         self.reg = LinearRegression()
         self.normalized = normalized
         self.dim = dim
@@ -335,7 +335,7 @@ def load_model(model_name, shape, normalization, **kwargs):
     elif model_name == "DLinear":
         model = DLinear(lags, dim, horizon, kwargs.get("kernel_size",25))
     elif model_name == "sklinear":
-        model = sklinear(normalization, eps=kwargs.get("eps",1))
+        model = sklinear(normalization, eps=kwargs.get("eps",1e-6))
     elif model_name == "PatchTST":
         model = PatchTST(lags, horizon)
     else:

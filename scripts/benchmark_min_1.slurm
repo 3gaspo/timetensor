@@ -17,7 +17,7 @@ data=sim1
 model_name=PatchTST
 loss=MSE
 lr=0.0001
-epochs=200
+epochs=300
 
 for seed in 1 2 3 4 5
 do
@@ -65,7 +65,7 @@ do
             "training.bs=10" \
             "training.lr=$lr" \
             "training.epochs=$epochs" \
-            "training.eval_freq=50" \
+            "training.eval_freq=100" \
             "training.print_freq=100" \
             "data=$data" \
             "data.reshuffle=True" \
@@ -86,7 +86,7 @@ do
             "training.bs=10" \
             "training.lr=$lr" \
             "training.epochs=$epochs" \
-            "training.eval_freq=50" \
+            "training.eval_freq=100" \
             "training.print_freq=100" \
             "data=$data" \
             "data.reshuffle=True" \
@@ -109,7 +109,7 @@ do
             "training.bs=10" \
             "training.lr=$lr" \
             "training.epochs=$epochs" \
-            "training.eval_freq=50" \
+            "training.eval_freq=100" \
             "training.print_freq=100" \
             "data=$data" \
             "data.reshuffle=True" \

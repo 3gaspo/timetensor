@@ -172,7 +172,7 @@ def save_results(value, path, name, model_name, metric_name):
             print(dico)
 
 
-def normalize(x, mean, std, eps=1):
+def normalize(x, mean, std, eps=1e-6):
     return (x - mean) / (std + eps)
 
 
