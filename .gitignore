@@ -4,3 +4,4 @@ __pycache__/
 .venv
 datasets/electricity.csv
 datasets/electricity.txt
+*.egg-info
