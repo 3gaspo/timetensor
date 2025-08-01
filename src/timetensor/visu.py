@@ -169,21 +169,27 @@ def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookb
 
     keys, means_list, stds_list = [], [], []
     for key, df in data.items():
+        
         if per_user:
             means = df.mean(axis=0)
             stds = df.std(axis=0)
         else:
-            means = df.rolling(window=lookback).mean()[lookback:].stack().sample(samples)
-            stds = df.rolling(window=lookback).std()[lookback:].stack().sample(samples)
-        
+            means = df.rolling(window=lookback).mean()[lookback:].stack()#.sample(samples)
+            stds = df.rolling(window=lookback).std()[lookback:].stack()#.sample(samples)
+            sampled_idx = np.random.choice(len(means), size=samples, replace=False)
+            means = means.iloc[sampled_idx]
+            stds = stds.iloc[sampled_idx]
+
         if remove_cte:
             keep_idx = np.where(stds>0)[0]
+            keys += [key + f" (mean: {means.iloc[keep_idx].median():.2f} | std: {stds.iloc[keep_idx].median():.2f})" for k in range(len(keep_idx))]
+            means_list += np.log(np.where(means.iloc[keep_idx]>0, means.iloc[keep_idx], 1e-8)).tolist()
+            stds_list += np.log(stds.iloc[keep_idx]).tolist() #np.where(stds>0, stds, 1e-8)).tolist()
         else:
-            keep_idx = np.array(means.index)
-        keys += [key + f" (mean: {means.iloc[keep_idx].median():.2f} | std: {stds.iloc[keep_idx].median():.2f})" for k in range(len(means.iloc[keep_idx]))]
-        means_list += np.log(np.where(means.iloc[keep_idx]>0, means.iloc[keep_idx], 1e-8)).tolist()
-        stds_list += np.log(stds.iloc[keep_idx]).tolist() #np.where(stds>0, stds, 1e-8)).tolist()
-
+            keys += [key + f" (mean: {means.median():.2f} | std: {stds.median():.2f})" for k in range(len(means))]
+            means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
+            stds_list += np.log(np.where(stds>0, stds, 1e-8)).tolist() #np.where(stds>0, stds, 1e-8)).tolist()
+    
     stats_df = pd.DataFrame({
         'key': keys,
         'log(mean)': means_list,
@@ -226,15 +232,19 @@ def plot_means(data, path="", name="stats.pdf", show=False, per_user=True, lookb
             means = df.mean(axis=0)
             stds = df.std(axis=0)
         else:
-            means = df.rolling(window=lookback).mean()[lookback:].stack().sample(samples)
-            stds = df.rolling(window=lookback).std()[lookback:].stack().sample(samples)
-        
+            means = df.rolling(window=lookback).mean()[lookback:].stack()#.sample(samples)
+            stds = df.rolling(window=lookback).std()[lookback:].stack()#.sample(samples)
+            sampled_idx = np.random.choice(len(means), size=samples, replace=False)
+            means = means.iloc[sampled_idx]
+            stds = stds.iloc[sampled_idx]
+
         if remove_cte:
             keep_idx = np.where(stds>0)[0]
+            keys += [key + f" (mean: {means.iloc[keep_idx].median():.2f})" for k in range(len(keep_idx))]
+            means_list += np.log(np.where(means.iloc[keep_idx]>0, means.iloc[keep_idx], 1e-8)).tolist()
         else:
-            keep_idx = np.array(means.index)
-        keys += [key + f" (mean: {means.iloc[keep_idx].median():.2f} | std: {stds.iloc[keep_idx].median():.2f})" for k in range(len(means.iloc[keep_idx]))]
-        means_list += np.log(np.where(means.iloc[keep_idx]>0, means.iloc[keep_idx], 1e-8)).tolist()
+            keys += [key + f" (mean: {means.median():.2f})" for k in range(len(means))]
+            means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
     
     means_df = pd.DataFrame({
         'key': keys,

@@ -26,6 +26,7 @@ do
     normalization=revin
     srun python3 train_model.py \
         "model=${model_name}" \
+        "misc.seed=$seed" \
         "misc.output_dir=$output_dir" \
         "normalization=$normalization" \
         "training.loss=$loss" \
@@ -43,6 +44,7 @@ do
     normalization=mIN
     srun python3 train_model.py \
         "model=${model_name}" \
+        "misc.seed=$seed" \
         "misc.output_dir=$output_dir" \
         "normalization=$normalization" \
         "training.loss=$loss" \
@@ -58,7 +60,7 @@ do
         "task.horizon=20" \
         "normalization.configs.use_gamma=True" \
         "normalization.configs.inverse_gamma=True" \
-        "misc.save_name=revin_min"
+        "misc.save_name=min_gamma"
 
     srun python3 -c "from src.timetensor.visu import plot_expe;plot_expe('$output_dir', $eval_freq)"
 

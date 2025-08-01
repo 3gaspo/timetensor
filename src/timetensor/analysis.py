@@ -133,8 +133,12 @@ def get_cluster_distances(df, cluster_indices, centroids):
   return intra_distances, inter_distances
 
 def get_cluster_heterogeneity(df, cluster_indices, centroids):
-  intra_distances, inter_distances = get_cluster_distances(df, cluster_indices, centroids)
-  return np.mean(list(inter_distances.values())) / (np.mean(list(intra_distances.values())) + 1)
+    intra_distances, inter_distances = get_cluster_distances(df, cluster_indices, centroids)
+    intra_distances, inter_distances = list(intra_distances.values()), list(inter_distances.values())
+    if len(inter_distances)>0:
+        return np.mean(intra_distances) / (np.mean(inter_distances) + 1)
+    else:
+        return np.mean(intra_distances)
 
 def plot_centroids(centroids, show=False, path="", name="centroids.pdf"):
     plt.figure(figsize=(10, 6))
@@ -156,7 +160,7 @@ def plot_heterogeneity(df, show=False, path="", name="heterogeneity.pdf"):
     N_clusters = [1, 2, 3, 4, 5, 10, 20, df.shape[1]//10, df.shape[1]//5, df.shape[1]//2, df.shape[1]]
     N_clusters = np.sort(N_clusters)
     Z, distances_matrix = init_clusters(df)
-    for n_clusters in N_clusters:
+    for n_clusters in tqdm(N_clusters):
         labels, cluster_indices = get_clusters(Z, n_clusters)
         centroids = get_centroids(df, cluster_indices)
         heterogeneity = get_cluster_heterogeneity(df, cluster_indices, centroids)
@@ -186,24 +190,28 @@ def plot_gamma(data, path="", name="stats.pdf", show=False, per_user=True, lookb
             beta_means = betas.median(axis=0)
             stds = df.std(axis=0)
         else:
-            alpha_means = alphas.stack().sample(samples)
-            beta_means = betas.stack().sample(samples)
-            stds = df.rolling(window=lookback).std()[lookback:].stack().sample(samples)
+            alpha_means = alphas.stack()
+            beta_means = betas.stack()
+            stds = df.rolling(window=lookback).std()[lookback:].stack()
+            sampled_idx = np.random.choice(len(alpha_means), size=samples, replace=False)
+            alpha_means = alpha_means.iloc[sampled_idx]
+            beta_means = beta_means.iloc[sampled_idx]
+            stds = stds.iloc[sampled_idx]
 
         if remove_cte:
             keep_idx = np.where(stds>0)[0]
+            keys += [key + f" (alpha: {alpha_means.iloc[keep_idx].median():.2f} | beta: {beta_means.iloc[keep_idx].median():.2f})" for k in range(len(keep_idx))]
+            alpha_means_list += alpha_means.iloc[keep_idx].tolist()
+            beta_means_list += beta_means.iloc[keep_idx].tolist()
         else:
-            keep_idx = np.array(stds.index)
-        keys += [key + f" (alpha: {alpha_means.iloc[keep_idx].median():.2f} | beta: {beta_means.iloc[keep_idx].median():.2f})" for k in range(len(alpha_means.iloc[keep_idx]))]
-        alpha_means_list += alpha_means.iloc[keep_idx].tolist()
-        beta_means_list += beta_means.iloc[keep_idx].tolist()
+            keys += [key + f" (alpha: {alpha_means.median():.2f} | beta: {beta_means.median():.2f})" for k in range(len(alpha_means))]
+            alpha_means_list += alpha_means.tolist()
+            beta_means_list += beta_means.tolist()
 
     stats_df = pd.DataFrame({
         'key': keys,
         'beta': beta_means_list,
         'alpha': alpha_means_list})
-
-    sns.set_theme(style="white")
 
     g = sns.jointplot(
         data=stats_df,
@@ -218,7 +226,7 @@ def plot_gamma(data, path="", name="stats.pdf", show=False, per_user=True, lookb
     g.plot_joint(sns.kdeplot, hue='key', fill=False, alpha=0.3)
 
     if title is None:
-        plt.suptitle("Statistics distribution", y=1.02)
+        plt.suptitle("Statistics distribution")#, y=1.02)
     else:
         plt.suptitle(title)
     plt.tight_layout()

@@ -81,7 +81,7 @@ class TimeSeriesDataset(Dataset):
             values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
             if self.skip_cte:
                 std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach() # (1, dim_values, 1)
-                while std == torch.zeros((1, self.dim_values, 1)):
+                while (std == torch.zeros((1, self.dim_values, 1))).any:
                     t = np.random.randint(self.dates - self.lags - self.horizon)
                     values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0)
                     std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach()
@@ -512,12 +512,12 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subset
         if key=="train":
             loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
         else:
-            loaders_dict[key] = DataLoader(dataset, batch_size=1, shuffle=False, collate_fn=collate_fn)
+            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
        
     return loaders_dict
 
 
-def collate_fn(data):
+def collate_fn(data, remove_cte=True):
     """
        data: is a list of tuples with (input, (context), target)
     """
@@ -536,6 +536,12 @@ def collate_fn(data):
     targets = torch.stack(targets)
     targets = targets.view(-1, targets.shape[-2], targets.shape[-1])
 
+    if remove_cte:
+        stds = inputs.std(dim=-1) #(bs * indiv, dim)
+        non_constant_mask = (stds != 0).all(dim=1)  # (bs * indiv)
+        inputs, targets = inputs[non_constant_mask], targets[non_constant_mask]
+        if contexts is not None:
+            contexts = contexts[non_constant_mask]
     return inputs, contexts, targets
 
 

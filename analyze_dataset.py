@@ -5,6 +5,7 @@ import pandas as pd
 
 from src.timetensor.analysis import *
 from src.timetensor.visu import plot_stats
+from src.timetensor.utils import load_data
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -18,18 +19,24 @@ def run(cfg):
     #configs
     data_path, dataset_name = cfg.data.path, cfg.data.dataset
     lags, horizon = cfg.task.lags, cfg.task.horizon
+    n_clusters = cfg.data.n_clusters
 
     for suffix in ["plots/", "examples/"]:
         if not os.path.exists(data_path+suffix):
             os.makedirs(data_path+suffix)
 
-    do_heterogeneity = False
+    do_heterogeneity = True
 
     logger.info("Fetched configs")
 
     #data
     if dataset_name == "electricity":
         from src.timetensor.electricity import fetch_data  #adapt path if script in another working directory
+    elif "sim" in dataset_name:
+        def fetch_data(data_path, raw_format=None, output_format=None):
+            values, _, _ = load_data(data_path)
+            df = pd.DataFrame(values.squeeze(1).numpy().T)
+            return df
     else:
             raise ValueError("Dataset name not recognized")
     plot_dir = data_path + "plots/"
@@ -43,16 +50,14 @@ def run(cfg):
     #fourier clustering
     logger.info("Fourier clustering")
     fourier_df = fourier(full_df)
-    logger.info("Fourier het")
     if do_heterogeneity:
         logger.info("Computing heterogeneity plot")
         plot_heterogeneity(fourier_df, path=plot_dir, name="fourier_heterogeneity.pdf")
-    n_clusters = 3
-    logger.info(f"Computing {n_clusters} clusters")
+        logger.info(f"Computing {n_clusters} clusters")
     Z, distances_matrix = init_clusters(fourier_df)
     labels, cluster_indices = get_clusters(Z, n_clusters)
+    logger.info(f"Cluster size: {[len(cluster) for cluster in cluster_indices]}")
     
-    logger.info(f"Drawing plots")
     plot_dendogram(Z, path=plot_dir, name="fourier_dendogram.pdf")
     plot_distances(distances_matrix, path=plot_dir, name="fourier_distances.pdf")
     
@@ -74,12 +79,11 @@ def run(cfg):
     if do_heterogeneity:
         logger.info("Computing heterogeneity plot")
         plot_heterogeneity(gamma_df, path=plot_dir, name="gammas_heterogeneity.pdf")
-    n_clusters = 3
-    logger.info(f"Computing {n_clusters} clusters")
+        logger.info(f"Computing {n_clusters} clusters")
     Z, distances_matrix = init_clusters(gamma_df)
     labels, cluster_indices = get_clusters(Z, n_clusters)
+    logger.info(f"Cluster size: {[len(cluster) for cluster in cluster_indices]}")
 
-    logger.info(f"Drawing plots")
     plot_dendogram(Z, path=plot_dir, name="gammas_dendogram.pdf")
     plot_distances(distances_matrix, path=plot_dir, name="gammas_distances.pdf")
     

@@ -40,7 +40,7 @@ class Loss():
         return self.loss(pred, y)
 
 
-def get_losses(criterion_name, mean=None, std=None):
+def get_losses(criterion_name, mean=None, std=None, complete_evaluation=False):
     """returns criterion and relevant eval losses from specified criterion name"""
     if criterion_name == "MSE":
         criterion = Loss(nn.MSELoss())
@@ -62,12 +62,18 @@ def get_losses(criterion_name, mean=None, std=None):
             "MSE": Loss(nn.MSELoss(reduction="none"), mode="denormalize_pred"),
             }
     else:
-        eval_losses = {
-            "MSE": Loss(nn.MSELoss(reduction="none")),
-            "MAE": Loss(nn.L1Loss(reduction="none")),
-            "NMSE": Loss(nn.MSELoss(reduction="none"), mode="instance"), 
-            "RMSE": Loss(nn.MSELoss(reduction="none"), mode="relative")
-        }
+        if complete_evaluation:
+            eval_losses = {
+                "MSE": Loss(nn.MSELoss(reduction="none")),
+                "MAE": Loss(nn.L1Loss(reduction="none")),
+                "NMSE": Loss(nn.MSELoss(reduction="none"), mode="instance"), 
+                "RMSE": Loss(nn.MSELoss(reduction="none"), mode="relative")
+            }
+        else:
+            eval_losses = {
+                "MSE": Loss(nn.MSELoss(reduction="none")),
+                "NMSE": Loss(nn.MSELoss(reduction="none"), mode="instance"), 
+            }
     return criterion, eval_losses
     
 

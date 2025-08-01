@@ -1,0 +1,3 @@
+slurmstepd: error: *** JOB 6224 ON dgx-a100 CANCELLED AT 2025-07-31T09:59:07 DUE TO TIME LIMIT ***
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** STEP 6224.1 ON dgx-a100 CANCELLED AT 2025-07-31T09:59:07 DUE TO TIME LIMIT ***

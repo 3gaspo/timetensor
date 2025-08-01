@@ -1,0 +1,4 @@
+[2025-07-30 15:23:17,855][__main__][INFO] - =====Running main script=====
+[2025-07-30 15:23:17,861][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_repeat/sim1_repeat_1/
+[2025-07-30 15:23:17,861][__main__][INFO] - Model repeat, normalization None, criterion MSE, kwargs {}
+[2025-07-30 15:23:18,099][__main__][INFO] - Fetched dataloaders

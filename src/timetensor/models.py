@@ -270,16 +270,16 @@ class linear(nn.Module):
 
 class sklinear():
     """linear layer on lags"""
-    def __init__(self, normalized=False, dim=0, eps=1e-6, **kwargs):
+    def __init__(self, normalization=False, dim=0, eps=1e-6, **kwargs):
         self.reg = LinearRegression()
-        self.normalized = normalized
+        self.normalization = normalization
         self.dim = dim
         self.eps = eps
 
     def norm(self, X, mean, std):
-        if self.normalized == "instance":
+        if self.normalization == "instance":
             X = (X - mean) / (std+self.eps)
-        elif self.normalized == "relative":
+        elif self.normalization == "relative":
             #mean = torch.where(mean != 0, mean, 1)
             mean = torch.abs(mean) + self.eps
             X = X / mean 
@@ -287,9 +287,9 @@ class sklinear():
             X = X[:, self.dim, :]
         return X
     def denorm(self, X, mean, std):
-        if self.normalized == "instance":
+        if self.normalization == "instance":
             X = X * (std+self.eps) + mean
-        elif self.normalized == "relative":
+        elif self.normalization == "relative":
             #mean = torch.where(mean != 0, mean, 1)
             mean = torch.abs(mean) + self.eps
             X = X * mean
@@ -321,6 +321,8 @@ def load_model(model_name, shape, normalization, **kwargs):
     """
     if type(normalization) != str:
         normalization, norm_kwargs = normalization.name, normalization.configs
+    if norm_kwargs is None:
+        norm_kwargs = {}
     lags, dim, horizon = shape[0], shape[1], shape[2]
     if model_name == "persistence":
         model = persistence(horizon)

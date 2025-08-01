@@ -1,0 +1,95 @@
+[2025-07-30 10:59:13,156][__main__][INFO] - =====Running main script=====
+[2025-07-30 10:59:13,163][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_min_ecl/seed_1/PatchTST_revin/
+[2025-07-30 10:59:13,163][__main__][INFO] - Model PatchTST, normalization revin, criterion MSE, kwargs {}
+[2025-07-30 10:59:13,404][__main__][INFO] - Fetched dataloaders
+[2025-07-30 10:59:13,408][__main__][INFO] - Training data shape : (223, 1, 13152)
+[2025-07-30 10:59:13,408][__main__][INFO] - Batch sizes : X=torch.Size([10, 1, 100]), y=torch.Size([10, 1, 20])
+[2025-07-30 10:59:16,707][__main__][INFO] - batch_size=10, learning_rate=0.0001, steps per epoch=23, epochs=300
+[2025-07-30 10:59:16,707][__main__][INFO] - Starting training...
+[2025-07-30 10:59:16,707][__main__][INFO] - Using device: cuda
+[2025-07-30 10:59:16,707][__main__][INFO] - Training 300 epochs of 23 batches (6900 steps): , eval_freq: 100, print_freq: 100
+[2025-07-30 11:03:05,467][__main__][INFO] - Step 1 | valid1 MSE : 70770192.0000 | valid1 MAE : 1061.6622 | valid1 NMSE : 1.7507 | valid1 RMSE : 0.2402
+[2025-07-30 11:06:44,689][__main__][INFO] - Step 100 | valid1 MSE : 24178380.0000 | valid1 MAE : 618.9464 | valid1 NMSE : 1.3115 | valid1 RMSE : 0.1819
+[2025-07-30 11:10:23,876][__main__][INFO] - Step 200 | valid1 MSE : 19478110.0000 | valid1 MAE : 569.6987 | valid1 NMSE : 1.2519 | valid1 RMSE : 0.1736
+[2025-07-30 11:14:04,191][__main__][INFO] - Step 300 | valid1 MSE : 17876824.0000 | valid1 MAE : 546.4241 | valid1 NMSE : 1.2264 | valid1 RMSE : 0.1698
+[2025-07-30 11:17:40,800][__main__][INFO] - Step 400 | valid1 MSE : 19479126.0000 | valid1 MAE : 561.3928 | valid1 NMSE : 1.2248 | valid1 RMSE : 0.1692
+[2025-07-30 11:21:19,337][__main__][INFO] - Step 500 | valid1 MSE : 18144452.0000 | valid1 MAE : 548.0010 | valid1 NMSE : 1.2028 | valid1 RMSE : 0.1658
+[2025-07-30 11:24:56,324][__main__][INFO] - Step 600 | valid1 MSE : 17922996.0000 | valid1 MAE : 543.3572 | valid1 NMSE : 1.1862 | valid1 RMSE : 0.1625
+[2025-07-30 11:28:28,596][__main__][INFO] - Step 700 | valid1 MSE : 14257973.0000 | valid1 MAE : 495.5794 | valid1 NMSE : 1.1434 | valid1 RMSE : 0.1566
+[2025-07-30 11:32:00,932][__main__][INFO] - Step 800 | valid1 MSE : 17588100.0000 | valid1 MAE : 535.4171 | valid1 NMSE : 1.1641 | valid1 RMSE : 0.1595
+[2025-07-30 11:35:31,521][__main__][INFO] - Step 900 | valid1 MSE : 24401438.0000 | valid1 MAE : 612.1398 | valid1 NMSE : 1.2359 | valid1 RMSE : 0.1696
+[2025-07-30 11:39:07,131][__main__][INFO] - Step 1000 | valid1 MSE : 17616028.0000 | valid1 MAE : 534.4619 | valid1 NMSE : 1.1644 | valid1 RMSE : 0.1591
+[2025-07-30 11:42:40,278][__main__][INFO] - Step 1100 | valid1 MSE : 12476109.0000 | valid1 MAE : 464.4341 | valid1 NMSE : 1.1008 | valid1 RMSE : 0.1506
+[2025-07-30 11:46:12,894][__main__][INFO] - Step 1200 | valid1 MSE : 22007752.0000 | valid1 MAE : 574.9882 | valid1 NMSE : 1.1805 | valid1 RMSE : 0.1626
+[2025-07-30 11:49:44,671][__main__][INFO] - Step 1300 | valid1 MSE : 13796019.0000 | valid1 MAE : 472.4463 | valid1 NMSE : 1.0845 | valid1 RMSE : 0.1489
+[2025-07-30 11:53:15,523][__main__][INFO] - Step 1400 | valid1 MSE : 11123822.0000 | valid1 MAE : 430.5440 | valid1 NMSE : 1.0508 | valid1 RMSE : 0.1441
+[2025-07-30 11:56:48,436][__main__][INFO] - Step 1500 | valid1 MSE : 22939294.0000 | valid1 MAE : 578.3172 | valid1 NMSE : 1.1823 | valid1 RMSE : 0.1637
+[2025-07-30 12:00:19,433][__main__][INFO] - Step 1600 | valid1 MSE : 22954816.0000 | valid1 MAE : 594.4426 | valid1 NMSE : 1.1939 | valid1 RMSE : 0.1644
+[2025-07-30 12:03:49,614][__main__][INFO] - Step 1700 | valid1 MSE : 16370758.0000 | valid1 MAE : 505.3043 | valid1 NMSE : 1.1148 | valid1 RMSE : 0.1532
+[2025-07-30 12:07:20,313][__main__][INFO] - Step 1800 | valid1 MSE : 14297206.0000 | valid1 MAE : 479.4128 | valid1 NMSE : 1.0811 | valid1 RMSE : 0.1484
+[2025-07-30 12:10:53,046][__main__][INFO] - Step 1900 | valid1 MSE : 11366229.0000 | valid1 MAE : 438.4854 | valid1 NMSE : 1.0480 | valid1 RMSE : 0.1430
+[2025-07-30 12:14:26,623][__main__][INFO] - Step 2000 | valid1 MSE : 10191884.0000 | valid1 MAE : 419.0031 | valid1 NMSE : 1.0355 | valid1 RMSE : 0.1414
+[2025-07-30 12:17:59,394][__main__][INFO] - Step 2100 | valid1 MSE : 15941972.0000 | valid1 MAE : 501.5586 | valid1 NMSE : 1.1023 | valid1 RMSE : 0.1510
+[2025-07-30 12:21:32,472][__main__][INFO] - Step 2200 | valid1 MSE : 17011812.0000 | valid1 MAE : 505.3973 | valid1 NMSE : 1.1021 | valid1 RMSE : 0.1508
+[2025-07-30 12:25:03,496][__main__][INFO] - Step 2300 | valid1 MSE : 23977516.0000 | valid1 MAE : 601.7857 | valid1 NMSE : 1.1851 | valid1 RMSE : 0.1620
+[2025-07-30 12:28:33,204][__main__][INFO] - Step 2400 | valid1 MSE : 13145081.0000 | valid1 MAE : 470.3404 | valid1 NMSE : 1.0732 | valid1 RMSE : 0.1460
+[2025-07-30 12:32:01,096][__main__][INFO] - Step 2500 | valid1 MSE : 9203696.0000 | valid1 MAE : 403.3792 | valid1 NMSE : 1.0296 | valid1 RMSE : 0.1397
+[2025-07-30 12:35:32,498][__main__][INFO] - Step 2600 | valid1 MSE : 15148327.0000 | valid1 MAE : 480.8168 | valid1 NMSE : 1.0895 | valid1 RMSE : 0.1485
+[2025-07-30 12:39:05,019][__main__][INFO] - Step 2700 | valid1 MSE : 33938648.0000 | valid1 MAE : 700.3134 | valid1 NMSE : 1.3086 | valid1 RMSE : 0.1785
+[2025-07-30 12:42:35,155][__main__][INFO] - Step 2800 | valid1 MSE : 19340234.0000 | valid1 MAE : 559.5303 | valid1 NMSE : 1.1736 | valid1 RMSE : 0.1601
+[2025-07-30 12:46:07,182][__main__][INFO] - Step 2900 | valid1 MSE : 20370666.0000 | valid1 MAE : 566.2787 | valid1 NMSE : 1.1673 | valid1 RMSE : 0.1592
+[2025-07-30 12:49:37,959][__main__][INFO] - Step 3000 | valid1 MSE : 28930306.0000 | valid1 MAE : 665.6531 | valid1 NMSE : 1.2567 | valid1 RMSE : 0.1724
+[2025-07-30 12:53:08,484][__main__][INFO] - Step 3100 | valid1 MSE : 20214664.0000 | valid1 MAE : 573.0894 | valid1 NMSE : 1.1636 | valid1 RMSE : 0.1589
+[2025-07-30 12:56:37,540][__main__][INFO] - Step 3200 | valid1 MSE : 16148023.0000 | valid1 MAE : 514.8771 | valid1 NMSE : 1.1325 | valid1 RMSE : 0.1547
+[2025-07-30 13:00:09,427][__main__][INFO] - Step 3300 | valid1 MSE : 14171537.0000 | valid1 MAE : 491.5845 | valid1 NMSE : 1.1014 | valid1 RMSE : 0.1500
+[2025-07-30 13:03:42,060][__main__][INFO] - Step 3400 | valid1 MSE : 13584109.0000 | valid1 MAE : 478.5479 | valid1 NMSE : 1.0925 | valid1 RMSE : 0.1482
+[2025-07-30 13:07:13,732][__main__][INFO] - Step 3500 | valid1 MSE : 16039346.0000 | valid1 MAE : 515.4482 | valid1 NMSE : 1.1189 | valid1 RMSE : 0.1525
+[2025-07-30 13:10:46,350][__main__][INFO] - Step 3600 | valid1 MSE : 16232498.0000 | valid1 MAE : 518.5038 | valid1 NMSE : 1.1216 | valid1 RMSE : 0.1528
+[2025-07-30 13:14:19,290][__main__][INFO] - Step 3700 | valid1 MSE : 11921348.0000 | valid1 MAE : 453.9549 | valid1 NMSE : 1.0703 | valid1 RMSE : 0.1452
+[2025-07-30 13:17:53,099][__main__][INFO] - Step 3800 | valid1 MSE : 11332299.0000 | valid1 MAE : 447.7700 | valid1 NMSE : 1.0784 | valid1 RMSE : 0.1462
+[2025-07-30 13:21:25,272][__main__][INFO] - Step 3900 | valid1 MSE : 11942958.0000 | valid1 MAE : 459.0658 | valid1 NMSE : 1.0985 | valid1 RMSE : 0.1497
+[2025-07-30 13:24:55,827][__main__][INFO] - Step 4000 | valid1 MSE : 9451837.0000 | valid1 MAE : 415.1320 | valid1 NMSE : 1.0520 | valid1 RMSE : 0.1438
+[2025-07-30 13:28:27,343][__main__][INFO] - Step 4100 | valid1 MSE : 9629788.0000 | valid1 MAE : 419.2740 | valid1 NMSE : 1.0452 | valid1 RMSE : 0.1425
+[2025-07-30 13:31:58,686][__main__][INFO] - Step 4200 | valid1 MSE : 10055708.0000 | valid1 MAE : 421.4288 | valid1 NMSE : 1.0506 | valid1 RMSE : 0.1437
+[2025-07-30 13:35:30,774][__main__][INFO] - Step 4300 | valid1 MSE : 9790950.0000 | valid1 MAE : 420.9674 | valid1 NMSE : 1.0438 | valid1 RMSE : 0.1421
+[2025-07-30 13:39:02,533][__main__][INFO] - Step 4400 | valid1 MSE : 9794321.0000 | valid1 MAE : 416.2366 | valid1 NMSE : 1.0453 | valid1 RMSE : 0.1427
+[2025-07-30 13:42:36,237][__main__][INFO] - Step 4500 | valid1 MSE : 14063177.0000 | valid1 MAE : 473.2270 | valid1 NMSE : 1.0927 | valid1 RMSE : 0.1474
+[2025-07-30 13:46:09,126][__main__][INFO] - Step 4600 | valid1 MSE : 10699467.0000 | valid1 MAE : 436.3807 | valid1 NMSE : 1.0537 | valid1 RMSE : 0.1425
+[2025-07-30 13:49:41,130][__main__][INFO] - Step 4700 | valid1 MSE : 9994423.0000 | valid1 MAE : 420.5511 | valid1 NMSE : 1.0312 | valid1 RMSE : 0.1392
+[2025-07-30 13:53:12,569][__main__][INFO] - Step 4800 | valid1 MSE : 7769115.5000 | valid1 MAE : 379.3038 | valid1 NMSE : 0.9996 | valid1 RMSE : 0.1349
+[2025-07-30 13:56:45,280][__main__][INFO] - Step 4900 | valid1 MSE : 14430795.0000 | valid1 MAE : 494.6263 | valid1 NMSE : 1.1097 | valid1 RMSE : 0.1497
+[2025-07-30 14:00:18,001][__main__][INFO] - Step 5000 | valid1 MSE : 18809100.0000 | valid1 MAE : 553.1177 | valid1 NMSE : 1.1499 | valid1 RMSE : 0.1539
+[2025-07-30 14:03:50,897][__main__][INFO] - Step 5100 | valid1 MSE : 12742808.0000 | valid1 MAE : 470.2741 | valid1 NMSE : 1.0987 | valid1 RMSE : 0.1471
+[2025-07-30 14:07:24,005][__main__][INFO] - Step 5200 | valid1 MSE : 10970678.0000 | valid1 MAE : 444.8153 | valid1 NMSE : 1.0766 | valid1 RMSE : 0.1436
+[2025-07-30 14:10:59,888][__main__][INFO] - Step 5300 | valid1 MSE : 9453325.0000 | valid1 MAE : 416.0040 | valid1 NMSE : 1.0454 | valid1 RMSE : 0.1399
+[2025-07-30 14:14:30,977][__main__][INFO] - Step 5400 | valid1 MSE : 9378269.0000 | valid1 MAE : 411.9131 | valid1 NMSE : 1.0179 | valid1 RMSE : 0.1365
+[2025-07-30 14:18:03,943][__main__][INFO] - Step 5500 | valid1 MSE : 6971321.0000 | valid1 MAE : 363.6364 | valid1 NMSE : 0.9907 | valid1 RMSE : 0.1329
+[2025-07-30 14:21:37,609][__main__][INFO] - Step 5600 | valid1 MSE : 14205920.0000 | valid1 MAE : 480.5985 | valid1 NMSE : 1.0936 | valid1 RMSE : 0.1468
+[2025-07-30 14:25:12,593][__main__][INFO] - Step 5700 | valid1 MSE : 11016153.0000 | valid1 MAE : 439.7304 | valid1 NMSE : 1.0710 | valid1 RMSE : 0.1426
+[2025-07-30 14:28:44,841][__main__][INFO] - Step 5800 | valid1 MSE : 13835337.0000 | valid1 MAE : 481.4911 | valid1 NMSE : 1.0878 | valid1 RMSE : 0.1447
+[2025-07-30 14:32:19,243][__main__][INFO] - Step 5900 | valid1 MSE : 10000035.0000 | valid1 MAE : 424.8207 | valid1 NMSE : 1.0506 | valid1 RMSE : 0.1403
+[2025-07-30 14:35:50,863][__main__][INFO] - Step 6000 | valid1 MSE : 8775058.0000 | valid1 MAE : 400.3080 | valid1 NMSE : 1.0225 | valid1 RMSE : 0.1367
+[2025-07-30 14:39:24,621][__main__][INFO] - Step 6100 | valid1 MSE : 7696734.5000 | valid1 MAE : 379.8326 | valid1 NMSE : 1.0058 | valid1 RMSE : 0.1344
+[2025-07-30 14:42:59,756][__main__][INFO] - Step 6200 | valid1 MSE : 6765122.0000 | valid1 MAE : 360.7830 | valid1 NMSE : 0.9887 | valid1 RMSE : 0.1320
+[2025-07-30 14:46:36,353][__main__][INFO] - Step 6300 | valid1 MSE : 9320753.0000 | valid1 MAE : 420.5647 | valid1 NMSE : 1.0694 | valid1 RMSE : 0.1416
+[2025-07-30 14:50:10,883][__main__][INFO] - Step 6400 | valid1 MSE : 10828414.0000 | valid1 MAE : 442.1402 | valid1 NMSE : 1.0700 | valid1 RMSE : 0.1424
+[2025-07-30 14:53:44,532][__main__][INFO] - Step 6500 | valid1 MSE : 13902189.0000 | valid1 MAE : 486.3244 | valid1 NMSE : 1.1391 | valid1 RMSE : 0.1502
+[2025-07-30 14:57:19,475][__main__][INFO] - Step 6600 | valid1 MSE : 9263608.0000 | valid1 MAE : 417.0594 | valid1 NMSE : 1.0710 | valid1 RMSE : 0.1417
+[2025-07-30 15:00:53,926][__main__][INFO] - Step 6700 | valid1 MSE : 9982241.0000 | valid1 MAE : 424.0596 | valid1 NMSE : 1.0596 | valid1 RMSE : 0.1412
+[2025-07-30 15:04:30,414][__main__][INFO] - Step 6800 | valid1 MSE : 9143221.0000 | valid1 MAE : 411.6295 | valid1 NMSE : 1.0510 | valid1 RMSE : 0.1394
+[2025-07-30 15:08:06,693][__main__][INFO] - Step 6900 | valid1 MSE : 9619719.0000 | valid1 MAE : 421.2712 | valid1 NMSE : 1.0621 | valid1 RMSE : 0.1414
+[2025-07-30 15:08:06,694][__main__][INFO] - Training done in 248.833 min
+[2025-07-30 15:08:06,694][__main__][INFO] - Average time per step: 2.164 s
+[2025-07-30 15:08:06,742][__main__][INFO] - End of training
+[2025-07-30 15:08:08,580][__main__][INFO] - Plotted losses
+[2025-07-30 15:08:08,580][__main__][INFO] - Computing test metrics
+[2025-07-30 15:08:40,935][__main__][INFO] - Evaluation done in 0.539 min
+[2025-07-30 15:09:25,177][__main__][INFO] - Evaluation done in 0.349 min
+[2025-07-30 15:09:42,179][__main__][INFO] - Saved plots
+[2025-07-30 15:09:42,179][__main__][INFO] - Final mIN parameters: {'beta': np.float32(0.00022524317), 'alpha': np.float32(1.061465)}
+[2025-07-30 15:09:42,179][__main__][INFO] - End of script
+
+[2025-07-30 15:09:51,211][__main__][INFO] - =====Running main script=====
+[2025-07-30 15:09:51,219][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_min_ecl/seed_1/min_gamma/
+[2025-07-30 15:09:51,219][__main__][INFO] - Model PatchTST, normalization mIN, criterion MSE, kwargs {}
+[2025-07-30 15:09:51,453][__main__][INFO] - Fetched dataloaders

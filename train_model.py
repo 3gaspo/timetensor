@@ -29,7 +29,8 @@ def run(cfg):
     model_name, normalization, kwargs = cfg.model.name, cfg.normalization.name, cfg.model.configs
     if kwargs is None:
         kwargs = {}
-    verbose, benchmark, output_dir, save_name, seed = cfg.misc.verbose, cfg.misc.benchmark, cfg.misc.output_dir, cfg.misc.save_name, cfg.misc.seed
+    verbose, complete_evaluation, seed = cfg.misc.verbose, cfg.misc.complete_evaluation, cfg.misc.seed
+    benchmark, output_dir, save_name = cfg.misc.benchmark, cfg.misc.output_dir, cfg.misc.save_name, 
     save_name, save_dir = get_dirs(output_dir, save_name, model_name, normalization, criterion_name, subsets["sizes"])
     if verbose:
         logger.info(f"Fetched main configs, save directory : {save_dir}")
@@ -55,12 +56,13 @@ def run(cfg):
 
     #training
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    criterion, eval_losses = get_losses(criterion_name, mean=None, std=None)
+    criterion, eval_losses = get_losses(criterion_name, mean=None, std=None, complete_evaluation=complete_evaluation)
 
     model = load_model(model_name, shape, cfg.normalization, **kwargs)
     if init_path is not None:
         weights = torch.load(init_path)
         model.load_state_dict(weights)
+        logger.info("Loaded previous state dict")
     if cfg.training.freeze_core:
         if normalization is None or normalization=="None":
             for param in model.parameters():
@@ -68,8 +70,13 @@ def run(cfg):
         else:
             for param in model.model.parameters():
                 param.requires_grad = False
+        trainable_params = []
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                trainable_params.append(name)
+        logger.info(f"Froze parameters. Trainable: {trainable_params}")
 
-    if model_name in ["persistence", "repeat", "lookback", "expected"] and normalization not in ["revin", "mIN"]:
+    if model_name in ["persistence", "repeat", "lookback", "expected"] and normalization not in ["revin", "mIN", "cmIN"]:
         learner = Learner(model, criterion, lr, eval_losses, device=device, do_train=False)
         logger.info("No training needed")
     elif model_name == "sklinear":
@@ -129,14 +136,16 @@ def run(cfg):
         mean, std = test_losses1[loss_name].mean(), test_losses1[loss_name].std()
         save_results(mean, test_dir, "test1_mean_results.json", save_name, f"Test {loss_name}")
         save_results(std, test_dir, "test1_std_results.json", save_name, f"Test {loss_name}")
-        plot_errors(test_losses1[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"test1_{loss_name}.pdf", f"Test 1 {loss_name} of {save_name} : {mean}")
-        plot_horizon_errors(test_losses1[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test1_horizon_{loss_name}.pdf", f"Test 1 {loss_name} of {save_name} : {mean}")
+        if complete_evaluation:
+            plot_errors(test_losses1[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"test1_{loss_name}.pdf", f"Test 1 {loss_name} of {save_name} : {mean}")
+            plot_horizon_errors(test_losses1[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test1_horizon_{loss_name}.pdf", f"Test 1 {loss_name} of {save_name} : {mean}")
     for loss_name in eval_losses:
         mean, std = test_losses2[loss_name].mean(), test_losses2[loss_name].std()
         save_results(mean, test_dir, "test2_mean_results.json", save_name, f"Test {loss_name}")
         save_results(std, test_dir, "test2_std_results.json", save_name, f"Test {loss_name}")
-        plot_errors(test_losses2[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"test2_{loss_name}.pdf", f"Test 2 {loss_name} of {save_name} : {mean}")
-        plot_horizon_errors(test_losses2[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test2_horizon_{loss_name}.pdf", f"Test 2 {loss_name} of {save_name} : {mean}")
+        if complete_evaluation:
+            plot_errors(test_losses2[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"test2_{loss_name}.pdf", f"Test 2 {loss_name} of {save_name} : {mean}")
+            plot_horizon_errors(test_losses2[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test2_horizon_{loss_name}.pdf", f"Test 2 {loss_name} of {save_name} : {mean}")
     
     #examples
     ex_dir = data_path + "examples/" + f"{lags}_{horizon}/"

@@ -23,12 +23,14 @@ model_name=PatchTST
 lr=0.0001
 epochs=200
 
+seed=1
 for loss in MSE NMSE
 do
     for normalization in None instance revin
     do
-        python3 train_model.py \
+        srun python3 train_model.py \
             "model=${model_name}" \
+            "misc.seed=$seed" \
             "misc.output_dir=$output_dir" \
             "normalization=$normalization" \
             "training.loss=$loss" \
@@ -38,12 +40,12 @@ do
             "training.eval_freq=100" \
             "training.print_freq=100" \
             "data=$data" \
-            "data.reshuffle=False"
+            "data.reshuffle=True"
     done
 done
 
-python3 -c "from src.timetensor.visu import plot_expe;plot_expe('$output_dir', $eval_freq)"
+srun python3 -c "from src.timetensor.visu import plot_expe;plot_expe('$output_dir', $eval_freq)"
 
 multipliers="-8 -3 0 0"
-python3 -c "from src.timetensor.visu import print_nice_table;print_nice_table('${output_dir}test1_mean_results.json', multipliers='$multipliers')"
-python3 -c "from src.timetensor.visu import print_nice_table;print_nice_table('${output_dir}test2_mean_results.json', multipliers='$multipliers')"
+srun python3 -c "from src.timetensor.visu import print_nice_table;print_nice_table('${output_dir}test1_mean_results.json', multipliers='$multipliers')"
+srun python3 -c "from src.timetensor.visu import print_nice_table;print_nice_table('${output_dir}test2_mean_results.json', multipliers='$multipliers')"
