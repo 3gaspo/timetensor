@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=bench_repeat
-#SBATCH --gres=gpu:1
-#SBATCH --output=scripts/bench_repeat.out
-#SBATCH --error=scripts/bench_repeat.err
-#SBATCH --time=1:00:00
-#SBATCH --mem=10G
+#SBATCH --job-name=bench_repeat -p h100
+#SBATCH --gres=gpu:1 -p h100
+#SBATCH --output=scripts/bench_repeat.out -p h100
+#SBATCH --error=scripts/bench_repeat.err -p h100
+#SBATCH --time=23:00:00 -p h100
+#SBATCH --mem=40G -p h100
 source .venv/bin/activate
 
 output_dir="../outputs/bench_repeat/"

@@ -57,8 +57,8 @@ def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_
     values, context, datetimes = load_data(path, prefix)
 
     individuals, dim, dates = values.shape
-    rand_indiv = np.random.randint(individuals)
-    rand_date = np.random.randint(dates - (lag + horizon))
+    rand_indiv = torch.randint(individuals).item()
+    rand_date = torch.randint(dates - (lag + horizon)).item()
 
     inputs = values[rand_indiv, :, rand_date : rand_date+lag]
     target = values[rand_indiv, :, rand_date+lag : rand_date+lag+horizon]

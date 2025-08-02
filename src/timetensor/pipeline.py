@@ -120,7 +120,7 @@ class Learner:
         if self.pytorch:
             return self.model.state_dict()
         else:
-            return self.model.reg.coef_
+            return self.model.reg.coef_        
 
     def compute_step(self, X_batch, context_batch, y_batch):
         """computes forward and backward on batch"""
@@ -221,6 +221,7 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
     #training
     step = 0
     for epoch in range(epochs):
+        #train_loader.dataset.add_epoch() #updates dataset epoch index for seeding
         for X_batch, context_batch, y_batch in train_loader:
             step += 1
             loss = learner.compute_step(X_batch, context_batch, y_batch)

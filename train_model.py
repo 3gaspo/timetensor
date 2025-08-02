@@ -42,7 +42,7 @@ def run(cfg):
 
     #data   
     by_idx = cfg.data.by_idx
-    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, seed, reshuffle=reshuffle)
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
     loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=(by_idx=="dates"), subsets=subsets["sizes"], subset_mode=subsets["mode"], save_path=data_path+"subsets/")
     if verbose:
         logger.info("Fetched dataloaders")

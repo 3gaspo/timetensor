@@ -8,7 +8,7 @@ import pandas as pd
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
-    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=True, skip_cte=True):    
+    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=True, skip_cte=True):#, seed=None):    
         """
         values (N_individuals, dim_values, dates):  past target values 
         datetimes (dates): list of dates in datetime Y-m-d H:M:S format
@@ -43,7 +43,8 @@ class TimeSeriesDataset(Dataset):
         self.by_date = by_date
         self.return_all_individuals, self.context_by_individuals = return_all_individuals, context_by_individuals
         self.skip_cte = skip_cte
-
+        #self.seed, self.epoch = seed, epoch
+    
     @property
     def shape(self):
         if self.context is not None:
@@ -59,8 +60,17 @@ class TimeSeriesDataset(Dataset):
 
     def get_df(self, dim=0):
         return pd.DataFrame(self.values[:, 0, :].transpose(0,1), index=self.datetimes)
-        
+    
+    # def add_epoch(self):
+    #     self.epoch += 1
+
     def __getitem__(self, idx):
+        
+        # if self.seed is not None:
+        #     seed = self.seed + self.epoch + idx
+        #     g = torch.Generator()
+        #     g.manual_seed(seed)
+
         if self.by_date:
             if self.return_all_individuals: #1 batch = all individuals, batch of dates
                 values = self.values[:, :, idx : idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
@@ -68,7 +78,7 @@ class TimeSeriesDataset(Dataset):
                     context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
 
             else: #1 batch = 1 individual, batch of dates
-                indiv = np.random.randint(self.individuals)
+                indiv = np.random.randint(self.individuals) #torch.randint(self.individuals).item() #, , generator=g).item()
                 values = self.values[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
                 if self.context is not None:
                     if self.context_by_individuals:
@@ -77,12 +87,15 @@ class TimeSeriesDataset(Dataset):
                         context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
 
         else: #1 batch = batch of individuals, random date
-            t = np.random.randint(self.dates - self.lags - self.horizon)
+            t = np.random.randint(self.dates - self.lags - self.horizon) #torch.randint(self.dates - self.lags - self.horizon, generator=g).item()
             values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
             if self.skip_cte:
+                #modif_seed = 0
                 std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach() # (1, dim_values, 1)
-                while (std == torch.zeros((1, self.dim_values, 1))).any:
-                    t = np.random.randint(self.dates - self.lags - self.horizon)
+                while (std == 0).any(): #(std == torch.zeros((1, self.dim_values, 1))).any():
+                    # modif_seed += self.__len__()
+                    # g.manual_seed(seed + modif_seed)
+                    t = np.random.randint(self.dates - self.lags - self.horizon) #torch.randint(self.dates - self.lags - self.horizon, generator=g).item()
                     values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0)
                     std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach()
             if self.context is not None:
@@ -468,7 +481,7 @@ def get_dataset_splits(path="datasets/", indiv_split=None, date_splits=None, con
 
 
 
-def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets=None, save_path="", subset_mode="dates", context_by_individuals=True):
+def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets=None, save_path="", subset_mode="dates", context_by_individuals=True):#, seed=None):
     """returns dataloaders from data_dict as eventual subsets"""
     loaders_dict = {}
     
@@ -491,16 +504,12 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subset
     
     for key, (values, context, datetimes) in data_dict.items():
         if key == "train":
-                dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date, context_by_individuals=context_by_individuals)
+                dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date, context_by_individuals=context_by_individuals)#, seed=seed)
         else:
-            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True, context_by_individuals=context_by_individuals)
+            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True, context_by_individuals=context_by_individuals, return_all_individuals=True)#, seed=seed)
         
         if subsets is not None:
             subset = subsets.get(key)
-            # if subset is not None and (type(subset)==str or (type(subset)==float and subset<1 and subset>0)):
-            #     if type(subset)==str:
-            #         subset_indices = list(torch.load(subset, weights_only=False))
-                # elif type(subset)==float:
             if subset != 1:
                 if make_subsets:
                     subset_indices = get_subset_indices(dataset, subset, subset_mode)
@@ -510,7 +519,9 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subset
                 dataset = TimeSeriesSubset(dataset, subset_indices, subset_mode)
 
         if key=="train":
-            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
+            # g = torch.Generator()
+            # g.manual_seed(seed)
+            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)#, generator=g)
         else:
             loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
        
