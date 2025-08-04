@@ -145,7 +145,7 @@ class Learner:
 
     def fit(self, loader):
         assert not self.pytorch
-        Xtrain, Ytrain = unroll_windows(loader, shuffle=True)
+        Xtrain, Ytrain = unroll_windows(loader)#, shuffle=True)
         self.model.fit(Xtrain.cpu(), Ytrain.cpu())
 
     def eval(self, loader, verbose=0, return_all=False, logger=None, runs=1):

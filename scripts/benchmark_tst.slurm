@@ -8,25 +8,29 @@
 source .venv/bin/activate
 
 output_dir="../outputs/benchmark_tst/"
+data=electricity
+seed=1
+
 rm -rf "$output_dir"
 mkdir -p "$output_dir"
 
-#lookback
-model_name=repeat
+#repeat
 srun python3 train_model.py \
-    "model=${model_name}" \
+    "model=repeat" \
     "misc.output_dir=$output_dir" \
-    "misc.benchmark=True"
+    "misc.benchmark=True" \
+    "data=$data" \
+    "data.reshuffle=True" \
+    "misc.seed=$seed"
 
-data=electricity
 model_name=PatchTST
 lr=0.0001
-epochs=200
+epochs=300
+eval_freq=100
 
-seed=1
 for loss in MSE NMSE
 do
-    for normalization in None instance revin
+    for normalization in instance revin
     do
         srun python3 train_model.py \
             "model=${model_name}" \
@@ -37,7 +41,7 @@ do
             "misc.benchmark=True" \
             "training.lr=$lr" \
             "training.epochs=$epochs" \
-            "training.eval_freq=100" \
+            "training.eval_freq=$eval_freq" \
             "training.print_freq=100" \
             "data=$data" \
             "data.reshuffle=True"
@@ -46,6 +50,6 @@ done
 
 srun python3 -c "from src.timetensor.visu import plot_expe;plot_expe('$output_dir', $eval_freq)"
 
-multipliers="-8 -3 0 0"
+multipliers="-7 0"
 srun python3 -c "from src.timetensor.visu import print_nice_table;print_nice_table('${output_dir}test1_mean_results.json', multipliers='$multipliers')"
 srun python3 -c "from src.timetensor.visu import print_nice_table;print_nice_table('${output_dir}test2_mean_results.json', multipliers='$multipliers')"

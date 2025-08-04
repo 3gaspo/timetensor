@@ -275,14 +275,13 @@ class sklinear():
         self.normalization = normalization
         self.dim = dim
         self.eps = eps
-
+        
     def norm(self, X, mean, std):
         if self.normalization == "instance":
             X = (X - mean) / (std+self.eps)
         elif self.normalization == "relative":
-            #mean = torch.where(mean != 0, mean, 1)
-            mean = torch.abs(mean) + self.eps
-            X = X / mean 
+            mean = torch.abs(mean)
+            X = X / (mean + self.eps) 
         if len(X.shape)==3:
             X = X[:, self.dim, :]
         return X
@@ -290,9 +289,8 @@ class sklinear():
         if self.normalization == "instance":
             X = X * (std+self.eps) + mean
         elif self.normalization == "relative":
-            #mean = torch.where(mean != 0, mean, 1)
-            mean = torch.abs(mean) + self.eps
-            X = X * mean
+            mean = torch.abs(mean)
+            X = X * (mean + self.eps)
         if len(X.shape)==2:
             X = X.unsqueeze(dim=1)
         return X

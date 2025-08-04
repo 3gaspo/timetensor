@@ -57,8 +57,8 @@ def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_
     values, context, datetimes = load_data(path, prefix)
 
     individuals, dim, dates = values.shape
-    rand_indiv = torch.randint(individuals).item()
-    rand_date = torch.randint(dates - (lag + horizon)).item()
+    rand_indiv = np.random.randint(individuals)
+    rand_date = np.random.randint(dates - (lag + horizon))
 
     inputs = values[rand_indiv, :, rand_date : rand_date+lag]
     target = values[rand_indiv, :, rand_date+lag : rand_date+lag+horizon]
@@ -116,7 +116,7 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, b
     if shuffle:
         idx = np.random.permutation(len(X))
         X, Y = [X[i] for i in idx], [Y[i] for i in idx]
-        if shuffle:
+        if cap:
             X, Y = X[:cap], Y[:cap]
     return torch.concat(X), torch.concat(Y)
 

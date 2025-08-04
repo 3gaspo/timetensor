@@ -8,7 +8,7 @@ import pandas as pd
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
-    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=True, skip_cte=True):#, seed=None):    
+    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=True, remove_cte=False):#, seed=None):    
         """
         values (N_individuals, dim_values, dates):  past target values 
         datetimes (dates): list of dates in datetime Y-m-d H:M:S format
@@ -42,7 +42,7 @@ class TimeSeriesDataset(Dataset):
         self.datetimes = np.array(datetimes)
         self.by_date = by_date
         self.return_all_individuals, self.context_by_individuals = return_all_individuals, context_by_individuals
-        self.skip_cte = skip_cte
+        self.remove_cte = remove_cte
         #self.seed, self.epoch = seed, epoch
     
     @property
@@ -78,8 +78,14 @@ class TimeSeriesDataset(Dataset):
                     context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
 
             else: #1 batch = 1 individual, batch of dates
-                indiv = np.random.randint(self.individuals) #torch.randint(self.individuals).item() #, , generator=g).item()
+                indiv = np.random.randint(self.individuals)
                 values = self.values[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
+                if self.remove_cte: #skip constant windows
+                    std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach()
+                    while (std == 0).any():
+                        indiv = np.random.randint(self.individuals) 
+                        values = self.values[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0)
+                        std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach()
                 if self.context is not None:
                     if self.context_by_individuals:
                         context = self.context[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
@@ -89,7 +95,7 @@ class TimeSeriesDataset(Dataset):
         else: #1 batch = batch of individuals, random date
             t = np.random.randint(self.dates - self.lags - self.horizon) #torch.randint(self.dates - self.lags - self.horizon, generator=g).item()
             values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
-            if self.skip_cte:
+            if self.remove_cte: #skip constant windows
                 #modif_seed = 0
                 std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach() # (1, dim_values, 1)
                 while (std == 0).any(): #(std == torch.zeros((1, self.dim_values, 1))).any():
@@ -481,7 +487,7 @@ def get_dataset_splits(path="datasets/", indiv_split=None, date_splits=None, con
 
 
 
-def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets=None, save_path="", subset_mode="dates", context_by_individuals=True):#, seed=None):
+def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets=None, save_path="", subset_mode="dates", context_by_individuals=True, remove_cte=True):#, seed=None):
     """returns dataloaders from data_dict as eventual subsets"""
     loaders_dict = {}
     
@@ -504,9 +510,9 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subset
     
     for key, (values, context, datetimes) in data_dict.items():
         if key == "train":
-                dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date, context_by_individuals=context_by_individuals)#, seed=seed)
+                dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date, context_by_individuals=context_by_individuals, remove_cte=remove_cte)#, seed=seed)
         else:
-            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True, context_by_individuals=context_by_individuals, return_all_individuals=True)#, seed=seed)
+            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True, context_by_individuals=context_by_individuals, return_all_individuals=True, remove_cte=remove_cte)#, seed=seed)
         
         if subsets is not None:
             subset = subsets.get(key)
@@ -518,17 +524,18 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subset
                     subset_indices = list(torch.load(subset, weights_only=False))
                 dataset = TimeSeriesSubset(dataset, subset_indices, subset_mode)
 
+        local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_cte)
         if key=="train":
             # g = torch.Generator()
             # g.manual_seed(seed)
-            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)#, generator=g)
+            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=local_collate_fn)#, generator=g)
         else:
-            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=local_collate_fn)
        
     return loaders_dict
 
 
-def collate_fn(data, remove_cte=True):
+def collate_fn(data, remove_cte=False):
     """
        data: is a list of tuples with (input, (context), target)
     """
@@ -547,12 +554,13 @@ def collate_fn(data, remove_cte=True):
     targets = torch.stack(targets)
     targets = targets.view(-1, targets.shape[-2], targets.shape[-1])
 
-    if remove_cte:
+    if remove_cte: #remove constant windows
         stds = inputs.std(dim=-1) #(bs * indiv, dim)
         non_constant_mask = (stds != 0).all(dim=1)  # (bs * indiv)
         inputs, targets = inputs[non_constant_mask], targets[non_constant_mask]
         if contexts is not None:
             contexts = contexts[non_constant_mask]
+
     return inputs, contexts, targets
 
 

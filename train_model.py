@@ -21,7 +21,7 @@ def run(cfg):
 
     #configs
     data_path = cfg.data.path
-    lags, horizon = cfg.task.lags, cfg.task.horizon
+    lags, horizon, remove_cte = cfg.task.lags, cfg.task.horizon, cfg.data.remove_cte
     indiv_split, date_splits, subsets, reshuffle = cfg.data.indiv_split, cfg.data.date_splits, cfg.data.subsets, cfg.data.reshuffle
     batch_size, lr, epochs, criterion_name = cfg.training.bs, cfg.training.lr, cfg.training.epochs, cfg.training.loss
     retrain, init_path = cfg.training.retrain, cfg.training.init
@@ -35,6 +35,8 @@ def run(cfg):
     if verbose:
         logger.info(f"Fetched main configs, save directory : {save_dir}")
         logger.info(f"Model {model_name}, normalization {normalization}, criterion {criterion_name}, kwargs {kwargs}")
+    if seed == "None":
+        seed = None
     if seed is not None:
         torch.manual_seed(seed)
         torch.cuda.manual_seed(seed)
@@ -43,13 +45,13 @@ def run(cfg):
     #data   
     by_idx = cfg.data.by_idx
     data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
-    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=(by_idx=="dates"), subsets=subsets["sizes"], subset_mode=subsets["mode"], save_path=data_path+"subsets/")
+    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=(by_idx=="dates"), subsets=subsets["sizes"], subset_mode=subsets["mode"], save_path=data_path+"subsets/", remove_cte=remove_cte)
     if verbose:
         logger.info("Fetched dataloaders")
 
     #sizes
     shape, shape_str, batch_str = get_sizes(loaders_dict["train"], str_info=True)
-    X, c, y = next(iter(loaders_dict["train"])) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
+    #X, c, y = next(iter(loaders_dict["train"])) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
     if verbose:
         logger.info(shape_str)
         logger.info(batch_str)
@@ -80,14 +82,17 @@ def run(cfg):
         learner = Learner(model, criterion, lr, eval_losses, device=device, do_train=False)
         logger.info("No training needed")
     elif model_name == "sklinear":
-        logger.info("Starting scikit-learn fitting...")
         learner = Learner(model, criterion, lr, eval_losses, device=device, pytorch=False)
-        learner.fit(loaders_dict["train"])
-        logger.info("End of training")
-    else:
-        learner = Learner(model, criterion, lr, eval_losses, device=device)
-        logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps per epoch={len(loaders_dict['train'])}, epochs={epochs}")
         if retrain:
+            logger.info("Starting scikit-learn fitting...")
+            learner.fit(loaders_dict["train"])
+            logger.info("End of training")
+        else:
+            logger.info("No training needed")
+    else:
+        if retrain:
+            learner = Learner(model, criterion, lr, eval_losses, device=device)
+            logger.info(f"batch_size={batch_size}, learning_rate={lr}, steps per epoch={len(loaders_dict['train'])}, epochs={epochs}")
             logger.info("Starting training...")
             if normalization in ["revin", "mIN"]:
                 weight_follow = lambda model: {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
@@ -114,12 +119,12 @@ def run(cfg):
             logger.info("Plotted losses")
         
         else:
+            logger.info("No training needed")
             if init_path is None:
                 weights = torch.load(save_dir + "trained_model.pt")
                 model.load_state_dict(weights)
-            model.to(device)
-            learner.reset_model(weights)
-
+                learner.reset_model(weights)
+            learner = Learner(model, criterion, lr, eval_losses, device=device)
 
     #eval
     logger.info("Computing test metrics")
