@@ -380,6 +380,8 @@ def print_nice_table(path, multipliers=None, names=None):
     if names=="None":
         names=None
     if names is not None:
+        if type(names)==str:
+            names=names.split(";")
         df = df[names]
     if multipliers is not None:
         if type(multipliers) == str:
@@ -407,6 +409,8 @@ def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None
         if names=="None":
             names=None
         if names is not None:
+            if type(names)==str:
+                names=names.split(";")
             df = df[names]
 
         if baseline is not None and baseline in df.columns:
@@ -496,10 +500,13 @@ def plot_expe(losses_path, eval_freq=10, names=None, save_path=None):
         eval_freq=int(eval_freq)
     if names=="None":
         names=None
+    if names is not None:
+        if type(names)==str:
+            names=names.split(";")
     if save_path is None:
         save_path = losses_path+"plots/"
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
 
     expe_names = [name for name in os.listdir(losses_path) if (names is None and os.path.exists(losses_path + f"{name}/" + "valid_losses1.pt")) or (names is not None and name in names)]
 
