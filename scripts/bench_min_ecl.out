@@ -1,0 +1,12 @@
+[2025-08-20 18:44:48,757][__main__][INFO] - =====Running main script=====
+[2025-08-20 18:44:48,764][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_min_ecl/seed_1/PatchTST_revin_NMSE/
+[2025-08-20 18:44:48,764][__main__][INFO] - Model PatchTST, normalization revin, criterion NMSE, kwargs {}
+[2025-08-20 18:44:48,913][__main__][INFO] - Fetched dataloaders
+[2025-08-20 18:44:48,921][__main__][INFO] - Training data shape : (224, 1, 13152)
+[2025-08-20 18:44:48,921][__main__][INFO] - Batch sizes : X=torch.Size([223, 1, 336]), y=torch.Size([223, 1, 48])
+[2025-08-20 18:44:51,030][__main__][INFO] - batch_size=223, learning_rate=1e-05, steps per epoch=2, epochs=2000
+[2025-08-20 18:44:51,030][__main__][INFO] - Starting training...
+[2025-08-20 18:44:51,030][__main__][INFO] - Using device: cuda
+[2025-08-20 18:44:51,030][__main__][INFO] - Training 2000 epochs of 2 batches (4000 steps): , eval_freq: 100, print_freq: 100
+[2025-08-20 18:46:07,368][__main__][INFO] - Step 1 | valid1 MSE : 74530472.0000 | valid1 NMSE : 1.2893
+[2025-08-20 18:47:24,499][__main__][INFO] - Step 100 | valid1 MSE : 14653031.0000 | valid1 NMSE : 0.6044

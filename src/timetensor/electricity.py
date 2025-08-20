@@ -28,12 +28,13 @@ def fetch_txt_data(path, years=None, hourly=True, return_df=False):
     return consumptions, datetimes
 
 
-def fetch_csv_data(path, years=None, return_df=False):
+def fetch_csv_data(path, years=None, return_df=False, drop=True):
     """returns electricity.csv dataset as consumptions tensor and datetimes list"""
     #df = pd.read_csv(path + "electricity.csv")
     #datetimes = [datetime.datetime.strptime(date.strip('"'), "%Y-%m-%d %H:%M:%S") for date in df.date]
     df = pd.read_csv(path+'electricity.csv', index_col=0, parse_dates=True)
-    df = df.drop(columns=["57", "182"]) #big missing values
+    if drop:
+        df = df.drop(columns=["57", "106", "127", "182", "298"]) #big missing values
     df = df.rename(columns={"OT":"320"})
     if years is not None:
         df = df[df.index.year.isin(years)]
@@ -47,20 +48,20 @@ def fetch_csv_data(path, years=None, return_df=False):
         return consumptions, datetimes
 
 
-def fetch_data(path, raw_format="csv", output_format="torch", years=None, hourly=False, return_df=False):
+def fetch_data(path, raw_format="csv", output_format="torch", years=None, hourly=False, drop=True):
     """fetches correct dataset"""
     if output_format == "pandas":
         if raw_format == "txt":
             return fetch_txt_data(path, years, hourly, return_df=True)
         elif raw_format == "csv":
-            return fetch_csv_data(path, years, return_df=True)
+            return fetch_csv_data(path, years, return_df=True, drop=drop)
         else:
             raise ValueError("Format of raw dataset not recognized")
     else:
         if raw_format == "txt":
-            consumptions, datetimes = fetch_txt_data(path, years, hourly)
+            consumptions, datetimes = fetch_txt_data(path, years, hourly, return_df=False)
         elif raw_format == "csv":
-            consumptions, datetimes = fetch_csv_data(path, years)
+            consumptions, datetimes = fetch_csv_data(path, years, return_df=False, drop=drop)
         else:
             raise ValueError("Format of raw dataset not recognized")
         return consumptions, None, datetimes

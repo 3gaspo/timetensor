@@ -1,0 +1,89 @@
+[2025-08-04 12:02:05,871][__main__][INFO] - =====Running main script=====
+[2025-08-04 12:02:05,877][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_baselines/persistence/
+[2025-08-04 12:02:05,877][__main__][INFO] - Model persistence, normalization None, criterion MSE, kwargs {}
+[2025-08-04 12:02:06,024][__main__][INFO] - Fetched dataloaders
+[2025-08-04 12:02:06,026][__main__][INFO] - Training data shape : (223, 1, 13152)
+[2025-08-04 12:02:06,026][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 48])
+[2025-08-04 12:02:06,339][__main__][INFO] - No training needed
+[2025-08-04 12:02:06,339][__main__][INFO] - Computing test metrics
+[2025-08-04 12:02:26,863][__main__][INFO] - Evaluation done in 0.342 min
+[2025-08-04 12:02:57,294][__main__][INFO] - Evaluation done in 0.137 min
+[2025-08-04 12:03:13,885][__main__][INFO] - Saved plots
+[2025-08-04 12:03:13,885][__main__][INFO] - End of script
+
+[2025-08-04 12:03:19,058][__main__][INFO] - =====Running main script=====
+[2025-08-04 12:03:19,064][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_baselines/repeat/
+[2025-08-04 12:03:19,064][__main__][INFO] - Model repeat, normalization None, criterion MSE, kwargs {}
+[2025-08-04 12:03:19,203][__main__][INFO] - Fetched dataloaders
+[2025-08-04 12:03:19,205][__main__][INFO] - Training data shape : (223, 1, 13152)
+[2025-08-04 12:03:19,205][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 48])
+[2025-08-04 12:03:19,493][__main__][INFO] - No training needed
+[2025-08-04 12:03:19,493][__main__][INFO] - Computing test metrics
+[2025-08-04 12:03:39,594][__main__][INFO] - Evaluation done in 0.335 min
+[2025-08-04 12:04:11,601][__main__][INFO] - Evaluation done in 0.144 min
+[2025-08-04 12:04:28,140][__main__][INFO] - Saved plots
+[2025-08-04 12:04:28,140][__main__][INFO] - End of script
+
+[2025-08-04 12:04:34,580][__main__][INFO] - =====Running main script=====
+[2025-08-04 12:04:34,586][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_baselines/expected/
+[2025-08-04 12:04:34,586][__main__][INFO] - Model expected, normalization None, criterion MSE, kwargs {}
+[2025-08-04 12:04:34,732][__main__][INFO] - Fetched dataloaders
+[2025-08-04 12:04:34,734][__main__][INFO] - Training data shape : (223, 1, 13152)
+[2025-08-04 12:04:34,734][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 48])
+[2025-08-04 12:04:35,083][__main__][INFO] - No training needed
+[2025-08-04 12:04:35,083][__main__][INFO] - Computing test metrics
+[2025-08-04 12:04:55,434][__main__][INFO] - Evaluation done in 0.339 min
+[2025-08-04 12:05:26,686][__main__][INFO] - Evaluation done in 0.142 min
+[2025-08-04 12:05:43,273][__main__][INFO] - Saved plots
+[2025-08-04 12:05:43,273][__main__][INFO] - End of script
+
+[2025-08-04 12:05:49,476][__main__][INFO] - =====Running main script=====
+[2025-08-04 12:05:49,481][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_baselines/lookback_0/
+[2025-08-04 12:05:49,481][__main__][INFO] - Model lookback, normalization None, criterion MSE, kwargs {'lookback_idx': 0}
+[2025-08-04 12:05:49,629][__main__][INFO] - Fetched dataloaders
+[2025-08-04 12:05:49,631][__main__][INFO] - Training data shape : (223, 1, 13152)
+[2025-08-04 12:05:49,632][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 48])
+[2025-08-04 12:05:49,934][__main__][INFO] - No training needed
+[2025-08-04 12:05:49,934][__main__][INFO] - Computing test metrics
+[2025-08-04 12:06:10,145][__main__][INFO] - Evaluation done in 0.337 min
+[2025-08-04 12:06:41,043][__main__][INFO] - Evaluation done in 0.140 min
+[2025-08-04 12:06:57,818][__main__][INFO] - Saved plots
+[2025-08-04 12:06:57,818][__main__][INFO] - End of script
+
+[2025-08-04 12:07:04,145][__main__][INFO] - =====Running main script=====
+[2025-08-04 12:07:04,150][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_baselines/lookback_168/
+[2025-08-04 12:07:04,150][__main__][INFO] - Model lookback, normalization None, criterion MSE, kwargs {'lookback_idx': 168}
+[2025-08-04 12:07:04,299][__main__][INFO] - Fetched dataloaders
+[2025-08-04 12:07:04,301][__main__][INFO] - Training data shape : (223, 1, 13152)
+[2025-08-04 12:07:04,301][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 48])
+[2025-08-04 12:07:04,660][__main__][INFO] - No training needed
+[2025-08-04 12:07:04,660][__main__][INFO] - Computing test metrics
+[2025-08-04 12:07:24,717][__main__][INFO] - Evaluation done in 0.334 min
+[2025-08-04 12:07:55,479][__main__][INFO] - Evaluation done in 0.136 min
+[2025-08-04 12:08:12,577][__main__][INFO] - Saved plots
+[2025-08-04 12:08:12,577][__main__][INFO] - End of script
+
+Table of ../outputs/benchmark_baselines/test1_mean_results.json
++-----------------+---------------+----------+------------+--------------+----------------+
+|                 |   persistence |   repeat |   expected |   lookback_0 |   lookback_168 |
++=================+===============+==========+============+==============+================+
+| Test MSE * 1e-8 |        2.1442 |   0.0751 |     1.1098 |       0.1863 |         0.1440 |
++-----------------+---------------+----------+------------+--------------+----------------+
+| Test MAE * 1e-3 |        1.4934 |   0.3224 |     1.2463 |       0.3933 |         0.3357 |
++-----------------+---------------+----------+------------+--------------+----------------+
+| Test NMSE       |        2.0236 |   0.5099 |     1.1324 |       0.4375 |         0.3816 |
++-----------------+---------------+----------+------------+--------------+----------------+
+| Test RMSE       |        0.3131 |   0.1109 |     0.1782 |       0.0864 |         0.0715 |
++-----------------+---------------+----------+------------+--------------+----------------+
+Table of ../outputs/benchmark_baselines/test2_mean_results.json
++-----------------+---------------+----------+------------+--------------+----------------+
+|                 |   persistence |   repeat |   expected |   lookback_0 |   lookback_168 |
++=================+===============+==========+============+==============+================+
+| Test MSE * 1e-8 |        0.0217 |   0.0016 |     0.0113 |       0.0022 |         0.0019 |
++-----------------+---------------+----------+------------+--------------+----------------+
+| Test MAE * 1e-3 |        0.4473 |   0.1164 |     0.3679 |       0.1246 |         0.1098 |
++-----------------+---------------+----------+------------+--------------+----------------+
+| Test NMSE       |        2.0277 |   0.5799 |     1.1539 |       0.5071 |         0.4284 |
++-----------------+---------------+----------+------------+--------------+----------------+
+| Test RMSE       |        0.4413 |   0.2376 |     0.2813 |       0.2244 |         0.1824 |
++-----------------+---------------+----------+------------+--------------+----------------+

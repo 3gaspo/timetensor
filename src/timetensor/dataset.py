@@ -521,7 +521,7 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subset
                     subset_indices = get_subset_indices(dataset, subset, subset_mode)
                     torch.save(subset_indices, subset_dir + f"{key}_subset.pt")
                 else:
-                    subset_indices = list(torch.load(subset, weights_only=False))
+                    subset_indices = list(torch.load(subset_dir + f"{key}_subset.pt", weights_only=False))
                 dataset = TimeSeriesSubset(dataset, subset_indices, subset_mode)
 
         local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_cte)
@@ -564,17 +564,48 @@ def collate_fn(data, remove_cte=False):
     return inputs, contexts, targets
 
 
-def aggregate_loaders(loaders, context_by_individuals=True, by_date=True):
-    if (not context_by_individuals) and by_date: #other cases tODO
-        values_list = []
-        for loader in loaders:
-            values_list.append(loader.dataset.values)
-        extended_values = torch.cat(values_list, dim=0)
-        shuffle = isinstance(loader.sampler, torch.utils.data.RandomSampler)
-        extended_dataset = TimeSeriesDataset(extended_values, loader.dataset.datetimes, loader.dataset.context, loader.dataset.lags, loader.dataset.horizon, by_date=True)
-        extended_loader = DataLoader(extended_dataset, batch_size=loader.batch_size, shuffle=shuffle, collate_fn=loader.collate_fn)
-        return extended_loader
+# def aggregate_loaders(loaders, context_by_individuals=True, by_date=True):
+#     if (not context_by_individuals) and by_date: #other cases tODO
+#         values_list = []
+#         for loader in loaders:
+#             values_list.append(loader.dataset.values)
+#         extended_values = torch.cat(values_list, dim=0)
+#         shuffle = isinstance(loader.sampler, torch.utils.data.RandomSampler)
+#         extended_dataset = TimeSeriesDataset(extended_values, loader.dataset.datetimes, loader.dataset.context, loader.dataset.lags, loader.dataset.horizon, by_date=True)
+#         extended_loader = DataLoader(extended_dataset, batch_size=loader.batch_size, shuffle=shuffle, collate_fn=loader.collate_fn)
+#         return extended_loader
     
+def aggregate_loaders_dict(loaders_dicts):
+    """aggregates loaders of different individuals. Expects same dates."""
+    loaders_dict = {}
+    keys = list(loaders_dicts[0].keys())
+    example_dataset = loaders_dicts[0][keys[0]].dataset
+    lags, horizon = example_dataset.lags, example_dataset.horizon
+    by_date, context_by_individuals, return_all_individuals = example_dataset.by_date, example_dataset.context_by_individuals, example_dataset.return_all_individuals
+    
+    for key in keys:
+        batch_size = loaders_dicts[0][key].batch_size
+        shuffle = isinstance(loaders_dicts[0][key].sampler, torch.utils.data.RandomSampler)
+        collate_fn = loaders_dicts[0][key].collate_fn
+        datetimes = loaders_dicts[0][key].dataset.datetimes
+        if context_by_individuals:
+            context_list = []
+        else:
+            context = loaders_dicts[0][key].dataset.context
+        values_list = []
+        for new_dict in loaders_dicts:
+            values = new_dict[key].dataset.values
+            values_list.append(values)
+            if context_by_individuals:
+                context = new_dict[key].dataset.context
+                context_list.append(context)
+        if context_by_individuals:
+            context = torch.cat(context_list, dim=0)
+        extended_dataset = TimeSeriesDataset(torch.cat(values_list, dim=0), datetimes, context, lags, horizon, by_date, return_all_individuals, context_by_individuals)
+        extended_loader = DataLoader(extended_dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=collate_fn)
+        loaders_dict[key] = extended_loader
+    return loaders_dict
+
 
 def get_sizes(loader, str_info=False):
     """get data size from loader"""

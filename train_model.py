@@ -8,7 +8,7 @@ from src.timetensor.dataset import get_dataset_splits, get_train_loaders, get_si
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import Learner, train_model, get_losses
 from src.timetensor.visu import plot_losses, plot_multi_losses, plot_errors, plot_horizon_errors, plot_pred, plot_weights, plot_stats, plot_named_example, plot_serie
-from src.timetensor.utils import save_results, fetch_example_data, get_dirs, unroll_windows, set_random_data
+from src.timetensor.utils import save_results, fetch_example_data, get_dirs, set_random_data
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)

@@ -1,0 +1,26 @@
+{
+    "repeat": {
+        "Test MSE": 245304912.0,
+        "Test NMSE": 9.118661880493164
+    },
+    "PatchTST_instance": {
+        "Test MSE": 466204640.0,
+        "Test NMSE": 9.184231758117676
+    },
+    "PatchTST_revin": {
+        "Test MSE": 463150880.0,
+        "Test NMSE": 9.16187572479248
+    },
+    "PatchTST_instance_NMSE": {
+        "Test MSE": 264199728.0,
+        "Test NMSE": 8.88734245300293
+    },
+    "DLinear_instance_NMSE": {
+        "Test MSE": 259009040.0,
+        "Test NMSE": 8.912612915039062
+    },
+    "PatchTST_revin_NMSE": {
+        "Test MSE": 260332240.0,
+        "Test NMSE": 8.88645076751709
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "TST_bs5_dates": {
+        "Test MSE": 8270586.5,
+        "Test NMSE": 0.2641257345676422
+    },
+    "TST_bs28_individuals": {
+        "Test MSE": 7345833.5,
+        "Test NMSE": 0.26319506764411926
+    },
+    "TST_bs56_individuals": {
+        "Test MSE": 7208437.0,
+        "Test NMSE": 0.2629242539405823
+    },
+    "TST_bs28_individuals_lr1e-5": {
+        "Test MSE": 7295733.0,
+        "Test NMSE": 0.2720295786857605
+    }
+}

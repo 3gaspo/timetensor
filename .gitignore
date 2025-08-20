@@ -2,6 +2,6 @@ uv.lock
 outputs/
 __pycache__/
 .venv
-datasets/electricity.csv
-datasets/electricity.txt
+*.pt
 *.egg-info
+hydra_dir.txt

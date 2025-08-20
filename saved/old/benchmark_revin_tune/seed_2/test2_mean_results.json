@@ -1,0 +1,58 @@
+{
+    "PatchTST_revin": {
+        "Test MSE": 0.006275704596191645,
+        "Test NMSE": 0.010585821233689785
+    },
+    "PatchTST_mIN": {
+        "Test MSE": 0.006260794587433338,
+        "Test NMSE": 0.010561203584074974
+    },
+    "sim1_local_revin": {
+        "Test MSE": 0.004439671989530325,
+        "Test NMSE": 0.007530635222792625
+    },
+    "sim1_local_min": {
+        "Test MSE": 0.004309250973165035,
+        "Test NMSE": 0.007311645429581404
+    },
+    "sim1_freeze_revin": {
+        "Test MSE": 0.028860468417406082,
+        "Test NMSE": 0.04864165559411049
+    },
+    "sim1_tune_revin": {
+        "Test MSE": 0.021774897351861,
+        "Test NMSE": 0.03658027574419975
+    },
+    "sim1_freeze_min": {
+        "Test MSE": 0.029836902394890785,
+        "Test NMSE": 0.050281308591365814
+    },
+    "sim1_tune_min": {
+        "Test MSE": 0.021350031718611717,
+        "Test NMSE": 0.035866186022758484
+    },
+    "sim2_local_revin": {
+        "Test MSE": 0.004761020187288523,
+        "Test NMSE": 0.008044719696044922
+    },
+    "sim2_local_min": {
+        "Test MSE": 0.004490189254283905,
+        "Test NMSE": 0.007583243306726217
+    },
+    "sim2_freeze_revin": {
+        "Test MSE": 0.006275704596191645,
+        "Test NMSE": 0.010585821233689785
+    },
+    "sim2_tune_revin": {
+        "Test MSE": 0.006705422420054674,
+        "Test NMSE": 0.011312021873891354
+    },
+    "sim2_freeze_min": {
+        "Test MSE": 0.006260794587433338,
+        "Test NMSE": 0.0105612026527524
+    },
+    "sim2_tune_min": {
+        "Test MSE": 0.006875898223370314,
+        "Test NMSE": 0.011599822901189327
+    }
+}

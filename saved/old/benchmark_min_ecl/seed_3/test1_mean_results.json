@@ -1,0 +1,10 @@
+{
+    "PatchTST_revin": {
+        "Test MSE": 12536712.0,
+        "Test NMSE": 0.7237846851348877
+    },
+    "min_gamma": {
+        "Test MSE": 12339772.0,
+        "Test NMSE": 0.7089727520942688
+    }
+}

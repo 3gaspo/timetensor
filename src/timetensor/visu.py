@@ -162,6 +162,39 @@ def plot_named_example(path, name):
 #     plt.savefig(path + name)
 #     plt.close()
 
+def check_cte_windows(df, lookback, title="Histogram of constant windows", path="", name="cte_windows.pdf", print_idx=False):
+    """plots histogram of constand windows per individual"""
+    dates, indivs = df.shape
+    stds = df.rolling(window=lookback).std()[lookback:].stack()
+    counts = {}
+    if print_idx:
+        idxs = np.where(std==0)
+        print(idxs)
+
+    for idx, std in enumerate(stds.values):
+        indiv, date = idx % indivs, idx // dates
+        if std == 0:
+            if counts.get(indiv) is None:
+                counts[indiv] = 0
+            counts[indiv] += 1
+
+    if len(counts)>0:
+        print("Found constant windows!")
+        
+        if len(counts)<20:   
+            print(counts)
+            
+        if len(counts)>10:
+            plt.clf()
+            fig = plt.figure(figsize=(10,5))
+            plt.hist(np.log(list(counts.values())), bins=100)
+            plt.yscale("log")
+            plt.title(title)
+            plt.xlabel("Individuals")
+            plt.ylabel("Cte window counts")
+            plt.savefig(path + name)
+            plt.close()
+
 def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None, remove_cte=True):
     """plots means and stds. data must be pandas dataframe or dict of df"""
     if type(data) != dict:
@@ -182,11 +215,18 @@ def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookb
 
         if remove_cte:
             keep_idx = np.where(stds>0)[0]
-            keys += [key + f" (mean: {means.iloc[keep_idx].median():.2f} | std: {stds.iloc[keep_idx].median():.2f})" for k in range(len(keep_idx))]
+            if per_user:
+                keys += [key + f" (mean: {means.iloc[keep_idx].mean():.2f} | stds: {stds.iloc[keep_idx].mean():.2f} | std: {np.std(df.iloc[keep_idx].values):.2f})" for k in range(len(keep_idx))]
+            else:
+                keys += [key + f" (mean: {means.iloc[keep_idx].mean():.2f} | stds: {stds.iloc[keep_idx].mean():.2f})" for k in range(len(keep_idx))]
             means_list += np.log(np.where(means.iloc[keep_idx]>0, means.iloc[keep_idx], 1e-8)).tolist()
             stds_list += np.log(stds.iloc[keep_idx]).tolist() #np.where(stds>0, stds, 1e-8)).tolist()
         else:
-            keys += [key + f" (mean: {means.median():.2f} | std: {stds.median():.2f})" for k in range(len(means))]
+            if per_user:
+                keys += [key + f" (mean: {means.mean():.2f} | stds: {stds.mean():.2f} | std: {np.std(df.values):.2f})" for k in range(len(means))]
+            else:
+                keys += [key + f" (mean: {means.mean():.2f} | stds: {stds.mean():.2f})" for k in range(len(means))]
+
             means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
             stds_list += np.log(np.where(stds>0, stds, 1e-8)).tolist() #np.where(stds>0, stds, 1e-8)).tolist()
     
@@ -240,10 +280,10 @@ def plot_means(data, path="", name="stats.pdf", show=False, per_user=True, lookb
 
         if remove_cte:
             keep_idx = np.where(stds>0)[0]
-            keys += [key + f" (mean: {means.iloc[keep_idx].median():.2f})" for k in range(len(keep_idx))]
+            keys += [key + f" (mean: {means.iloc[keep_idx].mean():.2f})" for k in range(len(keep_idx))]
             means_list += np.log(np.where(means.iloc[keep_idx]>0, means.iloc[keep_idx], 1e-8)).tolist()
         else:
-            keys += [key + f" (mean: {means.median():.2f})" for k in range(len(means))]
+            keys += [key + f" (mean: {means.mean():.2f})" for k in range(len(means))]
             means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
     
     means_df = pd.DataFrame({
@@ -372,9 +412,9 @@ def pd_to_latex(path):
     print(latex_output)
 
 
-def print_nice_table(path, multipliers=None, names=None):
-    """print table from dataframe in path"""
-    with open(path) as file:
+def get_errors_df(dir_name, file_name, multipliers=None, names=None, save=True):
+    """formats errors json at path"""
+    with open(dir_name+file_name) as file:
         data = json.load(file)
     df = pd.DataFrame(data)
     if names=="None":
@@ -393,13 +433,15 @@ def print_nice_table(path, multipliers=None, names=None):
                 df.iloc[k] = df.iloc[k] * 10**multipliers[k]
                 new_index[k] = new_index[k] + f" * 1e{multipliers[k]}"
         df.index = new_index
-    table = tabulate(df, headers='keys', tablefmt='grid', showindex=True, floatfmt=".4f")
-    print(f"Table of {path}")
-    print(table)
+    if save:
+        df.to_csv(dir_name + 'errors.csv')
+    return df
 
 
-def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True, baseline=None):
-    """print table from dataframe in path"""
+
+
+def get_multiple_errors_df(dir_name, file_name, n_paths, multipliers=None, names=None, baseline=None, save=True):
+    """formats errors json from multipled seeds in dir_name"""
     paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
     dfs = []
     for path in paths:
@@ -433,6 +475,31 @@ def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None
         df_mean.index = new_index
         df_std.index = new_index
 
+    if save:
+        df_mean.to_csv(dir_name + 'mean_errors.csv')
+        df_std.to_csv(dir_name + 'std_errors.csv')
+    return df_mean, df_std
+
+
+def get_expe_results(dir_name, file_name, multipliers=None, names=None, print_table=True, save_name="errors.pdf"):
+    df = get_errors_df(dir_name, file_name, multipliers, names, save=True)
+    if print_table:
+        table = tabulate(df, headers='keys', tablefmt='grid', showindex=True, floatfmt=".4f")
+        print(f"==Table of {dir_name}==")
+        print(table)
+
+    plt.figure(figsize=(10,5))
+    plt.grid()
+    plt.scatter(list(df.columns), df.iloc[0].values, s=100)
+    plt.xticks(rotation = 45)
+    plt.title("Experiment results")
+    plt.tight_layout()
+    plt.savefig(dir_name + save_name)
+    plt.close()
+
+def get_multiple_expe_results(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True, baseline=None, print_table=True, show_row=0, save_name="errors.df"):
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+
     if show_std:
         df_formatted = df_mean.copy()
         for col in df_mean.columns:
@@ -440,9 +507,65 @@ def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None
     else:
         df_formatted = df_mean.applymap("{:.4f}".format)
 
-    table = tabulate(df_formatted, headers='keys', tablefmt='grid', showindex=True)
-    print(f"Table of {file_name}")
-    print(table)
+    if print_table:
+        table = tabulate(df_formatted, headers='keys', tablefmt='grid', showindex=True)
+        print(f"==Table of {dir_name}==")
+        print(table)
+
+    plt.figure(figsize=(10,5))
+    plt.grid()
+    plt.scatter(list(df_mean.columns), df_mean.iloc[show_row].values, s=100)
+    plt.xticks(rotation = 45)
+    plt.title("Experiment results")
+    plt.tight_layout()
+    plt.savefig(dir_name + save_name)
+    plt.close()
+
+# def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True, baseline=None):
+#     """print table from dataframe in path"""
+#     paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
+#     dfs = []
+#     for path in paths:
+#         with open(path) as file:
+#             data = json.load(file)
+#         df = pd.DataFrame(data)
+#         if names=="None":
+#             names=None
+#         if names is not None:
+#             if type(names)==str:
+#                 names=names.split(";")
+#             df = df[names]
+
+#         if baseline is not None and baseline in df.columns:
+#             df = df.subtract(df[baseline], axis=0)
+#         dfs.append(df)
+
+#     df_mean = pd.concat(dfs).groupby(level=0).mean()
+#     df_std = pd.concat(dfs).groupby(level=0).std()
+
+#     if multipliers is not None:
+#         if type(multipliers) == str:
+#             multipliers = multipliers.split(" ")
+#             multipliers = [int(w) for w in multipliers]
+#         new_index = list(df_mean.index)
+#         for k in range(min(len(multipliers), df_mean.shape[0])):
+#             if multipliers[k] != 0:
+#                 df_mean.iloc[k] = df_mean.iloc[k] * 10**multipliers[k]
+#                 df_std.iloc[k] = df_std.iloc[k] * 10**multipliers[k]
+#                 new_index[k] = new_index[k] + f" * 1e{multipliers[k]}"
+#         df_mean.index = new_index
+#         df_std.index = new_index
+
+#     if show_std:
+#         df_formatted = df_mean.copy()
+#         for col in df_mean.columns:
+#             df_formatted[col] = df_mean[col].map("{:.4f}".format) + " ± " + df_std[col].map("{:.4f}".format)
+#     else:
+#         df_formatted = df_mean.applymap("{:.4f}".format)
+
+#     table = tabulate(df_formatted, headers='keys', tablefmt='grid', showindex=True)
+#     print(f"Table of {file_name}")
+#     print(table)
 
 
 def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", save_path="", save_name="boxplot.pdf", names=None, baseline=None):

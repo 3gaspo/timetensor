@@ -1,0 +1,211 @@
+[2025-08-04 13:33:28,777][__main__][INFO] - =====Running main script=====
+[2025-08-04 13:33:28,783][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_tst/repeat/
+[2025-08-04 13:33:28,783][__main__][INFO] - Model repeat, normalization instance, criterion MSE, kwargs {}
+[2025-08-04 13:33:29,317][__main__][INFO] - Fetched dataloaders
+[2025-08-04 13:33:29,329][__main__][INFO] - Training data shape : (223, 1, 13152)
+[2025-08-04 13:33:29,329][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 48])
+[2025-08-04 13:33:29,450][__main__][INFO] - No training needed
+[2025-08-04 13:33:29,451][__main__][INFO] - Computing test metrics
+[2025-08-04 13:33:40,733][__main__][INFO] - Evaluation done in 0.188 min
+[2025-08-04 13:34:10,550][__main__][INFO] - Evaluation done in 0.085 min
+[2025-08-04 13:34:23,046][__main__][INFO] - Saved plots
+[2025-08-04 13:34:23,046][__main__][INFO] - End of script
+
+[2025-08-04 13:34:31,422][__main__][INFO] - =====Running main script=====
+[2025-08-04 13:34:31,428][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_tst/PatchTST_instance/
+[2025-08-04 13:34:31,429][__main__][INFO] - Model PatchTST, normalization instance, criterion MSE, kwargs {}
+[2025-08-04 13:34:31,658][__main__][INFO] - Fetched dataloaders
+[2025-08-04 13:34:31,663][__main__][INFO] - Training data shape : (223, 1, 13152)
+[2025-08-04 13:34:31,663][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 48])
+[2025-08-04 13:34:35,612][__main__][INFO] - batch_size=28, learning_rate=0.0001, steps per epoch=8, epochs=300
+[2025-08-04 13:34:35,612][__main__][INFO] - Starting training...
+[2025-08-04 13:34:35,612][__main__][INFO] - Using device: cuda
+[2025-08-04 13:34:35,612][__main__][INFO] - Training 300 epochs of 8 batches (2400 steps): , eval_freq: 100, print_freq: 100
+[2025-08-04 13:37:07,927][__main__][INFO] - Step 1 | valid1 MSE : 65767752.0000 | valid1 NMSE : 1.2163
+[2025-08-04 13:39:42,039][__main__][INFO] - Step 100 | valid1 MSE : 21482864.0000 | valid1 NMSE : 0.7349
+[2025-08-04 13:42:15,758][__main__][INFO] - Step 200 | valid1 MSE : 19386616.0000 | valid1 NMSE : 0.6822
+[2025-08-04 13:44:48,980][__main__][INFO] - Step 300 | valid1 MSE : 52559956.0000 | valid1 NMSE : 1.0804
+[2025-08-04 13:47:22,186][__main__][INFO] - Step 400 | valid1 MSE : 23064448.0000 | valid1 NMSE : 0.7645
+[2025-08-04 13:49:54,991][__main__][INFO] - Step 500 | valid1 MSE : 28020564.0000 | valid1 NMSE : 0.8369
+[2025-08-04 13:52:31,366][__main__][INFO] - Step 600 | valid1 MSE : 20539858.0000 | valid1 NMSE : 0.7628
+[2025-08-04 13:55:03,845][__main__][INFO] - Step 700 | valid1 MSE : 26456318.0000 | valid1 NMSE : 0.8951
+[2025-08-04 13:57:38,006][__main__][INFO] - Step 800 | valid1 MSE : 21555428.0000 | valid1 NMSE : 0.8374
+[2025-08-04 14:00:13,336][__main__][INFO] - Step 900 | valid1 MSE : 13336689.0000 | valid1 NMSE : 0.6963
+[2025-08-04 14:02:46,416][__main__][INFO] - Step 1000 | valid1 MSE : 14682865.0000 | valid1 NMSE : 0.7287
+[2025-08-04 14:05:22,037][__main__][INFO] - Step 1100 | valid1 MSE : 11710369.0000 | valid1 NMSE : 0.7249
+[2025-08-04 14:07:55,686][__main__][INFO] - Step 1200 | valid1 MSE : 10398992.0000 | valid1 NMSE : 0.7791
+[2025-08-04 14:10:30,046][__main__][INFO] - Step 1300 | valid1 MSE : 13141363.0000 | valid1 NMSE : 0.7846
+[2025-08-04 14:13:04,363][__main__][INFO] - Step 1400 | valid1 MSE : 13040921.0000 | valid1 NMSE : 0.9477
+[2025-08-04 14:15:39,496][__main__][INFO] - Step 1500 | valid1 MSE : 8331099.0000 | valid1 NMSE : 0.8042
+[2025-08-04 14:18:15,007][__main__][INFO] - Step 1600 | valid1 MSE : 13884914.0000 | valid1 NMSE : 0.9462
+[2025-08-04 14:20:50,467][__main__][INFO] - Step 1700 | valid1 MSE : 14492538.0000 | valid1 NMSE : 0.9318
+[2025-08-04 14:23:28,226][__main__][INFO] - Step 1800 | valid1 MSE : 10219165.0000 | valid1 NMSE : 0.8149
+[2025-08-04 14:26:03,563][__main__][INFO] - Step 1900 | valid1 MSE : 10198626.0000 | valid1 NMSE : 0.8619
+[2025-08-04 14:28:37,526][__main__][INFO] - Step 2000 | valid1 MSE : 7238513.5000 | valid1 NMSE : 0.8060
+[2025-08-04 14:31:10,240][__main__][INFO] - Step 2100 | valid1 MSE : 9653904.0000 | valid1 NMSE : 0.8629
+[2025-08-04 14:33:45,333][__main__][INFO] - Step 2200 | valid1 MSE : 10243925.0000 | valid1 NMSE : 0.7971
+[2025-08-04 14:36:19,257][__main__][INFO] - Step 2300 | valid1 MSE : 7554219.0000 | valid1 NMSE : 0.8241
+[2025-08-04 14:38:54,412][__main__][INFO] - Step 2400 | valid1 MSE : 8932461.0000 | valid1 NMSE : 0.8873
+[2025-08-04 14:38:54,413][__main__][INFO] - Training done in 64.313 min
+[2025-08-04 14:38:54,413][__main__][INFO] - Average time per step: 1.608 s
+[2025-08-04 14:38:54,468][__main__][INFO] - End of training
+[2025-08-04 14:38:55,402][__main__][INFO] - Plotted losses
+[2025-08-04 14:38:55,402][__main__][INFO] - Computing test metrics
+[2025-08-04 14:39:16,125][__main__][INFO] - Evaluation done in 0.345 min
+[2025-08-04 14:39:48,066][__main__][INFO] - Evaluation done in 0.143 min
+[2025-08-04 14:40:00,154][__main__][INFO] - Saved plots
+[2025-08-04 14:40:00,155][__main__][INFO] - End of script
+
+[2025-08-04 14:40:08,378][__main__][INFO] - =====Running main script=====
+[2025-08-04 14:40:08,400][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_tst/PatchTST_revin/
+[2025-08-04 14:40:08,400][__main__][INFO] - Model PatchTST, normalization revin, criterion MSE, kwargs {}
+[2025-08-04 14:40:08,630][__main__][INFO] - Fetched dataloaders
+[2025-08-04 14:40:08,634][__main__][INFO] - Training data shape : (223, 1, 13152)
+[2025-08-04 14:40:08,634][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 48])
+[2025-08-04 14:40:12,094][__main__][INFO] - batch_size=28, learning_rate=0.0001, steps per epoch=8, epochs=300
+[2025-08-04 14:40:12,095][__main__][INFO] - Starting training...
+[2025-08-04 14:40:12,095][__main__][INFO] - Using device: cuda
+[2025-08-04 14:40:12,095][__main__][INFO] - Training 300 epochs of 8 batches (2400 steps): , eval_freq: 100, print_freq: 100
+[2025-08-04 14:42:48,557][__main__][INFO] - Step 1 | valid1 MSE : 65768072.0000 | valid1 NMSE : 1.2163
+[2025-08-04 14:45:21,646][__main__][INFO] - Step 100 | valid1 MSE : 21421944.0000 | valid1 NMSE : 0.7339
+[2025-08-04 14:47:55,237][__main__][INFO] - Step 200 | valid1 MSE : 19282212.0000 | valid1 NMSE : 0.6806
+[2025-08-04 14:50:30,131][__main__][INFO] - Step 300 | valid1 MSE : 51543956.0000 | valid1 NMSE : 1.0675
+[2025-08-04 14:53:04,773][__main__][INFO] - Step 400 | valid1 MSE : 22631408.0000 | valid1 NMSE : 0.7567
+[2025-08-04 14:55:39,302][__main__][INFO] - Step 500 | valid1 MSE : 27273744.0000 | valid1 NMSE : 0.8228
+[2025-08-04 14:58:13,094][__main__][INFO] - Step 600 | valid1 MSE : 20012422.0000 | valid1 NMSE : 0.7499
+[2025-08-04 15:00:45,555][__main__][INFO] - Step 700 | valid1 MSE : 25825140.0000 | valid1 NMSE : 0.8756
+[2025-08-04 15:03:17,665][__main__][INFO] - Step 800 | valid1 MSE : 21064734.0000 | valid1 NMSE : 0.8203
+[2025-08-04 15:05:50,103][__main__][INFO] - Step 900 | valid1 MSE : 13036629.0000 | valid1 NMSE : 0.6835
+[2025-08-04 15:08:24,487][__main__][INFO] - Step 1000 | valid1 MSE : 14327867.0000 | valid1 NMSE : 0.7135
+[2025-08-04 15:10:56,113][__main__][INFO] - Step 1100 | valid1 MSE : 11471813.0000 | valid1 NMSE : 0.7094
+[2025-08-04 15:13:30,133][__main__][INFO] - Step 1200 | valid1 MSE : 10245060.0000 | valid1 NMSE : 0.7604
+[2025-08-04 15:16:03,524][__main__][INFO] - Step 1300 | valid1 MSE : 13054803.0000 | valid1 NMSE : 0.7697
+[2025-08-04 15:18:38,075][__main__][INFO] - Step 1400 | valid1 MSE : 12758951.0000 | valid1 NMSE : 0.9126
+[2025-08-04 15:21:12,126][__main__][INFO] - Step 1500 | valid1 MSE : 8181207.0000 | valid1 NMSE : 0.7792
+[2025-08-04 15:23:46,265][__main__][INFO] - Step 1600 | valid1 MSE : 13651387.0000 | valid1 NMSE : 0.9162
+[2025-08-04 15:26:19,126][__main__][INFO] - Step 1700 | valid1 MSE : 14197733.0000 | valid1 NMSE : 0.9023
+[2025-08-04 15:28:51,726][__main__][INFO] - Step 1800 | valid1 MSE : 10063798.0000 | valid1 NMSE : 0.7932
+[2025-08-04 15:31:24,629][__main__][INFO] - Step 1900 | valid1 MSE : 10027688.0000 | valid1 NMSE : 0.8381
+[2025-08-04 15:33:58,858][__main__][INFO] - Step 2000 | valid1 MSE : 7146038.5000 | valid1 NMSE : 0.7844
+[2025-08-04 15:36:31,333][__main__][INFO] - Step 2100 | valid1 MSE : 9599954.0000 | valid1 NMSE : 0.8420
+[2025-08-04 15:39:04,333][__main__][INFO] - Step 2200 | valid1 MSE : 10181557.0000 | valid1 NMSE : 0.7793
+[2025-08-04 15:41:38,020][__main__][INFO] - Step 2300 | valid1 MSE : 7527035.0000 | valid1 NMSE : 0.8047
+[2025-08-04 15:44:12,369][__main__][INFO] - Step 2400 | valid1 MSE : 8907661.0000 | valid1 NMSE : 0.8606
+[2025-08-04 15:44:12,370][__main__][INFO] - Training done in 64.005 min
+[2025-08-04 15:44:12,370][__main__][INFO] - Average time per step: 1.600 s
+[2025-08-04 15:44:12,424][__main__][INFO] - End of training
+[2025-08-04 15:44:13,579][__main__][INFO] - Plotted losses
+[2025-08-04 15:44:13,579][__main__][INFO] - Computing test metrics
+[2025-08-04 15:44:34,218][__main__][INFO] - Evaluation done in 0.344 min
+[2025-08-04 15:45:06,288][__main__][INFO] - Evaluation done in 0.142 min
+[2025-08-04 15:45:18,312][__main__][INFO] - Saved plots
+[2025-08-04 15:45:18,313][__main__][INFO] - Final mIN parameters: {'beta': np.float32(-0.0020686318), 'alpha': np.float32(1.0347464)}
+[2025-08-04 15:45:18,313][__main__][INFO] - End of script
+
+[2025-08-04 15:45:26,332][__main__][INFO] - =====Running main script=====
+[2025-08-04 15:45:26,359][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_tst/PatchTST_instance_NMSE/
+[2025-08-04 15:45:26,359][__main__][INFO] - Model PatchTST, normalization instance, criterion NMSE, kwargs {}
+[2025-08-04 15:45:26,585][__main__][INFO] - Fetched dataloaders
+[2025-08-04 15:45:26,590][__main__][INFO] - Training data shape : (223, 1, 13152)
+[2025-08-04 15:45:26,590][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 48])
+[2025-08-04 15:45:29,590][__main__][INFO] - batch_size=28, learning_rate=0.0001, steps per epoch=8, epochs=300
+[2025-08-04 15:45:29,590][__main__][INFO] - Starting training...
+[2025-08-04 15:45:29,591][__main__][INFO] - Using device: cuda
+[2025-08-04 15:45:29,591][__main__][INFO] - Training 300 epochs of 8 batches (2400 steps): , eval_freq: 100, print_freq: 100
+[2025-08-04 15:48:04,336][__main__][INFO] - Step 1 | valid1 MSE : 59186336.0000 | valid1 NMSE : 1.1423
+[2025-08-04 15:50:38,371][__main__][INFO] - Step 100 | valid1 MSE : 5126962.5000 | valid1 NMSE : 0.3937
+[2025-08-04 15:53:11,349][__main__][INFO] - Step 200 | valid1 MSE : 4428274.5000 | valid1 NMSE : 0.3600
+[2025-08-04 15:55:45,694][__main__][INFO] - Step 300 | valid1 MSE : 4414846.5000 | valid1 NMSE : 0.3528
+[2025-08-04 15:58:18,614][__main__][INFO] - Step 400 | valid1 MSE : 3839576.2500 | valid1 NMSE : 0.3451
+[2025-08-04 16:00:52,369][__main__][INFO] - Step 500 | valid1 MSE : 4743785.0000 | valid1 NMSE : 0.3491
+[2025-08-04 16:03:27,231][__main__][INFO] - Step 600 | valid1 MSE : 3894453.5000 | valid1 NMSE : 0.3432
+[2025-08-04 16:06:01,177][__main__][INFO] - Step 700 | valid1 MSE : 3885562.0000 | valid1 NMSE : 0.3396
+[2025-08-04 16:08:33,714][__main__][INFO] - Step 800 | valid1 MSE : 3775041.7500 | valid1 NMSE : 0.3381
+[2025-08-04 16:11:06,380][__main__][INFO] - Step 900 | valid1 MSE : 4257984.0000 | valid1 NMSE : 0.3430
+[2025-08-04 16:13:40,647][__main__][INFO] - Step 1000 | valid1 MSE : 3824465.7500 | valid1 NMSE : 0.3393
+[2025-08-04 16:16:14,012][__main__][INFO] - Step 1100 | valid1 MSE : 3844768.0000 | valid1 NMSE : 0.3393
+[2025-08-04 16:18:48,510][__main__][INFO] - Step 1200 | valid1 MSE : 4257045.5000 | valid1 NMSE : 0.3386
+[2025-08-04 16:21:21,640][__main__][INFO] - Step 1300 | valid1 MSE : 3995850.5000 | valid1 NMSE : 0.3421
+[2025-08-04 16:23:54,974][__main__][INFO] - Step 1400 | valid1 MSE : 3538893.2500 | valid1 NMSE : 0.3355
+[2025-08-04 16:26:28,686][__main__][INFO] - Step 1500 | valid1 MSE : 4457984.5000 | valid1 NMSE : 0.3446
+[2025-08-04 16:29:01,186][__main__][INFO] - Step 1600 | valid1 MSE : 3874529.5000 | valid1 NMSE : 0.3374
+[2025-08-04 16:31:33,318][__main__][INFO] - Step 1700 | valid1 MSE : 4224520.5000 | valid1 NMSE : 0.3394
+[2025-08-04 16:34:06,870][__main__][INFO] - Step 1800 | valid1 MSE : 3601042.5000 | valid1 NMSE : 0.3324
+[2025-08-04 16:36:39,053][__main__][INFO] - Step 1900 | valid1 MSE : 3622519.2500 | valid1 NMSE : 0.3344
+[2025-08-04 16:39:11,185][__main__][INFO] - Step 2000 | valid1 MSE : 3999710.2500 | valid1 NMSE : 0.3362
+[2025-08-04 16:41:44,158][__main__][INFO] - Step 2100 | valid1 MSE : 3954999.2500 | valid1 NMSE : 0.3396
+[2025-08-04 16:44:17,269][__main__][INFO] - Step 2200 | valid1 MSE : 3814535.5000 | valid1 NMSE : 0.3335
+[2025-08-04 16:46:49,121][__main__][INFO] - Step 2300 | valid1 MSE : 3387424.5000 | valid1 NMSE : 0.3306
+[2025-08-04 16:49:24,362][__main__][INFO] - Step 2400 | valid1 MSE : 3542668.0000 | valid1 NMSE : 0.3321
+[2025-08-04 16:49:24,364][__main__][INFO] - Training done in 63.913 min
+[2025-08-04 16:49:24,364][__main__][INFO] - Average time per step: 1.598 s
+[2025-08-04 16:49:24,402][__main__][INFO] - End of training
+[2025-08-04 16:49:25,283][__main__][INFO] - Plotted losses
+[2025-08-04 16:49:25,283][__main__][INFO] - Computing test metrics
+[2025-08-04 16:49:46,009][__main__][INFO] - Evaluation done in 0.345 min
+[2025-08-04 16:50:18,999][__main__][INFO] - Evaluation done in 0.159 min
+[2025-08-04 16:50:30,562][__main__][INFO] - Saved plots
+[2025-08-04 16:50:30,562][__main__][INFO] - End of script
+
+[2025-08-04 16:50:38,686][__main__][INFO] - =====Running main script=====
+[2025-08-04 16:50:38,693][__main__][INFO] - Fetched main configs, save directory : ../outputs/benchmark_tst/PatchTST_revin_NMSE/
+[2025-08-04 16:50:38,693][__main__][INFO] - Model PatchTST, normalization revin, criterion NMSE, kwargs {}
+[2025-08-04 16:50:38,923][__main__][INFO] - Fetched dataloaders
+[2025-08-04 16:50:38,928][__main__][INFO] - Training data shape : (223, 1, 13152)
+[2025-08-04 16:50:38,928][__main__][INFO] - Batch sizes : X=torch.Size([28, 1, 336]), y=torch.Size([28, 1, 48])
+[2025-08-04 16:50:41,943][__main__][INFO] - batch_size=28, learning_rate=0.0001, steps per epoch=8, epochs=300
+[2025-08-04 16:50:41,943][__main__][INFO] - Starting training...
+[2025-08-04 16:50:41,943][__main__][INFO] - Using device: cuda
+[2025-08-04 16:50:41,943][__main__][INFO] - Training 300 epochs of 8 batches (2400 steps): , eval_freq: 100, print_freq: 100
+[2025-08-04 16:53:17,573][__main__][INFO] - Step 1 | valid1 MSE : 59185328.0000 | valid1 NMSE : 1.1422
+[2025-08-04 16:55:49,317][__main__][INFO] - Step 100 | valid1 MSE : 5112536.5000 | valid1 NMSE : 0.3933
+[2025-08-04 16:58:20,580][__main__][INFO] - Step 200 | valid1 MSE : 4404081.5000 | valid1 NMSE : 0.3596
+[2025-08-04 17:00:55,303][__main__][INFO] - Step 300 | valid1 MSE : 4341455.0000 | valid1 NMSE : 0.3521
+[2025-08-04 17:03:26,996][__main__][INFO] - Step 400 | valid1 MSE : 3780297.2500 | valid1 NMSE : 0.3443
+[2025-08-04 17:05:59,074][__main__][INFO] - Step 500 | valid1 MSE : 4678508.0000 | valid1 NMSE : 0.3484
+[2025-08-04 17:08:32,364][__main__][INFO] - Step 600 | valid1 MSE : 3878827.7500 | valid1 NMSE : 0.3429
+[2025-08-04 17:11:05,110][__main__][INFO] - Step 700 | valid1 MSE : 3842019.5000 | valid1 NMSE : 0.3389
+[2025-08-04 17:13:37,631][__main__][INFO] - Step 800 | valid1 MSE : 3762838.0000 | valid1 NMSE : 0.3378
+[2025-08-04 17:16:10,831][__main__][INFO] - Step 900 | valid1 MSE : 4164056.0000 | valid1 NMSE : 0.3418
+[2025-08-04 17:18:43,415][__main__][INFO] - Step 1000 | valid1 MSE : 3812296.7500 | valid1 NMSE : 0.3388
+[2025-08-04 17:21:15,679][__main__][INFO] - Step 1100 | valid1 MSE : 3699556.5000 | valid1 NMSE : 0.3375
+[2025-08-04 17:23:48,288][__main__][INFO] - Step 1200 | valid1 MSE : 4227095.5000 | valid1 NMSE : 0.3382
+[2025-08-04 17:26:20,870][__main__][INFO] - Step 1300 | valid1 MSE : 3842681.7500 | valid1 NMSE : 0.3403
+[2025-08-04 17:28:55,246][__main__][INFO] - Step 1400 | valid1 MSE : 3546985.0000 | valid1 NMSE : 0.3349
+[2025-08-04 17:31:27,170][__main__][INFO] - Step 1500 | valid1 MSE : 4214997.0000 | valid1 NMSE : 0.3416
+[2025-08-04 17:33:59,857][__main__][INFO] - Step 1600 | valid1 MSE : 3745078.0000 | valid1 NMSE : 0.3360
+[2025-08-04 17:36:34,952][__main__][INFO] - Step 1700 | valid1 MSE : 3945836.7500 | valid1 NMSE : 0.3365
+[2025-08-04 17:39:07,227][__main__][INFO] - Step 1800 | valid1 MSE : 3498154.2500 | valid1 NMSE : 0.3313
+[2025-08-04 17:41:40,935][__main__][INFO] - Step 1900 | valid1 MSE : 3488643.2500 | valid1 NMSE : 0.3324
+[2025-08-04 17:44:12,995][__main__][INFO] - Step 2000 | valid1 MSE : 3840751.7500 | valid1 NMSE : 0.3344
+[2025-08-04 17:46:45,632][__main__][INFO] - Step 2100 | valid1 MSE : 3903112.0000 | valid1 NMSE : 0.3386
+[2025-08-04 17:49:17,627][__main__][INFO] - Step 2200 | valid1 MSE : 3648392.0000 | valid1 NMSE : 0.3319
+[2025-08-04 17:51:50,566][__main__][INFO] - Step 2300 | valid1 MSE : 3234142.7500 | valid1 NMSE : 0.3286
+[2025-08-04 17:54:24,854][__main__][INFO] - Step 2400 | valid1 MSE : 3481893.0000 | valid1 NMSE : 0.3309
+[2025-08-04 17:54:24,861][__main__][INFO] - Training done in 63.715 min
+[2025-08-04 17:54:24,861][__main__][INFO] - Average time per step: 1.593 s
+[2025-08-04 17:54:24,901][__main__][INFO] - End of training
+[2025-08-04 17:54:26,002][__main__][INFO] - Plotted losses
+[2025-08-04 17:54:26,002][__main__][INFO] - Computing test metrics
+[2025-08-04 17:54:46,747][__main__][INFO] - Evaluation done in 0.346 min
+[2025-08-04 17:55:19,313][__main__][INFO] - Evaluation done in 0.156 min
+[2025-08-04 17:55:30,871][__main__][INFO] - Saved plots
+[2025-08-04 17:55:30,872][__main__][INFO] - Final mIN parameters: {'beta': np.float32(-0.0025207782), 'alpha': np.float32(1.107724)}
+[2025-08-04 17:55:30,872][__main__][INFO] - End of script
+
+Table of ../outputs/benchmark_tst/test1_mean_results.json
++-----------------+----------+---------------------+------------------+--------------------------+-----------------------+
+|                 |   repeat |   PatchTST_instance |   PatchTST_revin |   PatchTST_instance_NMSE |   PatchTST_revin_NMSE |
++=================+==========+=====================+==================+==========================+=======================+
+| Test MSE * 1e-7 |   0.7514 |              1.5912 |           1.5825 |                   0.7444 |                0.7346 |
++-----------------+----------+---------------------+------------------+--------------------------+-----------------------+
+| Test NMSE       |   0.5099 |              0.8286 |           0.8002 |                   0.2644 |                0.2632 |
++-----------------+----------+---------------------+------------------+--------------------------+-----------------------+
+Table of ../outputs/benchmark_tst/test2_mean_results.json
++-----------------+----------+---------------------+------------------+--------------------------+-----------------------+
+|                 |   repeat |   PatchTST_instance |   PatchTST_revin |   PatchTST_instance_NMSE |   PatchTST_revin_NMSE |
++=================+==========+=====================+==================+==========================+=======================+
+| Test MSE * 1e-7 |   0.0160 |              0.0257 |           0.0252 |                   0.0109 |                0.0108 |
++-----------------+----------+---------------------+------------------+--------------------------+-----------------------+
+| Test NMSE       |   0.5799 |              0.9939 |           0.9557 |                   0.2970 |                0.2958 |
++-----------------+----------+---------------------+------------------+--------------------------+-----------------------+

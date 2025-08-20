@@ -1,0 +1,70 @@
+{
+    "repeat": {
+        "Test MSE": 245304912.0,
+        "Test NMSE": 9.118661880493164
+    },
+    "linear": {
+        "Test MSE": 581574144.0,
+        "Test NMSE": 9.004754066467285
+    },
+    "linear_instance": {
+        "Test MSE": 478097568.0,
+        "Test NMSE": 8.943622589111328
+    },
+    "DLinear": {
+        "Test MSE": 643461632.0,
+        "Test NMSE": 9.410736083984375
+    },
+    "DLinear_instance": {
+        "Test MSE": 525932480.0,
+        "Test NMSE": 9.000094413757324
+    },
+    "linear_NMSE": {
+        "Test MSE": 439385920.0,
+        "Test NMSE": 8.90610122680664
+    },
+    "linear_instance_NMSE": {
+        "Test MSE": 269339456.0,
+        "Test NMSE": 8.930365562438965
+    },
+    "DLinear_NMSE": {
+        "Test MSE": 333149088.0,
+        "Test NMSE": 8.866630554199219
+    },
+    "DLinear_instance_NMSE": {
+        "Test MSE": 259009040.0,
+        "Test NMSE": 8.912612915039062
+    },
+    "linear_RMSE": {
+        "Test MSE": 366716320.0,
+        "Test NMSE": 8.939459800720215
+    },
+    "linear_instance_RMSE": {
+        "Test MSE": 324967360.0,
+        "Test NMSE": 8.920246124267578
+    },
+    "DLinear_RMSE": {
+        "Test MSE": 331369216.0,
+        "Test NMSE": 8.897405624389648
+    },
+    "DLinear_instance_RMSE": {
+        "Test MSE": 309148960.0,
+        "Test NMSE": 8.919544219970703
+    },
+    "sklinear": {
+        "Test MSE": 510196640.0,
+        "Test NMSE": 8.873010635375977
+    },
+    "sklinear_instance": {
+        "Test MSE": 435982784.0,
+        "Test NMSE": 8.890321731567383
+    },
+    "sklinear_relative": {
+        "Test MSE": 444741184.0,
+        "Test NMSE": 8.871392250061035
+    },
+    "sklinear_instance_indiv": {
+        "Test MSE": 538769472.0,
+        "Test NMSE": 9.169069290161133
+    }
+}
