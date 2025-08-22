@@ -4,7 +4,7 @@ import os
 import torch
 import numpy as np
 
-from src.timetensor.dataset import get_dataset_splits, get_train_loaders, get_sizes
+from src.timetensor.dataset import get_dataset_splits, get_train_loaders, get_sizes, aggregate_loaders_dict
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import Learner, train_model, get_losses
 from src.timetensor.visu import plot_losses, plot_multi_losses, plot_errors, plot_horizon_errors, plot_pred, plot_weights, plot_stats, plot_named_example, plot_serie
@@ -22,11 +22,12 @@ def run(cfg):
     #configs
     data_path = cfg.data.path
     lags, horizon, remove_cte = cfg.task.lags, cfg.task.horizon, cfg.data.remove_cte
-    indiv_split, date_splits, subsets, reshuffle = cfg.data.indiv_split, cfg.data.date_splits, cfg.data.subsets, cfg.data.reshuffle
+    indiv_split, date_splits, subsets, reshuffle, by_idx = cfg.data.indiv_split, cfg.data.date_splits, cfg.data.subsets, cfg.data.reshuffle, cfg.data.by_idx
     batch_size, lr, epochs, criterion_name = cfg.training.bs, cfg.training.lr, cfg.training.epochs, cfg.training.loss
     retrain, init_path = cfg.training.retrain, cfg.training.init
     eval_freq, print_freq = cfg.training.eval_freq, cfg.training.print_freq
     model_name, normalization, kwargs = cfg.model.name, cfg.normalization.name, cfg.model.configs
+    do_clusters, n_clusters = cfg.data.do_clusters, cfg.data.n_clusters
     if kwargs is None:
         kwargs = {}
     verbose, complete_evaluation, seed = cfg.misc.verbose, cfg.misc.complete_evaluation, cfg.misc.seed
@@ -43,9 +44,15 @@ def run(cfg):
         np.random.seed(seed)
 
     #data   
-    by_idx = cfg.data.by_idx
-    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
-    loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=(by_idx=="dates"), subsets=subsets["sizes"], subset_mode=subsets["mode"], save_path=data_path+"subsets/", remove_cte=remove_cte)
+    if do_clusters:
+        loaders_dicts = []
+        for k in range(1,n_clusters+1):
+            data_dict = get_dataset_splits(data_path + f"node{k}/", indiv_split, date_splits, context_by_individuals=True, reshuffle=reshuffle)
+            loaders_dicts.append(get_train_loaders(data_dict, batch_size, lags, horizon, by_date=False))
+        loaders_dict = aggregate_loaders_dict(loaders_dicts)  
+    else:
+        data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+        loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=(by_idx=="dates"), subsets=subsets["sizes"], subset_mode=subsets["mode"], save_path=data_path+"subsets/", remove_cte=remove_cte)
     if verbose:
         logger.info("Fetched dataloaders")
 
@@ -153,7 +160,10 @@ def run(cfg):
             plot_horizon_errors(test_losses2[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test2_horizon_{loss_name}.pdf", f"Test 2 {loss_name} of {save_name} : {mean}")
     
     #examples
-    ex_dir = data_path + "examples/" + f"{lags}_{horizon}/"
+    if do_clusters:
+        ex_dir = data_path+"node0/"+"examples/" + f"{lags}_{horizon}/"
+    else:
+        ex_dir = data_path + "examples/" + f"{lags}_{horizon}/"
     if not os.path.exists(ex_dir):
         set_random_data(data_path, lags, horizon, name="rand")
         plot_named_example(ex_dir, f"rand")

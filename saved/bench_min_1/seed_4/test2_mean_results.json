@@ -1,0 +1,46 @@
+{
+    "PatchTST_instance_NMSE": {
+        "Test MSE": 0.003535525407642126,
+        "Test NMSE": 0.005978953093290329
+    },
+    "PatchTST_revin_NMSE": {
+        "Test MSE": 0.0035290878731757402,
+        "Test NMSE": 0.005968029145151377
+    },
+    "min": {
+        "Test MSE": 0.0035298229195177555,
+        "Test NMSE": 0.00596929294988513
+    },
+    "min_init": {
+        "Test MSE": 0.0032324749045073986,
+        "Test NMSE": 0.005467304959893227
+    },
+    "min_fixed": {
+        "Test MSE": 0.0032325934153050184,
+        "Test NMSE": 0.00546750333160162
+    },
+    "min+revin": {
+        "Test MSE": 0.003523510880768299,
+        "Test NMSE": 0.005958580411970615
+    },
+    "min_init+revin": {
+        "Test MSE": 0.0032258739229291677,
+        "Test NMSE": 0.005456095561385155
+    },
+    "min_fixed+revin": {
+        "Test MSE": 0.003225969150662422,
+        "Test NMSE": 0.005456254351884127
+    },
+    "min+gamma": {
+        "Test MSE": 0.003523510880768299,
+        "Test NMSE": 0.005958580411970615
+    },
+    "min_init+gamma": {
+        "Test MSE": 0.0032258739229291677,
+        "Test NMSE": 0.005456095561385155
+    },
+    "min_fixed+gamma": {
+        "Test MSE": 0.003225969150662422,
+        "Test NMSE": 0.005456254351884127
+    }
+}

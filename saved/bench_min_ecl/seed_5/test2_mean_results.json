@@ -1,0 +1,10 @@
+{
+    "PatchTST_revin_NMSE": {
+        "Test MSE": 323784.28125,
+        "Test NMSE": 0.35647815465927124
+    },
+    "revin_min": {
+        "Test MSE": 323780.65625,
+        "Test NMSE": 0.35647255182266235
+    }
+}

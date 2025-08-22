@@ -50,13 +50,13 @@ def run(cfg):
         fetcher1 = lambda path: fetch_data(path, n1=100, n2=0)
         fetcher2 = lambda path: fetch_data(path, n1=0, n2=100)
        
-        for suffix in ["sim1/", "sim2/", ""]:
+        for suffix in ["node1/", "node2/", ""]:
             path = data_path + suffix
             for suffix in ["plots/", "examples/"]:
                 if not os.path.exists(path+suffix):
                     os.makedirs(path+suffix)
-        build_dataset(fetcher1, data_path + "sim1/")
-        build_dataset(fetcher2, data_path + "sim2/")
+        build_dataset(fetcher1, data_path + "node1/")
+        build_dataset(fetcher2, data_path + "node2/")
     
     def fetch_data_(data_path):
         values, _, _ = load_data(data_path)
@@ -65,7 +65,7 @@ def run(cfg):
 
     #splits
     print("-------")
-    data_dict1 = get_dataset_splits(data_path + "sim1/", indiv_split, date_splits, context_by_individuals=True, reshuffle=reshuffle)
+    data_dict1 = get_dataset_splits(data_path + "node1/", indiv_split, date_splits, context_by_individuals=True, reshuffle=reshuffle)
     loaders_dict1 = get_train_loaders(data_dict1, batch_size, lags, horizon, by_date=False)
     for k,v in loaders_dict1.items():
         if k in ["train","test2"]:
@@ -76,7 +76,7 @@ def run(cfg):
     logger.info(f"Mean betas: {np.mean(betas):.4f}")
 
     print("-------")
-    data_dict2 = get_dataset_splits(data_path + "sim2/", indiv_split, date_splits, context_by_individuals=True, reshuffle=True)
+    data_dict2 = get_dataset_splits(data_path + "node2/", indiv_split, date_splits, context_by_individuals=True, reshuffle=True)
     loaders_dict2 = get_train_loaders(data_dict2, batch_size, lags, horizon, by_date=False)
     for k,v in loaders_dict2.items():
         if k in ["train","test2"]:
@@ -99,7 +99,7 @@ def run(cfg):
 
     #example
     if new_example:
-        for suffix in ["sim1/", "sim2/"]:
+        for suffix in ["node1/", "node2/"]:
             path = data_path + suffix
             logger.info("Setting new example")
             ex_dir = path + "examples/" + f"{lags}_{horizon}/"
@@ -107,13 +107,13 @@ def run(cfg):
             plot_named_example(ex_dir, f"rand")
     
     #plots
-    full_df1 = fetch_data_(data_path + "/sim1/")
-    full_df2 = fetch_data_(data_path + "/sim2/")
+    full_df1 = fetch_data_(data_path + "/node1/")
+    full_df2 = fetch_data_(data_path + "/node2/")
     full_df12 = pd.concat((full_df1, full_df2), axis=1)
     full_dfs = [full_df1, full_df2, full_df12]
     logger.info("Dataframe shapes" + str([df.shape for df in full_dfs]))
     replot=True
-    for ci, suffix in enumerate(["sim1/", "sim2/", ""]):
+    for ci, suffix in enumerate(["node1/", "node2/", ""]):
         if ci in [0,1]:
             continue
         plot_dir = data_path + suffix + "plots/"

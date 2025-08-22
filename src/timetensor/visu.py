@@ -49,118 +49,6 @@ def plot_named_example(path, name):
     plot_example(x[0], y[0], path + f"/{name}/", f"example.pdf", "Example")
 
 
-# def plot_global_stats(values, path="", dim=0):
-#     """plots stats of datasets"""
-#     plt.clf()
-#     fig = plt.figure(figsize=(15,5))
-    
-#     global_mean = values[:, dim, :].mean()
-#     local_means = values[:, dim, :].mean(dim=-1)
-#     plt.hist(local_means, bins=np.logspace(0, 6))
-#     plt.xscale("log")
-#     plt.xlabel("kWh")
-#     plt.ylabel("Counts")        
-#     plt.title(f"Distribution of users means (total avg: {global_mean:.2f} kWh)")
-#     plt.savefig(path + "global_means.pdf")
-
-#     global_std = values[:, dim, :].std()
-#     local_std = values[:, dim, :].std(dim=-1)
-#     plt.hist(local_std, bins=np.logspace(0, 6))
-#     plt.xscale("log")
-#     plt.xlabel("kWh")
-#     plt.ylabel("Counts")        
-#     plt.title(f"Distribution of users std (total avg: {global_std:.2f} kWh)")
-#     plt.savefig(path + "global_stds.pdf")
-#     plt.close()
-
-
-# def plot_stats(values, path="", name="stats.pdf", dim=0, title=None, logscale=True, limits=None):
-#     """plots stats of datasets"""
-#     plt.clf()
-#     fig = plt.figure(figsize=(15,5))
-#     if type(values) is dict:
-#         for split_name, split_values in values.items():
-#             mean_values, total_mean = get_stats(split_values, "mean", dim)
-#             if len(mean_values)>2000:
-#                 idx=random.sample(range(len(mean_values)),1000)
-#                 mean_values = mean_values[idx]
-#             if logscale:
-#                 bins = np.logspace(-3, 3, 100)
-#             else:
-#                 bins = 100
-#             plt.hist(mean_values, bins=bins, range=limits, density=True, alpha=0.5, label= f"{split_name} - mean={total_mean:.2f}")
-#             plt.legend()
-#     else:
-#         if logscale:
-#             bins = np.logspace(-3, 3, 100)
-#         else:
-#             bins = 100
-#         plt.hist(values, bins=bins, range=limits, density=True, alpha=0.5)
-        
-    
-#     if title is None:
-#         plt.title(f"Means distribution")
-#     else:
-#         plt.title(title)
-#     plt.xlabel(f"means")
-#     if logscale:
-#         plt.xscale("log")
-#     plt.ylabel("Density")
-#     plt.savefig(path + name)
-#     plt.close()
-
-
-# def scatter_stats(values_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True):
-#     """plots stats of datasets"""
-#     plt.clf()
-#     fig = plt.figure(figsize=(10,5))
-#     for split_name, split_values in values_dict.items():
-#         std_values, total_std = get_stats(split_values, "std", dim)
-#         mean_values, total_mean = get_stats(split_values, "mean", dim)
-#         if len(mean_values)>2000:
-#             idx=random.sample(range(len(mean_values)),1000)
-#             mean_values, std_values = mean_values[idx], std_values[idx]
-#         plt.scatter(mean_values, std_values, label= f"{split_name} - std={total_std:.2f}, mean={total_mean:.2f}", s=10)
-
-#     plt.legend()
-#     if title is None:
-#         plt.title(f"Distributions")
-#     else:
-#         plt.title(title)
-#     plt.xlabel(f"mean")
-#     if logscale:
-#         plt.xscale("log")
-#         plt.yscale("log")
-#     plt.ylabel("std")
-#     plt.savefig(path + name)
-#     plt.close()
-
-# def scatter_input_output(x_dict, y_dict, path="", name="stats.pdf", dim=0, title=None, logscale=True):
-#     """plots stats of datasets"""
-#     plt.clf()
-#     fig = plt.figure(figsize=(10,5))
-#     for key in x_dict:
-#         xmean_values, xtotal_mean = get_stats(x_dict[key], "mean", dim)
-#         ymean_values, ytotal_mean = get_stats(y_dict[key], "mean", dim)
-
-#         if len(xmean_values)>2000:
-#             idx=random.sample(range(len(xmean_values)),1000)
-#             xmean_values, ymean_values = xmean_values[idx], ymean_values[idx]
-
-#         plt.scatter(xmean_values, ymean_values, label= f"{key} - mean_x={xtotal_mean:.2f}, mean_y={ytotal_mean:.2f}", s=10)
-
-#     plt.legend()
-#     if title is None:
-#         plt.title(f"Output/Input mean distributions")
-#     else:
-#         plt.title(title)
-#     plt.xlabel(f"Input means")
-#     plt.ylabel("Output means")
-#     if logscale:
-#         plt.xscale("log")
-#         plt.yscale("log")
-#     plt.savefig(path + name)
-#     plt.close()
 
 def check_cte_windows(df, lookback, title="Histogram of constant windows", path="", name="cte_windows.pdf", print_idx=False):
     """plots histogram of constand windows per individual"""
@@ -440,7 +328,7 @@ def get_errors_df(dir_name, file_name, multipliers=None, names=None, save=True):
 
 
 
-def get_multiple_errors_df(dir_name, file_name, n_paths, multipliers=None, names=None, baseline=None, save=True):
+def get_multiple_errors_df(dir_name, file_name, n_paths, multipliers=None, names=None, baseline=None, save=False):
     """formats errors json from multipled seeds in dir_name"""
     paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
     dfs = []
@@ -481,7 +369,7 @@ def get_multiple_errors_df(dir_name, file_name, n_paths, multipliers=None, names
     return df_mean, df_std
 
 
-def get_expe_results(dir_name, file_name, multipliers=None, names=None, print_table=True, save_name="errors.pdf"):
+def get_expe_results(dir_name, file_name, multipliers=None, names=None, print_table=True, save_path=None, save_name="errors.pdf"):
     df = get_errors_df(dir_name, file_name, multipliers, names, save=True)
     if print_table:
         table = tabulate(df, headers='keys', tablefmt='grid', showindex=True, floatfmt=".4f")
@@ -494,10 +382,16 @@ def get_expe_results(dir_name, file_name, multipliers=None, names=None, print_ta
     plt.xticks(rotation = 45)
     plt.title("Experiment results")
     plt.tight_layout()
-    plt.savefig(dir_name + save_name)
+
+    if save_path is None:
+        save_path = dir_name+"plots/"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    plt.savefig(save_path + save_name)
     plt.close()
 
-def get_multiple_expe_results(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True, baseline=None, print_table=True, show_row=0, save_name="errors.df"):
+def get_multiple_expe_results(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True, baseline=None, print_table=True, show_row=0, save_path=None,save_name="errors.df"):
     df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
 
     if show_std:
@@ -518,57 +412,17 @@ def get_multiple_expe_results(dir_name, file_name, n_paths, multipliers=None, na
     plt.xticks(rotation = 45)
     plt.title("Experiment results")
     plt.tight_layout()
-    plt.savefig(dir_name + save_name)
+
+    if save_path is None:
+        save_path = dir_name+"plots/"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    plt.savefig(save_path + save_name)
     plt.close()
 
-# def print_nice_tables(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True, baseline=None):
-#     """print table from dataframe in path"""
-#     paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
-#     dfs = []
-#     for path in paths:
-#         with open(path) as file:
-#             data = json.load(file)
-#         df = pd.DataFrame(data)
-#         if names=="None":
-#             names=None
-#         if names is not None:
-#             if type(names)==str:
-#                 names=names.split(";")
-#             df = df[names]
 
-#         if baseline is not None and baseline in df.columns:
-#             df = df.subtract(df[baseline], axis=0)
-#         dfs.append(df)
-
-#     df_mean = pd.concat(dfs).groupby(level=0).mean()
-#     df_std = pd.concat(dfs).groupby(level=0).std()
-
-#     if multipliers is not None:
-#         if type(multipliers) == str:
-#             multipliers = multipliers.split(" ")
-#             multipliers = [int(w) for w in multipliers]
-#         new_index = list(df_mean.index)
-#         for k in range(min(len(multipliers), df_mean.shape[0])):
-#             if multipliers[k] != 0:
-#                 df_mean.iloc[k] = df_mean.iloc[k] * 10**multipliers[k]
-#                 df_std.iloc[k] = df_std.iloc[k] * 10**multipliers[k]
-#                 new_index[k] = new_index[k] + f" * 1e{multipliers[k]}"
-#         df_mean.index = new_index
-#         df_std.index = new_index
-
-#     if show_std:
-#         df_formatted = df_mean.copy()
-#         for col in df_mean.columns:
-#             df_formatted[col] = df_mean[col].map("{:.4f}".format) + " ± " + df_std[col].map("{:.4f}".format)
-#     else:
-#         df_formatted = df_mean.applymap("{:.4f}".format)
-
-#     table = tabulate(df_formatted, headers='keys', tablefmt='grid', showindex=True)
-#     print(f"Table of {file_name}")
-#     print(table)
-
-
-def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", save_path="", save_name="boxplot.pdf", names=None, baseline=None):
+def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", save_path=None, save_name="boxplot.pdf", names=None, baseline=None):
     """print table from dataframe in path"""
     paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
     
@@ -578,21 +432,22 @@ def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", save_path="", sav
             data = json.load(file)
         df = pd.DataFrame(data)
         if names=="None":
-            names=None
+            names=None            
         if names is not None:
+            if type(names)==str:
+                names=names.split(";")
             df = df[names]
-        df = df.loc[col]
         if baseline is not None:
             assert (baseline in df.columns)
             df = df.subtract(df[baseline], axis=0)
-        
+        df = df.loc[col]
         for algo, value in df.items():
             box_df.append({"Algorithm": algo, f"{col}": value, "seed":k})
 
     #df_values = pd.concat(dfs, axis=1)
     #df_long = pd.concat(dfs, axis=1).reset_index().melt(id_vars='index', var_name='Method', value_name=col)
     box_df = pd.DataFrame(box_df)
-
+    
     plt.figure(figsize=(10, 6))
     #plt.boxplot(df_values.values.T, labels=df_values.index)
     sns.boxplot(data=box_df, x='Algorithm', y=col)#, hue="seed")
@@ -602,6 +457,12 @@ def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", save_path="", sav
     plt.xticks(rotation=45)
     plt.grid(True)
     plt.tight_layout()
+
+    if save_path is None:
+        save_path = dir_name+"plots/"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
     plt.savefig(save_path + save_name)
     plt.close()
 

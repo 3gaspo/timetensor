@@ -1,0 +1,27 @@
+.venv/bin/activate: line 44: 0: No space left on device
+Error executing job with overrides: ['misc.seed=1', 'data.reshuffle=True', 'misc.output_dir=../outputs/bench_min_all/seed_1/', 'misc.benchmark=True', 'model=PatchTST', 'normalization=instance', 'training.loss=NMSE', 'training.bs=70', 'training.lr=0.00001', 'training.epochs=1000', 'training.eval_freq=100', 'training.print_freq=100', 'data=sim', 'task.lags=100', 'task.horizon=20']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 168, in run
+    set_random_data(data_path, lags, horizon, name="rand")
+  File "/home/h61084/codes/timetensor/src/timetensor/utils.py", line 57, in set_random_data
+    values, context, datetimes = load_data(path, prefix)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 225, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/sim/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-a100: task 0: Exited with exit code 1
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** JOB 8200 ON dgx-a100 CANCELLED AT 2025-08-22T16:09:55 ***
+slurmstepd: error: *** STEP 8200.1 ON dgx-a100 CANCELLED AT 2025-08-22T16:09:55 ***
