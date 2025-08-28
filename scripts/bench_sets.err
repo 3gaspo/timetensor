@@ -1,0 +1,2193 @@
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/traffic/336_48/seed_1/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/traffic/336_48/seed_1/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/traffic/336_48/seed_2/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/traffic/336_48/seed_2/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/traffic/336_48/seed_3/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/traffic/336_48/seed_3/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/traffic/336_48/seed_4/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/traffic/336_48/seed_4/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/traffic/336_48/seed_5/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/traffic/336_48/seed_5/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/336_48/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/336_48/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/336_48/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/336_48/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/traffic/336_96/seed_1/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=96', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/traffic/336_96/seed_1/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=96', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/traffic/336_96/seed_2/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=96', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/traffic/336_96/seed_2/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=96', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/traffic/336_96/seed_3/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=96', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/traffic/336_96/seed_3/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=96', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/traffic/336_96/seed_4/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=96', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/traffic/336_96/seed_4/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=96', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/traffic/336_96/seed_5/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=96', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/traffic/336_96/seed_5/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=96', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+srun: Step created for StepId=8394.109
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/336_96/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/336_96/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/336_96/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/336_96/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/traffic/168_24/seed_1/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=24', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/traffic/168_24/seed_1/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=24', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/traffic/168_24/seed_2/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=24', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/traffic/168_24/seed_2/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=24', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/traffic/168_24/seed_3/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=24', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/traffic/168_24/seed_3/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=24', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/traffic/168_24/seed_4/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=24', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/traffic/168_24/seed_4/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=24', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/traffic/168_24/seed_5/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=24', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/traffic/168_24/seed_5/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=24', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/168_24/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/168_24/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/168_24/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/168_24/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/traffic/168_48/seed_1/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/traffic/168_48/seed_1/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/traffic/168_48/seed_2/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/traffic/168_48/seed_2/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/traffic/168_48/seed_3/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/traffic/168_48/seed_3/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/traffic/168_48/seed_4/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/traffic/168_48/seed_4/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/traffic/168_48/seed_5/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/traffic/168_48/seed_5/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=traffic', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/traffic/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/168_48/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/168_48/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/168_48/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/traffic/168_48/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/etth/336_48/seed_1/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/etth/336_48/seed_1/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/etth/336_48/seed_2/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/etth/336_48/seed_2/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/etth/336_48/seed_3/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/etth/336_48/seed_3/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/etth/336_48/seed_4/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/etth/336_48/seed_4/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/etth/336_48/seed_5/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/etth/336_48/seed_5/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/336_48/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/336_48/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/336_48/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/336_48/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/etth/336_96/seed_1/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=96', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/etth/336_96/seed_1/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=96', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/etth/336_96/seed_2/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=96', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/etth/336_96/seed_2/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=96', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/etth/336_96/seed_3/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=96', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/etth/336_96/seed_3/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=96', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/etth/336_96/seed_4/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=96', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/etth/336_96/seed_4/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=96', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/etth/336_96/seed_5/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=336', 'task.horizon=96', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/etth/336_96/seed_5/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=336', 'task.horizon=96', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/336_96/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/336_96/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/336_96/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/336_96/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/etth/168_24/seed_1/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=24', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/etth/168_24/seed_1/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=24', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/etth/168_24/seed_2/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=24', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/etth/168_24/seed_2/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=24', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/etth/168_24/seed_3/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=24', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/etth/168_24/seed_3/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=24', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/etth/168_24/seed_4/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=24', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/etth/168_24/seed_4/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=24', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/etth/168_24/seed_5/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=24', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/etth/168_24/seed_5/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=24', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/168_24/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/168_24/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/168_24/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/168_24/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/etth/168_48/seed_1/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=1', 'misc.output_dir=../outputs/bench_sets/etth/168_48/seed_1/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/etth/168_48/seed_2/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=2', 'misc.output_dir=../outputs/bench_sets/etth/168_48/seed_2/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/etth/168_48/seed_3/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=3', 'misc.output_dir=../outputs/bench_sets/etth/168_48/seed_3/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/etth/168_48/seed_4/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=4', 'misc.output_dir=../outputs/bench_sets/etth/168_48/seed_4/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/etth/168_48/seed_5/', 'normalization=revin', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'task.lags=168', 'task.horizon=48', 'misc.save_name=revin']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Error executing job with overrides: ['model=PatchTST', 'misc.seed=5', 'misc.output_dir=../outputs/bench_sets/etth/168_48/seed_5/', 'normalization=mIN', 'training.loss=NMSE', 'misc.benchmark=True', 'training.bs=256', 'training.lr=0.00001', 'training.epochs=2000', 'training.eval_freq=100', 'training.print_freq=100', 'data=etth', 'data.reshuffle=True', 'normalization.configs.use_gamma=True', 'normalization.configs.inverse_gamma=False', 'task.lags=168', 'task.horizon=48', 'misc.save_name=min']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_model.py", line 54, in run
+    data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 464, in get_dataset_splits
+    values, context, datetimes = load_data(data_path) #load dataset
+                                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/dataset.py", line 228, in load_data
+    values = torch.load(path + prefix + "values.pt")#, weights_only=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 1479, in load
+    with _open_file_like(f, "rb") as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 759, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/serialization.py", line 740, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../datasets/etth/values.pt'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/168_48/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 395, in get_multiple_expe_results
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 336, in get_multiple_errors_df
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/168_48/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/168_48/seed_1/test1_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 431, in get_boxplots
+    with open(path) as file:
+         ^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/bench_sets/etth/168_48/seed_1/test2_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1

@@ -6,6 +6,7 @@ from .sota.dlinear import DLinear
 from .utils import get_normal_stats
 from sklearn.linear_model import LinearRegression
 
+#TODO: un module qui renvoie une constante quand il y a une constante en entrée, plutot que l'output du modele
 
 class DefaultNorm(nn.Module):
     def __init__(self, model, latent=False):

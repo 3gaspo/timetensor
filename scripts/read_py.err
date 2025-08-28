@@ -1,0 +1,14 @@
+/home/h61084/codes/timetensor/src/timetensor/dataset.py:224: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  df = pd.read_csv(data_path + data_name + ".csv", index_col=0, parse_dates=True)
+/home/h61084/codes/timetensor/src/timetensor/dataset.py:224: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  df = pd.read_csv(data_path + data_name + ".csv", index_col=0, parse_dates=True)
+/home/h61084/codes/timetensor/src/timetensor/dataset.py:224: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  df = pd.read_csv(data_path + data_name + ".csv", index_col=0, parse_dates=True)
+/home/h61084/codes/timetensor/src/timetensor/dataset.py:224: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  df = pd.read_csv(data_path + data_name + ".csv", index_col=0, parse_dates=True)
+/home/h61084/codes/timetensor/src/timetensor/dataset.py:224: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  df = pd.read_csv(data_path + data_name + ".csv", index_col=0, parse_dates=True)
+/home/h61084/codes/timetensor/src/timetensor/dataset.py:224: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  df = pd.read_csv(data_path + data_name + ".csv", index_col=0, parse_dates=True)
+/home/h61084/codes/timetensor/src/timetensor/dataset.py:224: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  df = pd.read_csv(data_path + data_name + ".csv", index_col=0, parse_dates=True)

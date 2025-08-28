@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import torch
+import os
 
 ## data generation
 
@@ -43,47 +44,73 @@ class cluster:
         return user(**user_dict)
 
 class bipartite_population:
-  def __init__(self, cluster1, cluster2, n_cluster1, n_cluster2):
-    self.n_cluster1 = n_cluster1
-    self.n_cluster2 = n_cluster2
-    self.cluster1 = cluster1
-    self.cluster2 = cluster2
-    self.build_population()
+    def __init__(self, cluster1, cluster2, n_cluster1, n_cluster2, r_mix1, r_mix2):
+        self.n_cluster1, self.n_cluster2 = n_cluster1, n_cluster2
+        self.r_mix1, self.r_mix2 = r_mix1, r_mix2
+        self.n_cluster1_out = int(self.r_mix1 * self.n_cluster1)
+        self.n_cluster2_out = int(self.r_mix2 * self.n_cluster2)
+        self.n_cluster1_in = self.n_cluster1 - self.n_cluster1_out
+        self.n_cluster2_in = self.n_cluster2 - self.n_cluster2_out
+        self.cluster1 = cluster1
+        self.cluster2 = cluster2
+        self.build_population()
 
-  def build_population(self):
-    users = {"cluster1": [], "cluster2": []}
-    for i in range(self.n_cluster1):
-      users["cluster1"].append(self.cluster1.get_user())
-    for i in range(self.n_cluster2):
-      users["cluster2"].append(self.cluster2.get_user())
-    self.users = users
+    def build_population(self):
+        users = {"cluster1": [], "cluster2": []}
+        for _ in range(self.n_cluster1_in):
+            users["cluster1"].append(self.cluster1.get_user())
+        for _ in range(self.n_cluster1_out):
+            users["cluster1"].append(self.cluster2.get_user())
+        for _ in range(self.n_cluster2_in):
+            users["cluster2"].append(self.cluster2.get_user())
+        for _ in range(self.n_cluster2_out):
+            users["cluster2"].append(self.cluster1.get_user())
+        self.users = users
 
-  def get_dataset(self, dates):
-    """returns dataset of size (n_cluster1 + n_cluster2) x T """
-    T = np.linspace(0, dates, dates)
-    data = np.array([user.get_data(T) for user in self.users["cluster1"]] + [user.get_data(T) for user in self.users["cluster2"]])
-    df = pd.DataFrame(data.T)
-    df.columns = range(df.shape[1])
-    return df
+    def get_dataset(self, dates):
+        """returns dataset of size (n_cluster1 + n_cluster2) x T """
+        T = np.linspace(0, dates, dates)
+        data = np.array([user.get_data(T) for user in self.users["cluster1"]] + [user.get_data(T) for user in self.users["cluster2"]])
+        df = pd.DataFrame(data.T)
+        df.columns = range(df.shape[1])
+        return df
 
 
-def fetch_data(path, raw_format=None, drop=None, n1=100, n2=100, dates=2000, return_df=False):
-   
-    cluster1 = cluster(
-        cluster_centroid = {"period":10, "offset":10, "shift":1e-2, "std":5e-2},
-        cluster_std = {"period":0,"offset":1, "shift":0, "std":0})
+def build_dataset(data_path, clusters=None, n1=100, n2=100, r1=0, r2=0, dates=2000, output_format="torch"):
+    """builds a synthetic dataset of two clusters.
+    r1 : proportion of users from cluster2 in cluster1
+    """
+    if clusters is None:
+        cluster1 = cluster(
+            cluster_centroid = {"period":10, "offset":10, "shift":1e-2, "std":5e-2},
+            cluster_std = {"period":0,"offset":1, "shift":0, "std":0})
 
-    cluster2 = cluster(
-        cluster_centroid = {"period":10, "offset":100, "shift":-1e-2, "std":5e-2},
-        cluster_std = {"period":0,"offset":10, "shift":0, "std":0})
+        cluster2 = cluster(
+            cluster_centroid = {"period":10, "offset":100, "shift":-1e-2, "std":5e-2},
+            cluster_std = {"period":0,"offset":10, "shift":0, "std":0})
+        clusters = [cluster1, cluster2]
 
-    population = bipartite_population(cluster1, cluster2, n1, n2)
-    df = population.get_dataset(dates)
-    if return_df:
-       return df
-    
-    values = torch.tensor(df.values.T, dtype=torch.float32).unsqueeze(1)
-    context =  torch.tensor([0 for _ in range(n1)] + [1 for _ in range(n2)]).unsqueeze(dim=1).unsqueeze(dim=1).repeat(1, 1, dates)
-    datetimes = list(range(dates))
-    
-    return values, context, datetimes
+    population = bipartite_population(cluster1, cluster2, n1, n2, r1, r2)    
+    values_df = population.get_dataset(dates)
+    values_df.to_csv(data_path + "synthetic.csv")
+    datetimes = list(values_df.index)
+    #tensors
+    context_pt =  torch.tensor([0 for _ in range(n1)] + [1 for _ in range(n2)]).unsqueeze(dim=1).unsqueeze(dim=1).repeat(1, 1, dates)
+    values_pt = torch.tensor(values_df.values.T, dtype=torch.float32).unsqueeze(1)
+    #save
+    torch.save(values_pt, data_path + "values.pt")
+    torch.save(context_pt, data_path + "context.pt")
+    torch.save(datetimes, data_path+ "datetimes.pt")
+    if not os.path.exists(data_path + "clusters/"):
+        os.makedirs(data_path + "clusters/")
+    torch.save(list(range(0,100)), data_path + "clusters/" + "node0.pt")
+    torch.save(list(range(100,200)), data_path + "clusters/" + "node1.pt")
+
+    #output
+    if output_format == "csv":
+        context_df = pd.DataFrame(context_pt.squeeze(1).transpose(1,0), index=datetimes)
+        return values_df, context_df, datetimes
+    elif output_format == "torch":
+        return values_pt, context_pt, datetimes
+    else:
+        raise ValueError("Unsupported output format")

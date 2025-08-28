@@ -1,0 +1,19 @@
+dataset: sim_mix2
+path: ../datasets/sim/mix_0.2/node2/
+
+indiv_split: 0.7 
+date_splits: 0.5;0.3;0.2
+by_idx: individuals
+context_by_individuals: True
+reshuffle: False
+n_clusters: 1
+remove_cte: True
+do_clusters: False
+mix: 0
+
+subsets:
+  mode: dates
+  sizes: 1;1;1;1;1;1
+
+mean: 560
+std: 330

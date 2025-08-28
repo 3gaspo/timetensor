@@ -25,59 +25,59 @@ for seed in 1 2 3 4 5
 do
     output_dir="${main_output_dir}seed_$seed/"
     
-    # normalization=revin
-    # srun python3 train_model.py \
-    #     "model=${model_name}" \
-    #     "misc.seed=$seed" \
-    #     "misc.output_dir=$output_dir" \
-    #     "normalization=$normalization" \
-    #     "training.loss=$loss" \
-    #     "misc.benchmark=True" \
-    #     "training.bs=$bs" \
-    #     "training.lr=$lr" \
-    #     "training.epochs=$epochs" \
-    #     "training.eval_freq=$eval_freq" \
-    #     "training.print_freq=100" \
-    #     "data=$data" \
-    #     "data.reshuffle=True"
+    normalization=revin
+    srun python3 train_model.py \
+        "model=${model_name}" \
+        "misc.seed=$seed" \
+        "misc.output_dir=$output_dir" \
+        "normalization=$normalization" \
+        "training.loss=$loss" \
+        "misc.benchmark=True" \
+        "training.bs=$bs" \
+        "training.lr=$lr" \
+        "training.epochs=$epochs" \
+        "training.eval_freq=$eval_freq" \
+        "training.print_freq=100" \
+        "data=$data" \
+        "data.reshuffle=True"
 
-    # normalization=mIN
-    # srun python3 train_model.py \
-    #     "model=${model_name}" \
-    #     "misc.seed=$seed" \
-    #     "misc.output_dir=$output_dir" \
-    #     "normalization=$normalization" \
-    #     "training.loss=$loss" \
-    #     "misc.benchmark=True" \
-    #     "training.bs=$bs" \
-    #     "training.lr=$lr" \
-    #     "training.epochs=$epochs" \
-    #     "training.eval_freq=$eval_freq" \
-    #     "training.print_freq=100" \
-    #     "data=$data" \
-    #     "data.reshuffle=True" \
-    #     "normalization.configs.use_gamma=False" \
-    #     "normalization.configs.inverse_gamma=False" \
-    #     "misc.save_name=revin_min"
+    normalization=mIN
+    srun python3 train_model.py \
+        "model=${model_name}" \
+        "misc.seed=$seed" \
+        "misc.output_dir=$output_dir" \
+        "normalization=$normalization" \
+        "training.loss=$loss" \
+        "misc.benchmark=True" \
+        "training.bs=$bs" \
+        "training.lr=$lr" \
+        "training.epochs=$epochs" \
+        "training.eval_freq=$eval_freq" \
+        "training.print_freq=100" \
+        "data=$data" \
+        "data.reshuffle=True" \
+        "normalization.configs.use_gamma=False" \
+        "normalization.configs.inverse_gamma=False" \
+        "misc.save_name=revin_min"
 
-    # normalization=mIN
-    # srun python3 train_model.py \
-    #     "model=${model_name}" \
-    #     "misc.seed=$seed" \
-    #     "misc.output_dir=$output_dir" \
-    #     "normalization=$normalization" \
-    #     "training.loss=$loss" \
-    #     "misc.benchmark=True" \
-    #     "training.bs=$bs" \
-    #     "training.lr=$lr" \
-    #     "training.epochs=$epochs" \
-    #     "training.eval_freq=$eval_freq" \
-    #     "training.print_freq=100" \
-    #     "data=$data" \
-    #     "data.reshuffle=True" \
-    #     "normalization.configs.use_gamma=True" \
-    #     "normalization.configs.inverse_gamma=True" \
-    #     "misc.save_name=revin_min"
+    normalization=mIN
+    srun python3 train_model.py \
+        "model=${model_name}" \
+        "misc.seed=$seed" \
+        "misc.output_dir=$output_dir" \
+        "normalization=$normalization" \
+        "training.loss=$loss" \
+        "misc.benchmark=True" \
+        "training.bs=$bs" \
+        "training.lr=$lr" \
+        "training.epochs=$epochs" \
+        "training.eval_freq=$eval_freq" \
+        "training.print_freq=100" \
+        "data=$data" \
+        "data.reshuffle=True" \
+        "normalization.configs.use_gamma=True" \
+        "normalization.configs.inverse_gamma=True" \
+        "misc.save_name=revin_min"
 
     srun python3 -c "from src.timetensor.visu import plot_expe;plot_expe('$output_dir', $eval_freq)"
 

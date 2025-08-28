@@ -11,7 +11,7 @@ main_output_dir="../outputs/bench_min_1/"
 rm -rf "$main_output_dir"
 mkdir -p "$main_output_dir"
 
-data=sim1
+data=syn1
 seed=1
 
 model_name=PatchTST
@@ -46,7 +46,6 @@ do
     done
 
     normalization=mIN
-
     #min
     #default
     alpha=1.0
@@ -76,7 +75,7 @@ do
         "normalization.configs.fixed_beta=$fixed_beta" \
         "normalization.configs.fixed_alpha=$fixed_alpha " \
         "normalization.configs.use_gamma=$use_gamma" \
-        "normalization.configs.inverse_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
         "misc.save_name=min"
 
     #init
@@ -107,7 +106,7 @@ do
         "normalization.configs.fixed_beta=$fixed_beta" \
         "normalization.configs.fixed_alpha=$fixed_alpha " \
         "normalization.configs.use_gamma=$use_gamma" \
-        "normalization.configs.inverse_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
         "misc.save_name=min_init"
 
     #fixed
@@ -138,7 +137,7 @@ do
         "normalization.configs.fixed_beta=$fixed_beta" \
         "normalization.configs.fixed_alpha=$fixed_alpha " \
         "normalization.configs.use_gamma=$use_gamma" \
-        "normalization.configs.inverse_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
         "misc.save_name=min_fixed"
 
     #min + revin
@@ -170,7 +169,7 @@ do
         "normalization.configs.fixed_beta=$fixed_beta" \
         "normalization.configs.fixed_alpha=$fixed_alpha " \
         "normalization.configs.use_gamma=$use_gamma" \
-        "normalization.configs.inverse_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
         "misc.save_name=min+revin"
 
     #init
@@ -201,7 +200,7 @@ do
         "normalization.configs.fixed_beta=$fixed_beta" \
         "normalization.configs.fixed_alpha=$fixed_alpha " \
         "normalization.configs.use_gamma=$use_gamma" \
-        "normalization.configs.inverse_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
         "misc.save_name=min_init+revin"
 
     #fixed
@@ -232,7 +231,7 @@ do
         "normalization.configs.fixed_beta=$fixed_beta" \
         "normalization.configs.fixed_alpha=$fixed_alpha " \
         "normalization.configs.use_gamma=$use_gamma" \
-        "normalization.configs.inverse_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
         "misc.save_name=min_fixed+revin"
 
 
@@ -265,7 +264,7 @@ do
         "normalization.configs.fixed_beta=$fixed_beta" \
         "normalization.configs.fixed_alpha=$fixed_alpha " \
         "normalization.configs.use_gamma=$use_gamma" \
-        "normalization.configs.inverse_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
         "misc.save_name=min+gamma"
 
     #init
@@ -296,7 +295,7 @@ do
         "normalization.configs.fixed_beta=$fixed_beta" \
         "normalization.configs.fixed_alpha=$fixed_alpha " \
         "normalization.configs.use_gamma=$use_gamma" \
-        "normalization.configs.inverse_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
         "misc.save_name=min_init+gamma"
 
     #fixed
@@ -327,14 +326,14 @@ do
         "normalization.configs.fixed_beta=$fixed_beta" \
         "normalization.configs.fixed_alpha=$fixed_alpha " \
         "normalization.configs.use_gamma=$use_gamma" \
-        "normalization.configs.inverse_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
         "misc.save_name=min_fixed+gamma"
 
     srun python3 -c "from src.timetensor.visu import plot_expe;plot_expe('$output_dir', $eval_freq)"
 done
 
 multipliers="3 3 4 6"
+srun python3 -c "from src.timetensor.visu import get_boxplots;get_boxplots('$main_output_dir', 'test1_mean_results.json', 5, 'Test MSE', 'test1_boxplot.pdf')"
+srun python3 -c "from src.timetensor.visu import get_boxplots;get_boxplots('$main_output_dir', 'test2_mean_results.json', 5, 'Test MSE', 'test2_boxplot.pdf')"
 srun python3 -c "from src.timetensor.visu import get_multiple_expe_results;get_multiple_expe_results('${main_output_dir}', 'test1_mean_results.json', 5, multipliers='$multipliers', baseline='PatchTST_revin', save_name='errors1.pdf')"
 srun python3 -c "from src.timetensor.visu import get_multiple_expe_results;get_multiple_expe_results('${main_output_dir}', 'test2_mean_results.json', 5, multipliers='$multipliers', baseline='PatchTST_revin', save_name='errors2.pdf')"
-srun python3 -c "from src.timetensor.visu import get_boxplots;get_boxplots('$main_output_dir', 'test1_mean_results.json', 5, 'Test MSE', '$main_output_dir', 'test1_boxplot.pdf')"
-srun python3 -c "from src.timetensor.visu import get_boxplots;get_boxplots('$main_output_dir', 'test2_mean_results.json', 5, 'Test MSE', '$main_output_dir', 'test2_boxplot.pdf')"

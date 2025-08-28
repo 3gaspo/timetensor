@@ -1,19 +1,19 @@
 dataset: electricity
 path: ../datasets/electricity/
 
+type: csv
+drop_users: True
+clusters:
+n_clusters: 2
+context_cols:
+
 indiv_split: 0.7 
 date_splits: 0.5;0.3;0.2
 by_idx: individuals
+context_by_individuals: True
 reshuffle: False
-n_clusters: 3
 remove_cte: True
-do_clusters: False
 
 subsets:
   mode: dates
   sizes: 1;1;1;1;1;1
-
-nodes: ../datasets/electricity/nodes/
-
-mean: 2500
-std: 15000

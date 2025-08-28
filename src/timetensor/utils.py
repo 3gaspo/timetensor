@@ -3,8 +3,8 @@ import torch
 import os
 import json
 import hydra
+import pandas as pd
 
-from .dataset import load_example, load_data
 
 def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_name=None, subsets=None):
     
@@ -50,44 +50,6 @@ def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_na
 #     features.append(np.sin((2*np.pi / 365) * posan)) # sin
 
 #     return features
-
-
-def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_by_individuals=True, prefix=""):
-    """gets a random individual and random window from dataset"""
-    values, context, datetimes = load_data(path, prefix)
-
-    individuals, dim, dates = values.shape
-    rand_indiv = np.random.randint(individuals)
-    rand_date = np.random.randint(dates - (lag + horizon))
-
-    inputs = values[rand_indiv, :, rand_date : rand_date+lag]
-    target = values[rand_indiv, :, rand_date+lag : rand_date+lag+horizon]
-    if context is not None:
-        if context_by_individuals:
-            context = context[rand_indiv, :, rand_date : rand_date+lag+horizon]
-        else:
-            context = context[:, :, rand_date : rand_date+lag+horizon]
-    
-    ex_dir = path + "examples/" + f"{lag}_{horizon}/" + name + "/"
-    if not os.path.exists(ex_dir):
-        os.makedirs(ex_dir)
-    torch.save(inputs, ex_dir + "input.pt")
-    if context is not None:
-        torch.save(context, ex_dir + "context.pt")
-    torch.save(target, ex_dir + "target.pt")
-    torch.save((rand_indiv, datetimes[rand_date]), ex_dir + "indivdate.pt")
-
-
-def fetch_example_data(path="datasets/examples/", names=None):
-    """fetches example data"""
-    if names is None:
-        names = [name for name in os.listdir(path)]
-    elif type(names) == str:
-        return load_example(path + names + "/")
-    dico = {}
-    for name in names:
-        dico[name] = load_example(path + name + "/")
-    return dico
 
 
 
@@ -196,3 +158,10 @@ def append_in_dict(dico1, dico2):
             dico1[key].append(value)
 
 
+def filter_dict(dico, keys):
+    return {key: dico[key] for key in keys}
+
+def filter_df(df, mask):
+    clean_df = df.copy()
+    clean_df[mask] = pd.NA
+    return clean_df

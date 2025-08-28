@@ -1,12 +1,14 @@
 import numpy as np
 from tqdm import tqdm
-from scipy.spatial.distance import cosine
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import json
 
 from scipy.cluster.hierarchy import fcluster
+from scipy.spatial.distance import cosine
 
+from .utils import filter_df
 
 def get_gammas(data, lookback, horizon, eps=1e-6):
     """compute alpha and beta series. data must be pandas dataframe"""
@@ -175,8 +177,44 @@ def plot_heterogeneity(df, show=False, path="", name="heterogeneity.pdf"):
     plt.close()
 
 
+def identify_cte(df, lookback, save=True, path="", logger=None):
+    users = df.shape[1]
+    stds = df.rolling(window=lookback).std()
 
-def plot_gamma(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, horizon=48, samples=1000, title=None, remove_cte=True):
+    #counts
+    cte_idxs = np.where(stds==0)
+    counts = {}
+    i = 0
+    for user in range(users):
+        if user in cte_idxs[0]:
+            if counts.get(user) is None:
+                counts[users] = 0
+            counts[user] += cte_idxs[1][i]
+            i+=1
+
+    #plots
+    if len(counts)>0:
+        if logger is not None:
+            logger.info("Found constant windows!")
+        if len(counts)<=10:
+            if logger is not None:
+                 logger.info(counts)
+        else:
+            if save:
+                plt.clf()
+                fig = plt.figure(figsize=(10,5))
+                plt.hist(np.log(list(counts.values())), bins=100)
+                plt.yscale("log")
+                plt.title("Constant windows per individual")
+                plt.xlabel("Individuals")
+                plt.ylabel("Constant windows counts")
+                plt.savefig(path + "constants_hist.pdf")
+                plt.close()
+    
+    mask = stds==0
+    return mask
+
+def plot_gamma(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, horizon=48, samples=1000, title=None, remove_cte=True, log=False):
     """plots means and stds. data must be pandas dataframe or dict of df"""
     if type(data) != dict:
         data = {"data":data}
@@ -184,11 +222,14 @@ def plot_gamma(data, path="", name="stats.pdf", show=False, per_user=True, lookb
     keys, alpha_means_list, beta_means_list = [], [], []
     for key, df in data.items():
         alphas, betas = get_gammas(df, lookback, horizon)
-
         if per_user:
-            alpha_means = alphas.median(axis=0)
-            beta_means = betas.median(axis=0)
-            stds = df.std(axis=0)
+            clean_alphas, clean_betas = alphas.copy(), betas.copy()
+            if remove_cte:
+                cte_mask = identify_cte(df.iloc[lookback:horizon], lookback, save=False)
+                clean_alphas[cte_mask] = pd.NA
+                clean_betas[cte_mask] = pd.NA
+            alpha_means = clean_alphas.mean(axis=0)
+            beta_means = clean_betas.mean(axis=0)
         else:
             alpha_means = alphas.stack()
             beta_means = betas.stack()
@@ -197,14 +238,15 @@ def plot_gamma(data, path="", name="stats.pdf", show=False, per_user=True, lookb
             alpha_means = alpha_means.iloc[sampled_idx]
             beta_means = beta_means.iloc[sampled_idx]
             stds = stds.iloc[sampled_idx]
+            if remove_cte:
+                keep_idx = np.where(stds>0)[0]
+                alpha_means, beta_means = alpha_means.iloc[keep_idx], beta_means.iloc[keep_idx]
 
-        if remove_cte:
-            keep_idx = np.where(stds>0)[0]
-            keys += [key + f" (alpha: {alpha_means.iloc[keep_idx].median():.2f} | beta: {beta_means.iloc[keep_idx].median():.2f})" for k in range(len(keep_idx))]
-            alpha_means_list += alpha_means.iloc[keep_idx].tolist()
-            beta_means_list += beta_means.iloc[keep_idx].tolist()
+        keys += [key + f" (alpha: {alpha_means.mean():.2f} | beta: {beta_means.mean():.2f})" for _ in range(len(alpha_means))]
+        if log:
+            alpha_means_list += np.log(np.where(alpha_means>0, alpha_means, 1e-8)).tolist()
+            beta_means_list += np.log(np.where(beta_means>0, beta_means, 1e-8)).tolist()
         else:
-            keys += [key + f" (alpha: {alpha_means.median():.2f} | beta: {beta_means.median():.2f})" for k in range(len(alpha_means))]
             alpha_means_list += alpha_means.tolist()
             beta_means_list += beta_means.tolist()
 
@@ -235,3 +277,51 @@ def plot_gamma(data, path="", name="stats.pdf", show=False, per_user=True, lookb
     else:
         plt.savefig(path+name)
     plt.close()
+
+
+def get_dataset_stats(df, df_dict, lags, horizon, remove_cte=True, logger=None, save_path="", save_name="stats.json"):
+    """produces and dictionary of dataset stats (raw and splits)"""
+    alphas, betas = get_gammas(df, lags, horizon)
+    gammas_dict = {key: get_gammas(df_dict[key], lags, horizon) for key in df_dict}
+        
+    if remove_cte:
+        cte_mask = identify_cte(df, lags, save=False)
+        clean_df, clean_alphas, clean_betas = filter_df(df, cte_mask), filter_df(alphas, cte_mask), filter_df(betas, cte_mask)
+    else:
+        clean_df, clean_alphas, clean_betas = df.copy(), alphas.copy(), betas.copy()
+    
+    stats_dict = {"total":{
+        "mean": float(np.nanmean(clean_df.values)),
+        "stds": float(np.nanmean(np.nanstd(clean_df.values, axis=1))),
+        "std": float(np.nanstd(clean_df.values)),
+        "alpha": float(np.nanmean(clean_alphas)),
+        "beta": float(np.nanmean(clean_betas))
+    }}
+
+    for key in df_dict:
+        split_df, split_alphas, split_betas = df_dict[key], gammas_dict[key][0], gammas_dict[key][1]
+        if remove_cte:
+            cte_mask = identify_cte(df_dict[key], lags, save=False)
+            clean_df, clean_alphas, clean_betas = filter_df(split_df, cte_mask), filter_df(split_alphas, cte_mask), filter_df(split_betas, cte_mask)
+        else:
+            clean_df, clean_alphas, clean_betas = split_df.copy(), split_alphas.copy(), split_betas.copy()
+        stats_dict[key] = {
+            "mean": float(np.nanmean(clean_df.values)),
+            "stds": float(np.nanmean(np.nanstd(clean_df.values, axis=1))),
+            "std": float(np.nanstd(clean_df.values)),
+            "alpha": float(np.nanmean(clean_alphas)),
+            "beta": float(np.nanmean(clean_betas))
+        }
+
+    if logger is not None:
+        logger.info("Saved stats")
+        for key in ["train", "test1", "test2"]:
+            stats_str = "\n".join(f"{k}"+"\t"+f"{v:.4f}" for k, v in stats_dict[key].items())
+            logger.info(f"{key} stats:\n{stats_str}")
+    
+    with open(save_path+save_name, "w") as file:
+        json.dump(stats_dict, file, indent=4)
+    
+    return stats_dict
+    
+    

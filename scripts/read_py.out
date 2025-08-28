@@ -1,0 +1,171 @@
+[2025-08-28 18:28:52,945][__main__][INFO] - =====Running data script=====
+[2025-08-28 18:28:52,949][__main__][INFO] - Fetched configs
+[2025-08-28 18:28:53,121][__main__][INFO] - Fetched dataloaders
+[2025-08-28 18:28:53,122][__main__][INFO] - Splits shapes:
+train	((140, 1, 1000), (140, 1, 1000))
+valid1	((140, 1, 600), (140, 1, 600))
+valid2	((60, 1, 1000), (60, 1, 1000))
+valid3	((60, 1, 600), (60, 1, 600))
+test1	((140, 1, 400), (140, 1, 400))
+test2	((60, 1, 400), (60, 1, 400))
+[2025-08-28 18:28:53,122][__main__][INFO] - Batches: 5 * (X=[28, 1, 100], c=[28, 1, 120], y=[28, 1, 20])
+[2025-08-28 18:28:53,539][__main__][INFO] - Saved stats
+[2025-08-28 18:28:53,539][__main__][INFO] - train stats:
+mean	54.9150
+stds	40.6680
+std	40.7730
+alpha	0.9483
+beta	-0.0001
+[2025-08-28 18:28:53,539][__main__][INFO] - test1 stats:
+mean	54.9154
+stds	27.9922
+std	28.0232
+alpha	0.9483
+beta	0.0004
+[2025-08-28 18:28:53,539][__main__][INFO] - test2 stats:
+mean	54.1697
+stds	27.1669
+std	27.1984
+alpha	0.9487
+beta	-0.0001
+[2025-08-28 18:28:53,946][__main__][INFO] - Saved stats
+[2025-08-28 18:28:53,947][__main__][INFO] - train stats:
+mean	54.9150
+stds	40.6680
+std	40.7730
+alpha	0.9483
+beta	-0.0001
+[2025-08-28 18:28:53,947][__main__][INFO] - test1 stats:
+mean	54.9154
+stds	27.9922
+std	28.0232
+alpha	0.9483
+beta	0.0004
+[2025-08-28 18:28:53,947][__main__][INFO] - test2 stats:
+mean	54.1697
+stds	27.1669
+std	27.1984
+alpha	0.9487
+beta	-0.0001
+[2025-08-28 18:28:54,221][__main__][INFO] - Saved stats
+[2025-08-28 18:28:54,221][__main__][INFO] - train stats:
+mean	14.9628
+stds	0.9489
+std	3.1164
+alpha	0.9482
+beta	0.7805
+[2025-08-28 18:28:54,221][__main__][INFO] - test1 stats:
+mean	27.9700
+stds	0.9491
+std	1.6444
+alpha	0.9483
+beta	0.7811
+[2025-08-28 18:28:54,221][__main__][INFO] - test2 stats:
+mean	28.2323
+stds	0.9600
+std	1.6509
+alpha	0.9483
+beta	0.7802
+[2025-08-28 18:28:54,376][__main__][INFO] - Saved stats
+[2025-08-28 18:28:54,376][__main__][INFO] - train stats:
+mean	94.8672
+stds	10.6740
+std	11.0818
+alpha	0.9484
+beta	-0.7806
+[2025-08-28 18:28:54,377][__main__][INFO] - test1 stats:
+mean	81.8608
+stds	10.6736
+std	10.7606
+alpha	0.9482
+beta	-0.7803
+[2025-08-28 18:28:54,377][__main__][INFO] - test2 stats:
+mean	80.1070
+stds	11.3764
+std	11.4581
+alpha	0.9491
+beta	-0.7805
+[2025-08-28 18:29:00,206][__main__][INFO] - ==Fourier clustering==
+[2025-08-28 18:29:00,265][__main__][INFO] - Computing 2 clusters
+[2025-08-28 18:29:00,581][__main__][INFO] - Cluster size: [100, 100]
+[2025-08-28 18:29:02,860][__main__][INFO] - ==Gamma clustering==
+[2025-08-28 18:29:02,936][__main__][INFO] - Computing 2 clusters
+[2025-08-28 18:29:03,293][__main__][INFO] - Cluster size: [100, 100]
+[2025-08-28 18:29:05,665][__main__][INFO] - Saved stats
+[2025-08-28 18:29:05,665][__main__][INFO] - train stats:
+mean	93.4975
+stds	11.2225
+std	11.6112
+alpha	0.9483
+beta	-0.7807
+[2025-08-28 18:29:05,665][__main__][INFO] - test1 stats:
+mean	80.4911
+stds	11.2220
+std	11.3048
+alpha	0.9484
+beta	-0.7800
+[2025-08-28 18:29:05,665][__main__][INFO] - test2 stats:
+mean	83.3030
+stds	9.9006
+std	9.9943
+alpha	0.9487
+beta	-0.7811
+[2025-08-28 18:29:05,869][__main__][INFO] - Saved stats
+[2025-08-28 18:29:05,869][__main__][INFO] - train stats:
+mean	15.0435
+stds	0.9965
+std	3.1310
+alpha	0.9481
+beta	0.7806
+[2025-08-28 18:29:05,869][__main__][INFO] - test1 stats:
+mean	28.0505
+stds	0.9963
+std	1.6722
+alpha	0.9480
+beta	0.7809
+[2025-08-28 18:29:05,869][__main__][INFO] - test2 stats:
+mean	28.0445
+stds	0.8693
+std	1.5994
+alpha	0.9491
+beta	0.7808
+[2025-08-28 18:29:06,193][__main__][INFO] - Saved stats
+[2025-08-28 18:29:06,193][__main__][INFO] - train stats:
+mean	14.9628
+stds	0.9489
+std	3.1164
+alpha	0.9482
+beta	0.7805
+[2025-08-28 18:29:06,193][__main__][INFO] - test1 stats:
+mean	27.9700
+stds	0.9491
+std	1.6444
+alpha	0.9483
+beta	0.7811
+[2025-08-28 18:29:06,193][__main__][INFO] - test2 stats:
+mean	28.2323
+stds	0.9600
+std	1.6509
+alpha	0.9483
+beta	0.7802
+[2025-08-28 18:29:06,401][__main__][INFO] - Saved stats
+[2025-08-28 18:29:06,401][__main__][INFO] - train stats:
+mean	94.8672
+stds	10.6740
+std	11.0818
+alpha	0.9484
+beta	-0.7806
+[2025-08-28 18:29:06,401][__main__][INFO] - test1 stats:
+mean	81.8608
+stds	10.6736
+std	10.7606
+alpha	0.9482
+beta	-0.7803
+[2025-08-28 18:29:06,401][__main__][INFO] - test2 stats:
+mean	80.1070
+stds	11.3764
+std	11.4581
+alpha	0.9491
+beta	-0.7805
+[2025-08-28 18:29:06,406][__main__][INFO] - End of script
+

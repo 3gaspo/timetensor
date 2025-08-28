@@ -1,96 +1,116 @@
-from .dataset import load_data, temporal_split
+from .dataset import load_data, get_dataset_splits
 import numpy as np
 import os
 import torch
 import copy
+import shutil
 
 from .utils import append_in_dict
 
 class Client:
+    """node in a federated setting"""
     def __init__(self, dataloaders, model=None, id=None, params={}):
-        self.dataloaders = dataloaders
-        self.model = model
-        self.params = params
+        self.dataloaders = dataloaders #train, valid, test loaders
+        self.model = model #currently held model
+
+        #optional
         self.id = id
+        self.params = params
         self.available = True
-    
     def set_unavailable(self):
         self.available = False
     def set_available(self):
         self.available = True
 
     def get_size(self):
+        """returns dataset size (scalar)"""
         shape = self.dataloaders["train"].dataset.shape
         if len(shape)==2: #context
-             return shape[0][0]*shape[0][2]
+             return shape[0][0]*shape[0][2]  #users * dates (values)
         else:
-            return shape[0]*shape[2]
+            return shape[0]*shape[2] #users * dates
 
     def get_weights(self):
+        """returns held model weights"""
         if self.model is not None:
             return self.model.state_dict()
         else:
             return None
 
-def client_split(values, context, datetimes, nodes, shuffle=True, seed=None, context_by_individuals=True, path=""):
+
+def client_split(values, context, datetimes, nodes, shuffle=True, context_by_individuals=True, save_path="", reshuffle=False):
     """splits individuals according to splits"""
     
     individuals = values.shape[0]
     if nodes is None:
-        N = individuals
-        indices_list = [[k] for k in range(individuals)]
-    elif type(nodes)==list and type(nodes[0])==float:
-        N = len(nodes)
-        if seed is not None:
-            np.random.seed(seed)
+        nodes= [1 for _ in range(individuals)]
+
+    split_dir = save_path + str(nodes) + "/"
+    if reshuffle:
+        if os.path.exists(split_dir):
+            shutil.rmtree(split_dir)
+    if not os.path.exists(split_dir):
+        os.makedirs(split_dir)
         if shuffle:
             user_list = np.random.permutation(individuals)
         else:
             user_list = list(range(individuals))
         indices_list = []
-        frac1 = 0
-        for k in range(N):
-            frac2 = frac1+nodes[k]
-            indices = user_list[int(frac1*individuals):int(frac2*individuals)]
+        
+        idx = 0
+        for k in range(len(nodes)):
+            idx_bis = idx + nodes[k]
+            if type(nodes[0])==float:
+                idx_bis = int(idx_bis * individuals)
+            indices = user_list[idx:idx_bis]
             indices_list.append(indices)
-            frac1=frac2
-            torch.save(indices, path + "indices/" + f"node_{k}_indices.pt")
-    elif type(nodes) == str:
-        indices_list = [torch.load(nodes+node_name, weights_only=False) for node_name in os.listdir(nodes)]
-        N = len(indices_list)
+            idx=idx_bis
+            torch.save(indices, split_dir + f"node{k}.pt")
     else:
-        raise ValueError("Unrecognized nodes")
+        indices_list = [torch.load(split_dir+node, weights_only=False) for node in os.listdir(split_dir)]
+
 
     if context_by_individuals:
         if context is None:
-            return {f"node_{i}":(values[indices_list[i], :, :], None, datetimes) for i in range(N)}
+            return {f"node_{i}":(values[indices_list[i], :, :], None, datetimes) for i in range(len(nodes))}
         else:
-            return {f"node_{i}":(values[indices_list[i], :, :], context[indices_list[i], :, :], datetimes) for i in range(N)}
+            return {f"node_{i}":(values[indices_list[i], :, :], context[indices_list[i], :, :], datetimes) for i in range(len(nodes))}
     else:
         if context is None:
-            return {f"node_{i}":(values[indices_list[i], :, :], None, datetimes) for i in range(N)}
+            return {f"node_{i}":(values[indices_list[i], :, :], None, datetimes) for i in range(len(nodes))}
         else:
-            return {f"node_{i}":(values[indices_list[i], :, :], context, datetimes) for i in range(N)}
+            return {f"node_{i}":(values[indices_list[i], :, :], context, datetimes) for i in range(len(nodes))}
 
 
-def get_client_splits(data_path, nodes, splits, shuffle=True, seed=None, context_by_individuals=True, save=False, path=""):
+##TODO read et complete
+
+
+def get_client_splits(data_path, splits, indiv_split, date_splits, shuffle=True, context_by_individuals=True, save_path=None, reshuffle=True):
     """splits is a dict with keys the splits for nodes (or path) and for each node the indiv and date splits (or paths)"""
     values, context, datetimes = load_data(data_path)
-    node_dict =  client_split(values, context, datetimes, nodes, shuffle, seed, context_by_individuals, path)
+    
+    if not os.path.exists(data_path+"nodes/"):
+        os.makedirs(data_path+"nodes/")
+    if save_path is None:
+        split_path = data_path+"nodes/"
+    else:
+        split_path = save_path
+    
+    if type(nodes)==str:
+        nodes = nodes.split(";")
+        nodes = [float(node) for node in nodes]
+    if int(nodes[0])==nodes[0]: #it is a list of ints
+        nodes = [int(node) for node in nodes]
+
+    #shuffle = shuffling of idxs to split, reshuffle=redo split
+    node_dict =  client_split(values, context, datetimes, nodes, shuffle, context_by_individuals, split_path, reshuffle)
 
     node_split_dict = {}
-    for node_name, (values, context, datetimes) in node_dict.items():
-        node_split_dict[node_name] = temporal_split(values, context, datetimes, splits, seed, save=False)
-        if save:
-            subpath = path + node_name + "/"
-            if not os.path.exists(subpath):
-                os.makedirs(subpath)
-            for key, (values, context, datetimes) in node_split_dict[node_name].items():
-                torch.save(values, subpath + key + "_values.pt")
-                if context is not None:
-                    torch.save(context, subpath + key + "_context.pt")
-                torch.save(datetimes, subpath + key + "_datetimes.pt")
+    for node_name, data in node_dict.items(): #data=(values, context, datetimes)
+        save_path + str(splits) + "/"
+        node_split_dict[node_name] = get_dataset_splits(data_path, indiv_split, date_splits, context_by_individuals, save_path, reshuffle, data)
     return node_split_dict
+
 
 
 class DefaultLocalServer():

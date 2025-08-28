@@ -10,8 +10,8 @@ import ipywidgets as widgets
 from IPython.display import display
 import seaborn as sns
 
-from .utils import fetch_example_data #, get_stats
-from .analysis import get_gammas
+from .dataset import fetch_example_data
+from .analysis import * #get_gammas, identify_cte, plot_heterogeneity, plot_dendogram, plot_distances, plot_centroids, plot_gamma, get_centroids, get_cluster_dicts, init_clusters, 
 
 def plot_serie(x, path="", name="series.pdf", title="Time series", axis=True):
     """plots example data"""
@@ -50,85 +50,50 @@ def plot_named_example(path, name):
 
 
 
-def check_cte_windows(df, lookback, title="Histogram of constant windows", path="", name="cte_windows.pdf", print_idx=False):
-    """plots histogram of constand windows per individual"""
-    dates, indivs = df.shape
-    stds = df.rolling(window=lookback).std()[lookback:].stack()
-    counts = {}
-    if print_idx:
-        idxs = np.where(std==0)
-        print(idxs)
-
-    for idx, std in enumerate(stds.values):
-        indiv, date = idx % indivs, idx // dates
-        if std == 0:
-            if counts.get(indiv) is None:
-                counts[indiv] = 0
-            counts[indiv] += 1
-
-    if len(counts)>0:
-        print("Found constant windows!")
-        
-        if len(counts)<20:   
-            print(counts)
-            
-        if len(counts)>10:
-            plt.clf()
-            fig = plt.figure(figsize=(10,5))
-            plt.hist(np.log(list(counts.values())), bins=100)
-            plt.yscale("log")
-            plt.title(title)
-            plt.xlabel("Individuals")
-            plt.ylabel("Cte window counts")
-            plt.savefig(path + name)
-            plt.close()
-
-def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None, remove_cte=True):
+def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None, remove_cte=True, log=False):
     """plots means and stds. data must be pandas dataframe or dict of df"""
     if type(data) != dict:
         data = {"data":data}
 
     keys, means_list, stds_list = [], [], []
     for key, df in data.items():
-        
         if per_user:
-            means = df.mean(axis=0)
-            stds = df.std(axis=0)
+            clean_df = df.copy()
+            if remove_cte:
+                cte_mask = identify_cte(df, lookback, save=False)
+                clean_df[cte_mask] = pd.NA
+            means = clean_df.mean(axis=0)
+            stds = clean_df.std(axis=0)
         else:
             means = df.rolling(window=lookback).mean()[lookback:].stack()#.sample(samples)
             stds = df.rolling(window=lookback).std()[lookback:].stack()#.sample(samples)
             sampled_idx = np.random.choice(len(means), size=samples, replace=False)
             means = means.iloc[sampled_idx]
             stds = stds.iloc[sampled_idx]
-
-        if remove_cte:
-            keep_idx = np.where(stds>0)[0]
-            if per_user:
-                keys += [key + f" (mean: {means.iloc[keep_idx].mean():.2f} | stds: {stds.iloc[keep_idx].mean():.2f} | std: {np.std(df.iloc[keep_idx].values):.2f})" for k in range(len(keep_idx))]
-            else:
-                keys += [key + f" (mean: {means.iloc[keep_idx].mean():.2f} | stds: {stds.iloc[keep_idx].mean():.2f})" for k in range(len(keep_idx))]
-            means_list += np.log(np.where(means.iloc[keep_idx]>0, means.iloc[keep_idx], 1e-8)).tolist()
-            stds_list += np.log(stds.iloc[keep_idx]).tolist() #np.where(stds>0, stds, 1e-8)).tolist()
-        else:
-            if per_user:
-                keys += [key + f" (mean: {means.mean():.2f} | stds: {stds.mean():.2f} | std: {np.std(df.values):.2f})" for k in range(len(means))]
-            else:
-                keys += [key + f" (mean: {means.mean():.2f} | stds: {stds.mean():.2f})" for k in range(len(means))]
-
+            if remove_cte:
+                keep_idx = np.where(stds>0)[0]
+                means, stds = means.iloc[keep_idx], stds.iloc[keep_idx]
+        keys += [key + f" (mean: {means.mean():.2f} | stds: {stds.mean():.2f}" for _ in range(len(means))]
+        if log:
             means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
-            stds_list += np.log(np.where(stds>0, stds, 1e-8)).tolist() #np.where(stds>0, stds, 1e-8)).tolist()
-    
+            stds_list += np.log(np.where(stds>0, stds, 1e-8)).tolist()
+            xlbl, ylbl = "log(mean)", "log(std)"
+        else:
+            means_list += means.tolist()
+            stds_list += stds.tolist()
+            xlbl, ylbl = "mean", "std"
+
     stats_df = pd.DataFrame({
         'key': keys,
-        'log(mean)': means_list,
-        'log(std)': stds_list})
+        xlbl: means_list,
+        ylbl: stds_list})
 
     sns.set_theme(style="white")
 
     g = sns.jointplot(
         data=stats_df,
-        x='log(mean)',
-        y='log(std)',
+        x=xlbl,
+        y=ylbl,
         hue='key',
         kind='scatter',
         palette='Set1',
@@ -149,7 +114,7 @@ def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookb
     plt.close()
 
 
-def plot_means(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None, remove_cte=True):
+def plot_means(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None, remove_cte=True, log=False):
 
     if type(data) != dict:
         data = {"data":data}
@@ -157,23 +122,27 @@ def plot_means(data, path="", name="stats.pdf", show=False, per_user=True, lookb
     keys, means_list = [], []
     for key, df in data.items():
         if per_user:
-            means = df.mean(axis=0)
-            stds = df.std(axis=0)
+            clean_df = df.copy()
+            if remove_cte:
+                cte_mask = identify_cte(df, lookback, save=False)
+                clean_df[cte_mask] = pd.NA
+            means = clean_df.mean(axis=0)
         else:
             means = df.rolling(window=lookback).mean()[lookback:].stack()#.sample(samples)
             stds = df.rolling(window=lookback).std()[lookback:].stack()#.sample(samples)
             sampled_idx = np.random.choice(len(means), size=samples, replace=False)
             means = means.iloc[sampled_idx]
             stds = stds.iloc[sampled_idx]
+            if remove_cte:
+                keep_idx = np.where(stds>0)[0]
+                means = means.iloc[keep_idx]
 
-        if remove_cte:
-            keep_idx = np.where(stds>0)[0]
-            keys += [key + f" (mean: {means.iloc[keep_idx].mean():.2f})" for k in range(len(keep_idx))]
-            means_list += np.log(np.where(means.iloc[keep_idx]>0, means.iloc[keep_idx], 1e-8)).tolist()
-        else:
-            keys += [key + f" (mean: {means.mean():.2f})" for k in range(len(means))]
+        keys += [key + f" (mean: {means.mean():.2f}" for _ in range(len(means))]
+        if log:
             means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
-    
+        else:
+            means_list += means.tolist()
+
     means_df = pd.DataFrame({
         'key': keys,
         'log(mean)': means_list,})
@@ -567,3 +536,30 @@ def visu_widget(data, lookback, horizon, eps=1e-6):
 
     display(dataframe_dropdown, column_dropdown, next_button, output)
     update_plot(dataframe_dropdown.value, column_dropdown.value)
+
+
+def plot_clustering(df, n_clusters, lags, horizon, clustering_name, data_path, plot_dir, do_heterogeneity=True, logger=None, remove_cte=True):
+    if do_heterogeneity:
+        if logger is not None:
+            logger.info("Computing heterogeneity plot")
+        plot_heterogeneity(df, path=plot_dir, name="heterogeneity.pdf")
+    if logger is not None:
+        logger.info(f"Computing {n_clusters} clusters")
+    Z, distances_matrix = init_clusters(df)
+    labels, cluster_indices = get_clusters(Z, n_clusters)
+    if not os.path.exists(data_path+"gamma_clusters/"):
+        os.makedirs(data_path+"gamma_clusters/")
+    for k in range(n_clusters):
+        torch.save(cluster_indices[k], data_path + f"{clustering_name}/node{k}.pt")
+    logger.info(f"Cluster size: {[len(cluster) for cluster in cluster_indices]}")
+    plot_dendogram(Z, path=plot_dir, name="dendogram.pdf")
+    plot_distances(distances_matrix, path=plot_dir, name="distances.pdf")
+    centroids = get_centroids(df, cluster_indices)
+    plot_centroids(centroids, path=plot_dir, name="centroids.pdf")
+    centroids = get_centroids(df, cluster_indices)
+    plot_centroids(centroids, path=plot_dir, name="raw_centroids.pdf")
+    df_dict = get_cluster_dicts(df, cluster_indices)
+    plot_stats(df_dict, plot_dir, name="stats.pdf", per_user=True, lookback=lags, title=f"{clustering_name} input statistics", remove_cte=remove_cte, log=True)
+    plot_gamma(df_dict, plot_dir, "gammas.pdf", per_user=True, lookback=lags, horizon=horizon, remove_cte=remove_cte, log=False)
+
+

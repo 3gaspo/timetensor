@@ -25,6 +25,9 @@ def run(cfg):
 
     #configs
     data_path = "../datasets/sim/"
+    mix = cfg.data.mix
+    if float(mix)>0:
+        data_path = data_path + "mix_" + str(mix) + "/" 
     lags, horizon, batch_size = 100, 20, 10
 
     indiv_split, date_splits = cfg.data.indiv_split, cfg.data.date_splits    
@@ -37,18 +40,18 @@ def run(cfg):
         torch.cuda.manual_seed(seed)
         np.random.seed(seed)
 
-    rebuild_pt = False
-    reshuffle = False
-    new_example = False
+    rebuild_pt = True
+    reshuffle = True
+    new_example = True
     replot = True
-    do_heterogeneity = False
+    do_heterogeneity = True
     logger.info("Fetched configs")
 
     if rebuild_pt:
         logger.info("Rebuilding dataset")
 
-        fetcher1 = lambda path: fetch_data(path, n1=100, n2=0)
-        fetcher2 = lambda path: fetch_data(path, n1=0, n2=100)
+        fetcher1 = lambda path: fetch_data(path, n1=100, n2=0, r1=mix)
+        fetcher2 = lambda path: fetch_data(path, n1=0, n2=100, r2=mix)
        
         for suffix in ["node1/", "node2/", ""]:
             path = data_path + suffix
@@ -100,8 +103,8 @@ def run(cfg):
     #example
     if new_example:
         for suffix in ["node1/", "node2/"]:
+            logger.info(f"Setting new example for {suffix}")
             path = data_path + suffix
-            logger.info("Setting new example")
             ex_dir = path + "examples/" + f"{lags}_{horizon}/"
             set_random_data(path, lags, horizon, name="rand")
             plot_named_example(ex_dir, f"rand")
@@ -110,12 +113,10 @@ def run(cfg):
     full_df1 = fetch_data_(data_path + "/node1/")
     full_df2 = fetch_data_(data_path + "/node2/")
     full_df12 = pd.concat((full_df1, full_df2), axis=1)
+    full_df12.columns = range(full_df12.shape[1])
     full_dfs = [full_df1, full_df2, full_df12]
     logger.info("Dataframe shapes" + str([df.shape for df in full_dfs]))
-    replot=True
     for ci, suffix in enumerate(["node1/", "node2/", ""]):
-        if ci in [0,1]:
-            continue
         plot_dir = data_path + suffix + "plots/"
         full_df = full_dfs[ci]
         loaders_dict = loaders_dicts[ci]
@@ -124,7 +125,6 @@ def run(cfg):
         if replot:
             
             check_cte_windows(full_df, lags, path=plot_dir)
-
             df_dict = {key: loaders_dict[key].dataset.get_df() for key in loaders_dict if key in ["train", "test1", "test2"]}
             
             plot_stats(full_df, plot_dir, name="per_user_stats.pdf", per_user=True, title=f"{dataset_name} user statistics", remove_cte=True)

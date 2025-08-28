@@ -14,7 +14,7 @@ task:
   horizon: 48
 
 misc:
-  seed:
+  seed: 1
   output_dir: ../outputs/new/
   benchmark: True
   save_name:
