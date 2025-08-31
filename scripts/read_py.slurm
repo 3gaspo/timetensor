@@ -4,7 +4,7 @@
 #SBATCH --output=scripts/read_py.out
 #SBATCH --error=scripts/read_py.err
 #SBATCH --time=01:00:00
-#SBATCH --mem=10G
+#SBATCH --mem=20G
 source .venv/bin/activate
 
-srun python3 load_dataset.py "data=synthetic" "task.lags=100" "task.horizon=20"
+srun python3 load_dataset.py "data=solar"

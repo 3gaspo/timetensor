@@ -5,13 +5,10 @@ import os
 import shutil
 import copy
 import pandas as pd
-import json
 
-from .analysis import get_dataset_stats
+from .utils import normalize
 
-#from .utils import normalize
-def normalize(x, mean, std, eps=1e-6):
-    return (x - mean) / (std + eps)
+
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
     def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=True, remove_cte=False, stats=None, weight=1):   
@@ -130,8 +127,6 @@ class TimeSeriesDataset(Dataset):
 
 class TimeSeriesSubset(Dataset):
     def __init__(self, dataset, indices, subset_mode="dates"):
-        super().__init__()
-
         self.indices = indices
         self.mode = subset_mode
         self.lags, self.horizon = dataset.lags, dataset.horizon 
@@ -219,7 +214,11 @@ class TimeSeriesSubset(Dataset):
         else:
             return self.dataset.datetimes
 
-def fetch_csv(data_path, data_name, context_cols=None):
+    def get_df(self, dim=0):
+        return pd.DataFrame(self.values[:, 0, :].transpose(0,1), index=self.datetimes)
+
+
+def fetch_csv(data_path, data_name, context_cols=None, drop=None):
     """fetches univariate csv (optional context) and saves pytorch. TODO: for multivariate"""
     df = pd.read_csv(data_path + data_name + ".csv", index_col=0, parse_dates=True)
     if context_cols is None:
@@ -230,6 +229,11 @@ def fetch_csv(data_path, data_name, context_cols=None):
         values_df = df.drop(columns=context_cols)
     values_df.columns = range(values_df.shape[1])
     datetimes = list(df.index)
+    if drop is not None and drop is not False:
+        drop = drop.split(";")
+        drop = [int(idx) for idx in drop]
+        values_df = values_df.drop(columns=drop)
+        values_df.columns = range(values_df.shape[1])
     return values_df, context_df, datetimes
 
 
@@ -493,7 +497,7 @@ def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None
             context = context[indices]
     else:
         cluster_path = ""
-    
+
     if save_path is None:
         split_path = data_path+"splits/"
     else:
@@ -501,14 +505,14 @@ def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None
     if type(date_splits) == str:
         date_splits = date_splits.split(";")
         date_splits = [float(txt) for txt in date_splits]
-    if indiv_split is None:
+    if indiv_split is None or values.shape[0]==1:
         type_split = 3
     elif len(date_splits) == 2:
         type_split = 4
     else:
         type_split = 6
     if type_split == 3:
-        data_dict = split_3_way(values, context, datetimes, date_splits, context_by_individuals, split_path, reshuffle=reshuffle)
+        data_dict = split_3_way(values, context, datetimes, date_splits, split_path, reshuffle=reshuffle)
     elif type_split == 4:
         data_dict = split_4_way(values, context, datetimes, indiv_split, date_splits[0], context_by_individuals, split_path, reshuffle=reshuffle)
     elif type_split == 6:

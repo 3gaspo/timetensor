@@ -11,7 +11,7 @@ from IPython.display import display
 import seaborn as sns
 
 from .dataset import fetch_example_data
-from .analysis import * #get_gammas, identify_cte, plot_heterogeneity, plot_dendogram, plot_distances, plot_centroids, plot_gamma, get_centroids, get_cluster_dicts, init_clusters, 
+from .analysis import *
 
 def plot_serie(x, path="", name="series.pdf", title="Time series", axis=True):
     """plots example data"""
@@ -49,6 +49,22 @@ def plot_named_example(path, name):
     plot_example(x[0], y[0], path + f"/{name}/", f"example.pdf", "Example")
 
 
+# def valid_for_kde(sub, keyx, keyy):
+#     return (
+#         len(sub) >= 3 and
+#         sub[keyy].nunique() >= 2 and sub[keyx].nunique() >= 2 and
+#         sub[keyy].std() > 0 and sub[keyx].std() > 0
+#     )
+def valid_for_kde(sub, keyx, keyy):
+    a = sub[keyy].to_numpy()
+    b = sub[keyx].to_numpy()
+    na = np.sum(~np.isnan(a))
+    nb = np.sum(~np.isnan(b))
+    if na < 2 or nb < 2:
+        return False
+    if np.nanmin(a) == np.nanmax(a) or np.nanmin(b) == np.nanmax(b):
+        return False
+    return len(sub) >= 3
 
 def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None, remove_cte=True, log=False):
     """plots means and stds. data must be pandas dataframe or dict of df"""
@@ -100,7 +116,30 @@ def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookb
         marginal_kws=dict(common_norm=False, fill=True, alpha=0.5)
     )
 
-    g.plot_joint(sns.kdeplot, hue='key', fill=False, alpha=0.3)
+    #g.plot_joint(sns.kdeplot, hue='key', fill=False, alpha=0.3)
+    ax = g.ax_joint
+    hue_order = list(dict.fromkeys(stats_df["key"]))  # preserves first-seen order
+    palette = sns.color_palette("Set1", n_colors=len(hue_order))
+    color_for = dict(zip(hue_order, palette))
+    for key, sub in stats_df.groupby("key"):
+        if not valid_for_kde(sub, xlbl, ylbl):
+            continue
+        try:
+            sns.kdeplot(
+                data=sub,
+                x="beta", y="alpha",
+                ax=ax,
+                color=color_for[key],   # match scatter color
+                fill=False, alpha=0.3,
+                levels=10,              # strictly increasing
+                thresh=1e-6,
+                bw_adjust=1.2,
+                warn_singular=False,
+                common_norm=False,
+                legend=False,           # avoid legend duplication
+            )
+        except ValueError: # If a group still blows up, just skip its KDE
+            pass
 
     if title is None:
         plt.suptitle("Statistics distribution", y=1.02)
@@ -538,14 +577,14 @@ def visu_widget(data, lookback, horizon, eps=1e-6):
     update_plot(dataframe_dropdown.value, column_dropdown.value)
 
 
-def plot_clustering(df, n_clusters, lags, horizon, clustering_name, data_path, plot_dir, do_heterogeneity=True, logger=None, remove_cte=True):
+def plot_clustering(raw_df, feature_df, n_clusters, lags, horizon, clustering_name, data_path, plot_dir, do_heterogeneity=True, logger=None, remove_cte=True):
     if do_heterogeneity:
         if logger is not None:
             logger.info("Computing heterogeneity plot")
-        plot_heterogeneity(df, path=plot_dir, name="heterogeneity.pdf")
+        plot_heterogeneity(feature_df, path=plot_dir, name="heterogeneity.pdf")
     if logger is not None:
         logger.info(f"Computing {n_clusters} clusters")
-    Z, distances_matrix = init_clusters(df)
+    Z, distances_matrix = init_clusters(feature_df)
     labels, cluster_indices = get_clusters(Z, n_clusters)
     if not os.path.exists(data_path+"gamma_clusters/"):
         os.makedirs(data_path+"gamma_clusters/")
@@ -554,11 +593,11 @@ def plot_clustering(df, n_clusters, lags, horizon, clustering_name, data_path, p
     logger.info(f"Cluster size: {[len(cluster) for cluster in cluster_indices]}")
     plot_dendogram(Z, path=plot_dir, name="dendogram.pdf")
     plot_distances(distances_matrix, path=plot_dir, name="distances.pdf")
-    centroids = get_centroids(df, cluster_indices)
+    centroids = get_centroids(feature_df, cluster_indices)
     plot_centroids(centroids, path=plot_dir, name="centroids.pdf")
-    centroids = get_centroids(df, cluster_indices)
+    centroids = get_centroids(raw_df, cluster_indices)
     plot_centroids(centroids, path=plot_dir, name="raw_centroids.pdf")
-    df_dict = get_cluster_dicts(df, cluster_indices)
+    df_dict = get_cluster_dicts(raw_df, cluster_indices)
     plot_stats(df_dict, plot_dir, name="stats.pdf", per_user=True, lookback=lags, title=f"{clustering_name} input statistics", remove_cte=remove_cte, log=True)
     plot_gamma(df_dict, plot_dir, "gammas.pdf", per_user=True, lookback=lags, horizon=horizon, remove_cte=remove_cte, log=False)
 

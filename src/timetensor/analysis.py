@@ -178,19 +178,15 @@ def plot_heterogeneity(df, show=False, path="", name="heterogeneity.pdf"):
 
 
 def identify_cte(df, lookback, save=True, path="", logger=None):
-    users = df.shape[1]
     stds = df.rolling(window=lookback).std()
 
     #counts
     cte_idxs = np.where(stds==0)
     counts = {}
-    i = 0
-    for user in range(users):
-        if user in cte_idxs[0]:
-            if counts.get(user) is None:
-                counts[users] = 0
-            counts[user] += cte_idxs[1][i]
-            i+=1
+    for user in enumerate(cte_idxs[1]):
+        if counts.get(user) is None:
+            counts[user] = 0
+        counts[user] += 1
 
     #plots
     if len(counts)>0:
@@ -214,6 +210,17 @@ def identify_cte(df, lookback, save=True, path="", logger=None):
     mask = stds==0
     return mask
 
+def valid_for_kde(sub, keyx, keyy):
+    a = sub[keyy].to_numpy()
+    b = sub[keyx].to_numpy()
+    na = np.sum(~np.isnan(a))
+    nb = np.sum(~np.isnan(b))
+    if na < 2 or nb < 2:
+        return False
+    if np.nanmin(a) == np.nanmax(a) or np.nanmin(b) == np.nanmax(b):
+        return False
+    return len(sub) >= 3
+
 def plot_gamma(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, horizon=48, samples=1000, title=None, remove_cte=True, log=False):
     """plots means and stds. data must be pandas dataframe or dict of df"""
     if type(data) != dict:
@@ -225,7 +232,7 @@ def plot_gamma(data, path="", name="stats.pdf", show=False, per_user=True, lookb
         if per_user:
             clean_alphas, clean_betas = alphas.copy(), betas.copy()
             if remove_cte:
-                cte_mask = identify_cte(df.iloc[lookback:horizon], lookback, save=False)
+                cte_mask = identify_cte(df.iloc[lookback:-horizon], lookback, save=False)
                 clean_alphas[cte_mask] = pd.NA
                 clean_betas[cte_mask] = pd.NA
             alpha_means = clean_alphas.mean(axis=0)
@@ -265,7 +272,30 @@ def plot_gamma(data, path="", name="stats.pdf", show=False, per_user=True, lookb
         marginal_kws=dict(common_norm=False, fill=True, alpha=0.5)
     )
 
-    g.plot_joint(sns.kdeplot, hue='key', fill=False, alpha=0.3)
+    # g.plot_joint(sns.kdeplot, hue='key', fill=False, alpha=0.3)
+    ax = g.ax_joint
+    hue_order = list(dict.fromkeys(stats_df["key"]))  # preserves first-seen order
+    palette = sns.color_palette("Set1", n_colors=len(hue_order))
+    color_for = dict(zip(hue_order, palette))
+    for key, sub in stats_df.groupby("key"):
+        if not valid_for_kde(sub, "beta", "alpha"):
+            continue
+        try:
+            sns.kdeplot(
+                data=sub,
+                x="beta", y="alpha",
+                ax=ax,
+                color=color_for[key],   # match scatter color
+                fill=False, alpha=0.3,
+                levels=10,              # strictly increasing
+                thresh=1e-6,
+                bw_adjust=1.2,
+                warn_singular=False,
+                common_norm=False,
+                legend=False,           # avoid legend duplication
+            )
+        except ValueError: # If a group still blows up, just skip its KDE
+            pass
 
     if title is None:
         plt.suptitle("Statistics distribution")#, y=1.02)

@@ -1,15 +1,17 @@
-dataset: ETTh1
-path: ../datasets/etth/
+dataset: solar
+path: ../datasets/solar/
 
-context_cols:
+type: csv
 clusters:
 n_clusters: 2
+context_cols:
+drop_users:
 
 indiv_split: 0.7 
 date_splits: 0.5;0.3;0.2
 by_idx: individuals
 context_by_individuals: True
-reshuffle: False
+reshuffle: True
 remove_cte: True
 
 subsets:
