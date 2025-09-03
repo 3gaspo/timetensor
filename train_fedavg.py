@@ -3,18 +3,15 @@ import logging
 import os
 import torch
 import numpy as np
-import json
-import copy
 
 from src.timetensor.dataset import fetch_training_data, get_sizes, set_random_data, fetch_example_data, fetch_stats
 from src.timetensor.models import load_model
-from src.timetensor.pipeline import get_losses, launch_training
-from src.timetensor.visu import plot_errors, plot_horizon_errors, plot_pred, plot_weights, plot_named_example
+from src.timetensor.pipeline import get_losses
+from src.timetensor.visu import plot_pred, plot_named_example
 from src.timetensor.utils import save_results, get_dirs
 
-from src.timetensor.dataset import get_train_loaders, aggregate_loaders_dict
-from src.timetensor.pipeline import Learner
-from src.timetensor.federated import get_client_splits, eval_nodes, get_node_metrics
+from src.timetensor.dataset import get_train_loaders
+from src.timetensor.federated import get_client_splits, eval_nodes, get_node_metrics, launch_training
 from src.timetensor.fedavg import LocalFedAvg, GlobalFedAvg, FedAvgScheme
 
 import warnings
@@ -101,7 +98,7 @@ def run(cfg):
   
     server, shadow_server, nodes, shadow_nodes, size_weights = launch_training(client_builder, server_builder, scheme_builder, loaders_dicts, global_model,
         criterion, lr, eval_losses, device, logger,
-        save_dir, retrain=True)
+        save_dir, retrain=True, verbose=1)
 
     #example
     global_model.load_state_dict(server.update)

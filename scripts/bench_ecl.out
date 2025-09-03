@@ -24,3 +24,4 @@
 [2025-09-03 23:27:26,996][__main__][INFO] - Step 200 | valid1 MSE : 0.0179 | valid1 NMSE : 0.3732
 [2025-09-03 23:28:54,095][__main__][INFO] - Step 300 | valid1 MSE : 0.0153 | valid1 NMSE : 0.3476
 [2025-09-03 23:30:17,993][__main__][INFO] - Step 400 | valid1 MSE : 0.0140 | valid1 NMSE : 0.3320
+[2025-09-03 23:31:45,095][__main__][INFO] - Step 500 | valid1 MSE : 0.0130 | valid1 NMSE : 0.3209
