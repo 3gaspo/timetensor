@@ -1,0 +1,17 @@
+[2025-09-03 23:27:15,361][__main__][INFO] - =====Running data script=====
+[2025-09-03 23:27:16,809][__main__][INFO] - End of script
+
+[2025-09-03 23:27:24,097][__main__][INFO] - =====Running train script=====
+[2025-09-03 23:27:24,237][__main__][INFO] - Fetched main configs, save directory : ../outputs/fed/seed_1/revin/
+[2025-09-03 23:27:24,237][__main__][INFO] - Model PatchTST, normalization revin, criterion NMSE, kwargs {'latent': False}
+[2025-09-03 23:27:24,340][__main__][INFO] - Fetched dataloaders
+[2025-09-03 23:27:24,341][__main__][INFO] - Splits shapes:
+node0	((70, 1, 1000), (70, 1, 1000))
+node1	((70, 1, 1000), (70, 1, 1000))
+[2025-09-03 23:27:31,633][__main__][INFO] - =====Running train script=====
+[2025-09-03 23:27:31,743][__main__][INFO] - Fetched main configs, save directory : ../outputs/fed/seed_1/mIN/
+[2025-09-03 23:27:31,743][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': False, 'fixed_beta': False, 'init_alpha': False, 'fixed_alpha': False, 'use_gamma': False, 'inverse_gamma': False}
+[2025-09-03 23:27:31,846][__main__][INFO] - Fetched dataloaders
+[2025-09-03 23:27:31,846][__main__][INFO] - Splits shapes:
+node0	((70, 1, 1000), (70, 1, 1000))
+node1	((70, 1, 1000), (70, 1, 1000))

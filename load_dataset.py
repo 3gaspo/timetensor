@@ -47,6 +47,7 @@ def run(cfg):
     new_example = cfg.task.new_example
     replot = cfg.task.replot
     do_heterogeneity = cfg.task.heterogeneity
+    recluster = cfg.task.recluster
     if verbose:
         logger.info("Fetched configs")
 
@@ -111,10 +112,10 @@ def run(cfg):
             stats_dict = get_dataset_stats(cluster_df, df_dict, lags, horizon, remove_cte, save_path=data_path+clusters+"stats/", save_name=f"node{i}_raw_stats.json")
 
     #plots
-    main_plot_dir = data_path + "plots/"
-    df, context, datetimes = fetch_csv(data_path, dataset_name, context_cols=context_cols, drop=drop_users)
-    loaders_dict, df_dict = fetch_dicts(data_path, cfg, remove_cte=remove_cte, clusters=clusters, seed=seed)
     if replot:    
+        main_plot_dir = data_path + "plots/"
+        df, context, datetimes = fetch_csv(data_path, dataset_name, context_cols=context_cols, drop=drop_users)
+        loaders_dict, df_dict = fetch_dicts(data_path, cfg, remove_cte=remove_cte, clusters=clusters, seed=seed)
         #stats
         plot_dir = main_plot_dir + "stats/"
         plot_stats(df, plot_dir, name="user_stats.pdf", per_user=True, title=f"{dataset_name} user statistics", remove_cte=remove_cte, log=True)
@@ -132,6 +133,7 @@ def run(cfg):
         if "test2" in df_dict:
             plot_gamma(filter_dict(df_dict, keys=["test1", "test2"]), plot_dir, name="spatial_gammas.pdf", per_user=True, title=f"{dataset_name} spatial splits statistics", remove_cte=remove_cte, log=False)
 
+    if recluster:
         #fourier clustering
         plot_dir = main_plot_dir + "fourier_clusters/"
         logger.info("==Fourier clustering==")
@@ -145,15 +147,15 @@ def run(cfg):
         gamma_df =  pd.concat((alphas_df, betas_df))
         plot_clustering(df, gamma_df, n_clusters, lags, horizon, "gamma_clusters", data_path, plot_dir, do_heterogeneity, logger, remove_cte)
 
-    #per cluster stats
-    for clusters in ["fourier_clusters/", "gamma_clusters/"]:
-        if not os.path.exists(data_path+clusters+"stats/"):
-            os.makedirs(data_path+clusters+"stats/")       
-        df, context, datetimes = fetch_csv(data_path, dataset_name, context_cols=context_cols, drop=drop_users)
-        loaders_dicts, df_dicts = fetch_dicts(data_path, cfg, remove_cte=remove_cte, clusters=clusters, seed=seed, stats_dict=stats_dict, aggregate=False)
-        for i, df_dict in enumerate(df_dicts.values()):
-            cluster_df = df[list(torch.load(data_path+clusters+f"node{i}.pt", weights_only=False))]
-            stats_dict = get_dataset_stats(cluster_df, df_dict, lags, horizon, remove_cte, save_path=data_path+clusters+"stats/", save_name=f"node{i}_raw_stats.json")
+        #per cluster stats
+        for clusters in ["fourier_clusters/", "gamma_clusters/"]:
+            if not os.path.exists(data_path+clusters+"stats/"):
+                os.makedirs(data_path+clusters+"stats/")       
+            df, context, datetimes = fetch_csv(data_path, dataset_name, context_cols=context_cols, drop=drop_users)
+            loaders_dicts, df_dicts = fetch_dicts(data_path, cfg, remove_cte=remove_cte, clusters=clusters, seed=seed, stats_dict=stats_dict, aggregate=False)
+            for i, df_dict in enumerate(df_dicts.values()):
+                cluster_df = df[list(torch.load(data_path+clusters+f"node{i}.pt", weights_only=False))]
+                stats_dict = get_dataset_stats(cluster_df, df_dict, lags, horizon, remove_cte, save_path=data_path+clusters+"stats/", save_name=f"node{i}_raw_stats.json")
 
     logger.info('End of script\n')
 

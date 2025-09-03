@@ -7,7 +7,6 @@
 #SBATCH --mem=40G -p h100
 source .venv/bin/activate
 
-#10h30
 main_output_dir="../outputs/bench_ecl/"
 
 rm -rf "$main_output_dir"
@@ -18,11 +17,11 @@ data=electricity
 model_name=PatchTST
 loss=NMSE
 lr=0.00001
-epochs=2000
+epochs=1000
 bs=230
 eval_freq=100
 
-srun python3 load_dataset.py "task.rebuild_pt=True" "data=$data" "misc.seed=1" "misc.verbose=0"
+srun python3 load_dataset.py "task.rebuild_pt=True" "task.new_example=True" "task.replot=True" "task.recluster=True" "data=$data" "misc.verbose=0"
 
 for seed in 1 2 3 4 5
 do
@@ -48,6 +47,36 @@ do
             "training.print_freq=100" \
             "misc.save_name=$normalization"
     done
+
+    normalization=mIN    
+    #revin
+    init_alpha=False
+    init_beta=False
+    use_gamma=True
+    inverse_gamma=True
+    fixed_beta=False
+    fixed_alpha=False
+    srun python3 train_model.py \
+        "misc.seed=$seed" \
+        "data=$data" \
+        "data.reshuffle=True" \
+        "misc.output_dir=$output_dir" \
+        "misc.benchmark=True" \
+        "model=$model_name" \
+        "normalization=$normalization" \
+        "training.loss=$loss" \
+        "training.bs=$bs" \
+        "training.lr=$lr" \
+        "training.epochs=$epochs" \
+        "training.eval_freq=$eval_freq" \
+        "training.print_freq=100" \
+        "normalization.configs.init_beta=$init_beta" \
+        "normalization.configs.init_alpha=$init_alpha" \
+        "normalization.configs.fixed_beta=$fixed_beta" \
+        "normalization.configs.fixed_alpha=$fixed_alpha " \
+        "normalization.configs.use_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
+        "misc.save_name=fake_revin"
 
     #min
     normalization=mIN
@@ -80,6 +109,93 @@ do
         "normalization.configs.use_gamma=$use_gamma" \
         "normalization.configs.inverse_gamma=$inverse_gamma" \
         "misc.save_name=min"
+
+    #default+gamma
+    init_alpha=False
+    init_beta=False
+    use_gamma=True
+    inverse_gamma=False
+    fixed_beta=False
+    fixed_alpha=False
+    srun python3 train_model.py \
+        "misc.seed=$seed" \
+        "data=$data" \
+        "data.reshuffle=True" \
+        "misc.output_dir=$output_dir" \
+        "misc.benchmark=True" \
+        "model=$model_name" \
+        "normalization=$normalization" \
+        "training.loss=$loss" \
+        "training.bs=$bs" \
+        "training.lr=$lr" \
+        "training.epochs=$epochs" \
+        "training.eval_freq=$eval_freq" \
+        "training.print_freq=100" \
+        "normalization.configs.init_beta=$init_beta" \
+        "normalization.configs.init_alpha=$init_alpha" \
+        "normalization.configs.fixed_beta=$fixed_beta" \
+        "normalization.configs.fixed_alpha=$fixed_alpha " \
+        "normalization.configs.use_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
+        "misc.save_name=min_gamma"
+
+    #default+init
+    init_alpha=True
+    init_beta=True
+    use_gamma=False
+    inverse_gamma=False
+    fixed_beta=False
+    fixed_alpha=False
+    srun python3 train_model.py \
+        "misc.seed=$seed" \
+        "data=$data" \
+        "data.reshuffle=True" \
+        "misc.output_dir=$output_dir" \
+        "misc.benchmark=True" \
+        "model=$model_name" \
+        "normalization=$normalization" \
+        "training.loss=$loss" \
+        "training.bs=$bs" \
+        "training.lr=$lr" \
+        "training.epochs=$epochs" \
+        "training.eval_freq=$eval_freq" \
+        "training.print_freq=100" \
+        "normalization.configs.init_beta=$init_beta" \
+        "normalization.configs.init_alpha=$init_alpha" \
+        "normalization.configs.fixed_beta=$fixed_beta" \
+        "normalization.configs.fixed_alpha=$fixed_alpha " \
+        "normalization.configs.use_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
+        "misc.save_name=min_init"
+    
+    #default+init+gamma
+    init_alpha=True
+    init_beta=True
+    use_gamma=True
+    inverse_gamma=False
+    fixed_beta=False
+    fixed_alpha=False
+    srun python3 train_model.py \
+        "misc.seed=$seed" \
+        "data=$data" \
+        "data.reshuffle=True" \
+        "misc.output_dir=$output_dir" \
+        "misc.benchmark=True" \
+        "model=$model_name" \
+        "normalization=$normalization" \
+        "training.loss=$loss" \
+        "training.bs=$bs" \
+        "training.lr=$lr" \
+        "training.epochs=$epochs" \
+        "training.eval_freq=$eval_freq" \
+        "training.print_freq=100" \
+        "normalization.configs.init_beta=$init_beta" \
+        "normalization.configs.init_alpha=$init_alpha" \
+        "normalization.configs.fixed_beta=$fixed_beta" \
+        "normalization.configs.fixed_alpha=$fixed_alpha " \
+        "normalization.configs.use_gamma=$use_gamma" \
+        "normalization.configs.inverse_gamma=$inverse_gamma" \
+        "misc.save_name=min_init_gamma"
 
     #min + revin + init
     init_alpha=True

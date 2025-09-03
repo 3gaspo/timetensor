@@ -1,0 +1,2084 @@
+[2025-09-03 20:03:06,600][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:03:09,119][__main__][INFO] - End of script
+
+[2025-09-03 20:03:14,708][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:03:15,023][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_1/min_node0/
+[2025-09-03 20:03:15,023][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:03:15,088][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:03:15,088][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:03:17,193][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:03:17,193][__main__][INFO] - Starting training...
+[2025-09-03 20:03:17,193][__main__][INFO] - Using device: cuda
+[2025-09-03 20:03:17,193][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:03:18,407][__main__][INFO] - Step 1 | valid1 MSE : 0.0010 | valid1 NMSE : 1.3461
+[2025-09-03 20:03:20,038][__main__][INFO] - Step 100 | valid1 MSE : 0.0009 | valid1 NMSE : 1.2005
+[2025-09-03 20:03:21,694][__main__][INFO] - Step 200 | valid1 MSE : 0.0008 | valid1 NMSE : 1.0357
+[2025-09-03 20:03:23,335][__main__][INFO] - Step 300 | valid1 MSE : 0.0007 | valid1 NMSE : 0.9285
+[2025-09-03 20:03:25,142][__main__][INFO] - Step 400 | valid1 MSE : 0.0007 | valid1 NMSE : 0.8644
+[2025-09-03 20:03:26,787][__main__][INFO] - Step 500 | valid1 MSE : 0.0006 | valid1 NMSE : 0.8367
+[2025-09-03 20:03:26,787][__main__][INFO] - Training done in 0.160 min
+[2025-09-03 20:03:26,787][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:03:26,818][__main__][INFO] - End of training
+[2025-09-03 20:03:27,689][__main__][INFO] - Plotted losses
+[2025-09-03 20:03:27,689][__main__][INFO] - Computing test metrics
+[2025-09-03 20:03:27,798][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:03:27,938][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:03:28,131][__main__][INFO] - Saved plots
+[2025-09-03 20:03:28,131][__main__][INFO] - Final modulations: {'beta': np.float32(0.57505655), 'alpha': np.float32(0.94787866)}
+[2025-09-03 20:03:28,131][__main__][INFO] - End of script
+
+[2025-09-03 20:03:34,923][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:03:35,199][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_1/min_node1/
+[2025-09-03 20:03:35,199][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:03:35,255][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:03:35,255][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:03:37,560][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:03:37,560][__main__][INFO] - Starting training...
+[2025-09-03 20:03:37,560][__main__][INFO] - Using device: cuda
+[2025-09-03 20:03:37,560][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:03:38,777][__main__][INFO] - Step 1 | valid1 MSE : 0.0013 | valid1 NMSE : 1.3360
+[2025-09-03 20:03:40,409][__main__][INFO] - Step 100 | valid1 MSE : 0.0011 | valid1 NMSE : 1.2024
+[2025-09-03 20:03:42,079][__main__][INFO] - Step 200 | valid1 MSE : 0.0010 | valid1 NMSE : 1.0679
+[2025-09-03 20:03:43,735][__main__][INFO] - Step 300 | valid1 MSE : 0.0009 | valid1 NMSE : 1.0033
+[2025-09-03 20:03:45,563][__main__][INFO] - Step 400 | valid1 MSE : 0.0009 | valid1 NMSE : 0.9818
+[2025-09-03 20:03:47,212][__main__][INFO] - Step 500 | valid1 MSE : 0.0010 | valid1 NMSE : 1.0095
+[2025-09-03 20:03:47,212][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:03:47,212][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:03:47,238][__main__][INFO] - End of training
+[2025-09-03 20:03:48,020][__main__][INFO] - Plotted losses
+[2025-09-03 20:03:48,020][__main__][INFO] - Computing test metrics
+[2025-09-03 20:03:48,135][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:03:48,275][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:03:48,453][__main__][INFO] - Saved plots
+[2025-09-03 20:03:48,454][__main__][INFO] - Final modulations: {'beta': np.float32(-0.64188015), 'alpha': np.float32(0.94910544)}
+[2025-09-03 20:03:48,454][__main__][INFO] - End of script
+
+[2025-09-03 20:03:54,268][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:03:54,567][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_1/min_node0_tune1/
+[2025-09-03 20:03:54,567][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:03:54,628][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:03:54,628][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:03:54,872][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:03:56,840][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:03:56,840][__main__][INFO] - Starting training...
+[2025-09-03 20:03:56,840][__main__][INFO] - Using device: cuda
+[2025-09-03 20:03:56,840][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:03:58,058][__main__][INFO] - Step 1 | valid1 MSE : 0.0021 | valid1 NMSE : 2.7083
+[2025-09-03 20:03:59,719][__main__][INFO] - Step 100 | valid1 MSE : 0.0020 | valid1 NMSE : 2.5852
+[2025-09-03 20:03:59,719][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:03:59,719][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:03:59,750][__main__][INFO] - End of training
+[2025-09-03 20:04:00,576][__main__][INFO] - Plotted losses
+[2025-09-03 20:04:00,576][__main__][INFO] - Computing test metrics
+[2025-09-03 20:04:00,679][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:04:00,815][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:04:01,003][__main__][INFO] - Saved plots
+[2025-09-03 20:04:01,003][__main__][INFO] - Final modulations: {'beta': np.float32(-0.6408844), 'alpha': np.float32(0.94935256)}
+[2025-09-03 20:04:01,003][__main__][INFO] - End of script
+
+[2025-09-03 20:04:06,936][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:04:07,203][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_1/min_node1_tune0/
+[2025-09-03 20:04:07,203][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:04:07,267][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:04:07,267][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:04:07,485][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:04:09,395][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:04:09,395][__main__][INFO] - Starting training...
+[2025-09-03 20:04:09,395][__main__][INFO] - Using device: cuda
+[2025-09-03 20:04:09,395][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:04:10,623][__main__][INFO] - Step 1 | valid1 MSE : 0.0021 | valid1 NMSE : 2.2561
+[2025-09-03 20:04:12,276][__main__][INFO] - Step 100 | valid1 MSE : 0.0020 | valid1 NMSE : 2.1022
+[2025-09-03 20:04:12,277][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:04:12,277][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:04:12,302][__main__][INFO] - End of training
+[2025-09-03 20:04:13,084][__main__][INFO] - Plotted losses
+[2025-09-03 20:04:13,084][__main__][INFO] - Computing test metrics
+[2025-09-03 20:04:13,189][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:04:13,325][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:04:13,517][__main__][INFO] - Saved plots
+[2025-09-03 20:04:13,517][__main__][INFO] - Final modulations: {'beta': np.float32(0.57407063), 'alpha': np.float32(0.9489531)}
+[2025-09-03 20:04:13,517][__main__][INFO] - End of script
+
+[2025-09-03 20:04:19,427][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:04:21,821][__main__][INFO] - End of script
+
+[2025-09-03 20:04:27,132][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:04:27,453][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_2/min_node0/
+[2025-09-03 20:04:27,453][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:04:27,508][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:04:27,508][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:04:29,519][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:04:29,519][__main__][INFO] - Starting training...
+[2025-09-03 20:04:29,519][__main__][INFO] - Using device: cuda
+[2025-09-03 20:04:29,519][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:04:30,772][__main__][INFO] - Step 1 | valid1 MSE : 0.0012 | valid1 NMSE : 1.4456
+[2025-09-03 20:04:32,410][__main__][INFO] - Step 100 | valid1 MSE : 0.0010 | valid1 NMSE : 1.2301
+[2025-09-03 20:04:34,070][__main__][INFO] - Step 200 | valid1 MSE : 0.0008 | valid1 NMSE : 0.9941
+[2025-09-03 20:04:35,730][__main__][INFO] - Step 300 | valid1 MSE : 0.0007 | valid1 NMSE : 0.8425
+[2025-09-03 20:04:37,566][__main__][INFO] - Step 400 | valid1 MSE : 0.0006 | valid1 NMSE : 0.7502
+[2025-09-03 20:04:39,213][__main__][INFO] - Step 500 | valid1 MSE : 0.0006 | valid1 NMSE : 0.7020
+[2025-09-03 20:04:39,213][__main__][INFO] - Training done in 0.162 min
+[2025-09-03 20:04:39,213][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:04:39,240][__main__][INFO] - End of training
+[2025-09-03 20:04:40,024][__main__][INFO] - Plotted losses
+[2025-09-03 20:04:40,025][__main__][INFO] - Computing test metrics
+[2025-09-03 20:04:40,135][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:04:40,270][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:04:40,456][__main__][INFO] - Saved plots
+[2025-09-03 20:04:40,457][__main__][INFO] - Final modulations: {'beta': np.float32(0.57531816), 'alpha': np.float32(0.9477473)}
+[2025-09-03 20:04:40,457][__main__][INFO] - End of script
+
+[2025-09-03 20:04:47,401][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:04:47,738][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_2/min_node1/
+[2025-09-03 20:04:47,739][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:04:47,804][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:04:47,804][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:04:50,338][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:04:50,338][__main__][INFO] - Starting training...
+[2025-09-03 20:04:50,338][__main__][INFO] - Using device: cuda
+[2025-09-03 20:04:50,338][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:04:51,589][__main__][INFO] - Step 1 | valid1 MSE : 0.0013 | valid1 NMSE : 1.4555
+[2025-09-03 20:04:53,237][__main__][INFO] - Step 100 | valid1 MSE : 0.0012 | valid1 NMSE : 1.2757
+[2025-09-03 20:04:54,901][__main__][INFO] - Step 200 | valid1 MSE : 0.0010 | valid1 NMSE : 1.0669
+[2025-09-03 20:04:56,558][__main__][INFO] - Step 300 | valid1 MSE : 0.0009 | valid1 NMSE : 0.9467
+[2025-09-03 20:04:58,360][__main__][INFO] - Step 400 | valid1 MSE : 0.0008 | valid1 NMSE : 0.8826
+[2025-09-03 20:05:00,006][__main__][INFO] - Step 500 | valid1 MSE : 0.0008 | valid1 NMSE : 0.8603
+[2025-09-03 20:05:00,006][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:05:00,006][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:05:00,037][__main__][INFO] - End of training
+[2025-09-03 20:05:00,836][__main__][INFO] - Plotted losses
+[2025-09-03 20:05:00,836][__main__][INFO] - Computing test metrics
+[2025-09-03 20:05:00,945][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:05:01,085][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:05:01,274][__main__][INFO] - Saved plots
+[2025-09-03 20:05:01,275][__main__][INFO] - Final modulations: {'beta': np.float32(-0.61981726), 'alpha': np.float32(0.94813913)}
+[2025-09-03 20:05:01,275][__main__][INFO] - End of script
+
+[2025-09-03 20:05:07,258][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:05:07,561][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_2/min_node0_tune1/
+[2025-09-03 20:05:07,561][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:05:07,629][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:05:07,629][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:05:07,857][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:05:09,937][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:05:09,937][__main__][INFO] - Starting training...
+[2025-09-03 20:05:09,938][__main__][INFO] - Using device: cuda
+[2025-09-03 20:05:09,938][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:05:11,174][__main__][INFO] - Step 1 | valid1 MSE : 0.0019 | valid1 NMSE : 2.3598
+[2025-09-03 20:05:12,849][__main__][INFO] - Step 100 | valid1 MSE : 0.0018 | valid1 NMSE : 2.2274
+[2025-09-03 20:05:12,849][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:05:12,849][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:05:12,881][__main__][INFO] - End of training
+[2025-09-03 20:05:13,681][__main__][INFO] - Plotted losses
+[2025-09-03 20:05:13,681][__main__][INFO] - Computing test metrics
+[2025-09-03 20:05:13,786][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:05:13,925][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:05:14,118][__main__][INFO] - Saved plots
+[2025-09-03 20:05:14,118][__main__][INFO] - Final modulations: {'beta': np.float32(-0.61883014), 'alpha': np.float32(0.94845253)}
+[2025-09-03 20:05:14,118][__main__][INFO] - End of script
+
+[2025-09-03 20:05:19,989][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:05:20,280][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_2/min_node1_tune0/
+[2025-09-03 20:05:20,280][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:05:20,338][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:05:20,338][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:05:20,756][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:05:22,635][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:05:22,635][__main__][INFO] - Starting training...
+[2025-09-03 20:05:22,635][__main__][INFO] - Using device: cuda
+[2025-09-03 20:05:22,635][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:05:23,883][__main__][INFO] - Step 1 | valid1 MSE : 0.0019 | valid1 NMSE : 2.0547
+[2025-09-03 20:05:25,539][__main__][INFO] - Step 100 | valid1 MSE : 0.0018 | valid1 NMSE : 1.9081
+[2025-09-03 20:05:25,539][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:05:25,539][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:05:25,570][__main__][INFO] - End of training
+[2025-09-03 20:05:26,382][__main__][INFO] - Plotted losses
+[2025-09-03 20:05:26,382][__main__][INFO] - Computing test metrics
+[2025-09-03 20:05:26,490][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:05:26,629][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:05:26,824][__main__][INFO] - Saved plots
+[2025-09-03 20:05:26,824][__main__][INFO] - Final modulations: {'beta': np.float32(0.57433575), 'alpha': np.float32(0.94885725)}
+[2025-09-03 20:05:26,824][__main__][INFO] - End of script
+
+[2025-09-03 20:05:32,961][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:05:35,254][__main__][INFO] - End of script
+
+[2025-09-03 20:05:41,003][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:05:41,288][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_3/min_node0/
+[2025-09-03 20:05:41,289][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:05:41,355][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:05:41,355][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:05:43,671][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:05:43,671][__main__][INFO] - Starting training...
+[2025-09-03 20:05:43,671][__main__][INFO] - Using device: cuda
+[2025-09-03 20:05:43,671][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:05:44,904][__main__][INFO] - Step 1 | valid1 MSE : 0.0012 | valid1 NMSE : 1.2644
+[2025-09-03 20:05:46,547][__main__][INFO] - Step 100 | valid1 MSE : 0.0010 | valid1 NMSE : 1.0678
+[2025-09-03 20:05:48,213][__main__][INFO] - Step 200 | valid1 MSE : 0.0008 | valid1 NMSE : 0.8908
+[2025-09-03 20:05:49,869][__main__][INFO] - Step 300 | valid1 MSE : 0.0007 | valid1 NMSE : 0.7723
+[2025-09-03 20:05:51,700][__main__][INFO] - Step 400 | valid1 MSE : 0.0007 | valid1 NMSE : 0.7091
+[2025-09-03 20:05:53,346][__main__][INFO] - Step 500 | valid1 MSE : 0.0007 | valid1 NMSE : 0.6861
+[2025-09-03 20:05:53,346][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:05:53,347][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:05:53,380][__main__][INFO] - End of training
+[2025-09-03 20:05:54,278][__main__][INFO] - Plotted losses
+[2025-09-03 20:05:54,278][__main__][INFO] - Computing test metrics
+[2025-09-03 20:05:54,382][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:05:54,522][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:05:54,719][__main__][INFO] - Saved plots
+[2025-09-03 20:05:54,719][__main__][INFO] - Final modulations: {'beta': np.float32(0.5973326), 'alpha': np.float32(0.94769025)}
+[2025-09-03 20:05:54,719][__main__][INFO] - End of script
+
+[2025-09-03 20:06:02,172][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:06:02,472][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_3/min_node1/
+[2025-09-03 20:06:02,472][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:06:02,534][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:06:02,534][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:06:05,306][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:06:05,307][__main__][INFO] - Starting training...
+[2025-09-03 20:06:05,307][__main__][INFO] - Using device: cuda
+[2025-09-03 20:06:05,307][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:06:06,555][__main__][INFO] - Step 1 | valid1 MSE : 0.0010 | valid1 NMSE : 1.2628
+[2025-09-03 20:06:08,192][__main__][INFO] - Step 100 | valid1 MSE : 0.0008 | valid1 NMSE : 1.0854
+[2025-09-03 20:06:09,853][__main__][INFO] - Step 200 | valid1 MSE : 0.0007 | valid1 NMSE : 0.9324
+[2025-09-03 20:06:11,497][__main__][INFO] - Step 300 | valid1 MSE : 0.0007 | valid1 NMSE : 0.8514
+[2025-09-03 20:06:13,293][__main__][INFO] - Step 400 | valid1 MSE : 0.0006 | valid1 NMSE : 0.8207
+[2025-09-03 20:06:14,930][__main__][INFO] - Step 500 | valid1 MSE : 0.0006 | valid1 NMSE : 0.8350
+[2025-09-03 20:06:14,930][__main__][INFO] - Training done in 0.160 min
+[2025-09-03 20:06:14,930][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:06:14,960][__main__][INFO] - End of training
+[2025-09-03 20:06:15,714][__main__][INFO] - Plotted losses
+[2025-09-03 20:06:15,714][__main__][INFO] - Computing test metrics
+[2025-09-03 20:06:15,824][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:06:15,966][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:06:16,238][__main__][INFO] - Saved plots
+[2025-09-03 20:06:16,238][__main__][INFO] - Final modulations: {'beta': np.float32(-0.5977122), 'alpha': np.float32(0.9482171)}
+[2025-09-03 20:06:16,238][__main__][INFO] - End of script
+
+[2025-09-03 20:06:22,085][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:06:22,355][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_3/min_node0_tune1/
+[2025-09-03 20:06:22,355][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:06:22,424][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:06:22,425][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:06:22,726][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:06:24,608][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:06:24,608][__main__][INFO] - Starting training...
+[2025-09-03 20:06:24,608][__main__][INFO] - Using device: cuda
+[2025-09-03 20:06:24,608][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:06:25,889][__main__][INFO] - Step 1 | valid1 MSE : 0.0023 | valid1 NMSE : 2.3903
+[2025-09-03 20:06:27,544][__main__][INFO] - Step 100 | valid1 MSE : 0.0022 | valid1 NMSE : 2.2861
+[2025-09-03 20:06:27,545][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:06:27,545][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:06:27,574][__main__][INFO] - End of training
+[2025-09-03 20:06:28,388][__main__][INFO] - Plotted losses
+[2025-09-03 20:06:28,388][__main__][INFO] - Computing test metrics
+[2025-09-03 20:06:28,502][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:06:28,641][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:06:28,830][__main__][INFO] - Saved plots
+[2025-09-03 20:06:28,831][__main__][INFO] - Final modulations: {'beta': np.float32(-0.59672135), 'alpha': np.float32(0.948806)}
+[2025-09-03 20:06:28,831][__main__][INFO] - End of script
+
+[2025-09-03 20:06:34,672][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:06:34,995][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_3/min_node1_tune0/
+[2025-09-03 20:06:34,995][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:06:35,066][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:06:35,066][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:06:35,322][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:06:37,369][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:06:37,369][__main__][INFO] - Starting training...
+[2025-09-03 20:06:37,369][__main__][INFO] - Using device: cuda
+[2025-09-03 20:06:37,370][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:06:38,632][__main__][INFO] - Step 1 | valid1 MSE : 0.0017 | valid1 NMSE : 2.1617
+[2025-09-03 20:06:40,277][__main__][INFO] - Step 100 | valid1 MSE : 0.0016 | valid1 NMSE : 2.0415
+[2025-09-03 20:06:40,277][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:06:40,277][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:06:40,309][__main__][INFO] - End of training
+[2025-09-03 20:06:41,149][__main__][INFO] - Plotted losses
+[2025-09-03 20:06:41,149][__main__][INFO] - Computing test metrics
+[2025-09-03 20:06:41,263][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:06:41,398][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:06:41,590][__main__][INFO] - Saved plots
+[2025-09-03 20:06:41,591][__main__][INFO] - Final modulations: {'beta': np.float32(0.5963468), 'alpha': np.float32(0.94880545)}
+[2025-09-03 20:06:41,591][__main__][INFO] - End of script
+
+[2025-09-03 20:06:47,712][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:06:50,132][__main__][INFO] - End of script
+
+[2025-09-03 20:06:55,968][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:06:56,265][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_4/min_node0/
+[2025-09-03 20:06:56,265][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:06:56,327][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:06:56,327][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:06:58,642][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:06:58,642][__main__][INFO] - Starting training...
+[2025-09-03 20:06:58,642][__main__][INFO] - Using device: cuda
+[2025-09-03 20:06:58,642][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:06:59,893][__main__][INFO] - Step 1 | valid1 MSE : 0.0013 | valid1 NMSE : 1.3068
+[2025-09-03 20:07:01,536][__main__][INFO] - Step 100 | valid1 MSE : 0.0011 | valid1 NMSE : 1.1629
+[2025-09-03 20:07:03,201][__main__][INFO] - Step 200 | valid1 MSE : 0.0009 | valid1 NMSE : 0.9379
+[2025-09-03 20:07:04,845][__main__][INFO] - Step 300 | valid1 MSE : 0.0008 | valid1 NMSE : 0.7970
+[2025-09-03 20:07:06,647][__main__][INFO] - Step 400 | valid1 MSE : 0.0007 | valid1 NMSE : 0.7137
+[2025-09-03 20:07:08,291][__main__][INFO] - Step 500 | valid1 MSE : 0.0007 | valid1 NMSE : 0.6760
+[2025-09-03 20:07:08,291][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:07:08,291][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:07:08,326][__main__][INFO] - End of training
+[2025-09-03 20:07:09,161][__main__][INFO] - Plotted losses
+[2025-09-03 20:07:09,161][__main__][INFO] - Computing test metrics
+[2025-09-03 20:07:09,270][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:07:09,406][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:07:09,587][__main__][INFO] - Saved plots
+[2025-09-03 20:07:09,587][__main__][INFO] - Final modulations: {'beta': np.float32(0.64239293), 'alpha': np.float32(0.94777596)}
+[2025-09-03 20:07:09,587][__main__][INFO] - End of script
+
+[2025-09-03 20:07:15,635][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:07:15,938][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_4/min_node1/
+[2025-09-03 20:07:15,938][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:07:15,990][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:07:15,990][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:07:18,277][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:07:18,277][__main__][INFO] - Starting training...
+[2025-09-03 20:07:18,277][__main__][INFO] - Using device: cuda
+[2025-09-03 20:07:18,277][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:07:19,545][__main__][INFO] - Step 1 | valid1 MSE : 0.0010 | valid1 NMSE : 1.2942
+[2025-09-03 20:07:21,192][__main__][INFO] - Step 100 | valid1 MSE : 0.0009 | valid1 NMSE : 1.1609
+[2025-09-03 20:07:22,857][__main__][INFO] - Step 200 | valid1 MSE : 0.0008 | valid1 NMSE : 0.9758
+[2025-09-03 20:07:24,516][__main__][INFO] - Step 300 | valid1 MSE : 0.0007 | valid1 NMSE : 0.8805
+[2025-09-03 20:07:26,317][__main__][INFO] - Step 400 | valid1 MSE : 0.0007 | valid1 NMSE : 0.8506
+[2025-09-03 20:07:27,960][__main__][INFO] - Step 500 | valid1 MSE : 0.0007 | valid1 NMSE : 0.8683
+[2025-09-03 20:07:27,960][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:07:27,960][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:07:27,992][__main__][INFO] - End of training
+[2025-09-03 20:07:28,785][__main__][INFO] - Plotted losses
+[2025-09-03 20:07:28,785][__main__][INFO] - Computing test metrics
+[2025-09-03 20:07:28,896][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:07:29,031][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:07:29,220][__main__][INFO] - Saved plots
+[2025-09-03 20:07:29,220][__main__][INFO] - Final modulations: {'beta': np.float32(-0.597833), 'alpha': np.float32(0.9487062)}
+[2025-09-03 20:07:29,220][__main__][INFO] - End of script
+
+[2025-09-03 20:07:35,214][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:07:35,524][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_4/min_node0_tune1/
+[2025-09-03 20:07:35,525][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:07:35,583][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:07:35,583][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:07:35,808][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:07:37,717][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:07:37,718][__main__][INFO] - Starting training...
+[2025-09-03 20:07:37,718][__main__][INFO] - Using device: cuda
+[2025-09-03 20:07:37,718][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:07:38,948][__main__][INFO] - Step 1 | valid1 MSE : 0.0024 | valid1 NMSE : 2.5007
+[2025-09-03 20:07:40,604][__main__][INFO] - Step 100 | valid1 MSE : 0.0023 | valid1 NMSE : 2.3365
+[2025-09-03 20:07:40,604][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:07:40,604][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:07:40,630][__main__][INFO] - End of training
+[2025-09-03 20:07:41,379][__main__][INFO] - Plotted losses
+[2025-09-03 20:07:41,379][__main__][INFO] - Computing test metrics
+[2025-09-03 20:07:41,485][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:07:41,621][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:07:41,803][__main__][INFO] - Saved plots
+[2025-09-03 20:07:41,804][__main__][INFO] - Final modulations: {'beta': np.float32(-0.59684414), 'alpha': np.float32(0.9484285)}
+[2025-09-03 20:07:41,804][__main__][INFO] - End of script
+
+[2025-09-03 20:07:47,628][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:07:47,942][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_4/min_node1_tune0/
+[2025-09-03 20:07:47,942][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:07:48,009][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:07:48,009][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:07:48,212][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:07:50,149][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:07:50,149][__main__][INFO] - Starting training...
+[2025-09-03 20:07:50,149][__main__][INFO] - Using device: cuda
+[2025-09-03 20:07:50,149][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:07:51,388][__main__][INFO] - Step 1 | valid1 MSE : 0.0019 | valid1 NMSE : 2.4173
+[2025-09-03 20:07:53,053][__main__][INFO] - Step 100 | valid1 MSE : 0.0018 | valid1 NMSE : 2.2273
+[2025-09-03 20:07:53,054][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:07:53,054][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:07:53,084][__main__][INFO] - End of training
+[2025-09-03 20:07:53,875][__main__][INFO] - Plotted losses
+[2025-09-03 20:07:53,876][__main__][INFO] - Computing test metrics
+[2025-09-03 20:07:53,982][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:07:54,120][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:07:54,506][__main__][INFO] - Saved plots
+[2025-09-03 20:07:54,506][__main__][INFO] - Final modulations: {'beta': np.float32(0.6414097), 'alpha': np.float32(0.94847435)}
+[2025-09-03 20:07:54,506][__main__][INFO] - End of script
+
+[2025-09-03 20:08:00,435][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:08:02,854][__main__][INFO] - End of script
+
+[2025-09-03 20:08:07,948][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:08:08,234][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_5/min_node0/
+[2025-09-03 20:08:08,234][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:08:08,291][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:08:08,291][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:08:10,350][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:08:10,350][__main__][INFO] - Starting training...
+[2025-09-03 20:08:10,350][__main__][INFO] - Using device: cuda
+[2025-09-03 20:08:10,350][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:08:11,570][__main__][INFO] - Step 1 | valid1 MSE : 0.0017 | valid1 NMSE : 1.1854
+[2025-09-03 20:08:13,221][__main__][INFO] - Step 100 | valid1 MSE : 0.0014 | valid1 NMSE : 1.0011
+[2025-09-03 20:08:14,884][__main__][INFO] - Step 200 | valid1 MSE : 0.0011 | valid1 NMSE : 0.8040
+[2025-09-03 20:08:16,538][__main__][INFO] - Step 300 | valid1 MSE : 0.0009 | valid1 NMSE : 0.6612
+[2025-09-03 20:08:18,353][__main__][INFO] - Step 400 | valid1 MSE : 0.0008 | valid1 NMSE : 0.5737
+[2025-09-03 20:08:19,989][__main__][INFO] - Step 500 | valid1 MSE : 0.0007 | valid1 NMSE : 0.5219
+[2025-09-03 20:08:19,990][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:08:19,990][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:08:20,019][__main__][INFO] - End of training
+[2025-09-03 20:08:20,865][__main__][INFO] - Plotted losses
+[2025-09-03 20:08:20,865][__main__][INFO] - Computing test metrics
+[2025-09-03 20:08:20,966][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:08:21,105][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:08:21,294][__main__][INFO] - Saved plots
+[2025-09-03 20:08:21,295][__main__][INFO] - Final modulations: {'beta': np.float32(0.68691826), 'alpha': np.float32(0.94784915)}
+[2025-09-03 20:08:21,295][__main__][INFO] - End of script
+
+[2025-09-03 20:08:27,812][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:08:28,096][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_5/min_node1/
+[2025-09-03 20:08:28,096][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:08:28,152][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:08:28,152][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:08:30,467][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:08:30,467][__main__][INFO] - Starting training...
+[2025-09-03 20:08:30,467][__main__][INFO] - Using device: cuda
+[2025-09-03 20:08:30,467][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:08:31,699][__main__][INFO] - Step 1 | valid1 MSE : 0.0013 | valid1 NMSE : 1.1894
+[2025-09-03 20:08:33,344][__main__][INFO] - Step 100 | valid1 MSE : 0.0011 | valid1 NMSE : 1.0158
+[2025-09-03 20:08:34,993][__main__][INFO] - Step 200 | valid1 MSE : 0.0009 | valid1 NMSE : 0.8383
+[2025-09-03 20:08:36,632][__main__][INFO] - Step 300 | valid1 MSE : 0.0008 | valid1 NMSE : 0.7310
+[2025-09-03 20:08:38,440][__main__][INFO] - Step 400 | valid1 MSE : 0.0007 | valid1 NMSE : 0.6861
+[2025-09-03 20:08:40,081][__main__][INFO] - Step 500 | valid1 MSE : 0.0007 | valid1 NMSE : 0.6833
+[2025-09-03 20:08:40,081][__main__][INFO] - Training done in 0.160 min
+[2025-09-03 20:08:40,081][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:08:40,109][__main__][INFO] - End of training
+[2025-09-03 20:08:40,854][__main__][INFO] - Plotted losses
+[2025-09-03 20:08:40,854][__main__][INFO] - Computing test metrics
+[2025-09-03 20:08:40,957][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:08:41,096][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:08:41,284][__main__][INFO] - Saved plots
+[2025-09-03 20:08:41,284][__main__][INFO] - Final modulations: {'beta': np.float32(-0.6422762), 'alpha': np.float32(0.94849086)}
+[2025-09-03 20:08:41,285][__main__][INFO] - End of script
+
+[2025-09-03 20:08:47,176][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:08:47,462][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_5/min_node0_tune1/
+[2025-09-03 20:08:47,462][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:08:47,523][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:08:47,523][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:08:47,730][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:08:49,685][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:08:49,685][__main__][INFO] - Starting training...
+[2025-09-03 20:08:49,685][__main__][INFO] - Using device: cuda
+[2025-09-03 20:08:49,685][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:08:50,938][__main__][INFO] - Step 1 | valid1 MSE : 0.0036 | valid1 NMSE : 2.5538
+[2025-09-03 20:08:52,597][__main__][INFO] - Step 100 | valid1 MSE : 0.0033 | valid1 NMSE : 2.3652
+[2025-09-03 20:08:52,598][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:08:52,598][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:08:52,625][__main__][INFO] - End of training
+[2025-09-03 20:08:53,419][__main__][INFO] - Plotted losses
+[2025-09-03 20:08:53,419][__main__][INFO] - Computing test metrics
+[2025-09-03 20:08:53,524][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:08:53,665][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:08:53,940][__main__][INFO] - Saved plots
+[2025-09-03 20:08:53,940][__main__][INFO] - Final modulations: {'beta': np.float32(-0.64129084), 'alpha': np.float32(0.9480658)}
+[2025-09-03 20:08:53,940][__main__][INFO] - End of script
+
+[2025-09-03 20:08:59,754][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:09:00,053][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s0.2/seed_5/min_node1_tune0/
+[2025-09-03 20:09:00,053][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:09:00,116][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:09:00,116][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:09:00,398][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:09:02,346][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:09:02,346][__main__][INFO] - Starting training...
+[2025-09-03 20:09:02,346][__main__][INFO] - Using device: cuda
+[2025-09-03 20:09:02,346][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:09:03,556][__main__][INFO] - Step 1 | valid1 MSE : 0.0027 | valid1 NMSE : 2.5361
+[2025-09-03 20:09:05,212][__main__][INFO] - Step 100 | valid1 MSE : 0.0025 | valid1 NMSE : 2.3002
+[2025-09-03 20:09:05,212][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:09:05,212][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:09:05,238][__main__][INFO] - End of training
+[2025-09-03 20:09:06,030][__main__][INFO] - Plotted losses
+[2025-09-03 20:09:06,030][__main__][INFO] - Computing test metrics
+[2025-09-03 20:09:06,139][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:09:06,278][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:09:06,467][__main__][INFO] - Saved plots
+[2025-09-03 20:09:06,467][__main__][INFO] - Final modulations: {'beta': np.float32(0.68593675), 'alpha': np.float32(0.9481105)}
+[2025-09-03 20:09:06,467][__main__][INFO] - End of script
+
+==Table of ../outputs/bench_tune/r0.1_s0.2/==
++-----------------+-------------------+-------------------+--------------------+--------------------+
+|                 | min_node0         | min_node1         | min_node0_tune1    | min_node1_tune0    |
++=================+===================+===================+====================+====================+
+| Test MSE * 1e4  | 6.4950 ± 0.6008   | 7.6302 ± 1.2188   | 23.0428 ± 5.8573   | 19.0944 ± 3.4128   |
++-----------------+-------------------+-------------------+--------------------+--------------------+
+| Test NMSE * 1e2 | 68.5058 ± 11.1553 | 85.1061 ± 11.5604 | 236.0492 ± 13.6480 | 211.5251 ± 15.5084 |
++-----------------+-------------------+-------------------+--------------------+--------------------+
+==Table of ../outputs/bench_tune/r0.1_s0.2/==
++-----------------+-------------------+-------------------+--------------------+--------------------+
+|                 | min_node0         | min_node1         | min_node0_tune1    | min_node1_tune0    |
++=================+===================+===================+====================+====================+
+| Test MSE * 1e4  | 6.8639 ± 3.0172   | 7.5133 ± 1.9064   | 22.8706 ± 3.6301   | 19.0572 ± 2.3857   |
++-----------------+-------------------+-------------------+--------------------+--------------------+
+| Test NMSE * 1e2 | 68.0721 ± 13.0522 | 82.9314 ± 13.9149 | 238.2943 ± 26.4618 | 212.1167 ± 10.0961 |
++-----------------+-------------------+-------------------+--------------------+--------------------+
+[2025-09-03 20:09:46,445][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:09:49,153][__main__][INFO] - End of script
+
+[2025-09-03 20:09:54,660][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:09:54,990][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_1/min_node0/
+[2025-09-03 20:09:54,990][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:09:55,048][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:09:55,048][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:09:57,601][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:09:57,601][__main__][INFO] - Starting training...
+[2025-09-03 20:09:57,601][__main__][INFO] - Using device: cuda
+[2025-09-03 20:09:57,601][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:09:58,808][__main__][INFO] - Step 1 | valid1 MSE : 0.0010 | valid1 NMSE : 1.3323
+[2025-09-03 20:10:00,459][__main__][INFO] - Step 100 | valid1 MSE : 0.0003 | valid1 NMSE : 0.3512
+[2025-09-03 20:10:02,125][__main__][INFO] - Step 200 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1528
+[2025-09-03 20:10:03,791][__main__][INFO] - Step 300 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1115
+[2025-09-03 20:10:05,596][__main__][INFO] - Step 400 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0883
+[2025-09-03 20:10:07,245][__main__][INFO] - Step 500 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0619
+[2025-09-03 20:10:07,245][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:10:07,245][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:10:07,272][__main__][INFO] - End of training
+[2025-09-03 20:10:08,066][__main__][INFO] - Plotted losses
+[2025-09-03 20:10:08,066][__main__][INFO] - Computing test metrics
+[2025-09-03 20:10:08,167][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:10:08,302][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:10:08,486][__main__][INFO] - Saved plots
+[2025-09-03 20:10:08,486][__main__][INFO] - Final modulations: {'beta': np.float32(0.5740527), 'alpha': np.float32(0.9468708)}
+[2025-09-03 20:10:08,486][__main__][INFO] - End of script
+
+[2025-09-03 20:10:14,382][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:10:14,697][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_1/min_node1/
+[2025-09-03 20:10:14,697][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:10:14,753][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:10:14,753][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:10:16,922][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:10:16,922][__main__][INFO] - Starting training...
+[2025-09-03 20:10:16,922][__main__][INFO] - Using device: cuda
+[2025-09-03 20:10:16,922][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:10:18,188][__main__][INFO] - Step 1 | valid1 MSE : 0.0013 | valid1 NMSE : 1.3225
+[2025-09-03 20:10:19,840][__main__][INFO] - Step 100 | valid1 MSE : 0.0003 | valid1 NMSE : 0.3595
+[2025-09-03 20:10:21,489][__main__][INFO] - Step 200 | valid1 MSE : 0.0002 | valid1 NMSE : 0.1726
+[2025-09-03 20:10:23,140][__main__][INFO] - Step 300 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1311
+[2025-09-03 20:10:24,946][__main__][INFO] - Step 400 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0978
+[2025-09-03 20:10:26,589][__main__][INFO] - Step 500 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0665
+[2025-09-03 20:10:26,589][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:10:26,589][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:10:26,614][__main__][INFO] - End of training
+[2025-09-03 20:10:27,407][__main__][INFO] - Plotted losses
+[2025-09-03 20:10:27,407][__main__][INFO] - Computing test metrics
+[2025-09-03 20:10:27,514][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:10:27,654][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:10:27,834][__main__][INFO] - Saved plots
+[2025-09-03 20:10:27,835][__main__][INFO] - Final modulations: {'beta': np.float32(-0.64035875), 'alpha': np.float32(0.94716966)}
+[2025-09-03 20:10:27,835][__main__][INFO] - End of script
+
+[2025-09-03 20:10:33,920][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:10:34,207][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_1/min_node0_tune1/
+[2025-09-03 20:10:34,208][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:10:34,259][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:10:34,259][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:10:34,509][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:10:36,232][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:10:36,232][__main__][INFO] - Starting training...
+[2025-09-03 20:10:36,232][__main__][INFO] - Using device: cuda
+[2025-09-03 20:10:36,232][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:10:37,422][__main__][INFO] - Step 1 | valid1 MSE : 0.0003 | valid1 NMSE : 0.3865
+[2025-09-03 20:10:39,078][__main__][INFO] - Step 100 | valid1 MSE : 0.0002 | valid1 NMSE : 0.2769
+[2025-09-03 20:10:39,079][__main__][INFO] - Training done in 0.047 min
+[2025-09-03 20:10:39,079][__main__][INFO] - Average time per step: 0.028 s
+[2025-09-03 20:10:39,104][__main__][INFO] - End of training
+[2025-09-03 20:10:39,883][__main__][INFO] - Plotted losses
+[2025-09-03 20:10:39,883][__main__][INFO] - Computing test metrics
+[2025-09-03 20:10:39,995][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:10:40,136][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:10:40,324][__main__][INFO] - Saved plots
+[2025-09-03 20:10:40,324][__main__][INFO] - Final modulations: {'beta': np.float32(-0.63945967), 'alpha': np.float32(0.94813293)}
+[2025-09-03 20:10:40,324][__main__][INFO] - End of script
+
+[2025-09-03 20:10:46,224][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:10:46,495][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_1/min_node1_tune0/
+[2025-09-03 20:10:46,495][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:10:46,555][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:10:46,555][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:10:46,846][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:10:48,819][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:10:48,819][__main__][INFO] - Starting training...
+[2025-09-03 20:10:48,819][__main__][INFO] - Using device: cuda
+[2025-09-03 20:10:48,819][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:10:50,069][__main__][INFO] - Step 1 | valid1 MSE : 0.0003 | valid1 NMSE : 0.3543
+[2025-09-03 20:10:51,710][__main__][INFO] - Step 100 | valid1 MSE : 0.0002 | valid1 NMSE : 0.2105
+[2025-09-03 20:10:51,710][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:10:51,710][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:10:51,740][__main__][INFO] - End of training
+[2025-09-03 20:10:52,512][__main__][INFO] - Plotted losses
+[2025-09-03 20:10:52,512][__main__][INFO] - Computing test metrics
+[2025-09-03 20:10:52,621][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:10:52,758][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:10:52,942][__main__][INFO] - Saved plots
+[2025-09-03 20:10:52,943][__main__][INFO] - Final modulations: {'beta': np.float32(0.57316726), 'alpha': np.float32(0.94780594)}
+[2025-09-03 20:10:52,943][__main__][INFO] - End of script
+
+[2025-09-03 20:10:58,710][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:11:01,279][__main__][INFO] - End of script
+
+[2025-09-03 20:11:06,927][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:11:07,213][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_2/min_node0/
+[2025-09-03 20:11:07,214][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:11:07,270][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:11:07,270][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:11:09,889][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:11:09,889][__main__][INFO] - Starting training...
+[2025-09-03 20:11:09,889][__main__][INFO] - Using device: cuda
+[2025-09-03 20:11:09,889][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:11:11,125][__main__][INFO] - Step 1 | valid1 MSE : 0.0011 | valid1 NMSE : 1.4281
+[2025-09-03 20:11:12,778][__main__][INFO] - Step 100 | valid1 MSE : 0.0003 | valid1 NMSE : 0.4073
+[2025-09-03 20:11:14,454][__main__][INFO] - Step 200 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1737
+[2025-09-03 20:11:16,121][__main__][INFO] - Step 300 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1239
+[2025-09-03 20:11:17,923][__main__][INFO] - Step 400 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0981
+[2025-09-03 20:11:19,570][__main__][INFO] - Step 500 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0735
+[2025-09-03 20:11:19,570][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:11:19,570][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:11:19,594][__main__][INFO] - End of training
+[2025-09-03 20:11:20,345][__main__][INFO] - Plotted losses
+[2025-09-03 20:11:20,346][__main__][INFO] - Computing test metrics
+[2025-09-03 20:11:20,449][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:11:20,583][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:11:20,758][__main__][INFO] - Saved plots
+[2025-09-03 20:11:20,758][__main__][INFO] - Final modulations: {'beta': np.float32(0.57392347), 'alpha': np.float32(0.94730705)}
+[2025-09-03 20:11:20,758][__main__][INFO] - End of script
+
+[2025-09-03 20:11:26,210][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:11:26,492][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_2/min_node1/
+[2025-09-03 20:11:26,493][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:11:26,546][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:11:26,546][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:11:28,474][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:11:28,475][__main__][INFO] - Starting training...
+[2025-09-03 20:11:28,475][__main__][INFO] - Using device: cuda
+[2025-09-03 20:11:28,475][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:11:29,704][__main__][INFO] - Step 1 | valid1 MSE : 0.0013 | valid1 NMSE : 1.4376
+[2025-09-03 20:11:31,368][__main__][INFO] - Step 100 | valid1 MSE : 0.0004 | valid1 NMSE : 0.4214
+[2025-09-03 20:11:33,027][__main__][INFO] - Step 200 | valid1 MSE : 0.0002 | valid1 NMSE : 0.1871
+[2025-09-03 20:11:34,674][__main__][INFO] - Step 300 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1375
+[2025-09-03 20:11:36,489][__main__][INFO] - Step 400 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1081
+[2025-09-03 20:11:38,148][__main__][INFO] - Step 500 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0805
+[2025-09-03 20:11:38,149][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:11:38,149][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:11:38,177][__main__][INFO] - End of training
+[2025-09-03 20:11:39,016][__main__][INFO] - Plotted losses
+[2025-09-03 20:11:39,016][__main__][INFO] - Computing test metrics
+[2025-09-03 20:11:39,121][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:11:39,260][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:11:39,452][__main__][INFO] - Saved plots
+[2025-09-03 20:11:39,452][__main__][INFO] - Final modulations: {'beta': np.float32(-0.6178444), 'alpha': np.float32(0.9471241)}
+[2025-09-03 20:11:39,452][__main__][INFO] - End of script
+
+[2025-09-03 20:11:46,237][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:11:46,501][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_2/min_node0_tune1/
+[2025-09-03 20:11:46,501][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:11:46,559][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:11:46,559][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:11:46,774][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:11:48,700][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:11:48,700][__main__][INFO] - Starting training...
+[2025-09-03 20:11:48,700][__main__][INFO] - Using device: cuda
+[2025-09-03 20:11:48,700][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:11:49,931][__main__][INFO] - Step 1 | valid1 MSE : 0.0004 | valid1 NMSE : 0.4727
+[2025-09-03 20:11:51,579][__main__][INFO] - Step 100 | valid1 MSE : 0.0002 | valid1 NMSE : 0.2724
+[2025-09-03 20:11:51,579][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:11:51,579][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:11:51,613][__main__][INFO] - End of training
+[2025-09-03 20:11:52,374][__main__][INFO] - Plotted losses
+[2025-09-03 20:11:52,374][__main__][INFO] - Computing test metrics
+[2025-09-03 20:11:52,485][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:11:52,629][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:11:52,823][__main__][INFO] - Saved plots
+[2025-09-03 20:11:52,824][__main__][INFO] - Final modulations: {'beta': np.float32(-0.6169321), 'alpha': np.float32(0.9481124)}
+[2025-09-03 20:11:52,824][__main__][INFO] - End of script
+
+[2025-09-03 20:11:58,756][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:11:59,065][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_2/min_node1_tune0/
+[2025-09-03 20:11:59,065][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:11:59,122][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:11:59,122][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:11:59,394][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:12:01,338][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:12:01,339][__main__][INFO] - Starting training...
+[2025-09-03 20:12:01,339][__main__][INFO] - Using device: cuda
+[2025-09-03 20:12:01,339][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:12:02,586][__main__][INFO] - Step 1 | valid1 MSE : 0.0004 | valid1 NMSE : 0.4269
+[2025-09-03 20:12:04,251][__main__][INFO] - Step 100 | valid1 MSE : 0.0002 | valid1 NMSE : 0.2564
+[2025-09-03 20:12:04,252][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:12:04,252][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:12:04,281][__main__][INFO] - End of training
+[2025-09-03 20:12:05,042][__main__][INFO] - Plotted losses
+[2025-09-03 20:12:05,042][__main__][INFO] - Computing test metrics
+[2025-09-03 20:12:05,154][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:12:05,294][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:12:05,487][__main__][INFO] - Saved plots
+[2025-09-03 20:12:05,488][__main__][INFO] - Final modulations: {'beta': np.float32(0.57301563), 'alpha': np.float32(0.9482702)}
+[2025-09-03 20:12:05,488][__main__][INFO] - End of script
+
+[2025-09-03 20:12:11,074][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:12:13,266][__main__][INFO] - End of script
+
+[2025-09-03 20:12:18,477][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:12:18,788][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_3/min_node0/
+[2025-09-03 20:12:18,789][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:12:18,840][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:12:18,840][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:12:21,313][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:12:21,313][__main__][INFO] - Starting training...
+[2025-09-03 20:12:21,313][__main__][INFO] - Using device: cuda
+[2025-09-03 20:12:21,313][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:12:22,547][__main__][INFO] - Step 1 | valid1 MSE : 0.0012 | valid1 NMSE : 1.2513
+[2025-09-03 20:12:24,184][__main__][INFO] - Step 100 | valid1 MSE : 0.0003 | valid1 NMSE : 0.3045
+[2025-09-03 20:12:25,859][__main__][INFO] - Step 200 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1437
+[2025-09-03 20:12:27,514][__main__][INFO] - Step 300 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1127
+[2025-09-03 20:12:29,321][__main__][INFO] - Step 400 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0910
+[2025-09-03 20:12:30,964][__main__][INFO] - Step 500 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0688
+[2025-09-03 20:12:30,965][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:12:30,965][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:12:30,994][__main__][INFO] - End of training
+[2025-09-03 20:12:31,764][__main__][INFO] - Plotted losses
+[2025-09-03 20:12:31,764][__main__][INFO] - Computing test metrics
+[2025-09-03 20:12:31,867][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:12:32,001][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:12:32,185][__main__][INFO] - Saved plots
+[2025-09-03 20:12:32,185][__main__][INFO] - Final modulations: {'beta': np.float32(0.5956598), 'alpha': np.float32(0.9468625)}
+[2025-09-03 20:12:32,185][__main__][INFO] - End of script
+
+[2025-09-03 20:12:37,972][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:12:38,277][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_3/min_node1/
+[2025-09-03 20:12:38,277][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:12:38,329][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:12:38,329][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:12:40,267][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:12:40,267][__main__][INFO] - Starting training...
+[2025-09-03 20:12:40,267][__main__][INFO] - Using device: cuda
+[2025-09-03 20:12:40,267][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:12:41,493][__main__][INFO] - Step 1 | valid1 MSE : 0.0010 | valid1 NMSE : 1.2498
+[2025-09-03 20:12:43,155][__main__][INFO] - Step 100 | valid1 MSE : 0.0002 | valid1 NMSE : 0.3090
+[2025-09-03 20:12:44,818][__main__][INFO] - Step 200 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1478
+[2025-09-03 20:12:46,467][__main__][INFO] - Step 300 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1153
+[2025-09-03 20:12:48,271][__main__][INFO] - Step 400 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0944
+[2025-09-03 20:12:49,917][__main__][INFO] - Step 500 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0716
+[2025-09-03 20:12:49,917][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:12:49,917][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:12:49,945][__main__][INFO] - End of training
+[2025-09-03 20:12:50,772][__main__][INFO] - Plotted losses
+[2025-09-03 20:12:50,773][__main__][INFO] - Computing test metrics
+[2025-09-03 20:12:50,878][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:12:51,015][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:12:51,210][__main__][INFO] - Saved plots
+[2025-09-03 20:12:51,210][__main__][INFO] - Final modulations: {'beta': np.float32(-0.5960606), 'alpha': np.float32(0.9470478)}
+[2025-09-03 20:12:51,211][__main__][INFO] - End of script
+
+[2025-09-03 20:12:57,971][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:12:58,263][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_3/min_node0_tune1/
+[2025-09-03 20:12:58,263][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:12:58,322][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:12:58,322][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:12:58,529][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:13:00,507][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:13:00,507][__main__][INFO] - Starting training...
+[2025-09-03 20:13:00,507][__main__][INFO] - Using device: cuda
+[2025-09-03 20:13:00,507][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:13:01,769][__main__][INFO] - Step 1 | valid1 MSE : 0.0005 | valid1 NMSE : 0.4802
+[2025-09-03 20:13:03,455][__main__][INFO] - Step 100 | valid1 MSE : 0.0002 | valid1 NMSE : 0.2409
+[2025-09-03 20:13:03,456][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:13:03,456][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:13:03,482][__main__][INFO] - End of training
+[2025-09-03 20:13:04,227][__main__][INFO] - Plotted losses
+[2025-09-03 20:13:04,227][__main__][INFO] - Computing test metrics
+[2025-09-03 20:13:04,341][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:13:04,481][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:13:04,666][__main__][INFO] - Saved plots
+[2025-09-03 20:13:04,667][__main__][INFO] - Final modulations: {'beta': np.float32(-0.59516275), 'alpha': np.float32(0.94802713)}
+[2025-09-03 20:13:04,667][__main__][INFO] - End of script
+
+[2025-09-03 20:13:10,427][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:13:10,728][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_3/min_node1_tune0/
+[2025-09-03 20:13:10,728][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:13:10,791][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:13:10,791][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:13:11,090][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:13:13,053][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:13:13,053][__main__][INFO] - Starting training...
+[2025-09-03 20:13:13,053][__main__][INFO] - Using device: cuda
+[2025-09-03 20:13:13,053][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:13:14,298][__main__][INFO] - Step 1 | valid1 MSE : 0.0004 | valid1 NMSE : 0.4588
+[2025-09-03 20:13:15,950][__main__][INFO] - Step 100 | valid1 MSE : 0.0002 | valid1 NMSE : 0.2281
+[2025-09-03 20:13:15,950][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:13:15,950][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:13:15,977][__main__][INFO] - End of training
+[2025-09-03 20:13:16,750][__main__][INFO] - Plotted losses
+[2025-09-03 20:13:16,750][__main__][INFO] - Computing test metrics
+[2025-09-03 20:13:16,859][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:13:17,001][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:13:17,191][__main__][INFO] - Saved plots
+[2025-09-03 20:13:17,192][__main__][INFO] - Final modulations: {'beta': np.float32(0.59476393), 'alpha': np.float32(0.94783074)}
+[2025-09-03 20:13:17,192][__main__][INFO] - End of script
+
+[2025-09-03 20:13:23,067][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:13:25,240][__main__][INFO] - End of script
+
+[2025-09-03 20:13:30,476][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:13:30,790][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_4/min_node0/
+[2025-09-03 20:13:30,791][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:13:30,848][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:13:30,848][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:13:33,396][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:13:33,396][__main__][INFO] - Starting training...
+[2025-09-03 20:13:33,396][__main__][INFO] - Using device: cuda
+[2025-09-03 20:13:33,396][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:13:34,648][__main__][INFO] - Step 1 | valid1 MSE : 0.0013 | valid1 NMSE : 1.2905
+[2025-09-03 20:13:36,324][__main__][INFO] - Step 100 | valid1 MSE : 0.0003 | valid1 NMSE : 0.3228
+[2025-09-03 20:13:37,993][__main__][INFO] - Step 200 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1422
+[2025-09-03 20:13:39,646][__main__][INFO] - Step 300 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1102
+[2025-09-03 20:13:41,470][__main__][INFO] - Step 400 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0916
+[2025-09-03 20:13:43,109][__main__][INFO] - Step 500 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0748
+[2025-09-03 20:13:43,110][__main__][INFO] - Training done in 0.162 min
+[2025-09-03 20:13:43,110][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:13:43,151][__main__][INFO] - End of training
+[2025-09-03 20:13:43,939][__main__][INFO] - Plotted losses
+[2025-09-03 20:13:43,939][__main__][INFO] - Computing test metrics
+[2025-09-03 20:13:44,055][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:13:44,195][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:13:44,391][__main__][INFO] - Saved plots
+[2025-09-03 20:13:44,391][__main__][INFO] - Final modulations: {'beta': np.float32(0.6407264), 'alpha': np.float32(0.94644123)}
+[2025-09-03 20:13:44,391][__main__][INFO] - End of script
+
+[2025-09-03 20:13:50,571][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:13:50,892][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_4/min_node1/
+[2025-09-03 20:13:50,893][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:13:50,954][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:13:50,954][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:13:53,140][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:13:53,141][__main__][INFO] - Starting training...
+[2025-09-03 20:13:53,141][__main__][INFO] - Using device: cuda
+[2025-09-03 20:13:53,141][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:13:54,394][__main__][INFO] - Step 1 | valid1 MSE : 0.0010 | valid1 NMSE : 1.2772
+[2025-09-03 20:13:56,055][__main__][INFO] - Step 100 | valid1 MSE : 0.0002 | valid1 NMSE : 0.3110
+[2025-09-03 20:13:57,715][__main__][INFO] - Step 200 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1287
+[2025-09-03 20:13:59,368][__main__][INFO] - Step 300 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0971
+[2025-09-03 20:14:01,180][__main__][INFO] - Step 400 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0806
+[2025-09-03 20:14:02,826][__main__][INFO] - Step 500 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0646
+[2025-09-03 20:14:02,826][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:14:02,826][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:14:02,855][__main__][INFO] - End of training
+[2025-09-03 20:14:03,695][__main__][INFO] - Plotted losses
+[2025-09-03 20:14:03,696][__main__][INFO] - Computing test metrics
+[2025-09-03 20:14:03,803][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:14:03,943][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:14:04,136][__main__][INFO] - Saved plots
+[2025-09-03 20:14:04,136][__main__][INFO] - Final modulations: {'beta': np.float32(-0.59785306), 'alpha': np.float32(0.9465015)}
+[2025-09-03 20:14:04,136][__main__][INFO] - End of script
+
+[2025-09-03 20:14:11,182][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:14:11,443][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_4/min_node0_tune1/
+[2025-09-03 20:14:11,443][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:14:11,497][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:14:11,497][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:14:11,816][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:14:13,690][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:14:13,690][__main__][INFO] - Starting training...
+[2025-09-03 20:14:13,690][__main__][INFO] - Using device: cuda
+[2025-09-03 20:14:13,690][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:14:14,909][__main__][INFO] - Step 1 | valid1 MSE : 0.0006 | valid1 NMSE : 0.6017
+[2025-09-03 20:14:16,560][__main__][INFO] - Step 100 | valid1 MSE : 0.0003 | valid1 NMSE : 0.2830
+[2025-09-03 20:14:16,560][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:14:16,560][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:14:16,589][__main__][INFO] - End of training
+[2025-09-03 20:14:17,365][__main__][INFO] - Plotted losses
+[2025-09-03 20:14:17,365][__main__][INFO] - Computing test metrics
+[2025-09-03 20:14:17,478][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:14:17,615][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:14:17,808][__main__][INFO] - Saved plots
+[2025-09-03 20:14:17,808][__main__][INFO] - Final modulations: {'beta': np.float32(-0.5969499), 'alpha': np.float32(0.94752216)}
+[2025-09-03 20:14:17,808][__main__][INFO] - End of script
+
+[2025-09-03 20:14:23,559][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:14:23,875][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_4/min_node1_tune0/
+[2025-09-03 20:14:23,875][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:14:23,930][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:14:23,930][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:14:24,226][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:14:26,156][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:14:26,156][__main__][INFO] - Starting training...
+[2025-09-03 20:14:26,156][__main__][INFO] - Using device: cuda
+[2025-09-03 20:14:26,156][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:14:27,370][__main__][INFO] - Step 1 | valid1 MSE : 0.0006 | valid1 NMSE : 0.7135
+[2025-09-03 20:14:29,036][__main__][INFO] - Step 100 | valid1 MSE : 0.0003 | valid1 NMSE : 0.3688
+[2025-09-03 20:14:29,036][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:14:29,036][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:14:29,067][__main__][INFO] - End of training
+[2025-09-03 20:14:29,866][__main__][INFO] - Plotted losses
+[2025-09-03 20:14:29,866][__main__][INFO] - Computing test metrics
+[2025-09-03 20:14:29,971][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:14:30,112][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:14:30,312][__main__][INFO] - Saved plots
+[2025-09-03 20:14:30,313][__main__][INFO] - Final modulations: {'beta': np.float32(0.63981074), 'alpha': np.float32(0.94750994)}
+[2025-09-03 20:14:30,313][__main__][INFO] - End of script
+
+[2025-09-03 20:14:36,426][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:14:38,740][__main__][INFO] - End of script
+
+[2025-09-03 20:14:44,533][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:14:44,859][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_5/min_node0/
+[2025-09-03 20:14:44,859][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:14:44,923][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:14:44,923][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:14:47,665][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:14:47,665][__main__][INFO] - Starting training...
+[2025-09-03 20:14:47,665][__main__][INFO] - Using device: cuda
+[2025-09-03 20:14:47,665][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:14:48,886][__main__][INFO] - Step 1 | valid1 MSE : 0.0016 | valid1 NMSE : 1.1707
+[2025-09-03 20:14:50,563][__main__][INFO] - Step 100 | valid1 MSE : 0.0004 | valid1 NMSE : 0.2590
+[2025-09-03 20:14:52,221][__main__][INFO] - Step 200 | valid1 MSE : 0.0002 | valid1 NMSE : 0.1087
+[2025-09-03 20:14:53,871][__main__][INFO] - Step 300 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0885
+[2025-09-03 20:14:55,667][__main__][INFO] - Step 400 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0766
+[2025-09-03 20:14:57,321][__main__][INFO] - Step 500 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0639
+[2025-09-03 20:14:57,321][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:14:57,321][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:14:57,354][__main__][INFO] - End of training
+[2025-09-03 20:14:58,158][__main__][INFO] - Plotted losses
+[2025-09-03 20:14:58,159][__main__][INFO] - Computing test metrics
+[2025-09-03 20:14:58,262][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:14:58,400][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:14:58,595][__main__][INFO] - Saved plots
+[2025-09-03 20:14:58,596][__main__][INFO] - Final modulations: {'beta': np.float32(0.6852509), 'alpha': np.float32(0.94585997)}
+[2025-09-03 20:14:58,596][__main__][INFO] - End of script
+
+[2025-09-03 20:15:04,469][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:15:04,753][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_5/min_node1/
+[2025-09-03 20:15:04,753][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:15:04,812][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:15:04,812][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:15:06,921][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:15:06,921][__main__][INFO] - Starting training...
+[2025-09-03 20:15:06,921][__main__][INFO] - Using device: cuda
+[2025-09-03 20:15:06,921][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:15:08,137][__main__][INFO] - Step 1 | valid1 MSE : 0.0013 | valid1 NMSE : 1.1733
+[2025-09-03 20:15:09,798][__main__][INFO] - Step 100 | valid1 MSE : 0.0003 | valid1 NMSE : 0.2568
+[2025-09-03 20:15:11,448][__main__][INFO] - Step 200 | valid1 MSE : 0.0001 | valid1 NMSE : 0.1010
+[2025-09-03 20:15:13,083][__main__][INFO] - Step 300 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0801
+[2025-09-03 20:15:14,877][__main__][INFO] - Step 400 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0691
+[2025-09-03 20:15:16,519][__main__][INFO] - Step 500 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0588
+[2025-09-03 20:15:16,519][__main__][INFO] - Training done in 0.160 min
+[2025-09-03 20:15:16,519][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:15:16,546][__main__][INFO] - End of training
+[2025-09-03 20:15:17,360][__main__][INFO] - Plotted losses
+[2025-09-03 20:15:17,360][__main__][INFO] - Computing test metrics
+[2025-09-03 20:15:17,463][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:15:17,602][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:15:17,789][__main__][INFO] - Saved plots
+[2025-09-03 20:15:17,789][__main__][INFO] - Final modulations: {'beta': np.float32(-0.6417553), 'alpha': np.float32(0.94585794)}
+[2025-09-03 20:15:17,789][__main__][INFO] - End of script
+
+[2025-09-03 20:15:24,995][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:15:25,290][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_5/min_node0_tune1/
+[2025-09-03 20:15:25,290][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:15:25,357][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:15:25,358][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:15:25,631][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:15:27,597][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:15:27,597][__main__][INFO] - Starting training...
+[2025-09-03 20:15:27,597][__main__][INFO] - Using device: cuda
+[2025-09-03 20:15:27,597][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:15:28,837][__main__][INFO] - Step 1 | valid1 MSE : 0.0012 | valid1 NMSE : 0.8397
+[2025-09-03 20:15:30,505][__main__][INFO] - Step 100 | valid1 MSE : 0.0005 | valid1 NMSE : 0.3375
+[2025-09-03 20:15:30,506][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:15:30,506][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:15:30,540][__main__][INFO] - End of training
+[2025-09-03 20:15:31,319][__main__][INFO] - Plotted losses
+[2025-09-03 20:15:31,319][__main__][INFO] - Computing test metrics
+[2025-09-03 20:15:31,431][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:15:31,567][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:15:31,766][__main__][INFO] - Saved plots
+[2025-09-03 20:15:31,766][__main__][INFO] - Final modulations: {'beta': np.float32(-0.6408542), 'alpha': np.float32(0.946928)}
+[2025-09-03 20:15:31,767][__main__][INFO] - End of script
+
+[2025-09-03 20:15:37,644][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:15:37,953][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0.1_s1/seed_5/min_node1_tune0/
+[2025-09-03 20:15:37,953][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:15:38,011][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:15:38,011][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:15:38,334][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:15:40,284][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:15:40,284][__main__][INFO] - Starting training...
+[2025-09-03 20:15:40,284][__main__][INFO] - Using device: cuda
+[2025-09-03 20:15:40,284][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:15:41,500][__main__][INFO] - Step 1 | valid1 MSE : 0.0010 | valid1 NMSE : 0.9394
+[2025-09-03 20:15:43,143][__main__][INFO] - Step 100 | valid1 MSE : 0.0005 | valid1 NMSE : 0.4338
+[2025-09-03 20:15:43,143][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:15:43,143][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:15:43,173][__main__][INFO] - End of training
+[2025-09-03 20:15:43,966][__main__][INFO] - Plotted losses
+[2025-09-03 20:15:43,966][__main__][INFO] - Computing test metrics
+[2025-09-03 20:15:44,071][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:15:44,209][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:15:44,394][__main__][INFO] - Saved plots
+[2025-09-03 20:15:44,394][__main__][INFO] - Final modulations: {'beta': np.float32(0.6843386), 'alpha': np.float32(0.9469545)}
+[2025-09-03 20:15:44,394][__main__][INFO] - End of script
+
+==Table of ../outputs/bench_tune/r0.1_s1/==
++-----------------+-----------------+-----------------+-------------------+-------------------+
+|                 | min_node0       | min_node1       | min_node0_tune1   | min_node1_tune0   |
++=================+=================+=================+===================+===================+
+| Test MSE * 1e4  | 0.6677 ± 0.1559 | 0.6136 ± 0.0875 | 2.8127 ± 1.0853   | 2.7373 ± 1.1518   |
++-----------------+-----------------+-----------------+-------------------+-------------------+
+| Test NMSE * 1e2 | 6.8715 ± 0.5712 | 6.8449 ± 0.8288 | 28.2153 ± 3.5021  | 29.9613 ± 9.7039  |
++-----------------+-----------------+-----------------+-------------------+-------------------+
+==Table of ../outputs/bench_tune/r0.1_s1/==
++-----------------+-----------------+-----------------+-------------------+-------------------+
+|                 | min_node0       | min_node1       | min_node0_tune1   | min_node1_tune0   |
++=================+=================+=================+===================+===================+
+| Test MSE * 1e4  | 0.9498 ± 1.0747 | 0.7302 ± 0.7010 | 2.7868 ± 1.4712   | 2.6303 ± 1.4487   |
++-----------------+-----------------+-----------------+-------------------+-------------------+
+| Test NMSE * 1e2 | 8.3024 ± 7.3064 | 7.7293 ± 6.3363 | 27.2312 ± 6.8531  | 28.6822 ± 13.0052 |
++-----------------+-----------------+-----------------+-------------------+-------------------+
+[2025-09-03 20:16:25,629][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:16:27,955][__main__][INFO] - End of script
+
+[2025-09-03 20:16:33,509][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:16:33,801][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_1/min_node0/
+[2025-09-03 20:16:33,801][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:16:33,864][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:16:33,864][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:16:36,406][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:16:36,407][__main__][INFO] - Starting training...
+[2025-09-03 20:16:36,407][__main__][INFO] - Using device: cuda
+[2025-09-03 20:16:36,407][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:16:37,644][__main__][INFO] - Step 1 | valid1 MSE : 0.0635 | valid1 NMSE : 1.0415
+[2025-09-03 20:16:39,287][__main__][INFO] - Step 100 | valid1 MSE : 0.0547 | valid1 NMSE : 0.8944
+[2025-09-03 20:16:40,939][__main__][INFO] - Step 200 | valid1 MSE : 0.0445 | valid1 NMSE : 0.7274
+[2025-09-03 20:16:42,589][__main__][INFO] - Step 300 | valid1 MSE : 0.0378 | valid1 NMSE : 0.6184
+[2025-09-03 20:16:44,407][__main__][INFO] - Step 400 | valid1 MSE : 0.0337 | valid1 NMSE : 0.5507
+[2025-09-03 20:16:46,050][__main__][INFO] - Step 500 | valid1 MSE : 0.0321 | valid1 NMSE : 0.5231
+[2025-09-03 20:16:46,051][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:16:46,051][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:16:46,077][__main__][INFO] - End of training
+[2025-09-03 20:16:46,823][__main__][INFO] - Plotted losses
+[2025-09-03 20:16:46,823][__main__][INFO] - Computing test metrics
+[2025-09-03 20:16:46,934][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:16:47,072][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:16:47,258][__main__][INFO] - Saved plots
+[2025-09-03 20:16:47,258][__main__][INFO] - Final modulations: {'beta': np.float32(0.7757152), 'alpha': np.float32(0.94882184)}
+[2025-09-03 20:16:47,258][__main__][INFO] - End of script
+
+[2025-09-03 20:16:52,769][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:16:53,081][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_1/min_node1/
+[2025-09-03 20:16:53,081][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:16:53,138][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:16:53,138][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:16:55,107][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:16:55,107][__main__][INFO] - Starting training...
+[2025-09-03 20:16:55,107][__main__][INFO] - Using device: cuda
+[2025-09-03 20:16:55,107][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:16:56,326][__main__][INFO] - Step 1 | valid1 MSE : 0.0050 | valid1 NMSE : 1.0314
+[2025-09-03 20:16:57,974][__main__][INFO] - Step 100 | valid1 MSE : 0.0043 | valid1 NMSE : 0.8897
+[2025-09-03 20:16:59,631][__main__][INFO] - Step 200 | valid1 MSE : 0.0036 | valid1 NMSE : 0.7540
+[2025-09-03 20:17:01,291][__main__][INFO] - Step 300 | valid1 MSE : 0.0033 | valid1 NMSE : 0.6895
+[2025-09-03 20:17:03,128][__main__][INFO] - Step 400 | valid1 MSE : 0.0032 | valid1 NMSE : 0.6721
+[2025-09-03 20:17:04,766][__main__][INFO] - Step 500 | valid1 MSE : 0.0034 | valid1 NMSE : 0.7098
+[2025-09-03 20:17:04,767][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:17:04,767][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:17:04,796][__main__][INFO] - End of training
+[2025-09-03 20:17:05,544][__main__][INFO] - Plotted losses
+[2025-09-03 20:17:05,545][__main__][INFO] - Computing test metrics
+[2025-09-03 20:17:05,654][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:17:05,790][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:17:05,984][__main__][INFO] - Saved plots
+[2025-09-03 20:17:05,985][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7759205), 'alpha': np.float32(0.9502503)}
+[2025-09-03 20:17:05,985][__main__][INFO] - End of script
+
+[2025-09-03 20:17:11,810][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:17:12,094][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_1/min_node0_tune1/
+[2025-09-03 20:17:12,094][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:17:12,153][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:17:12,153][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:17:12,363][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:17:14,298][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:17:14,299][__main__][INFO] - Starting training...
+[2025-09-03 20:17:14,299][__main__][INFO] - Using device: cuda
+[2025-09-03 20:17:14,299][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:17:15,501][__main__][INFO] - Step 1 | valid1 MSE : 0.2259 | valid1 NMSE : 3.7089
+[2025-09-03 20:17:17,162][__main__][INFO] - Step 100 | valid1 MSE : 0.2106 | valid1 NMSE : 3.4544
+[2025-09-03 20:17:17,162][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:17:17,162][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:17:17,191][__main__][INFO] - End of training
+[2025-09-03 20:17:17,984][__main__][INFO] - Plotted losses
+[2025-09-03 20:17:17,984][__main__][INFO] - Computing test metrics
+[2025-09-03 20:17:18,088][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:17:18,226][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:17:18,418][__main__][INFO] - Saved plots
+[2025-09-03 20:17:18,419][__main__][INFO] - Final modulations: {'beta': np.float32(-0.774929), 'alpha': np.float32(0.9494907)}
+[2025-09-03 20:17:18,419][__main__][INFO] - End of script
+
+[2025-09-03 20:17:24,390][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:17:24,679][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_1/min_node1_tune0/
+[2025-09-03 20:17:24,680][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:17:24,740][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:17:24,741][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:17:25,065][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:17:27,478][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:17:27,478][__main__][INFO] - Starting training...
+[2025-09-03 20:17:27,478][__main__][INFO] - Using device: cuda
+[2025-09-03 20:17:27,478][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:17:28,702][__main__][INFO] - Step 1 | valid1 MSE : 0.0161 | valid1 NMSE : 3.3348
+[2025-09-03 20:17:30,363][__main__][INFO] - Step 100 | valid1 MSE : 0.0145 | valid1 NMSE : 3.0139
+[2025-09-03 20:17:30,364][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:17:30,364][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:17:30,392][__main__][INFO] - End of training
+[2025-09-03 20:17:31,247][__main__][INFO] - Plotted losses
+[2025-09-03 20:17:31,248][__main__][INFO] - Computing test metrics
+[2025-09-03 20:17:31,352][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:17:31,489][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:17:31,681][__main__][INFO] - Saved plots
+[2025-09-03 20:17:31,681][__main__][INFO] - Final modulations: {'beta': np.float32(0.7747322), 'alpha': np.float32(0.94838476)}
+[2025-09-03 20:17:31,681][__main__][INFO] - End of script
+
+[2025-09-03 20:17:37,458][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:17:39,639][__main__][INFO] - End of script
+
+[2025-09-03 20:17:44,814][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:17:45,162][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_2/min_node0/
+[2025-09-03 20:17:45,162][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:17:45,218][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:17:45,218][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:17:47,526][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:17:47,526][__main__][INFO] - Starting training...
+[2025-09-03 20:17:47,526][__main__][INFO] - Using device: cuda
+[2025-09-03 20:17:47,527][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:17:48,725][__main__][INFO] - Step 1 | valid1 MSE : 0.0703 | valid1 NMSE : 1.1533
+[2025-09-03 20:17:50,363][__main__][INFO] - Step 100 | valid1 MSE : 0.0570 | valid1 NMSE : 0.9379
+[2025-09-03 20:17:52,029][__main__][INFO] - Step 200 | valid1 MSE : 0.0428 | valid1 NMSE : 0.7047
+[2025-09-03 20:17:53,685][__main__][INFO] - Step 300 | valid1 MSE : 0.0333 | valid1 NMSE : 0.5485
+[2025-09-03 20:17:55,509][__main__][INFO] - Step 400 | valid1 MSE : 0.0275 | valid1 NMSE : 0.4518
+[2025-09-03 20:17:57,164][__main__][INFO] - Step 500 | valid1 MSE : 0.0243 | valid1 NMSE : 0.3996
+[2025-09-03 20:17:57,164][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:17:57,165][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:17:57,194][__main__][INFO] - End of training
+[2025-09-03 20:17:57,989][__main__][INFO] - Plotted losses
+[2025-09-03 20:17:57,989][__main__][INFO] - Computing test metrics
+[2025-09-03 20:17:58,091][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:17:58,231][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:17:58,416][__main__][INFO] - Saved plots
+[2025-09-03 20:17:58,417][__main__][INFO] - Final modulations: {'beta': np.float32(0.77605987), 'alpha': np.float32(0.94861525)}
+[2025-09-03 20:17:58,417][__main__][INFO] - End of script
+
+[2025-09-03 20:18:04,346][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:18:04,610][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_2/min_node1/
+[2025-09-03 20:18:04,610][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:18:04,671][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:18:04,671][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:18:06,830][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:18:06,830][__main__][INFO] - Starting training...
+[2025-09-03 20:18:06,830][__main__][INFO] - Using device: cuda
+[2025-09-03 20:18:06,830][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:18:08,090][__main__][INFO] - Step 1 | valid1 MSE : 0.0065 | valid1 NMSE : 1.1642
+[2025-09-03 20:18:09,740][__main__][INFO] - Step 100 | valid1 MSE : 0.0055 | valid1 NMSE : 0.9914
+[2025-09-03 20:18:11,395][__main__][INFO] - Step 200 | valid1 MSE : 0.0044 | valid1 NMSE : 0.7862
+[2025-09-03 20:18:13,055][__main__][INFO] - Step 300 | valid1 MSE : 0.0037 | valid1 NMSE : 0.6628
+[2025-09-03 20:18:14,885][__main__][INFO] - Step 400 | valid1 MSE : 0.0033 | valid1 NMSE : 0.5959
+[2025-09-03 20:18:16,525][__main__][INFO] - Step 500 | valid1 MSE : 0.0032 | valid1 NMSE : 0.5759
+[2025-09-03 20:18:16,526][__main__][INFO] - Training done in 0.162 min
+[2025-09-03 20:18:16,526][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:18:16,555][__main__][INFO] - End of training
+[2025-09-03 20:18:17,303][__main__][INFO] - Plotted losses
+[2025-09-03 20:18:17,303][__main__][INFO] - Computing test metrics
+[2025-09-03 20:18:17,407][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:18:17,545][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:18:17,734][__main__][INFO] - Saved plots
+[2025-09-03 20:18:17,734][__main__][INFO] - Final modulations: {'beta': np.float32(-0.77611345), 'alpha': np.float32(0.9491663)}
+[2025-09-03 20:18:17,734][__main__][INFO] - End of script
+
+[2025-09-03 20:18:23,606][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:18:23,926][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_2/min_node0_tune1/
+[2025-09-03 20:18:23,926][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:18:23,983][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:18:23,983][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:18:24,183][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:18:25,930][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:18:25,930][__main__][INFO] - Starting training...
+[2025-09-03 20:18:25,930][__main__][INFO] - Using device: cuda
+[2025-09-03 20:18:25,930][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:18:27,157][__main__][INFO] - Step 1 | valid1 MSE : 0.1992 | valid1 NMSE : 3.2713
+[2025-09-03 20:18:28,794][__main__][INFO] - Step 100 | valid1 MSE : 0.1862 | valid1 NMSE : 3.0600
+[2025-09-03 20:18:28,794][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:18:28,794][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:18:28,817][__main__][INFO] - End of training
+[2025-09-03 20:18:29,599][__main__][INFO] - Plotted losses
+[2025-09-03 20:18:29,599][__main__][INFO] - Computing test metrics
+[2025-09-03 20:18:29,704][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:18:29,841][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:18:30,025][__main__][INFO] - Saved plots
+[2025-09-03 20:18:30,026][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7751269), 'alpha': np.float32(0.9484823)}
+[2025-09-03 20:18:30,026][__main__][INFO] - End of script
+
+[2025-09-03 20:18:36,438][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:18:36,713][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_2/min_node1_tune0/
+[2025-09-03 20:18:36,713][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:18:36,769][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:18:36,770][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:18:37,089][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:18:38,998][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:18:38,998][__main__][INFO] - Starting training...
+[2025-09-03 20:18:38,998][__main__][INFO] - Using device: cuda
+[2025-09-03 20:18:38,998][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:18:40,202][__main__][INFO] - Step 1 | valid1 MSE : 0.0170 | valid1 NMSE : 3.0347
+[2025-09-03 20:18:41,841][__main__][INFO] - Step 100 | valid1 MSE : 0.0156 | valid1 NMSE : 2.7848
+[2025-09-03 20:18:41,842][__main__][INFO] - Training done in 0.047 min
+[2025-09-03 20:18:41,842][__main__][INFO] - Average time per step: 0.028 s
+[2025-09-03 20:18:41,872][__main__][INFO] - End of training
+[2025-09-03 20:18:42,757][__main__][INFO] - Plotted losses
+[2025-09-03 20:18:42,758][__main__][INFO] - Computing test metrics
+[2025-09-03 20:18:42,861][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:18:42,997][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:18:43,188][__main__][INFO] - Saved plots
+[2025-09-03 20:18:43,188][__main__][INFO] - Final modulations: {'beta': np.float32(0.7750765), 'alpha': np.float32(0.9482848)}
+[2025-09-03 20:18:43,188][__main__][INFO] - End of script
+
+[2025-09-03 20:18:49,618][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:18:52,141][__main__][INFO] - End of script
+
+[2025-09-03 20:18:57,966][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:18:58,256][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_3/min_node0/
+[2025-09-03 20:18:58,256][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:18:58,320][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:18:58,320][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:19:01,019][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:19:01,019][__main__][INFO] - Starting training...
+[2025-09-03 20:19:01,019][__main__][INFO] - Using device: cuda
+[2025-09-03 20:19:01,019][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:19:02,273][__main__][INFO] - Step 1 | valid1 MSE : 0.0609 | valid1 NMSE : 1.0136
+[2025-09-03 20:19:03,920][__main__][INFO] - Step 100 | valid1 MSE : 0.0491 | valid1 NMSE : 0.8158
+[2025-09-03 20:19:05,580][__main__][INFO] - Step 200 | valid1 MSE : 0.0382 | valid1 NMSE : 0.6346
+[2025-09-03 20:19:07,248][__main__][INFO] - Step 300 | valid1 MSE : 0.0306 | valid1 NMSE : 0.5081
+[2025-09-03 20:19:09,069][__main__][INFO] - Step 400 | valid1 MSE : 0.0263 | valid1 NMSE : 0.4365
+[2025-09-03 20:19:10,713][__main__][INFO] - Step 500 | valid1 MSE : 0.0245 | valid1 NMSE : 0.4066
+[2025-09-03 20:19:10,713][__main__][INFO] - Training done in 0.162 min
+[2025-09-03 20:19:10,713][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:19:10,745][__main__][INFO] - End of training
+[2025-09-03 20:19:11,521][__main__][INFO] - Plotted losses
+[2025-09-03 20:19:11,521][__main__][INFO] - Computing test metrics
+[2025-09-03 20:19:11,630][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:19:11,766][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:19:11,957][__main__][INFO] - Saved plots
+[2025-09-03 20:19:11,957][__main__][INFO] - Final modulations: {'beta': np.float32(0.7759037), 'alpha': np.float32(0.94841075)}
+[2025-09-03 20:19:11,957][__main__][INFO] - End of script
+
+[2025-09-03 20:19:17,758][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:19:18,067][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_3/min_node1/
+[2025-09-03 20:19:18,067][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:19:18,124][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:19:18,124][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:19:20,207][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:19:20,207][__main__][INFO] - Starting training...
+[2025-09-03 20:19:20,207][__main__][INFO] - Using device: cuda
+[2025-09-03 20:19:20,207][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:19:21,472][__main__][INFO] - Step 1 | valid1 MSE : 0.0051 | valid1 NMSE : 1.0117
+[2025-09-03 20:19:23,128][__main__][INFO] - Step 100 | valid1 MSE : 0.0042 | valid1 NMSE : 0.8299
+[2025-09-03 20:19:24,799][__main__][INFO] - Step 200 | valid1 MSE : 0.0034 | valid1 NMSE : 0.6729
+[2025-09-03 20:19:26,474][__main__][INFO] - Step 300 | valid1 MSE : 0.0029 | valid1 NMSE : 0.5862
+[2025-09-03 20:19:28,294][__main__][INFO] - Step 400 | valid1 MSE : 0.0027 | valid1 NMSE : 0.5496
+[2025-09-03 20:19:29,945][__main__][INFO] - Step 500 | valid1 MSE : 0.0028 | valid1 NMSE : 0.5670
+[2025-09-03 20:19:29,946][__main__][INFO] - Training done in 0.162 min
+[2025-09-03 20:19:29,946][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:19:29,983][__main__][INFO] - End of training
+[2025-09-03 20:19:30,758][__main__][INFO] - Plotted losses
+[2025-09-03 20:19:30,758][__main__][INFO] - Computing test metrics
+[2025-09-03 20:19:30,870][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:19:31,009][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:19:31,204][__main__][INFO] - Saved plots
+[2025-09-03 20:19:31,205][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7763002), 'alpha': np.float32(0.94906616)}
+[2025-09-03 20:19:31,205][__main__][INFO] - End of script
+
+[2025-09-03 20:19:38,028][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:19:38,320][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_3/min_node0_tune1/
+[2025-09-03 20:19:38,320][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:19:38,380][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:19:38,380][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:19:38,626][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:19:40,699][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:19:40,699][__main__][INFO] - Starting training...
+[2025-09-03 20:19:40,699][__main__][INFO] - Using device: cuda
+[2025-09-03 20:19:40,699][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:19:41,968][__main__][INFO] - Step 1 | valid1 MSE : 0.2033 | valid1 NMSE : 3.3874
+[2025-09-03 20:19:43,619][__main__][INFO] - Step 100 | valid1 MSE : 0.1915 | valid1 NMSE : 3.1867
+[2025-09-03 20:19:43,619][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:19:43,619][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:19:43,652][__main__][INFO] - End of training
+[2025-09-03 20:19:44,504][__main__][INFO] - Plotted losses
+[2025-09-03 20:19:44,505][__main__][INFO] - Computing test metrics
+[2025-09-03 20:19:44,610][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:19:44,745][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:19:44,953][__main__][INFO] - Saved plots
+[2025-09-03 20:19:44,953][__main__][INFO] - Final modulations: {'beta': np.float32(-0.77531123), 'alpha': np.float32(0.9483965)}
+[2025-09-03 20:19:44,953][__main__][INFO] - End of script
+
+[2025-09-03 20:19:51,547][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:19:51,842][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_3/min_node1_tune0/
+[2025-09-03 20:19:51,842][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:19:51,910][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:19:51,910][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:19:52,192][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:19:54,285][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:19:54,285][__main__][INFO] - Starting training...
+[2025-09-03 20:19:54,285][__main__][INFO] - Using device: cuda
+[2025-09-03 20:19:54,285][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:19:55,522][__main__][INFO] - Step 1 | valid1 MSE : 0.0155 | valid1 NMSE : 3.0929
+[2025-09-03 20:19:57,163][__main__][INFO] - Step 100 | valid1 MSE : 0.0142 | valid1 NMSE : 2.8495
+[2025-09-03 20:19:57,163][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:19:57,163][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:19:57,197][__main__][INFO] - End of training
+[2025-09-03 20:19:57,975][__main__][INFO] - Plotted losses
+[2025-09-03 20:19:57,975][__main__][INFO] - Computing test metrics
+[2025-09-03 20:19:58,078][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:19:58,214][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:19:58,408][__main__][INFO] - Saved plots
+[2025-09-03 20:19:58,408][__main__][INFO] - Final modulations: {'beta': np.float32(0.7749196), 'alpha': np.float32(0.9481654)}
+[2025-09-03 20:19:58,409][__main__][INFO] - End of script
+
+[2025-09-03 20:20:04,457][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:20:06,657][__main__][INFO] - End of script
+
+[2025-09-03 20:20:12,099][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:20:12,388][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_4/min_node0/
+[2025-09-03 20:20:12,388][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:20:12,445][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:20:12,445][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:20:14,952][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:20:14,952][__main__][INFO] - Starting training...
+[2025-09-03 20:20:14,952][__main__][INFO] - Using device: cuda
+[2025-09-03 20:20:14,952][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:20:16,218][__main__][INFO] - Step 1 | valid1 MSE : 0.0676 | valid1 NMSE : 1.1137
+[2025-09-03 20:20:17,872][__main__][INFO] - Step 100 | valid1 MSE : 0.0590 | valid1 NMSE : 0.9732
+[2025-09-03 20:20:19,541][__main__][INFO] - Step 200 | valid1 MSE : 0.0450 | valid1 NMSE : 0.7427
+[2025-09-03 20:20:21,208][__main__][INFO] - Step 300 | valid1 MSE : 0.0359 | valid1 NMSE : 0.5938
+[2025-09-03 20:20:23,037][__main__][INFO] - Step 400 | valid1 MSE : 0.0305 | valid1 NMSE : 0.5037
+[2025-09-03 20:20:24,685][__main__][INFO] - Step 500 | valid1 MSE : 0.0278 | valid1 NMSE : 0.4606
+[2025-09-03 20:20:24,685][__main__][INFO] - Training done in 0.162 min
+[2025-09-03 20:20:24,686][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:20:24,718][__main__][INFO] - End of training
+[2025-09-03 20:20:25,545][__main__][INFO] - Plotted losses
+[2025-09-03 20:20:25,545][__main__][INFO] - Computing test metrics
+[2025-09-03 20:20:25,658][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:20:25,796][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:20:25,998][__main__][INFO] - Saved plots
+[2025-09-03 20:20:25,998][__main__][INFO] - Final modulations: {'beta': np.float32(0.7761491), 'alpha': np.float32(0.9484017)}
+[2025-09-03 20:20:25,998][__main__][INFO] - End of script
+
+[2025-09-03 20:20:32,074][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:20:32,354][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_4/min_node1/
+[2025-09-03 20:20:32,354][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:20:32,416][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:20:32,416][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:20:34,551][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:20:34,551][__main__][INFO] - Starting training...
+[2025-09-03 20:20:34,551][__main__][INFO] - Using device: cuda
+[2025-09-03 20:20:34,551][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:20:35,774][__main__][INFO] - Step 1 | valid1 MSE : 0.0072 | valid1 NMSE : 1.0945
+[2025-09-03 20:20:37,418][__main__][INFO] - Step 100 | valid1 MSE : 0.0063 | valid1 NMSE : 0.9603
+[2025-09-03 20:20:39,089][__main__][INFO] - Step 200 | valid1 MSE : 0.0051 | valid1 NMSE : 0.7719
+[2025-09-03 20:20:40,748][__main__][INFO] - Step 300 | valid1 MSE : 0.0044 | valid1 NMSE : 0.6704
+[2025-09-03 20:20:42,561][__main__][INFO] - Step 400 | valid1 MSE : 0.0042 | valid1 NMSE : 0.6368
+[2025-09-03 20:20:44,214][__main__][INFO] - Step 500 | valid1 MSE : 0.0043 | valid1 NMSE : 0.6565
+[2025-09-03 20:20:44,214][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:20:44,214][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:20:44,242][__main__][INFO] - End of training
+[2025-09-03 20:20:45,053][__main__][INFO] - Plotted losses
+[2025-09-03 20:20:45,053][__main__][INFO] - Computing test metrics
+[2025-09-03 20:20:45,157][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:20:45,295][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:20:45,481][__main__][INFO] - Saved plots
+[2025-09-03 20:20:45,481][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7763557), 'alpha': np.float32(0.9496933)}
+[2025-09-03 20:20:45,481][__main__][INFO] - End of script
+
+[2025-09-03 20:20:52,175][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:20:52,477][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_4/min_node0_tune1/
+[2025-09-03 20:20:52,477][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:20:52,540][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:20:52,540][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:20:52,753][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:20:54,500][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:20:54,501][__main__][INFO] - Starting training...
+[2025-09-03 20:20:54,501][__main__][INFO] - Using device: cuda
+[2025-09-03 20:20:54,501][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:20:55,718][__main__][INFO] - Step 1 | valid1 MSE : 0.2105 | valid1 NMSE : 3.4636
+[2025-09-03 20:20:57,377][__main__][INFO] - Step 100 | valid1 MSE : 0.1939 | valid1 NMSE : 3.1917
+[2025-09-03 20:20:57,378][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:20:57,378][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:20:57,401][__main__][INFO] - End of training
+[2025-09-03 20:20:58,175][__main__][INFO] - Plotted losses
+[2025-09-03 20:20:58,175][__main__][INFO] - Computing test metrics
+[2025-09-03 20:20:58,282][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:20:58,423][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:20:58,613][__main__][INFO] - Saved plots
+[2025-09-03 20:20:58,613][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7753695), 'alpha': np.float32(0.94898903)}
+[2025-09-03 20:20:58,613][__main__][INFO] - End of script
+
+[2025-09-03 20:21:04,082][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:21:04,377][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_4/min_node1_tune0/
+[2025-09-03 20:21:04,377][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:21:04,430][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:21:04,430][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:21:04,707][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:21:06,446][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:21:06,446][__main__][INFO] - Starting training...
+[2025-09-03 20:21:06,446][__main__][INFO] - Using device: cuda
+[2025-09-03 20:21:06,446][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:21:07,658][__main__][INFO] - Step 1 | valid1 MSE : 0.0210 | valid1 NMSE : 3.1740
+[2025-09-03 20:21:09,321][__main__][INFO] - Step 100 | valid1 MSE : 0.0189 | valid1 NMSE : 2.8681
+[2025-09-03 20:21:09,323][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:21:09,323][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:21:09,349][__main__][INFO] - End of training
+[2025-09-03 20:21:10,148][__main__][INFO] - Plotted losses
+[2025-09-03 20:21:10,148][__main__][INFO] - Computing test metrics
+[2025-09-03 20:21:10,253][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:21:10,394][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:21:10,584][__main__][INFO] - Saved plots
+[2025-09-03 20:21:10,584][__main__][INFO] - Final modulations: {'beta': np.float32(0.77516747), 'alpha': np.float32(0.94800925)}
+[2025-09-03 20:21:10,584][__main__][INFO] - End of script
+
+[2025-09-03 20:21:16,536][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:21:19,169][__main__][INFO] - End of script
+
+[2025-09-03 20:21:24,716][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:21:25,039][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_5/min_node0/
+[2025-09-03 20:21:25,039][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:21:25,099][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:21:25,099][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:21:27,647][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:21:27,647][__main__][INFO] - Starting training...
+[2025-09-03 20:21:27,647][__main__][INFO] - Using device: cuda
+[2025-09-03 20:21:27,647][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:21:28,881][__main__][INFO] - Step 1 | valid1 MSE : 0.0649 | valid1 NMSE : 1.0579
+[2025-09-03 20:21:30,533][__main__][INFO] - Step 100 | valid1 MSE : 0.0539 | valid1 NMSE : 0.8760
+[2025-09-03 20:21:32,188][__main__][INFO] - Step 200 | valid1 MSE : 0.0414 | valid1 NMSE : 0.6738
+[2025-09-03 20:21:33,836][__main__][INFO] - Step 300 | valid1 MSE : 0.0324 | valid1 NMSE : 0.5265
+[2025-09-03 20:21:35,638][__main__][INFO] - Step 400 | valid1 MSE : 0.0267 | valid1 NMSE : 0.4341
+[2025-09-03 20:21:37,287][__main__][INFO] - Step 500 | valid1 MSE : 0.0233 | valid1 NMSE : 0.3791
+[2025-09-03 20:21:37,287][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:21:37,287][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:21:37,325][__main__][INFO] - End of training
+[2025-09-03 20:21:38,119][__main__][INFO] - Plotted losses
+[2025-09-03 20:21:38,119][__main__][INFO] - Computing test metrics
+[2025-09-03 20:21:38,225][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:21:38,363][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:21:38,555][__main__][INFO] - Saved plots
+[2025-09-03 20:21:38,555][__main__][INFO] - Final modulations: {'beta': np.float32(0.7760612), 'alpha': np.float32(0.9482309)}
+[2025-09-03 20:21:38,556][__main__][INFO] - End of script
+
+[2025-09-03 20:21:44,423][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:21:44,704][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_5/min_node1/
+[2025-09-03 20:21:44,704][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:21:44,758][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:21:44,759][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:21:46,759][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:21:46,760][__main__][INFO] - Starting training...
+[2025-09-03 20:21:46,760][__main__][INFO] - Using device: cuda
+[2025-09-03 20:21:46,760][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:21:47,975][__main__][INFO] - Step 1 | valid1 MSE : 0.0062 | valid1 NMSE : 1.0580
+[2025-09-03 20:21:49,625][__main__][INFO] - Step 100 | valid1 MSE : 0.0052 | valid1 NMSE : 0.8872
+[2025-09-03 20:21:51,293][__main__][INFO] - Step 200 | valid1 MSE : 0.0041 | valid1 NMSE : 0.7060
+[2025-09-03 20:21:52,957][__main__][INFO] - Step 300 | valid1 MSE : 0.0035 | valid1 NMSE : 0.5912
+[2025-09-03 20:21:54,787][__main__][INFO] - Step 400 | valid1 MSE : 0.0032 | valid1 NMSE : 0.5424
+[2025-09-03 20:21:56,431][__main__][INFO] - Step 500 | valid1 MSE : 0.0032 | valid1 NMSE : 0.5423
+[2025-09-03 20:21:56,432][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:21:56,432][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:21:56,457][__main__][INFO] - End of training
+[2025-09-03 20:21:57,235][__main__][INFO] - Plotted losses
+[2025-09-03 20:21:57,235][__main__][INFO] - Computing test metrics
+[2025-09-03 20:21:57,339][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:21:57,478][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:21:57,663][__main__][INFO] - Saved plots
+[2025-09-03 20:21:57,663][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7762712), 'alpha': np.float32(0.9491136)}
+[2025-09-03 20:21:57,663][__main__][INFO] - End of script
+
+[2025-09-03 20:22:04,319][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:22:04,608][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_5/min_node0_tune1/
+[2025-09-03 20:22:04,608][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:22:04,675][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:22:04,675][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:22:04,880][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:22:06,843][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:22:06,844][__main__][INFO] - Starting training...
+[2025-09-03 20:22:06,844][__main__][INFO] - Using device: cuda
+[2025-09-03 20:22:06,844][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:22:08,105][__main__][INFO] - Step 1 | valid1 MSE : 0.2012 | valid1 NMSE : 3.2824
+[2025-09-03 20:22:09,765][__main__][INFO] - Step 100 | valid1 MSE : 0.1847 | valid1 NMSE : 3.0109
+[2025-09-03 20:22:09,765][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:22:09,765][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:22:09,807][__main__][INFO] - End of training
+[2025-09-03 20:22:10,632][__main__][INFO] - Plotted losses
+[2025-09-03 20:22:10,632][__main__][INFO] - Computing test metrics
+[2025-09-03 20:22:10,741][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:22:10,881][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:22:11,077][__main__][INFO] - Saved plots
+[2025-09-03 20:22:11,077][__main__][INFO] - Final modulations: {'beta': np.float32(-0.77528465), 'alpha': np.float32(0.9484381)}
+[2025-09-03 20:22:11,077][__main__][INFO] - End of script
+
+[2025-09-03 20:22:17,410][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:22:17,712][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s0.2/seed_5/min_node1_tune0/
+[2025-09-03 20:22:17,712][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:22:17,778][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:22:17,778][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:22:18,096][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:22:20,169][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:22:20,169][__main__][INFO] - Starting training...
+[2025-09-03 20:22:20,169][__main__][INFO] - Using device: cuda
+[2025-09-03 20:22:20,169][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:22:21,380][__main__][INFO] - Step 1 | valid1 MSE : 0.0178 | valid1 NMSE : 3.0552
+[2025-09-03 20:22:23,050][__main__][INFO] - Step 100 | valid1 MSE : 0.0160 | valid1 NMSE : 2.7509
+[2025-09-03 20:22:23,051][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:22:23,051][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:22:23,084][__main__][INFO] - End of training
+[2025-09-03 20:22:23,895][__main__][INFO] - Plotted losses
+[2025-09-03 20:22:23,896][__main__][INFO] - Computing test metrics
+[2025-09-03 20:22:24,005][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:22:24,144][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:22:24,344][__main__][INFO] - Saved plots
+[2025-09-03 20:22:24,344][__main__][INFO] - Final modulations: {'beta': np.float32(0.7750791), 'alpha': np.float32(0.9477982)}
+[2025-09-03 20:22:24,344][__main__][INFO] - End of script
+
+==Table of ../outputs/bench_tune/r0_s0.2/==
++-----------------+--------------------+------------------+----------------------+--------------------+
+|                 | min_node0          | min_node1        | min_node0_tune1      | min_node1_tune0    |
++=================+====================+==================+======================+====================+
+| Test MSE * 1e4  | 264.0814 ± 35.8119 | 33.9650 ± 5.6549 | 1933.5395 ± 102.6986 | 158.5897 ± 18.6799 |
++-----------------+--------------------+------------------+----------------------+--------------------+
+| Test NMSE * 1e2 | 43.3993 ± 5.8341   | 61.0133 ± 6.9788 | 318.1578 ± 17.1887   | 285.2418 ± 10.0122 |
++-----------------+--------------------+------------------+----------------------+--------------------+
+==Table of ../outputs/bench_tune/r0_s0.2/==
++-----------------+--------------------+------------------+----------------------+--------------------+
+|                 | min_node0          | min_node1        | min_node0_tune1      | min_node1_tune0    |
++=================+====================+==================+======================+====================+
+| Test MSE * 1e4  | 264.2472 ± 35.7139 | 33.9412 ± 5.6023 | 1934.2520 ± 102.7216 | 158.5361 ± 18.5163 |
++-----------------+--------------------+------------------+----------------------+--------------------+
+| Test NMSE * 1e2 | 43.4137 ± 5.7927   | 61.0165 ± 7.0730 | 318.1866 ± 16.9524   | 285.3051 ± 10.2709 |
++-----------------+--------------------+------------------+----------------------+--------------------+
+[2025-09-03 20:23:07,667][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:23:10,175][__main__][INFO] - End of script
+
+[2025-09-03 20:23:15,982][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:23:16,251][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_1/min_node0/
+[2025-09-03 20:23:16,251][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:23:16,310][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:23:16,310][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:23:18,900][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:23:18,900][__main__][INFO] - Starting training...
+[2025-09-03 20:23:18,900][__main__][INFO] - Using device: cuda
+[2025-09-03 20:23:18,900][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:23:20,138][__main__][INFO] - Step 1 | valid1 MSE : 0.0627 | valid1 NMSE : 1.0274
+[2025-09-03 20:23:21,798][__main__][INFO] - Step 100 | valid1 MSE : 0.0074 | valid1 NMSE : 0.1213
+[2025-09-03 20:23:23,456][__main__][INFO] - Step 200 | valid1 MSE : 0.0007 | valid1 NMSE : 0.0113
+[2025-09-03 20:23:25,102][__main__][INFO] - Step 300 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0068
+[2025-09-03 20:23:26,904][__main__][INFO] - Step 400 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0064
+[2025-09-03 20:23:28,546][__main__][INFO] - Step 500 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0061
+[2025-09-03 20:23:28,547][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:23:28,547][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:23:28,583][__main__][INFO] - End of training
+[2025-09-03 20:23:29,354][__main__][INFO] - Plotted losses
+[2025-09-03 20:23:29,354][__main__][INFO] - Computing test metrics
+[2025-09-03 20:23:29,462][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:23:29,598][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:23:29,785][__main__][INFO] - Saved plots
+[2025-09-03 20:23:29,785][__main__][INFO] - Final modulations: {'beta': np.float32(0.7820342), 'alpha': np.float32(0.94514495)}
+[2025-09-03 20:23:29,785][__main__][INFO] - End of script
+
+[2025-09-03 20:23:35,438][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:23:35,728][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_1/min_node1/
+[2025-09-03 20:23:35,729][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:23:35,787][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:23:35,787][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:23:38,019][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:23:38,019][__main__][INFO] - Starting training...
+[2025-09-03 20:23:38,019][__main__][INFO] - Using device: cuda
+[2025-09-03 20:23:38,019][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:23:39,260][__main__][INFO] - Step 1 | valid1 MSE : 0.0049 | valid1 NMSE : 1.0182
+[2025-09-03 20:23:40,924][__main__][INFO] - Step 100 | valid1 MSE : 0.0006 | valid1 NMSE : 0.1169
+[2025-09-03 20:23:42,597][__main__][INFO] - Step 200 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0105
+[2025-09-03 20:23:44,269][__main__][INFO] - Step 300 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0068
+[2025-09-03 20:23:46,112][__main__][INFO] - Step 400 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0065
+[2025-09-03 20:23:47,746][__main__][INFO] - Step 500 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0062
+[2025-09-03 20:23:47,747][__main__][INFO] - Training done in 0.162 min
+[2025-09-03 20:23:47,747][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:23:47,780][__main__][INFO] - End of training
+[2025-09-03 20:23:48,599][__main__][INFO] - Plotted losses
+[2025-09-03 20:23:48,599][__main__][INFO] - Computing test metrics
+[2025-09-03 20:23:48,709][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:23:48,844][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:23:49,039][__main__][INFO] - Saved plots
+[2025-09-03 20:23:49,040][__main__][INFO] - Final modulations: {'beta': np.float32(-0.78218037), 'alpha': np.float32(0.94523937)}
+[2025-09-03 20:23:49,040][__main__][INFO] - End of script
+
+[2025-09-03 20:23:55,258][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:23:55,540][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_1/min_node0_tune1/
+[2025-09-03 20:23:55,540][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:23:55,602][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:23:55,602][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:23:55,817][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:23:57,907][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:23:57,907][__main__][INFO] - Starting training...
+[2025-09-03 20:23:57,907][__main__][INFO] - Using device: cuda
+[2025-09-03 20:23:57,907][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:23:59,170][__main__][INFO] - Step 1 | valid1 MSE : 0.1472 | valid1 NMSE : 2.4163
+[2025-09-03 20:24:00,837][__main__][INFO] - Step 100 | valid1 MSE : 0.0621 | valid1 NMSE : 1.0189
+[2025-09-03 20:24:00,837][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:24:00,837][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:24:00,869][__main__][INFO] - End of training
+[2025-09-03 20:24:01,774][__main__][INFO] - Plotted losses
+[2025-09-03 20:24:01,774][__main__][INFO] - Computing test metrics
+[2025-09-03 20:24:01,879][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:24:02,019][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:24:02,222][__main__][INFO] - Saved plots
+[2025-09-03 20:24:02,222][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7812496), 'alpha': np.float32(0.94642425)}
+[2025-09-03 20:24:02,222][__main__][INFO] - End of script
+
+[2025-09-03 20:24:09,168][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:24:09,448][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_1/min_node1_tune0/
+[2025-09-03 20:24:09,448][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:24:09,530][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:24:09,530][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:24:09,826][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:24:11,637][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:24:11,637][__main__][INFO] - Starting training...
+[2025-09-03 20:24:11,637][__main__][INFO] - Using device: cuda
+[2025-09-03 20:24:11,637][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:24:12,843][__main__][INFO] - Step 1 | valid1 MSE : 0.0121 | valid1 NMSE : 2.5050
+[2025-09-03 20:24:14,499][__main__][INFO] - Step 100 | valid1 MSE : 0.0052 | valid1 NMSE : 1.0874
+[2025-09-03 20:24:14,499][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:24:14,499][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:24:14,524][__main__][INFO] - End of training
+[2025-09-03 20:24:15,322][__main__][INFO] - Plotted losses
+[2025-09-03 20:24:15,322][__main__][INFO] - Computing test metrics
+[2025-09-03 20:24:15,430][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:24:15,570][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:24:15,756][__main__][INFO] - Saved plots
+[2025-09-03 20:24:15,756][__main__][INFO] - Final modulations: {'beta': np.float32(0.78110135), 'alpha': np.float32(0.9461118)}
+[2025-09-03 20:24:15,756][__main__][INFO] - End of script
+
+[2025-09-03 20:24:21,224][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:24:23,388][__main__][INFO] - End of script
+
+[2025-09-03 20:24:28,515][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:24:28,782][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_2/min_node0/
+[2025-09-03 20:24:28,782][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:24:28,836][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:24:28,836][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:24:31,392][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:24:31,392][__main__][INFO] - Starting training...
+[2025-09-03 20:24:31,392][__main__][INFO] - Using device: cuda
+[2025-09-03 20:24:31,392][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:24:32,659][__main__][INFO] - Step 1 | valid1 MSE : 0.0693 | valid1 NMSE : 1.1361
+[2025-09-03 20:24:34,324][__main__][INFO] - Step 100 | valid1 MSE : 0.0102 | valid1 NMSE : 0.1689
+[2025-09-03 20:24:36,008][__main__][INFO] - Step 200 | valid1 MSE : 0.0010 | valid1 NMSE : 0.0159
+[2025-09-03 20:24:37,674][__main__][INFO] - Step 300 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0074
+[2025-09-03 20:24:39,486][__main__][INFO] - Step 400 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0069
+[2025-09-03 20:24:41,136][__main__][INFO] - Step 500 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0064
+[2025-09-03 20:24:41,137][__main__][INFO] - Training done in 0.162 min
+[2025-09-03 20:24:41,137][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:24:41,166][__main__][INFO] - End of training
+[2025-09-03 20:24:41,964][__main__][INFO] - Plotted losses
+[2025-09-03 20:24:41,964][__main__][INFO] - Computing test metrics
+[2025-09-03 20:24:42,074][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:24:42,210][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:24:42,404][__main__][INFO] - Saved plots
+[2025-09-03 20:24:42,404][__main__][INFO] - Final modulations: {'beta': np.float32(0.78240865), 'alpha': np.float32(0.9458266)}
+[2025-09-03 20:24:42,404][__main__][INFO] - End of script
+
+[2025-09-03 20:24:48,315][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:24:48,609][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_2/min_node1/
+[2025-09-03 20:24:48,609][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:24:48,665][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:24:48,666][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:24:50,783][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:24:50,783][__main__][INFO] - Starting training...
+[2025-09-03 20:24:50,783][__main__][INFO] - Using device: cuda
+[2025-09-03 20:24:50,783][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:24:52,004][__main__][INFO] - Step 1 | valid1 MSE : 0.0064 | valid1 NMSE : 1.1461
+[2025-09-03 20:24:53,661][__main__][INFO] - Step 100 | valid1 MSE : 0.0010 | valid1 NMSE : 0.1757
+[2025-09-03 20:24:55,314][__main__][INFO] - Step 200 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0158
+[2025-09-03 20:24:56,970][__main__][INFO] - Step 300 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0073
+[2025-09-03 20:24:58,781][__main__][INFO] - Step 400 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0068
+[2025-09-03 20:25:00,415][__main__][INFO] - Step 500 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0064
+[2025-09-03 20:25:00,415][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:25:00,415][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:25:00,442][__main__][INFO] - End of training
+[2025-09-03 20:25:01,251][__main__][INFO] - Plotted losses
+[2025-09-03 20:25:01,251][__main__][INFO] - Computing test metrics
+[2025-09-03 20:25:01,361][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:25:01,501][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:25:01,694][__main__][INFO] - Saved plots
+[2025-09-03 20:25:01,695][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7824049), 'alpha': np.float32(0.9457324)}
+[2025-09-03 20:25:01,695][__main__][INFO] - End of script
+
+[2025-09-03 20:25:07,610][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:25:07,904][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_2/min_node0_tune1/
+[2025-09-03 20:25:07,905][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:25:07,959][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:25:07,959][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:25:08,169][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:25:10,378][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:25:10,378][__main__][INFO] - Starting training...
+[2025-09-03 20:25:10,378][__main__][INFO] - Using device: cuda
+[2025-09-03 20:25:10,378][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:25:11,593][__main__][INFO] - Step 1 | valid1 MSE : 0.1518 | valid1 NMSE : 2.4881
+[2025-09-03 20:25:13,267][__main__][INFO] - Step 100 | valid1 MSE : 0.0829 | valid1 NMSE : 1.3582
+[2025-09-03 20:25:13,268][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:25:13,268][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:25:13,294][__main__][INFO] - End of training
+[2025-09-03 20:25:14,139][__main__][INFO] - Plotted losses
+[2025-09-03 20:25:14,139][__main__][INFO] - Computing test metrics
+[2025-09-03 20:25:14,245][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:25:14,385][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:25:14,575][__main__][INFO] - Saved plots
+[2025-09-03 20:25:14,575][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7814533), 'alpha': np.float32(0.94666535)}
+[2025-09-03 20:25:14,575][__main__][INFO] - End of script
+
+[2025-09-03 20:25:20,728][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:25:21,044][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_2/min_node1_tune0/
+[2025-09-03 20:25:21,044][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:25:21,104][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:25:21,104][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:25:21,398][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:25:23,350][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:25:23,350][__main__][INFO] - Starting training...
+[2025-09-03 20:25:23,351][__main__][INFO] - Using device: cuda
+[2025-09-03 20:25:23,351][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:25:24,615][__main__][INFO] - Step 1 | valid1 MSE : 0.0139 | valid1 NMSE : 2.4881
+[2025-09-03 20:25:26,282][__main__][INFO] - Step 100 | valid1 MSE : 0.0077 | valid1 NMSE : 1.3696
+[2025-09-03 20:25:26,282][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:25:26,282][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:25:26,312][__main__][INFO] - End of training
+[2025-09-03 20:25:27,119][__main__][INFO] - Plotted losses
+[2025-09-03 20:25:27,119][__main__][INFO] - Computing test metrics
+[2025-09-03 20:25:27,231][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:25:27,369][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:25:27,560][__main__][INFO] - Saved plots
+[2025-09-03 20:25:27,560][__main__][INFO] - Final modulations: {'beta': np.float32(0.7814571), 'alpha': np.float32(0.94689214)}
+[2025-09-03 20:25:27,560][__main__][INFO] - End of script
+
+[2025-09-03 20:25:33,412][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:25:35,591][__main__][INFO] - End of script
+
+[2025-09-03 20:25:41,044][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:25:41,354][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_3/min_node0/
+[2025-09-03 20:25:41,354][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:25:41,414][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:25:41,414][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:25:43,937][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:25:43,937][__main__][INFO] - Starting training...
+[2025-09-03 20:25:43,938][__main__][INFO] - Using device: cuda
+[2025-09-03 20:25:43,938][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:25:45,171][__main__][INFO] - Step 1 | valid1 MSE : 0.0601 | valid1 NMSE : 1.0009
+[2025-09-03 20:25:46,810][__main__][INFO] - Step 100 | valid1 MSE : 0.0068 | valid1 NMSE : 0.1133
+[2025-09-03 20:25:48,461][__main__][INFO] - Step 200 | valid1 MSE : 0.0006 | valid1 NMSE : 0.0108
+[2025-09-03 20:25:50,107][__main__][INFO] - Step 300 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0068
+[2025-09-03 20:25:51,916][__main__][INFO] - Step 400 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0065
+[2025-09-03 20:25:53,548][__main__][INFO] - Step 500 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0062
+[2025-09-03 20:25:53,548][__main__][INFO] - Training done in 0.160 min
+[2025-09-03 20:25:53,548][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:25:53,577][__main__][INFO] - End of training
+[2025-09-03 20:25:54,350][__main__][INFO] - Plotted losses
+[2025-09-03 20:25:54,350][__main__][INFO] - Computing test metrics
+[2025-09-03 20:25:54,462][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:25:54,599][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:25:54,793][__main__][INFO] - Saved plots
+[2025-09-03 20:25:54,793][__main__][INFO] - Final modulations: {'beta': np.float32(0.77981997), 'alpha': np.float32(0.9451326)}
+[2025-09-03 20:25:54,793][__main__][INFO] - End of script
+
+[2025-09-03 20:26:00,373][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:26:00,642][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_3/min_node1/
+[2025-09-03 20:26:00,642][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:26:00,698][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:26:00,698][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:26:02,673][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:26:02,673][__main__][INFO] - Starting training...
+[2025-09-03 20:26:02,673][__main__][INFO] - Using device: cuda
+[2025-09-03 20:26:02,673][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:26:03,917][__main__][INFO] - Step 1 | valid1 MSE : 0.0050 | valid1 NMSE : 0.9991
+[2025-09-03 20:26:05,595][__main__][INFO] - Step 100 | valid1 MSE : 0.0006 | valid1 NMSE : 0.1151
+[2025-09-03 20:26:07,259][__main__][INFO] - Step 200 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0111
+[2025-09-03 20:26:08,918][__main__][INFO] - Step 300 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0071
+[2025-09-03 20:26:10,750][__main__][INFO] - Step 400 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0067
+[2025-09-03 20:26:12,405][__main__][INFO] - Step 500 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0064
+[2025-09-03 20:26:12,406][__main__][INFO] - Training done in 0.162 min
+[2025-09-03 20:26:12,406][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:26:12,435][__main__][INFO] - End of training
+[2025-09-03 20:26:13,235][__main__][INFO] - Plotted losses
+[2025-09-03 20:26:13,236][__main__][INFO] - Computing test metrics
+[2025-09-03 20:26:13,346][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:26:13,483][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:26:13,671][__main__][INFO] - Saved plots
+[2025-09-03 20:26:13,672][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7803992), 'alpha': np.float32(0.94538665)}
+[2025-09-03 20:26:13,672][__main__][INFO] - End of script
+
+[2025-09-03 20:26:20,230][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:26:20,509][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_3/min_node0_tune1/
+[2025-09-03 20:26:20,509][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:26:20,562][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:26:20,562][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:26:20,765][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:26:22,508][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:26:22,508][__main__][INFO] - Starting training...
+[2025-09-03 20:26:22,508][__main__][INFO] - Using device: cuda
+[2025-09-03 20:26:22,508][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:26:23,724][__main__][INFO] - Step 1 | valid1 MSE : 0.1474 | valid1 NMSE : 2.4506
+[2025-09-03 20:26:25,381][__main__][INFO] - Step 100 | valid1 MSE : 0.0718 | valid1 NMSE : 1.1934
+[2025-09-03 20:26:25,381][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:26:25,381][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:26:25,406][__main__][INFO] - End of training
+[2025-09-03 20:26:26,224][__main__][INFO] - Plotted losses
+[2025-09-03 20:26:26,224][__main__][INFO] - Computing test metrics
+[2025-09-03 20:26:26,330][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:26:26,465][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:26:26,647][__main__][INFO] - Saved plots
+[2025-09-03 20:26:26,647][__main__][INFO] - Final modulations: {'beta': np.float32(-0.77945596), 'alpha': np.float32(0.9465188)}
+[2025-09-03 20:26:26,648][__main__][INFO] - End of script
+
+[2025-09-03 20:26:32,498][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:26:32,772][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_3/min_node1_tune0/
+[2025-09-03 20:26:32,772][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:26:32,831][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:26:32,831][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:26:33,141][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:26:35,085][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:26:35,085][__main__][INFO] - Starting training...
+[2025-09-03 20:26:35,085][__main__][INFO] - Using device: cuda
+[2025-09-03 20:26:35,085][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:26:36,335][__main__][INFO] - Step 1 | valid1 MSE : 0.0120 | valid1 NMSE : 2.4003
+[2025-09-03 20:26:38,010][__main__][INFO] - Step 100 | valid1 MSE : 0.0058 | valid1 NMSE : 1.1667
+[2025-09-03 20:26:38,011][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:26:38,011][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:26:38,036][__main__][INFO] - End of training
+[2025-09-03 20:26:38,893][__main__][INFO] - Plotted losses
+[2025-09-03 20:26:38,893][__main__][INFO] - Computing test metrics
+[2025-09-03 20:26:38,999][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:26:39,144][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:26:39,335][__main__][INFO] - Saved plots
+[2025-09-03 20:26:39,335][__main__][INFO] - Final modulations: {'beta': np.float32(0.7788778), 'alpha': np.float32(0.94634306)}
+[2025-09-03 20:26:39,335][__main__][INFO] - End of script
+
+[2025-09-03 20:26:45,142][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:26:47,531][__main__][INFO] - End of script
+
+[2025-09-03 20:26:53,001][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:26:53,300][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_4/min_node0/
+[2025-09-03 20:26:53,301][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:26:53,357][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:26:53,357][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:26:55,883][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:26:55,883][__main__][INFO] - Starting training...
+[2025-09-03 20:26:55,884][__main__][INFO] - Using device: cuda
+[2025-09-03 20:26:55,884][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:26:57,126][__main__][INFO] - Step 1 | valid1 MSE : 0.0666 | valid1 NMSE : 1.0973
+[2025-09-03 20:26:58,802][__main__][INFO] - Step 100 | valid1 MSE : 0.0091 | valid1 NMSE : 0.1501
+[2025-09-03 20:27:00,463][__main__][INFO] - Step 200 | valid1 MSE : 0.0008 | valid1 NMSE : 0.0137
+[2025-09-03 20:27:02,118][__main__][INFO] - Step 300 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0070
+[2025-09-03 20:27:03,921][__main__][INFO] - Step 400 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0064
+[2025-09-03 20:27:05,570][__main__][INFO] - Step 500 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0061
+[2025-09-03 20:27:05,570][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:27:05,570][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:27:05,595][__main__][INFO] - End of training
+[2025-09-03 20:27:06,383][__main__][INFO] - Plotted losses
+[2025-09-03 20:27:06,383][__main__][INFO] - Computing test metrics
+[2025-09-03 20:27:06,491][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:27:06,627][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:27:06,824][__main__][INFO] - Saved plots
+[2025-09-03 20:27:06,825][__main__][INFO] - Final modulations: {'beta': np.float32(0.78264457), 'alpha': np.float32(0.9455626)}
+[2025-09-03 20:27:06,825][__main__][INFO] - End of script
+
+[2025-09-03 20:27:12,417][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:27:12,699][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_4/min_node1/
+[2025-09-03 20:27:12,699][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:27:12,762][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:27:12,762][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:27:14,740][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:27:14,741][__main__][INFO] - Starting training...
+[2025-09-03 20:27:14,741][__main__][INFO] - Using device: cuda
+[2025-09-03 20:27:14,741][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:27:15,978][__main__][INFO] - Step 1 | valid1 MSE : 0.0071 | valid1 NMSE : 1.0777
+[2025-09-03 20:27:17,657][__main__][INFO] - Step 100 | valid1 MSE : 0.0009 | valid1 NMSE : 0.1422
+[2025-09-03 20:27:19,326][__main__][INFO] - Step 200 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0137
+[2025-09-03 20:27:20,992][__main__][INFO] - Step 300 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0070
+[2025-09-03 20:27:22,817][__main__][INFO] - Step 400 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0064
+[2025-09-03 20:27:24,475][__main__][INFO] - Step 500 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0062
+[2025-09-03 20:27:24,475][__main__][INFO] - Training done in 0.162 min
+[2025-09-03 20:27:24,475][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:27:24,515][__main__][INFO] - End of training
+[2025-09-03 20:27:25,352][__main__][INFO] - Plotted losses
+[2025-09-03 20:27:25,352][__main__][INFO] - Computing test metrics
+[2025-09-03 20:27:25,466][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:27:25,605][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:27:25,792][__main__][INFO] - Saved plots
+[2025-09-03 20:27:25,793][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7827813), 'alpha': np.float32(0.9454522)}
+[2025-09-03 20:27:25,793][__main__][INFO] - End of script
+
+[2025-09-03 20:27:32,246][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:27:32,797][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_4/min_node0_tune1/
+[2025-09-03 20:27:32,797][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:27:32,853][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:27:32,853][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:27:33,155][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:27:35,525][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:27:35,526][__main__][INFO] - Starting training...
+[2025-09-03 20:27:35,526][__main__][INFO] - Using device: cuda
+[2025-09-03 20:27:35,526][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:27:36,785][__main__][INFO] - Step 1 | valid1 MSE : 0.1461 | valid1 NMSE : 2.4030
+[2025-09-03 20:27:38,449][__main__][INFO] - Step 100 | valid1 MSE : 0.0786 | valid1 NMSE : 1.2916
+[2025-09-03 20:27:38,450][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:27:38,450][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:27:38,478][__main__][INFO] - End of training
+[2025-09-03 20:27:39,332][__main__][INFO] - Plotted losses
+[2025-09-03 20:27:39,332][__main__][INFO] - Computing test metrics
+[2025-09-03 20:27:39,446][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:27:39,587][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:27:39,783][__main__][INFO] - Saved plots
+[2025-09-03 20:27:39,784][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7818322), 'alpha': np.float32(0.94668466)}
+[2025-09-03 20:27:39,784][__main__][INFO] - End of script
+
+[2025-09-03 20:27:46,010][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:27:46,282][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_4/min_node1_tune0/
+[2025-09-03 20:27:46,282][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:27:46,339][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:27:46,339][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:27:46,615][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:27:48,527][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:27:48,527][__main__][INFO] - Starting training...
+[2025-09-03 20:27:48,527][__main__][INFO] - Using device: cuda
+[2025-09-03 20:27:48,527][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:27:49,772][__main__][INFO] - Step 1 | valid1 MSE : 0.0163 | valid1 NMSE : 2.4690
+[2025-09-03 20:27:51,428][__main__][INFO] - Step 100 | valid1 MSE : 0.0089 | valid1 NMSE : 1.3487
+[2025-09-03 20:27:51,429][__main__][INFO] - Training done in 0.048 min
+[2025-09-03 20:27:51,429][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:27:51,455][__main__][INFO] - End of training
+[2025-09-03 20:27:52,265][__main__][INFO] - Plotted losses
+[2025-09-03 20:27:52,265][__main__][INFO] - Computing test metrics
+[2025-09-03 20:27:52,374][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:27:52,511][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:27:52,693][__main__][INFO] - Saved plots
+[2025-09-03 20:27:52,694][__main__][INFO] - Final modulations: {'beta': np.float32(0.78169364), 'alpha': np.float32(0.9464043)}
+[2025-09-03 20:27:52,694][__main__][INFO] - End of script
+
+[2025-09-03 20:27:58,326][__main__][INFO] - =====Running data script=====
+[2025-09-03 20:28:00,496][__main__][INFO] - End of script
+
+[2025-09-03 20:28:05,842][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:28:06,146][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_5/min_node0/
+[2025-09-03 20:28:06,146][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:28:06,205][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:28:06,205][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:28:08,733][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:28:08,733][__main__][INFO] - Starting training...
+[2025-09-03 20:28:08,733][__main__][INFO] - Using device: cuda
+[2025-09-03 20:28:08,733][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:28:09,972][__main__][INFO] - Step 1 | valid1 MSE : 0.0640 | valid1 NMSE : 1.0428
+[2025-09-03 20:28:11,630][__main__][INFO] - Step 100 | valid1 MSE : 0.0088 | valid1 NMSE : 0.1418
+[2025-09-03 20:28:13,309][__main__][INFO] - Step 200 | valid1 MSE : 0.0009 | valid1 NMSE : 0.0143
+[2025-09-03 20:28:14,966][__main__][INFO] - Step 300 | valid1 MSE : 0.0005 | valid1 NMSE : 0.0073
+[2025-09-03 20:28:16,764][__main__][INFO] - Step 400 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0069
+[2025-09-03 20:28:18,419][__main__][INFO] - Step 500 | valid1 MSE : 0.0004 | valid1 NMSE : 0.0066
+[2025-09-03 20:28:18,419][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:28:18,419][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:28:18,448][__main__][INFO] - End of training
+[2025-09-03 20:28:19,240][__main__][INFO] - Plotted losses
+[2025-09-03 20:28:19,240][__main__][INFO] - Computing test metrics
+[2025-09-03 20:28:19,350][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:28:19,487][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:28:19,681][__main__][INFO] - Saved plots
+[2025-09-03 20:28:19,682][__main__][INFO] - Final modulations: {'beta': np.float32(0.77956086), 'alpha': np.float32(0.94532305)}
+[2025-09-03 20:28:19,682][__main__][INFO] - End of script
+
+[2025-09-03 20:28:25,378][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:28:25,651][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_5/min_node1/
+[2025-09-03 20:28:25,651][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:28:25,707][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:28:25,707][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:28:27,686][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=500
+[2025-09-03 20:28:27,686][__main__][INFO] - Starting training...
+[2025-09-03 20:28:27,686][__main__][INFO] - Using device: cuda
+[2025-09-03 20:28:27,686][__main__][INFO] - Training 500 epochs of 1 batches (500 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:28:28,920][__main__][INFO] - Step 1 | valid1 MSE : 0.0061 | valid1 NMSE : 1.0420
+[2025-09-03 20:28:30,572][__main__][INFO] - Step 100 | valid1 MSE : 0.0008 | valid1 NMSE : 0.1445
+[2025-09-03 20:28:32,234][__main__][INFO] - Step 200 | valid1 MSE : 0.0001 | valid1 NMSE : 0.0151
+[2025-09-03 20:28:33,880][__main__][INFO] - Step 300 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0075
+[2025-09-03 20:28:35,692][__main__][INFO] - Step 400 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0069
+[2025-09-03 20:28:37,340][__main__][INFO] - Step 500 | valid1 MSE : 0.0000 | valid1 NMSE : 0.0066
+[2025-09-03 20:28:37,341][__main__][INFO] - Training done in 0.161 min
+[2025-09-03 20:28:37,341][__main__][INFO] - Average time per step: 0.019 s
+[2025-09-03 20:28:37,365][__main__][INFO] - End of training
+[2025-09-03 20:28:38,132][__main__][INFO] - Plotted losses
+[2025-09-03 20:28:38,132][__main__][INFO] - Computing test metrics
+[2025-09-03 20:28:38,242][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:28:38,378][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:28:38,561][__main__][INFO] - Saved plots
+[2025-09-03 20:28:38,561][__main__][INFO] - Final modulations: {'beta': np.float32(-0.7807629), 'alpha': np.float32(0.9452554)}
+[2025-09-03 20:28:38,561][__main__][INFO] - End of script
+
+[2025-09-03 20:28:44,582][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:28:44,854][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_5/min_node0_tune1/
+[2025-09-03 20:28:44,854][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:28:44,906][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:28:44,906][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:28:45,121][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:28:47,042][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:28:47,042][__main__][INFO] - Starting training...
+[2025-09-03 20:28:47,042][__main__][INFO] - Using device: cuda
+[2025-09-03 20:28:47,042][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:28:48,293][__main__][INFO] - Step 1 | valid1 MSE : 0.1490 | valid1 NMSE : 2.4276
+[2025-09-03 20:28:49,953][__main__][INFO] - Step 100 | valid1 MSE : 0.0682 | valid1 NMSE : 1.1103
+[2025-09-03 20:28:49,954][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:28:49,954][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:28:49,978][__main__][INFO] - End of training
+[2025-09-03 20:28:50,799][__main__][INFO] - Plotted losses
+[2025-09-03 20:28:50,800][__main__][INFO] - Computing test metrics
+[2025-09-03 20:28:50,904][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:28:51,041][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:28:51,232][__main__][INFO] - Saved plots
+[2025-09-03 20:28:51,233][__main__][INFO] - Final modulations: {'beta': np.float32(-0.779825), 'alpha': np.float32(0.94645125)}
+[2025-09-03 20:28:51,233][__main__][INFO] - End of script
+
+[2025-09-03 20:28:57,313][__main__][INFO] - =====Running train script=====
+[2025-09-03 20:28:57,585][__main__][INFO] - Fetched main configs, save directory : ../outputs/bench_tune/r0_s1/seed_5/min_node1_tune0/
+[2025-09-03 20:28:57,585][__main__][INFO] - Model PatchTST, normalization mIN, criterion NMSE, kwargs {'last': False, 'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-03 20:28:57,646][__main__][INFO] - Fetched dataloaders
+[2025-09-03 20:28:57,646][__main__][INFO] - Batches: 1 * (X=[70, 1, 100], c=[70, 1, 120], y=[70, 1, 20])
+[2025-09-03 20:28:57,913][__main__][INFO] - Loaded previous state dict
+[2025-09-03 20:28:59,837][__main__][INFO] - batch_size=100, learning_rate=1e-05, steps per epoch=1, epochs=100
+[2025-09-03 20:28:59,838][__main__][INFO] - Starting training...
+[2025-09-03 20:28:59,838][__main__][INFO] - Using device: cuda
+[2025-09-03 20:28:59,838][__main__][INFO] - Training 100 epochs of 1 batches (100 steps): , eval_freq: 100, print_freq: 100
+[2025-09-03 20:29:01,111][__main__][INFO] - Step 1 | valid1 MSE : 0.0144 | valid1 NMSE : 2.4691
+[2025-09-03 20:29:02,769][__main__][INFO] - Step 100 | valid1 MSE : 0.0065 | valid1 NMSE : 1.1183
+[2025-09-03 20:29:02,769][__main__][INFO] - Training done in 0.049 min
+[2025-09-03 20:29:02,769][__main__][INFO] - Average time per step: 0.029 s
+[2025-09-03 20:29:02,796][__main__][INFO] - End of training
+[2025-09-03 20:29:03,594][__main__][INFO] - Plotted losses
+[2025-09-03 20:29:03,594][__main__][INFO] - Computing test metrics
+[2025-09-03 20:29:03,699][__main__][INFO] - Evaluation done in 0.002 min
+[2025-09-03 20:29:03,836][__main__][INFO] - Evaluation done in 0.001 min
+[2025-09-03 20:29:04,027][__main__][INFO] - Saved plots
+[2025-09-03 20:29:04,028][__main__][INFO] - Final modulations: {'beta': np.float32(0.77862203), 'alpha': np.float32(0.9464606)}
+[2025-09-03 20:29:04,028][__main__][INFO] - End of script
+
+==Table of ../outputs/bench_tune/r0_s1/==
++-----------------+-----------------+-----------------+--------------------+--------------------+
+|                 | min_node0       | min_node1       | min_node0_tune1    | min_node1_tune0    |
++=================+=================+=================+====================+====================+
+| Test MSE * 1e4  | 3.8513 ± 0.1255 | 0.3558 ± 0.0442 | 727.0306 ± 82.5348 | 68.3818 ± 14.6751  |
++-----------------+-----------------+-----------------+--------------------+--------------------+
+| Test NMSE * 1e2 | 0.6342 ± 0.0167 | 0.6390 ± 0.0169 | 119.4657 ± 13.6014 | 121.7861 ± 13.1299 |
++-----------------+-----------------+-----------------+--------------------+--------------------+
+==Table of ../outputs/bench_tune/r0_s1/==
++-----------------+-----------------+-----------------+--------------------+--------------------+
+|                 | min_node0       | min_node1       | min_node0_tune1    | min_node1_tune0    |
++=================+=================+=================+====================+====================+
+| Test MSE * 1e4  | 3.8452 ± 0.1282 | 0.3543 ± 0.0451 | 727.3893 ± 82.7967 | 68.3535 ± 14.6420  |
++-----------------+-----------------+-----------------+--------------------+--------------------+
+| Test NMSE * 1e2 | 0.6331 ± 0.0194 | 0.6365 ± 0.0150 | 119.5028 ± 13.7242 | 121.8017 ± 13.2294 |
++-----------------+-----------------+-----------------+--------------------+--------------------+

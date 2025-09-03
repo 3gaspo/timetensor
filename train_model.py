@@ -54,7 +54,11 @@ def run(cfg):
 
     #data
     stats_dict = fetch_stats(data_path, clusters, normalization, subsets)
-    loaders_dict = fetch_training_data(data_path, cfg.data.indiv_split, cfg.data.date_splits, subsets, batch_size, lags, horizon, by_date=(cfg.data.by_idx=="dates"), context_by_individuals=cfg.data.context_by_individuals, reshuffle=cfg.data.reshuffle, clusters=clusters, remove_cte=cfg.data.remove_cte, stats=stats_dict, seed=seed)
+    loaders_dict = fetch_training_data(data_path,
+            cfg.data.indiv_split, cfg.data.date_splits, subsets,
+            batch_size, lags, horizon, by_date=(cfg.data.by_idx=="dates"), context_by_individuals=cfg.data.context_by_individuals,
+            reshuffle=cfg.data.reshuffle, remove_cte=cfg.data.remove_cte,
+            clusters=clusters,  stats=stats_dict, seed=seed)
     shape, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
     if verbose:
         logger.info("Fetched dataloaders")

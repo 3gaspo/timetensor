@@ -7,6 +7,7 @@
 #SBATCH --mem=40G -p h100
 source .venv/bin/activate
 
+#min tune
 data=synthetic
 
 model_name=PatchTST
@@ -15,10 +16,17 @@ lr=0.00001
 bs=100
 eval_freq=100
 
-for r in 0 0.1 0.25
+for r in 0.1 0
 do
-    for subset in 1 0.5 0.2
+    for subset in 0.2 1
     do
+
+        # if [ "$subset" = "0.2" ]; then
+        #     bs=20
+        # else
+        #     bs=100
+        # fi
+
         main_output_dir="../outputs/bench_tune/r${r}_s${subset}/"
         sizes="${subset};1;1;1;1;1"
 
@@ -28,7 +36,7 @@ do
         for seed in 1 2 3 4 5
         do
             output_dir="${main_output_dir}seed_$seed/"
-            srun python3 load_dataset.py "data=$data" "data.r1=$r" "data.r2=$r" "data.subsets.sizes='$sizes'" "misc.seed=$seed" "misc.verbose=0" "task.lags=100" "task.horizon=20"
+            srun python3 load_dataset.py "task.rebuild_pt=True" "data=$data" "data.r1=$r" "data.r2=$r" "data.subsets.sizes='$sizes'" "misc.seed=$seed" "misc.verbose=0" "task.lags=100" "task.horizon=20"
             
             #mIN
             epochs=500
@@ -57,8 +65,8 @@ do
                     "task.horizon=20" \
                     "normalization.configs.init_beta=True" \
                     "normalization.configs.init_alpha=True" \
-                    "normalization.configs.fixed_beta=True" \
-                    "normalization.configs.fixed_alpha=True " \
+                    "normalization.configs.fixed_beta=False" \
+                    "normalization.configs.fixed_alpha=False " \
                     "normalization.configs.use_gamma=True" \
                     "normalization.configs.inverse_gamma=True" \
                     "misc.save_name=min_$node"
@@ -92,8 +100,8 @@ do
                 "task.horizon=20" \
                 "normalization.configs.init_beta=True" \
                 "normalization.configs.init_alpha=True" \
-                "normalization.configs.fixed_beta=True" \
-                "normalization.configs.fixed_alpha=True " \
+                "normalization.configs.fixed_beta=False" \
+                "normalization.configs.fixed_alpha=False " \
                 "normalization.configs.use_gamma=True" \
                 "normalization.configs.inverse_gamma=True" \
                 "misc.save_name=min_node0_tune1"
@@ -126,8 +134,8 @@ do
                 "task.horizon=20" \
                 "normalization.configs.init_beta=True" \
                 "normalization.configs.init_alpha=True" \
-                "normalization.configs.fixed_beta=True" \
-                "normalization.configs.fixed_alpha=True " \
+                "normalization.configs.fixed_beta=False" \
+                "normalization.configs.fixed_alpha=False " \
                 "normalization.configs.use_gamma=True" \
                 "normalization.configs.inverse_gamma=True" \
                 "misc.save_name=min_node1_tune0"

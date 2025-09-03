@@ -16,6 +16,10 @@ task:
   new_example: False
   replot: False
   heterogeneity: False
+  recluster: False
+  splits:
+  rounds: 10
+  sampled_clients: 1
 
 misc:
   seed: 1
