@@ -475,17 +475,6 @@ def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", save_path=None, s
     plt.close()
 
 
-def plot_weights(weights, path, name="weights.pdf", title='Model weights'):
-    plt.figure()
-    plt.imshow(weights, aspect='auto', cmap='viridis')
-    plt.colorbar(label='Weight value')
-    plt.xlabel('Inputs (lookback)')
-    plt.ylabel('Outputs (horizon)')
-    plt.title(title)
-    plt.savefig(path + name)
-    plt.close()
-
-
 def plot_expe(losses_path, eval_freq=10, names=None, save_path=None):
     """plots losses for list of experiments in path"""
     if type(eval_freq)==str:
@@ -602,3 +591,29 @@ def plot_clustering(raw_df, feature_df, n_clusters, lags, horizon, clustering_na
     plot_gamma(df_dict, plot_dir, "gammas.pdf", per_user=True, lookback=lags, horizon=horizon, remove_cte=remove_cte, log=False)
 
 
+def plot_weights_(weights, path, name="weights.pdf", title='Model weights'):
+    plt.figure()
+    plt.imshow(weights, aspect='auto', cmap='viridis')
+    plt.colorbar(label='Weight value')
+    plt.xlabel('Inputs (lookback)')
+    plt.ylabel('Outputs (horizon)')
+    plt.title(title)
+    plt.savefig(path + name)
+    plt.close()
+
+def plot_weights(model, learner, save_dir, save_name):
+    model_name = model.name
+    normalization = model.normalization
+    if model_name in ["linear", "sklinear"]:
+        if model_name == "sklinear":
+            weights = learner.get_weights()
+        else:
+            weights = model.model.fc.weight.detach().cpu().numpy()
+        plot_weights_(weights, save_dir + "plots/", title=f'{save_name} weights')
+        
+    if model_name == "DLinear":
+        linear_weights = model.model.Linear_Seasonal[0].weight.detach().cpu().numpy()
+        season_weights = model.model.Linear_Trend[0].weight.detach().cpu().numpy()
+        plot_weights_(linear_weights, save_dir + "plots/", name="season_weights.pdf", title=f'{save_name} seasonal weights')
+        plot_weights_(season_weights, save_dir + "plots/", name="trend_weights.pdf", title=f'{save_name} trend weights')
+    

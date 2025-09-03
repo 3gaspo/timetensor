@@ -16,3 +16,4 @@ remove_cte: True
 subsets:
   mode: dates
   sizes: 1;1;1;1;1;1
+  cluster:

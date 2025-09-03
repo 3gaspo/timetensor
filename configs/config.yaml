@@ -12,6 +12,10 @@ training:
 task:
   lags: 336
   horizon: 48
+  rebuild_pt: False
+  new_example: False
+  replot: False
+  heterogeneity: False
 
 misc:
   seed: 1

@@ -8,3 +8,5 @@
 source .venv/bin/activate
 
 srun python3 load_dataset.py "data=solar"
+
+# nohup bash scripts/read.sh > read.log 2>&1 &

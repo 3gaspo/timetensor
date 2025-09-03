@@ -12,11 +12,13 @@ class DefaultNorm(nn.Module):
     def __init__(self, model, latent=False):
         super().__init__()
         self.model = model
+        self.name = self.model.name
+        self.normalization = "None"
         self.latent = latent
     def norm(self, x):
-        pass
+        return x
     def denorm(self, y):
-        pass
+        return y
     def forward(self, x, c=None): #(B, dim, lags)
         x  = self.norm(x) #(B, dim, lags)
         pred = self.model(x, c) #(B, dim, horizon)
@@ -30,6 +32,7 @@ class GlobalNorm(DefaultNorm):
     def __init__(self, model, mean, std, latent=False):
         """Norm/Denorm using fixed mean and std"""
         super().__init__(model, latent=latent)
+        self.normalization = "global"
         self.mean, self.std = mean, std
 
     def norm(self, x):
@@ -44,6 +47,7 @@ class InstanceNorm(DefaultNorm):
     def __init__(self, model, eps=1e-6, last=False, latent=True, **kwargs):
         """Norm/Denorm using per instance mean and std"""
         super().__init__(model, latent=latent)
+        self.normalization = "instance"
         self.eps, self.last = eps, last
     def norm(self, x):
         self.mean, self.std = get_normal_stats(x)#, std_cst=self.eps)
@@ -57,6 +61,7 @@ class RevIN(DefaultNorm):
     def __init__(self, model, dim, eps=1e-6, latent=False, **kwargs):
         """RevIN: Reversible Instance Normalization for Time Series Forecasting"""
         super().__init__(model, latent=latent)
+        self.normalization = "revin"
         self.dim, self.eps = dim, eps
         self.alpha = nn.Parameter(torch.ones(1, dim, 1))  #scale
         self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
@@ -80,28 +85,29 @@ class RevIN(DefaultNorm):
     
 
 class mIN(DefaultNorm):
-    def __init__(self, model, dim, eps=1e-6, last=False, init_alpha=None, init_beta=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, mode=0,  latent=False, **kwargs):
+    def __init__(self, model, dim, eps=1e-6, last=False, init_alpha=False, init_beta=False, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, mode=0,  latent=False, **kwargs):
         """mIN: Modulated Instance Normalization"""
         super().__init__(model, latent=latent)
+        self.normalization = "mIN"
         self.dim, self.eps = dim, eps
 
         if fixed_alpha:
-            if init_alpha is not None:
+            if init_alpha:
                 self.register_buffer("alpha", torch.full((1, self.dim, 1), init_alpha))
             else:
                 self.register_buffer("alpha", torch.ones(1, self.dim, 1))
         else:
-            if init_alpha is not None:
+            if init_alpha:
                 self.alpha = nn.Parameter(torch.full((1, self.dim, 1), init_alpha))
             else:
                 self.alpha = nn.Parameter(torch.ones(1, self.dim, 1))  #scale
         if fixed_beta:
-            if init_beta is not None:
+            if init_beta:
                 self.register_buffer("beta", torch.full((1, self.dim, 1), init_beta))
             else:
                 self.register_buffer("beta", torch.zeros((1, self.dim, 1)))
         else:
-            if init_beta is not None:
+            if init_beta:
                 self.beta = nn.Parameter(torch.full((1, self.dim, 1), init_beta))
             else:
                 self.beta = nn.Parameter(torch.zeros(1, self.dim, 1))  #shift
@@ -109,6 +115,8 @@ class mIN(DefaultNorm):
         self.gamma =  nn.Parameter(torch.ones(1, self.dim, 1))
         self.omega = nn.Parameter(torch.zeros(1, self.dim, 1))
         self.use_gamma, self.inverse_gamma = use_gamma, inverse_gamma
+        if self.inverse_gamma:
+            assert self.use_gamma
         self.mode = mode
         self.last, self.latent = last, latent
 
@@ -152,23 +160,19 @@ class mIN(DefaultNorm):
 
 
 class cmIN(mIN):
-    def __init__(self, model, dim, eps=1e-6, last=False, init_alphas=None, init_betas=None, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, mode=0,  latent=False, **kwargs):
+    def __init__(self, model, dim, n_clusters=2, eps=1e-6, last=False, init_alpha=False, init_beta=False, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, mode=0,  latent=False, **kwargs):
         """mIN: Modulated Instance Normalization"""
         super().__init__(model, dim, eps, last, use_gamma=use_gamma, inverse_gamma=inverse_gamma, mode=mode,  latent=latent, **kwargs)
-
-        assert init_alphas is not None and init_betas is not None
-
-        if type(init_alphas)==int:
-            self.init_alphas = [1.0 for k in range(init_alphas)]
+        self.normalization="cmIN"
+        assert n_clusters is not None
+        if init_alpha:
+            self.init_alphas = [float(value) for value in init_alpha]
         else:
-            init_alphas = init_alphas.split(";")
-            self.init_alphas = [float(value) for value in init_alphas]
-            
-        if type(init_betas)==int:
-            self.init_betas = [0.0 for k in range(init_betas)]
+            self.init_alphas = [1.0 for _ in range(n_clusters)]
+        if init_beta:
+            self.init_betas = [float(value) for value in init_beta]
         else:
-            init_betas = init_betas.split(";")
-            self.init_betas = [float(value) for value in init_betas]
+            self.init_betas = [0.0 for _ in range(n_clusters)]
 
         self.fixed_alpha = fixed_alpha
         if self.fixed_alpha:
@@ -219,6 +223,8 @@ class persistence(nn.Module):
     """repeats single last value"""
     def __init__(self, horizon):
         super().__init__()
+        self.name = "persistence"
+        self.normalization = None
         self.horizon = horizon
     def forward(self, x, context=None):
         past_values = x[:, :, -1].unsqueeze(2) # (B, dim, 1)
@@ -229,6 +235,8 @@ class expected(nn.Module):
     """repeats single last value"""
     def __init__(self, horizon):
         super().__init__()
+        self.name = "expected"
+        self.normalization = None
         self.horizon = horizon
     def forward(self, x, context=None):
         mean, _ = get_normal_stats(x)
@@ -239,6 +247,8 @@ class repeat(nn.Module):
     """returns last horizon values"""
     def __init__(self, horizon):
         super().__init__()
+        self.name = "repeat"
+        self.normalization = None
         self.horizon = horizon
     def forward(self, x, context=None):
         output = x[:, :, -self.horizon:] # (B, dim, horizon)
@@ -248,6 +258,8 @@ class lookback(nn.Module):
     """repeats past horizon (at idx)"""
     def __init__(self, idx, horizon):
         super().__init__()
+        self.name = "lookback"
+        self.normalization = None
         self.idx  = idx
         self.horizon = horizon
     def forward(self, x, context=None):
@@ -258,6 +270,8 @@ class linear(nn.Module):
     """linear layer on lags"""
     def __init__(self, lags, dim, horizon):
         super().__init__()
+        self.name = "linear"
+        self.normalization = None
         self.lags, self.dim, self.horizon  = lags, dim, horizon
         self.fc = nn.Linear(lags * dim, horizon * dim)
     def forward(self, x, context=None):
@@ -272,6 +286,7 @@ class linear(nn.Module):
 class sklinear():
     """linear layer on lags"""
     def __init__(self, normalization=False, dim=0, eps=1e-6, **kwargs):
+        self.name = "sklinear"
         self.reg = LinearRegression()
         self.normalization = normalization
         self.dim = dim
@@ -310,18 +325,8 @@ class sklinear():
         return pred
 
 
-def load_model(model_name, shape, normalization, **kwargs):
-    """loads models from str model name
-    normalization:
-        0/False
-        1: by provided mean and std
-        2: by instance
-        3: revin
-    """
-    if type(normalization) != str:
-        normalization, norm_kwargs = normalization.name, normalization.configs
-    if norm_kwargs is None:
-        norm_kwargs = {}
+def load_model(model_name, shape, normalization, init_path=None, freeze_core=False, logger=None, **kwargs):
+    """loads models from str model name"""
     lags, dim, horizon = shape[0], shape[1], shape[2]
     if model_name == "persistence":
         model = persistence(horizon)
@@ -335,27 +340,49 @@ def load_model(model_name, shape, normalization, **kwargs):
         model = linear(lags, dim, horizon)
     elif model_name == "DLinear":
         model = DLinear(lags, dim, horizon, kwargs.get("kernel_size",25))
+        model.name = "DLinear"
     elif model_name == "sklinear":
-        model = sklinear(normalization, **norm_kwargs)
+        model = sklinear(normalization, **kwargs)
     elif model_name == "PatchTST":
         model = PatchTST(lags, horizon)
+        model.name = "PatchTST"
     else:
         raise ValueError(f"Model name not recognized : {model_name}")
     
     get_training = normalization in ["mIN", "revin"] or (model_name not in ["persistence", "repeat", "lookback", "expected"])
 
     if normalization is not None and normalization != "None" and get_training and model_name != "sklinear":
+        if normalization == "None":
+            model = DefaultNorm(model)
         if normalization == "global":
             mean, std = kwargs.get("mean", 2500), kwargs.get("std", 15000)
-            return GlobalNorm(model, mean, std)
+            model = GlobalNorm(model, mean, std)
         elif normalization == "instance":
-            return InstanceNorm(model, **norm_kwargs)
+            model = InstanceNorm(model, **kwargs)
         elif normalization == "revin":
-            return RevIN(model, dim,  **norm_kwargs)
+            model = RevIN(model, dim,  **kwargs)
         elif normalization == "mIN":
-            return mIN(model, dim, **norm_kwargs)
+            model = mIN(model, dim, **kwargs)
         elif normalization == "cmIN":
-            return cmIN(model, dim, **norm_kwargs)
+            model = cmIN(model, dim, **kwargs)
         else:
             ValueError(f"Normalization not recognized : {normalization}")
+    else:
+        model = DefaultNorm(model)
+
+    if init_path is not None:
+        weights = torch.load(init_path)
+        model.load_state_dict(weights)
+        if logger is not None:
+            logger.info("Loaded previous state dict")
+    if freeze_core:
+        for param in model.model.parameters():
+            param.requires_grad = False
+        trainable_params = []
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                trainable_params.append(name)
+        if logger is not None:
+            logger.info(f"Froze parameters. Trainable: {trainable_params}")
+
     return model

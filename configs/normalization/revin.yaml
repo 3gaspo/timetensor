@@ -1,4 +1,3 @@
 name: revin
 configs:
-  eps: 1e-6
   latent: False

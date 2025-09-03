@@ -9,7 +9,7 @@ import torch
 import numpy as np
 import json
 
-from src.timetensor.dataset import get_sizes, fetch_training_data, fetch_dicts, set_random_data
+from src.timetensor.dataset import get_sizes, fetch_training_data, fetch_dicts, set_random_data, fetch_csv
 from src.timetensor.utils import filter_dict
 from src.timetensor.visu import plot_named_example, plot_stats, plot_means, plot_clustering
 from src.timetensor.analysis import *
@@ -43,11 +43,12 @@ def run(cfg):
         if not os.path.exists(data_path+"plots/" + suffix):
             os.makedirs(data_path+"plots/" + suffix)
 
-    rebuild_pt = True
-    new_example = True
-    replot = True
-    do_heterogeneity = True
-    logger.info("Fetched configs")
+    rebuild_pt = cfg.task.rebuild_pt
+    new_example = cfg.task.new_example
+    replot = cfg.task.replot
+    do_heterogeneity = cfg.task.heterogeneity
+    if verbose:
+        logger.info("Fetched configs")
 
     if seed is not None:
         torch.manual_seed(seed)
@@ -57,9 +58,6 @@ def run(cfg):
     #build dataset values.pt from dataset_name.csv
     if rebuild_pt:
         t1 = perf_counter()
-        # if dataset_name == "electricity":
-        #     from src.timetensor.electricity import build_dataset
-        #     build_dataset(data_path, raw_format=cfg.data.type, output_format="csv", drop=cfg.data.drop_users)
         if "synthetic" in dataset_name:
             from src.timetensor.synthetic import build_dataset
             build_dataset(data_path, n1=cfg.data.n1, n2=cfg.data.n2, r1=cfg.data.r1, r2=cfg.data.r2, output_format="csv")
@@ -69,19 +67,14 @@ def run(cfg):
         t2 = perf_counter()
         if verbose:
             logger.info(f"Rebuilt dataset in {(t2-t1)/60:.3f} min")
-
-    # if dataset_name == "electricity":
-    #     from src.timetensor.electricity import fetch_csv
-    # else:
-    #     from src.timetensor.dataset import fetch_csv
-    from src.timetensor.dataset import fetch_csv
+    
 
     #plot and save example
     if new_example:
         ex_dir = data_path + "examples/" + f"{lags}_{horizon}/"
         set_random_data(data_path, lags, horizon, name="rand")
         plot_named_example(ex_dir, f"rand")
-        if logger is not None:
+        if verbose:
             logger.info("Set new example")
 
     #look for outlier windows
@@ -99,7 +92,7 @@ def run(cfg):
     #stats
     df, context, datetimes = fetch_csv(data_path, dataset_name, context_cols=context_cols, drop=drop_users)
     loaders_dict, df_dict = fetch_dicts(data_path, cfg, remove_cte=remove_cte, clusters=clusters, seed=seed)
-    stats_dict = get_dataset_stats(df, df_dict, lags, horizon, remove_cte, logger, data_path, "raw_stats.json")
+    stats_dict = get_dataset_stats(df, df_dict, lags, horizon, remove_cte, logger if verbose else None, data_path, "raw_stats.json")
 
     #normalized stats
     df, context, datetimes = fetch_csv(data_path, dataset_name, context_cols=context_cols, drop=drop_users)

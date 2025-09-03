@@ -5,9 +5,10 @@ import os
 import shutil
 import copy
 import pandas as pd
+import warnings
+import json
 
 from .utils import normalize
-
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
@@ -220,7 +221,13 @@ class TimeSeriesSubset(Dataset):
 
 def fetch_csv(data_path, data_name, context_cols=None, drop=None):
     """fetches univariate csv (optional context) and saves pytorch. TODO: for multivariate"""
-    df = pd.read_csv(data_path + data_name + ".csv", index_col=0, parse_dates=True)
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message="Could not infer format, so each element will be parsed individually",
+            category=UserWarning,
+        )
+        df = pd.read_csv(data_path + data_name + ".csv", index_col=0, parse_dates=True)
     if context_cols is None:
         values_df = df
         context_df = None
@@ -656,7 +663,7 @@ def fetch_training_data(data_path, indiv_split, date_splits, subsets, batch_size
         torch.manual_seed(seed)
         torch.cuda.manual_seed(seed)
         np.random.seed(seed)
-    if clusters is not None:
+    if clusters is not None and subsets["cluster"] in ["None", None]:
         cluster_names = [name for name in os.listdir(data_path + clusters) if name[-3:]==".pt"]
         loaders_dicts = []
         for cluster_name in cluster_names: #TODO include stats for clusters
@@ -667,7 +674,11 @@ def fetch_training_data(data_path, indiv_split, date_splits, subsets, batch_size
         else:
             loaders_dict = {f"node{k}": loaders_dicts[k] for k in range(len(loaders_dicts))}
     else:
-        data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
+        if subsets["cluster"] not in ["None", None]:
+            cluster_path = data_path+clusters+subsets["cluster"] + ".pt"
+        else:
+            cluster_path = None
+        data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle, cluster_path=cluster_path)
         loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date, subsets=subsets["sizes"], subset_mode=subsets["mode"], save_path=data_path+"subsets/", remove_cte=remove_cte, stats=stats)
     
     return loaders_dict
@@ -725,3 +736,30 @@ def fetch_example_data(path="datasets/examples/", names=None):
     for name in names:
         dico[name] = load_example(path + name + "/")
     return dico
+
+
+def fetch_stats(data_path, clusters, normalization, subsets):
+    """returns correct stats dict"""
+    if normalization == "cmIN":
+        assert clusters is not None
+        #total stats
+        stats_path = data_path + "raw_stats.json"
+        with open(stats_path) as file:
+            stats_dict = json.load(file)
+        stats_dict["train"]["alpha"], stats_dict["train"]["beta"] = [], []
+        #cluster stats
+        cluster_names = [name[:-3] for name in os.listdir(data_path + clusters) if name[-3:]==".pt"]
+        for cluster_name in cluster_names:
+            stats_path = data_path + clusters + "stats/" + cluster_name + "_raw_stats.json"
+            with open(stats_path) as file:
+                stats_dict_ = json.load(file)
+            stats_dict["train"]["alpha"].append(stats_dict_["train"]["alpha"])
+            stats_dict["train"]["beta"].append(stats_dict_["train"]["beta"])
+    else:
+        if subsets["cluster"] is not None:
+            stats_path = data_path + clusters + "stats/" + subsets["cluster"] + "_raw_stats.json"
+        else:
+            stats_path = data_path + "raw_stats.json"
+        with open(stats_path) as file:
+            stats_dict = json.load(file)
+    return stats_dict

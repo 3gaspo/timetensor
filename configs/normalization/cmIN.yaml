@@ -1,11 +1,11 @@
 name: cmIN
 configs:
-  eps: 1e-6
   last: False
   latent: False
-  init_betas:
+  init_beta: False
   fixed_beta: False
-  init_alphas:
+  init_alpha: False
   fixed_alpha: False
   use_gamma: False
   inverse_gamma: False
+  n_clusters: 2
