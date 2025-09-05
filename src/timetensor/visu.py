@@ -233,7 +233,7 @@ def plot_losses(train_losses, valid_losses_dict=None, path="", name="losses.pdf"
     plt.savefig(path + name)
     plt.close()
 
-def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", logscale=True, x_every=None, eval_freq=10):
+def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", logscale=True, x_every=None, eval_freq=1):
     """plots losses during training"""
     plt.clf()
     fig = plt.figure(figsize=(10,5))

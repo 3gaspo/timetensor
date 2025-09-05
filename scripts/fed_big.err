@@ -1,0 +1,202 @@
+/home/h61084/codes/timetensor/src/timetensor/utils.py:112: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  std =  x.std(dim=-1, keepdim=True).detach()
+Error executing job with overrides: ['misc.seed=1', 'data=electricity', 'data.reshuffle=True', 'misc.output_dir=../outputs/fed_big/seed_1/', 'misc.benchmark=True', 'model=PatchTST', 'normalization=mIN', 'training.loss=NMSE', 'training.bs=1', 'training.lr=0.00001', 'training.epochs=10', 'task.rounds=10', 'task.sampled_clients=0.1', 'training.eval_freq=100', 'training.print_freq=100', "task.splits='None'", 'task.fedmin=True', 'misc.save_name=mIN_jointTrue']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_fedavg.py", line 112, in run
+    server, shadow_server, nodes, shadow_nodes, size_weights = launch_training(client_builder, server_builder, scheme_builder, loaders_dicts, global_model,
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/federated.py", line 301, in launch_training
+    training_losses, valid_losses, shadow_valid_losses, global_valid_losses = scheme.compute_scheme(verbose=verbose)
+                                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/fedavg.py", line 97, in compute_scheme
+    self.compute_round(verbose=max(0,verbose-1))
+  File "/home/h61084/codes/timetensor/src/timetensor/fedavg.py", line 69, in compute_round
+    shadow_losses = self.shadow_server.compute_round(self.E)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/federated.py", line 165, in compute_round
+    average_eval_dict = self.compute_epoch()
+                        ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/federated.py", line 158, in compute_epoch
+    loss = self.learner.compute_step(X_batch, context_batch, y_batch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/pipeline.py", line 143, in compute_step
+    predictions = self.model(X_batch, context_batch)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/models.py", line 157, in forward
+    pred = self.model(x, c) #(B, dim, horizon)
+           ^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/sota/patchtst/patch_tst.py", line 52, in forward
+    x = self.model(x)
+        ^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/sota/patchtst/PatchTST_backbone.py", line 63, in forward
+    z = self.backbone(z)                                                                # z: [bs x nvars x d_model x patch_num]
+        ^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/sota/patchtst/PatchTST_backbone.py", line 152, in forward
+    z = self.encoder(u)                                                      # z: [bs * nvars x patch_num x d_model]
+        ^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/sota/patchtst/PatchTST_backbone.py", line 177, in forward
+    for mod in self.layers: output, scores = mod(output, prev=scores, key_padding_mask=key_padding_mask, attn_mask=attn_mask)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/sota/patchtst/PatchTST_backbone.py", line 228, in forward
+    src2, attn, scores = self.self_attn(src, src, src, prev, key_padding_mask=key_padding_mask, attn_mask=attn_mask)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/sota/patchtst/PatchTST_backbone.py", line 290, in forward
+    q_s = self.W_Q(Q).view(bs, -1, self.n_heads, self.d_k).transpose(1,2)       # q_s    : [bs x n_heads x max_q_len x d_k]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: cannot reshape tensor of 0 elements into shape [0, -1, 16, 8] because the unspecified dimension size -1 can be any value and is ambiguous
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+/home/h61084/codes/timetensor/src/timetensor/utils.py:112: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  std =  x.std(dim=-1, keepdim=True).detach()
+Error executing job with overrides: ['misc.seed=1', 'data=electricity', 'data.reshuffle=True', 'misc.output_dir=../outputs/fed_big/seed_1/', 'misc.benchmark=True', 'model=PatchTST', 'normalization=mIN', 'training.loss=NMSE', 'training.bs=1', 'training.lr=0.00001', 'training.epochs=10', 'task.rounds=10', 'task.sampled_clients=0.1', 'training.eval_freq=100', 'training.print_freq=100', "task.splits='None'", 'task.fedmin=False', 'misc.save_name=mIN_jointFalse']
+Traceback (most recent call last):
+  File "/home/h61084/codes/timetensor/train_fedavg.py", line 112, in run
+    server, shadow_server, nodes, shadow_nodes, size_weights = launch_training(client_builder, server_builder, scheme_builder, loaders_dicts, global_model,
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/federated.py", line 301, in launch_training
+    training_losses, valid_losses, shadow_valid_losses, global_valid_losses = scheme.compute_scheme(verbose=verbose)
+                                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/fedavg.py", line 97, in compute_scheme
+    self.compute_round(verbose=max(0,verbose-1))
+  File "/home/h61084/codes/timetensor/src/timetensor/fedavg.py", line 69, in compute_round
+    shadow_losses = self.shadow_server.compute_round(self.E)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/federated.py", line 165, in compute_round
+    average_eval_dict = self.compute_epoch()
+                        ^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/federated.py", line 158, in compute_epoch
+    loss = self.learner.compute_step(X_batch, context_batch, y_batch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/pipeline.py", line 143, in compute_step
+    predictions = self.model(X_batch, context_batch)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/models.py", line 157, in forward
+    pred = self.model(x, c) #(B, dim, horizon)
+           ^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/sota/patchtst/patch_tst.py", line 52, in forward
+    x = self.model(x)
+        ^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/sota/patchtst/PatchTST_backbone.py", line 63, in forward
+    z = self.backbone(z)                                                                # z: [bs x nvars x d_model x patch_num]
+        ^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/sota/patchtst/PatchTST_backbone.py", line 152, in forward
+    z = self.encoder(u)                                                      # z: [bs * nvars x patch_num x d_model]
+        ^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/sota/patchtst/PatchTST_backbone.py", line 177, in forward
+    for mod in self.layers: output, scores = mod(output, prev=scores, key_padding_mask=key_padding_mask, attn_mask=attn_mask)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/sota/patchtst/PatchTST_backbone.py", line 228, in forward
+    src2, attn, scores = self.self_attn(src, src, src, prev, key_padding_mask=key_padding_mask, attn_mask=attn_mask)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/venvs/timetensor/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/sota/patchtst/PatchTST_backbone.py", line 290, in forward
+    q_s = self.W_Q(Q).view(bs, -1, self.n_heads, self.d_k).transpose(1,2)       # q_s    : [bs x n_heads x max_q_len x d_k]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: cannot reshape tensor of 0 elements into shape [0, -1, 16, 8] because the unspecified dimension size -1 can be any value and is ambiguous
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 381, in get_expe_results
+    df = get_errors_df(dir_name, file_name, multipliers, names, save=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 313, in get_errors_df
+    with open(dir_name+file_name) as file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/fed_big/seed_1/MSE_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 381, in get_expe_results
+    df = get_errors_df(dir_name, file_name, multipliers, names, save=True)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/h61084/codes/timetensor/src/timetensor/visu.py", line 313, in get_errors_df
+    with open(dir_name+file_name) as file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../outputs/fed_big/seed_1/NMSE_mean_results.json'
+srun: error: dgx-h100: task 0: Exited with exit code 1

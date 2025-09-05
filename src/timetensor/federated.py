@@ -44,8 +44,9 @@ def client_split(values, context, datetimes, nodes, shuffle=True, context_by_ind
     individuals = values.shape[0]
     if nodes is None:
         nodes= [1 for _ in range(individuals)]
-
-    split_dir = save_path + str(nodes) + "/"
+        split_dir = save_path + "nodes_all/"
+    else:
+        split_dir = save_path + str(nodes) + "/"
     if reshuffle:
         if os.path.exists(split_dir):
             shutil.rmtree(split_dir)
@@ -81,7 +82,7 @@ def client_split(values, context, datetimes, nodes, shuffle=True, context_by_ind
             return {f"node{i}":(values[indices_list[i], :, :], context, datetimes) for i in range(len(nodes))}
 
 
-def get_client_splits(data_path, splits, indiv_split, date_splits, shuffle=True, context_by_individuals=True, save_path=None, reshuffle=True):
+def get_client_splits(data_path, nodes, indiv_split, date_splits, shuffle=True, context_by_individuals=True, save_path=None, reshuffle=True):
     """returns random split as nodes data dict. equivalent de fetch_training data(cluster, aggregate=False)"""
     values, context, datetimes = load_data(data_path)
     
@@ -92,18 +93,20 @@ def get_client_splits(data_path, splits, indiv_split, date_splits, shuffle=True,
     else:
         split_path = save_path
     
-    if type(nodes)==str:
-        nodes = nodes.split(";")
-        nodes = [float(node) for node in nodes]
-    if int(nodes[0])==nodes[0]: #it is a list of ints
-        nodes = [int(node) for node in nodes]
+    if nodes == "None":
+        nodes = None
+    if nodes is not None:
+        if type(nodes)==str:
+            nodes = nodes.split(";")
+            nodes = [float(node) for node in nodes]
+        if int(nodes[0])==nodes[0]: #it is a list of ints
+            nodes = [int(node) for node in nodes]
 
     #shuffle = shuffling of idxs to split, reshuffle=redo split
     node_dict =  client_split(values, context, datetimes, nodes, shuffle, context_by_individuals, split_path, reshuffle)
 
     node_split_dict = {}
     for node_name, data in node_dict.items(): #data=(values, context, datetimes)
-        save_path + str(splits) + "/"
         node_split_dict[node_name] = get_dataset_splits(data_path, indiv_split, date_splits, context_by_individuals, save_path, reshuffle, data)
     return node_split_dict
 
@@ -132,6 +135,9 @@ class DefaultLocalServer():
     def assign_client_learner(self):
         """reset learner to client's held model"""
         self.assign_learner_weights(self.client.model.state_dict())
+    def assign_learner_client(self):
+        """set client to learner's latest model"""
+        self.assign_client_weights(self.get_latest_weights())
     def get_latest_weights(self):
         """returns latest learner's weights"""
         return self.learner.get_weights()
@@ -140,9 +146,9 @@ class DefaultLocalServer():
         return self.client.model.state_dict()
     
     def validate(self):
-        return self.learner.eval(self.client.dataloaders["valid"])
+        return self.learner.eval(self.client.dataloaders["valid1"])
     def eval(self):
-        return self.learner.eval(self.client.dataloaders["test"])
+        return self.learner.eval(self.client.dataloaders["test1"])
 
     def compute_epoch(self):
         """computes one training epoch"""
@@ -203,12 +209,12 @@ class DefaultScheme():
         self.E, self.K = E, K
         #fraction of sampled nodes at each round
         if B <= 1:
-            self.B = B*self.M
+            self.B = int(B*self.M)
         else:
             self.B = B
-        self.training_losses = {f"node_{k}": {} for k in range(self.N)}
-        self.valid_losses = {f"node_{k}": {} for k in range(self.N)}
-        self.shadow_valid_losses = {f"node_{k}": {} for k in range(self.N)}
+        self.training_losses = {f"node_{k}": {} for k in range(self.M)}
+        self.valid_losses = {f"node_{k}": {} for k in range(self.M)}
+        self.shadow_valid_losses = {f"node_{k}": {} for k in range(self.M)}
         self.global_valid_losses = {}
 
     def compute_round(self, epochs):
@@ -257,9 +263,13 @@ from src.timetensor.pipeline import Learner
 from src.timetensor.visu import plot_multi_losses
 
 def launch_training(client_builder, server_builder, scheme_builder, loaders_dicts, global_model,
-    E, criterion, lr, eval_losses, device, logger,
+    E, K, criterion, lr, eval_losses, device, logger,
     save_dir, save_name, retrain=True, verbose=1):
     
+    losses_dir = save_dir + "losses/"
+    if not os.path.exists(losses_dir):
+        os.makedirs(losses_dir)
+
     #nodes
     M = len(loaders_dicts)
     nodes, sizes = [], []
@@ -279,7 +289,7 @@ def launch_training(client_builder, server_builder, scheme_builder, loaders_dict
 
     #server
     global_shadow_learner = Learner(copy.deepcopy(global_model), criterion, lr, eval_losses, device=device)
-    server_client = Client(aggregate_loaders_dict(loaders_dicts), id="server")
+    server_client = Client(aggregate_loaders_dict(list(loaders_dicts.values())), id="server")
     shadow_server = client_builder(server_client, global_shadow_learner)
     server = server_builder(global_model)
     logger.info("Built all nodes")
@@ -291,16 +301,11 @@ def launch_training(client_builder, server_builder, scheme_builder, loaders_dict
         training_losses, valid_losses, shadow_valid_losses, global_valid_losses = scheme.compute_scheme(verbose=verbose)
         logger.info(f"Finished")
 
-        avg_losses = average_nodes(valid_losses)
-        mean_losses =  average_nodes(valid_losses, size_weights)
-        shadow_avg_losses = average_nodes(shadow_valid_losses)
-        shadow_mean_losses =  average_nodes(shadow_valid_losses, size_weights)
-
         #save losses
-        torch.save(training_losses, save_dir + f"training_losses.pt")
-        torch.save(valid_losses, save_dir + f"valid_losses.pt")
-        torch.save(shadow_valid_losses, save_dir + f"shadow_losses.pt")
-        torch.save(global_valid_losses, save_dir + f"global_losses.pt")
+        torch.save(training_losses, losses_dir + f"training_losses.pt")
+        torch.save(valid_losses, losses_dir + f"valid_losses.pt")
+        torch.save(shadow_valid_losses, losses_dir + f"shadow_losses.pt")
+        torch.save(global_valid_losses, losses_dir + f"global_losses.pt")
 
         for k in range(M):
             path = save_dir + f"nodes/node_{k}/"
@@ -311,23 +316,58 @@ def launch_training(client_builder, server_builder, scheme_builder, loaders_dict
         torch.save(server.update, save_dir + "global_model.pt")
         torch.save(shadow_server.get_latest_weights(), save_dir + "shadow_model.pt")
 
-        #plots
-        if M<=10:
-            for k in range(M):
-                path = save_dir + f"nodes/node_{k}/"
-                for key in eval_losses:
-                    plot_multi_losses({
-                        "valid": valid_losses[f"node_{k}"][key], "shadow valid": shadow_valid_losses[f"node_{k}"][key]},
-                        path, f"valid_{key}.pdf", f"Training {key} of {save_name}, node_{k}", x_every=E)
-        for key in eval_losses: #TODO: if global=partial, aura pas le bon nombre de points (cf train/valid: ajouter un dict de train et un dict de valid dans params de plot function)
-            plot_multi_losses({
-                f"mean valid {key}": mean_losses[key],
-                f"shadow mean valid {key}": shadow_mean_losses[key],
-                f"global valid {key}": global_valid_losses[key]},
-                save_dir + "plots/", f"valid_{key}.pdf", f"Training {key} of {save_name}", x_every=E)
-            plot_multi_losses({
-                f"avg valid {key}": avg_losses[key],
-                f"shadow avg valid {key}": shadow_avg_losses[key]},
-                save_dir + "plots/", f"avg_valid_{key}.pdf", f"Training {key} of {save_name}", x_every=E)
+
+    else:
+        training_losses = torch.load(losses_dir + f"training_losses.pt", weights_only=False)
+        valid_losses = torch.load(losses_dir + f"valid_losses.pt", weights_only=False)
+        shadow_valid_losses = torch.load(losses_dir + f"shadow_losses.pt", weights_only=False)
+        global_valid_losses = torch.load(losses_dir + f"global_losses.pt", weights_only=False)    
+
+    # avg_train_losses = average_nodes(training_losses)
+    # shadow_avg_losses = average_nodes(shadow_valid_losses)
+    # avg_losses = average_nodes(valid_losses)
+    mean_train_losses =  average_nodes(training_losses, size_weights)
+    mean_losses =  average_nodes(valid_losses, size_weights)
+    shadow_mean_losses =  average_nodes(shadow_valid_losses, size_weights)
+
+    #plots
+    if M<=10:
+        for k in range(M):
+            path = save_dir + f"nodes/node_{k}/"
+            for key in eval_losses:
+                plot_multi_losses({
+                    "valid": training_losses[f"node_{k}"][key], "shadow valid": shadow_valid_losses[f"node_{k}"][key]},
+                    path, f"valid_{key}.pdf", f"Training {key} of {save_name}, node_{k}", x_every=E)
+    for key in eval_losses:
+        plot_multi_losses({
+            f"mean valid {key}": mean_losses[key],
+            f"global valid {key}": global_valid_losses[key]},
+            save_dir + "plots/", f"mean_valid_{key}.pdf", f"Training {key} of {save_name}", x_every=None)
+        plot_multi_losses({
+            f"mean training {key}": mean_train_losses[key],
+            f"mean shadows {key}": shadow_mean_losses[key]},
+            save_dir + "plots/", f"mean_training_{key}.pdf", f"Training {key} of {save_name}", x_every=E)
     
     return server, shadow_server, nodes, shadow_nodes, size_weights
+
+from .utils import save_results
+
+def launch_eval(global_model, nodes, shadow_server, eval_losses, size_weights, save_dir, save_name, logger):
+    M = len(nodes)
+    logger.info("Computing test metrics")
+    tune_losses_dict = eval_nodes(nodes)
+    global_losses_dict = shadow_server.eval()
+    tune_avg_loss_dict, tune_mean_losses_dict, tune_flop_losses_dict = get_node_metrics(tune_losses_dict, size_weights)
+
+    for k in range(M):
+        flat_losses_dict = eval_nodes(nodes, global_model.state_dict())
+        flat_avg_loss_dict, flat_mean_losses_dict, flat_flop_losses_dict = get_node_metrics(flat_losses_dict, size_weights)
+
+    for loss_name in eval_losses:
+        save_results(global_losses_dict[loss_name], save_dir, f"{loss_name}_mean_results.json", save_name, f"Global {loss_name}")
+        save_results(tune_avg_loss_dict[loss_name], save_dir, f"{loss_name}_mean_results.json", save_name, f"Tuned Uniform {loss_name}")
+        save_results(tune_mean_losses_dict[loss_name], save_dir, f"{loss_name}_mean_results.json", save_name, f"Tuned Weighted {loss_name}")
+        save_results(tune_flop_losses_dict[loss_name], save_dir, f"{loss_name}_mean_results.json", save_name, f"Tuned Flop10 {loss_name}")
+        save_results(flat_avg_loss_dict[loss_name], save_dir, f"{loss_name}_mean_results.json", save_name, f"Flat Uniform {loss_name}")
+        save_results(flat_mean_losses_dict[loss_name], save_dir, f"{loss_name}_mean_results.json", save_name, f"Flat Weighted {loss_name}")
+        save_results(flat_flop_losses_dict[loss_name], save_dir, f"{loss_name}_mean_results.json", save_name, f"Flat Flop10 {loss_name}")

@@ -9,6 +9,10 @@ from .utils import unroll_windows
 from .utils import normalize
 from .visu import plot_losses, plot_multi_losses, plot_serie
 
+from .dataset import set_random_data, fetch_example_data
+from .visu import plot_named_example, plot_horizon_errors, plot_pred
+import os
+
 class Loss():
     def __init__(self, loss, mean=None, std=None, mode=None, eps=1e-6):
         self.loss = loss #e.g nn.MSELoss()
@@ -315,3 +319,43 @@ def launch_training(model, normalization, criterion, lr, bs, epochs, loaders_dic
             logger.info("No training needed")
             learner = Learner(model, criterion, lr, eval_losses, device=device)
     return learner
+
+from .utils import save_results
+from .visu import plot_errors, plot_horizon_errors
+
+def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complete_evaluation, logger):
+    logger.info("Computing test metrics")
+    test_losses1 = learner.eval(loaders_dict["test1"], return_all=True, verbose=1, logger=logger) #(ndates*nindividuals, dim, horizon)
+    test_losses2 = learner.eval(loaders_dict["test2"], return_all=True, verbose=1, logger=logger) #(ndates*nindividuals, dim, horizon)
+    torch.save(test_losses1, save_dir + "test_losses1.pt")
+    torch.save(test_losses2, save_dir + "test_losses2.pt")
+
+    for loss_name in eval_losses:
+        mean, std = test_losses1[loss_name].mean(), test_losses1[loss_name].std()
+        save_results(mean, save_dir, "test1_mean_results.json", save_name, f"Test {loss_name}")
+        save_results(std, save_dir, "test1_std_results.json", save_name, f"Test {loss_name}")
+        if complete_evaluation:
+            plot_errors(test_losses1[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"test1_{loss_name}.pdf", f"Test 1 {loss_name} of {save_name} : {mean}")
+            plot_horizon_errors(test_losses1[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test1_horizon_{loss_name}.pdf", f"Test 1 {loss_name} of {save_name} : {mean}")
+    for loss_name in eval_losses:
+        mean, std = test_losses2[loss_name].mean(), test_losses2[loss_name].std()
+        save_results(mean, save_dir, "test2_mean_results.json", save_name, f"Test {loss_name}")
+        save_results(std, save_dir, "test2_std_results.json", save_name, f"Test {loss_name}")
+        if complete_evaluation:
+            plot_errors(test_losses2[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"test2_{loss_name}.pdf", f"Test 2 {loss_name} of {save_name} : {mean}")
+            plot_horizon_errors(test_losses2[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test2_horizon_{loss_name}.pdf", f"Test 2 {loss_name} of {save_name} : {mean}")
+
+
+def launch_example(data_path, model, lags, horizon, device, save_dir, save_name, logger):
+    ex_dir = data_path + "examples/" + f"{lags}_{horizon}/"
+    if not os.path.exists(ex_dir):
+        set_random_data(data_path, lags, horizon, name="rand")
+        plot_named_example(ex_dir, f"rand")
+    dico = fetch_example_data(ex_dir)
+    for data_name, data_tuple in dico.items():
+        x, c, y = data_tuple[0].unsqueeze(0).to(device), data_tuple[1], data_tuple[2].unsqueeze(0).to(device)
+        if c is not None:
+            c = c.unsqueeze(0).to(device)
+        pred = model(x,c)
+        plot_pred(x[0,0].cpu().detach().numpy(), y[0,0].cpu().detach().numpy(), pred[0,0].cpu().detach().numpy(), save_dir + "examples/", f"{data_name}_predictions.pdf", f"Example {data_name} prediction for {save_name}")        
+    logger.info('Saved plots')

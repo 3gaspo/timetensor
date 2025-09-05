@@ -486,7 +486,7 @@ def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by
 
 
 
-def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None, context_by_individuals=True, save_path=None, reshuffle=False, data=None, cluster_path=None):
+def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None, context_by_individuals=True, save_path=None, reshuffle=False, data=None, cluster_path=None, set_cluster=None):
     """splits data from path. If str splits, will load given split, if float will save new split"""
     
     #load whole data
@@ -498,9 +498,15 @@ def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None
     #filter values at cluster path
     if cluster_path is not None:
         indices = list(torch.load(cluster_path, weights_only=False))
-        values = values[indices]
+        try:
+            values = values[indices]
+        except:
+            raise ValueError(f"{type(cluster_path)}: {cluster_path} | {type(indices)}: {indices} ")
         if context is not None and context_by_individuals:
             context = context[indices]
+        else:
+            if set_cluster is not None:
+                context = torch.tensor([set_cluster for _ in range(len(indices))]).unsqueeze(dim=1).unsqueeze(dim=1).repeat(1, values.shape[1], values.shape[2])
 
     if save_path is None:
         split_path = data_path+"splits/"
@@ -553,8 +559,16 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subset
             subsets = {"train": subsets[0], "valid1": subsets[1], "valid2": subsets[2], "valid3": subsets[3], "test1": subsets[4], "test2": subsets[5]}
     
     for key, (values, context, datetimes) in data_dict.items():
+        individuals = values.shape[0]
+        
+
         if key == "train":
-                dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date, context_by_individuals=context_by_individuals, remove_cte=remove_cte, stats=stats)
+            weight=1
+            if not by_date and batch_size != 1:
+                virtual_bs = min(individuals, batch_size)
+                if virtual_bs == 1:
+                    weight = batch_size
+            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date, context_by_individuals=context_by_individuals, remove_cte=remove_cte, stats=stats, weight=weight)
         else:
             dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True, context_by_individuals=context_by_individuals, return_all_individuals=True, remove_cte=remove_cte, stats=stats)
         
@@ -664,14 +678,15 @@ def fetch_training_data(data_path, indiv_split, date_splits, subsets, batch_size
     if clusters is not None and subsets["cluster"] in ["None", None]: #fetch clusters
         cluster_names = [name for name in os.listdir(data_path + clusters) if name[-3:]==".pt"]
         loaders_dicts = []
-        for cluster_name in cluster_names: #TODO include stats for clusters
-            data_dict = get_dataset_splits(data_path, indiv_split, date_splits, context_by_individuals=context_by_individuals, reshuffle=reshuffle, save_path=data_path+clusters+"splits/"+cluster_name[:-3]+"_", cluster_path=data_path+clusters+cluster_name)
+        for k, cluster_name in enumerate(cluster_names): #TODO include stats for clusters
+            data_dict = get_dataset_splits(data_path, indiv_split, date_splits, context_by_individuals=context_by_individuals, reshuffle=reshuffle, save_path=data_path+clusters+"splits/"+cluster_name[:-3]+"_", cluster_path=data_path+clusters+cluster_name, set_cluster=k)
             #TODO: add stats=stats after proper cluster stats dict done
             loaders_dicts.append(get_train_loaders(data_dict, batch_size, lags, horizon, by_date=False, save_path=data_path+clusters+"subsets/"+cluster_name[:-3]+"_")) #stats=stats
         if aggregate:
             loaders_dict = aggregate_loaders_dict(loaders_dicts)  
         else:
             loaders_dict = {f"node{k}": loaders_dicts[k] for k in range(len(loaders_dicts))}
+
     else:
         if subsets["cluster"] not in ["None", None]: #fetch one cluster
             cluster_path = data_path+clusters+subsets["cluster"] + ".pt"

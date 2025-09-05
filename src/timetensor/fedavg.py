@@ -71,7 +71,7 @@ class FedAvgScheme(DefaultScheme):
                 shadow_losses = self.shadow_server.compute_round(1)
             append_in_dict(self.global_valid_losses, shadow_losses)
         
-        for k in range(self.N):
+        for k in range(self.M):
             #loss of received model
             append_in_dict(self.valid_losses[f"node_{k}"], self.nodes[k].validate())
         
@@ -109,21 +109,24 @@ class FedAvgScheme(DefaultScheme):
                     shadow_losses = self.shadow_server.compute_round(1)
                 append_in_dict(self.global_valid_losses, shadow_losses)
 
-            for k in range(self.N):
+            for k in range(self.M):
                 #loss of received model
                 append_in_dict(self.valid_losses[f"node_{k}"], self.nodes[k].validate())
 
-            for k in range(self.N):
+            for k in range(self.M):
                 if self.shadow_nodes is not None:
                     shadow_losses = self.shadow_nodes[k].compute_round(self.E)
                     append_in_dict(self.shadow_valid_losses[f"node_{k}"], shadow_losses)
                     
                 #loss of training
-                losses = self.nodes[k].compute_round(self.E) 
+                losses = self.nodes[k].compute_round(self.E)
                 if verbose:
                     print(f"Node {k} done")
                 append_in_dict(self.training_losses[f"node_{k}"], losses)
-
             if verbose:
                 print(f"Last fine-tuning done")
+        
+            for k in range(self.M):
+                self.nodes[k].assign_learner_client()
+                print(f"debug assigned last model, beta:", self.nodes[k].client.model.beta.data.detach().cpu().numpy()[0][0][0])
         return self.training_losses, self.valid_losses, self.shadow_valid_losses, self.global_valid_losses
