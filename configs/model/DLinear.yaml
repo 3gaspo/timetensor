@@ -1,3 +1,4 @@
 name: DLinear
+constants: True
 configs:
   kernel_size: 25

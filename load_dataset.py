@@ -7,18 +7,14 @@ from time import perf_counter
 import pandas as pd
 import torch
 import numpy as np
-import json
 
-from src.timetensor.dataset import get_sizes, fetch_training_data, fetch_dicts, set_random_data, fetch_csv
-from src.timetensor.utils import filter_dict
+from src.timetensor.dataset import get_sizes, fetch_training_data, set_random_data, fetch_csv, apply_stats
 from src.timetensor.visu import plot_named_example, plot_stats, plot_means, plot_clustering
 from src.timetensor.analysis import *
+from src.timetensor.utils import filter_dict
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
-
-
-#TODO: bug nanvar sur traffic
 
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def run(cfg):
@@ -26,15 +22,12 @@ def run(cfg):
     logger.info("=====Running data script=====")
 
     #configs
-    data_path, dataset_name = cfg.data.path, cfg.data.dataset
-    lags, horizon = cfg.task.lags, cfg.task.horizon
+    data_path, dataset_name, context_cols = cfg.data.path, cfg.data.dataset, cfg.data.context_cols
+    lags, horizon = int(cfg.task.lags), int(cfg.task.horizon)
     seed, verbose = cfg.misc.seed, cfg.misc.verbose
-    if seed == "None":
-        seed = None
 
-    remove_cte = cfg.data.remove_cte
-    clusters, n_clusters = cfg.data.clusters, cfg.data.n_clusters
-    context_cols, drop_users = cfg.data.context_cols, cfg.data.drop_users
+    split_kwargs, subset_kwargs = cfg.data.splits, cfg.data.subsets
+    clusters, n_clusters = cfg.data.clustering.clusters, cfg.data.clustering.n_clusters
 
     for suffix in ["plots/", "examples/", "fourier_clusters/", "gamma_clusters/"]:
         if not os.path.exists(data_path+suffix):
@@ -43,32 +36,27 @@ def run(cfg):
         if not os.path.exists(data_path+"plots/" + suffix):
             os.makedirs(data_path+"plots/" + suffix)
 
-    rebuild_pt = cfg.task.rebuild_pt
-    new_example = cfg.task.new_example
-    replot = cfg.task.replot
-    do_heterogeneity = cfg.task.heterogeneity
-    recluster = cfg.task.recluster
+    rebuild = cfg.load.rebuild
+    new_example = cfg.load.example
+    replot = cfg.load.replot
+    do_heterogeneity = cfg.load.heterogeneity
+    recluster = cfg.load.clusters
+
     if verbose:
         logger.info("Fetched configs")
 
-    if seed is not None:
-        torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
-        np.random.seed(seed)
-
-    #build dataset values.pt from dataset_name.csv
-    if rebuild_pt:
+    #build pytorch dataset
+    if rebuild:
         t1 = perf_counter()
         if "synthetic" in dataset_name:
             from src.timetensor.synthetic import build_dataset
-            build_dataset(data_path, n1=cfg.data.n1, n2=cfg.data.n2, r1=cfg.data.r1, r2=cfg.data.r2, output_format="csv")
+            build_dataset(data_path, n1=cfg.data.n1, n2=cfg.data.n2, r1=cfg.data.r1, r2=cfg.data.r2, seed=seed)
         else:
             from src.timetensor.dataset import build_dataset
-            build_dataset(data_path, dataset_name, context_cols=cfg.data.context_cols, raw_format="csv", output_format="csv")
+            build_dataset(data_path, dataset_name, context_cols, drop_users=split_kwargs.drop_users)
         t2 = perf_counter()
         if verbose:
             logger.info(f"Rebuilt dataset in {(t2-t1)/60:.3f} min")
-    
 
     #plot and save example
     if new_example:
@@ -78,84 +66,71 @@ def run(cfg):
         if verbose:
             logger.info("Set new example")
 
-    #look for outlier windows
-    df, context, datetimes = fetch_csv(data_path, dataset_name, context_cols=context_cols, drop=drop_users)
-    cte_mask = identify_cte(df, lags, path=data_path, logger=logger)
+    #constant windows
+    df, _, _ = fetch_csv(data_path, dataset_name, context_cols, split_kwargs["drop_users"])
+    _, counts = identify_cte(df, lags)
+    if len(counts)>0:
+        logger.info("Found constant windows!")
+        if len(counts)<=10:    
+            logger.info(counts)
 
+            
     #splits
-    loaders_dict = fetch_training_data(data_path, cfg.data.indiv_split, cfg.data.date_splits, cfg.data.subsets, cfg.training.bs, lags, horizon, by_date=True, context_by_individuals=cfg.data.context_by_individuals, reshuffle=cfg.data.reshuffle, remove_cte=remove_cte, clusters=clusters, seed=seed)
+    loaders_dict, stats_dict = fetch_training_data(data_path, split_kwargs, subset_kwargs, cfg.training.bs, lags, horizon, clusters=clusters, seed=seed)
     _, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
     if verbose:
         logger.info("Fetched dataloaders")
         logger.info(shape_str)
         logger.info(batch_str)
-
-    #stats
-    df, context, datetimes = fetch_csv(data_path, dataset_name, context_cols=context_cols, drop=drop_users)
-    loaders_dict, df_dict = fetch_dicts(data_path, cfg, remove_cte=remove_cte, clusters=clusters, seed=seed)
-    stats_dict = get_dataset_stats(df, df_dict, lags, horizon, remove_cte, logger if verbose else None, data_path, "raw_stats.json")
-
-    #normalized stats
-    df, context, datetimes = fetch_csv(data_path, dataset_name, context_cols=context_cols, drop=drop_users)
-    loaders_dict, df_dict = fetch_dicts(data_path, cfg, remove_cte=remove_cte, clusters=clusters, seed=seed, stats_dict=stats_dict)
-    df = (df - stats_dict["train"]["mean"]) / (stats_dict["train"]["std"] + 1e-6)
-    stats_dict = get_dataset_stats(df, df_dict, lags, horizon, remove_cte, save_path=data_path, save_name="normal_stats.json")
-
-    #per cluster stats
-    if clusters is not None:
-        if not os.path.exists(data_path+clusters+"stats/"):
-            os.makedirs(data_path+clusters+"stats/")
-        df, context, datetimes = fetch_csv(data_path, dataset_name, context_cols=context_cols, drop=drop_users)
-        loaders_dict, df_dicts = fetch_dicts(data_path, cfg, remove_cte=remove_cte, clusters=clusters, seed=seed, aggregate=False)
-        for i, df_dict in enumerate(df_dicts.values()):
-            cluster_df = df[list(torch.load(data_path+clusters+f"node{i}.pt", weights_only=False))]
-            stats_dict = get_dataset_stats(cluster_df, df_dict, lags, horizon, remove_cte, save_path=data_path+clusters+"stats/", save_name=f"node{i}_raw_stats.json")
+    for key in ["train", "test1", "test2"]:
+        stats_str = "\n".join(f"{k}\t{v:.4f}" for k, v in stats_dict[key].items())
+        logger.info(f"{key} stats:\n{stats_str}")
+    if cfg.data.normalize:
+        apply_stats(loaders_dict, stats_dict)
+        df = (df-stats_dict["train"]["mean"])/(stats_dict["train"]["std"]+1e-8)
 
     #plots
-    if replot:    
+    if replot: 
         main_plot_dir = data_path + "plots/"
-        df, context, datetimes = fetch_csv(data_path, dataset_name, context_cols=context_cols, drop=drop_users)
-        loaders_dict, df_dict = fetch_dicts(data_path, cfg, remove_cte=remove_cte, clusters=clusters, seed=seed)
+        remove_cte, logs = split_kwargs.remove_train_cte, cfg.load.logs
+        df_dict = {key: loader.dataset.get_df() for key, loader in loaders_dict.items()}
+
         #stats
         plot_dir = main_plot_dir + "stats/"
-        plot_stats(df, plot_dir, name="user_stats.pdf", per_user=True, title=f"{dataset_name} user statistics", remove_cte=remove_cte, log=True)
-        plot_stats(df, plot_dir, name="input_stats.pdf", per_user=False, lookback=lags, samples=1000, title=f"{dataset_name} input statistics", remove_cte=remove_cte, log=True)
-        plot_stats(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, name="temporal_stats.pdf", per_user=True, title=f"{dataset_name} temporal splits statistics", remove_cte=remove_cte, log=True)
+        plot_stats(df, plot_dir, "user_stats.pdf", per_user=True, lookback=lags, title=f"{dataset_name} user statistics", remove_cte=remove_cte, log=logs)
+        plot_stats(df, plot_dir, "input_stats.pdf", per_user=False, lookback=lags, samples=1000, title=f"{dataset_name} input statistics", remove_cte=remove_cte, log=logs)
+        plot_stats(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, "temporal_stats.pdf", per_user=True, lookback=lags, title=f"{dataset_name} temporal splits statistics", remove_cte=remove_cte, log=logs)
         if "test2" in df_dict:
-            plot_stats(filter_dict(df_dict, keys=["test1", "test2"]), plot_dir, name="spatial_stats.pdf", per_user=True, title=f"{dataset_name} spatial splits statistics", remove_cte=remove_cte, log=True)
-        plot_means(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, name="input_temporal_means.pdf", per_user=False, title=f"{dataset_name} input means", log=True)
+            plot_stats(filter_dict(df_dict, keys=["test1", "test2"]), plot_dir, "spatial_stats.pdf", per_user=True, lookback=lags, title=f"{dataset_name} spatial splits statistics", remove_cte=remove_cte, log=logs)
+        plot_means(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, "input_temporal_means.pdf", per_user=False, lookback=lags, title=f"{dataset_name} input means", log=logs)
 
         #gamma
         plot_dir = main_plot_dir + "gammas/"
         plot_gamma(df, plot_dir, "gammas.pdf", per_user=True, lookback=lags, horizon=horizon, log=False)
         plot_gamma(df, plot_dir, "input_gammas.pdf", per_user=False, lookback=lags, horizon=horizon, samples=1000, log=False)
-        plot_gamma(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, name="temporal_gammas.pdf", per_user=True, title=f"{dataset_name} temporal splits statistics", remove_cte=remove_cte, log=False)
+        plot_gamma(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, name="temporal_gammas.pdf", per_user=True,  lookback=lags, title=f"{dataset_name} temporal splits statistics", remove_cte=remove_cte, log=False)
         if "test2" in df_dict:
-            plot_gamma(filter_dict(df_dict, keys=["test1", "test2"]), plot_dir, name="spatial_gammas.pdf", per_user=True, title=f"{dataset_name} spatial splits statistics", remove_cte=remove_cte, log=False)
+            plot_gamma(filter_dict(df_dict, keys=["test1", "test2"]), plot_dir, name="spatial_gammas.pdf", per_user=True,  lookback=lags, title=f"{dataset_name} spatial splits statistics", remove_cte=remove_cte, log=False)
 
     if recluster:
         #fourier clustering
         plot_dir = main_plot_dir + "fourier_clusters/"
         logger.info("==Fourier clustering==")
         fourier_df = fourier(df)
-        plot_clustering(df, fourier_df, n_clusters, lags, horizon, "fourier_clusters", data_path, plot_dir, do_heterogeneity, logger, remove_cte)
-
+        cluster_indices = plot_clustering(df, fourier_df, n_clusters, lags, horizon, "fourier_clusters", plot_dir, do_heterogeneity, remove_cte)
+        logger.info(f"Fourier cluster sizes: {[len(cluster) for cluster in cluster_indices]}")
+        for k in range(n_clusters):
+            torch.save(cluster_indices[k], data_path + "fourier_clusters/" + f"node{k}.pt")
+        
         #gamma clustering
         plot_dir = main_plot_dir + "gamma_clusters/"
         logger.info("==Gamma clustering==")
         alphas_df, betas_df = get_gammas(df, lags, horizon)
         gamma_df =  pd.concat((alphas_df, betas_df))
-        plot_clustering(df, gamma_df, n_clusters, lags, horizon, "gamma_clusters", data_path, plot_dir, do_heterogeneity, logger, remove_cte)
-
-        #per cluster stats
-        for clusters in ["fourier_clusters/", "gamma_clusters/"]:
-            if not os.path.exists(data_path+clusters+"stats/"):
-                os.makedirs(data_path+clusters+"stats/")       
-            df, context, datetimes = fetch_csv(data_path, dataset_name, context_cols=context_cols, drop=drop_users)
-            loaders_dicts, df_dicts = fetch_dicts(data_path, cfg, remove_cte=remove_cte, clusters=clusters, seed=seed, stats_dict=stats_dict, aggregate=False)
-            for i, df_dict in enumerate(df_dicts.values()):
-                cluster_df = df[list(torch.load(data_path+clusters+f"node{i}.pt", weights_only=False))]
-                stats_dict = get_dataset_stats(cluster_df, df_dict, lags, horizon, remove_cte, save_path=data_path+clusters+"stats/", save_name=f"node{i}_raw_stats.json")
+        cluster_indices = plot_clustering(df, gamma_df, n_clusters, lags, horizon, "gamma_clusters", plot_dir, do_heterogeneity, remove_cte)
+        logger.info(f"Gamma cluster sizes: {[len(cluster) for cluster in cluster_indices]}")
+        for k in range(n_clusters):
+            torch.save(cluster_indices[k], data_path + "fourier_clusters/" + f"node{k}.pt")
 
     logger.info('End of script\n')
 

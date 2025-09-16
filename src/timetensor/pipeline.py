@@ -2,19 +2,14 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from time import perf_counter
-import numpy as np
-
-from .utils import get_normal_stats, average_loss, append_in_dict
-from .utils import unroll_windows
-from .utils import normalize
-from .visu import plot_losses, plot_multi_losses, plot_serie
-
-from .dataset import set_random_data, fetch_example_data
-from .visu import plot_named_example, plot_horizon_errors, plot_pred
 import os
 
+from .utils import get_normal_stats, average_loss, append_in_dict, unroll_windows, normalize, save_results
+from .visu import plot_losses, plot_multi_losses, plot_serie, plot_named_example, plot_horizon_errors, plot_pred, plot_errors, plot_horizon_errors
+from .dataset import set_random_data, fetch_example_data
+
 class Loss():
-    def __init__(self, loss, mean=None, std=None, mode=None, eps=1e-6):
+    def __init__(self, loss, mean=None, std=None, mode=None, eps=1e-8):
         self.loss = loss #e.g nn.MSELoss()
         self.mode = mode
 
@@ -65,7 +60,7 @@ def get_losses(criterion_name, mean=None, std=None, complete_evaluation=False):
     criterion.name = criterion_name
     if criterion_name == "normalize_y":
         eval_losses = {
-            "NMSE": Loss(nn.MSELoss(reduction="none"), mode= "normalize_y"),
+            "NMSE": Loss(nn.MSELoss(reduction="none"), mode="normalize_y"),
             "MSE": Loss(nn.MSELoss(reduction="none"), mode="denormalize_pred"),
             }
     else:
@@ -272,7 +267,7 @@ def launch_training(model, normalization, criterion, lr, bs, epochs, loaders_dic
     model_name = model.name
     criterion_name = criterion.name
     #non trainable
-    if model_name in ["persistence", "repeat", "lookback", "expected"] and normalization not in ["revin", "mIN", "cmIN"]:
+    if (model_name in ["persistence", "repeat", "lookback", "expected"]) and ((normalization is None) or (("mIN" not in normalization) and ("revin" not in normalization))):
         learner = Learner(model, criterion, lr, eval_losses, device=device, do_train=False)
         logger.info("No training needed")
     
@@ -288,14 +283,14 @@ def launch_training(model, normalization, criterion, lr, bs, epochs, loaders_dic
     
     #pytorch training
     else:
+        learner = Learner(model, criterion, lr, eval_losses, device=device)
         if retrain:
-            learner = Learner(model, criterion, lr, eval_losses, device=device)
             logger.info(f"batch_size={bs}, learning_rate={lr}, steps per epoch={len(loaders_dict['train'])}, epochs={epochs}")
             logger.info("Starting training...")
-            if "revin" in normalization or "mIN" in normalization:
+            if normalization is not None and (("revin" in normalization) or ("mIN" in normalization)):
                 weight_follow = lambda model: {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
             else:
-                weight_follow=None
+                weight_follow = None
             train_losses, valid_losses1, valid_losses2, valid_losses3, followed_weights = train_model(learner, loaders_dict, epochs=epochs, logger=logger, eval_runs=1, eval_freq=eval_freq, print_freq=print_freq, weight_follow=weight_follow)
             torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")
             torch.save(train_losses, save_dir + f"train_losses.pt")
@@ -303,7 +298,6 @@ def launch_training(model, normalization, criterion, lr, bs, epochs, loaders_dic
             torch.save(valid_losses2, save_dir + f"valid_losses2.pt")
             torch.save(valid_losses3, save_dir + f"valid_losses3.pt")
             torch.save(followed_weights, save_dir + f"followed_weights.pt")
-            logger.info("End of training")
             #plots
             for loss_name in eval_losses:
                 valid_dict = {"valid1": valid_losses1[loss_name], "valid2": valid_losses2[loss_name], "valid3": valid_losses3[loss_name]}
@@ -313,15 +307,11 @@ def launch_training(model, normalization, criterion, lr, bs, epochs, loaders_dic
                     plot_multi_losses(valid_dict,  save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}", eval_freq=eval_freq)
             for weight_name in followed_weights:
                 plot_serie(followed_weights[weight_name], save_dir + "plots/", f"{weight_name}.pdf", title=f"{weight_name} during training")
-            logger.info("Plotted losses")
-        
+            logger.info("End of training")        
         else:
             logger.info("No training needed")
-            learner = Learner(model, criterion, lr, eval_losses, device=device)
     return learner
 
-from .utils import save_results
-from .visu import plot_errors, plot_horizon_errors
 
 def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complete_evaluation, logger):
     logger.info("Computing test metrics")

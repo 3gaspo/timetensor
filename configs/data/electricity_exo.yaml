@@ -1,7 +1,7 @@
-dataset: solar
-path: ../datasets/solar/
+dataset: electricity
+path: ../datasets/electricity_exo/
 context_cols:
-normalize: False
+normalize: True
 
 clustering:
   clusters:
@@ -9,7 +9,7 @@ clustering:
 
 splits:
   indiv_split: 0.7 
-  date_splits: 0.5;0.3;0.2
+  date_splits: 0.6;0.2;0.3
   by_idx: individuals
   context_by_individuals: True
   reshuffle: True

@@ -1,17 +1,21 @@
 dataset: traffic
 path: ../datasets/traffic/
-
 context_cols:
-clusters:
-n_clusters: 3
-drop_users:
+normalize: False
 
-indiv_split: 0.7 
-date_splits: 0.5;0.3;0.2
-by_idx: individuals
-context_by_individuals: True
-reshuffle: True
-remove_cte: True
+clustering:
+  clusters:
+  n_clusters: 2
+
+splits:
+  indiv_split: 0.7 
+  date_splits: 0.5;0.3;0.2
+  by_idx: individuals
+  context_by_individuals: True
+  reshuffle: True
+  remove_train_cte: True
+  remove_eval_cte: True
+  drop_users:
 
 subsets:
   mode: dates

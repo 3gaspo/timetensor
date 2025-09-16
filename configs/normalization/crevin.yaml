@@ -1,4 +1,4 @@
-name: mIN
+name: crevin
 configs:
   latent: False
   init_beta: False
@@ -7,3 +7,4 @@ configs:
   fixed_alpha: False
   use_gamma: False
   inverse_gamma: False
+  n_clusters: 2

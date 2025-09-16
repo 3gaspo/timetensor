@@ -66,7 +66,7 @@ def valid_for_kde(sub, keyx, keyy):
         return False
     return len(sub) >= 3
 
-def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None, remove_cte=True, log=False):
+def plot_stats(data, path="", name="stats.pdf", per_user=True, lookback=336, samples=1000, title=None, remove_cte=True, log=False, show=False):
     """plots means and stds. data must be pandas dataframe or dict of df"""
     if type(data) != dict:
         data = {"data":data}
@@ -76,10 +76,12 @@ def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookb
         if per_user:
             clean_df = df.copy()
             if remove_cte:
-                cte_mask = identify_cte(df, lookback, save=False)
+                cte_mask, _ = identify_cte(df, lookback)
                 clean_df[cte_mask] = pd.NA
             means = clean_df.mean(axis=0)
             stds = clean_df.std(axis=0)
+            if remove_cte and np.any(stds==0):
+                raise ValueError("Constant windows wrongly kept")
         else:
             means = df.rolling(window=lookback).mean()[lookback:].stack()#.sample(samples)
             stds = df.rolling(window=lookback).std()[lookback:].stack()#.sample(samples)
@@ -153,7 +155,7 @@ def plot_stats(data, path="", name="stats.pdf", show=False, per_user=True, lookb
     plt.close()
 
 
-def plot_means(data, path="", name="stats.pdf", show=False, per_user=True, lookback=336, samples=1000, title=None, remove_cte=True, log=False):
+def plot_means(data, path="", name="stats.pdf", per_user=True, lookback=336, samples=1000, title=None, remove_cte=True, log=False, show=False):
 
     if type(data) != dict:
         data = {"data":data}
@@ -163,7 +165,7 @@ def plot_means(data, path="", name="stats.pdf", show=False, per_user=True, lookb
         if per_user:
             clean_df = df.copy()
             if remove_cte:
-                cte_mask = identify_cte(df, lookback, save=False)
+                cte_mask, _ = identify_cte(df, lookback)
                 clean_df[cte_mask] = pd.NA
             means = clean_df.mean(axis=0)
         else:
@@ -517,7 +519,7 @@ def plot_expe(losses_path, eval_freq=10, names=None, save_path=None):
 
 
 
-def visu_widget(data, lookback, horizon, eps=1e-6):
+def visu_widget(data, lookback, horizon, eps=1e-8):
 
     alphas, betas = get_gammas(data, lookback, horizon, eps)
     dataframes = {'original': data, 'alpha': alphas, 'beta': betas}
@@ -566,20 +568,11 @@ def visu_widget(data, lookback, horizon, eps=1e-6):
     update_plot(dataframe_dropdown.value, column_dropdown.value)
 
 
-def plot_clustering(raw_df, feature_df, n_clusters, lags, horizon, clustering_name, data_path, plot_dir, do_heterogeneity=True, logger=None, remove_cte=True):
+def plot_clustering(raw_df, feature_df, n_clusters, lags, horizon, clustering_name, plot_dir, do_heterogeneity=True, remove_cte=True):
     if do_heterogeneity:
-        if logger is not None:
-            logger.info("Computing heterogeneity plot")
         plot_heterogeneity(feature_df, path=plot_dir, name="heterogeneity.pdf")
-    if logger is not None:
-        logger.info(f"Computing {n_clusters} clusters")
     Z, distances_matrix = init_clusters(feature_df)
     labels, cluster_indices = get_clusters(Z, n_clusters)
-    if not os.path.exists(data_path+"gamma_clusters/"):
-        os.makedirs(data_path+"gamma_clusters/")
-    for k in range(n_clusters):
-        torch.save(cluster_indices[k], data_path + f"{clustering_name}/node{k}.pt")
-    logger.info(f"Cluster size: {[len(cluster) for cluster in cluster_indices]}")
     plot_dendogram(Z, path=plot_dir, name="dendogram.pdf")
     plot_distances(distances_matrix, path=plot_dir, name="distances.pdf")
     centroids = get_centroids(feature_df, cluster_indices)
@@ -589,7 +582,7 @@ def plot_clustering(raw_df, feature_df, n_clusters, lags, horizon, clustering_na
     df_dict = get_cluster_dicts(raw_df, cluster_indices)
     plot_stats(df_dict, plot_dir, name="stats.pdf", per_user=True, lookback=lags, title=f"{clustering_name} input statistics", remove_cte=remove_cte, log=True)
     plot_gamma(df_dict, plot_dir, "gammas.pdf", per_user=True, lookback=lags, horizon=horizon, remove_cte=remove_cte, log=False)
-
+    return cluster_indices
 
 def plot_weights_(weights, path, name="weights.pdf", title='Model weights'):
     plt.figure()
@@ -603,12 +596,11 @@ def plot_weights_(weights, path, name="weights.pdf", title='Model weights'):
 
 def plot_weights(model, learner, save_dir, save_name):
     model_name = model.name
-    normalization = model.normalization
     if model_name in ["linear", "sklinear"]:
         if model_name == "sklinear":
             weights = learner.get_weights()
         else:
-            weights = model.model.fc.weight.detach().cpu().numpy()
+            weights = model.fc.weight.detach().cpu().numpy()
         plot_weights_(weights, save_dir + "plots/", title=f'{save_name} weights')
         
     if model_name == "DLinear":

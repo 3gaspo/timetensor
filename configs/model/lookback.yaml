@@ -1,3 +1,4 @@
 name: lookback
+constants: True
 configs:
   lookback_idx: 0

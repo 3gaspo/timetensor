@@ -1,6 +1,5 @@
 name: cmIN
 configs:
-  last: False
   latent: False
   init_beta: False
   fixed_beta: False

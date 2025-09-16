@@ -76,10 +76,15 @@ class bipartite_population:
         return df
 
 
-def build_dataset(data_path, clusters=None, n1=100, n2=100, r1=0, r2=0, dates=2000, output_format="torch"):
+def build_dataset(data_path, clusters=None, n1=100, n2=100, r1=0, r2=0, dates=2000, seed=None):
     """builds a synthetic dataset of two clusters.
     r1 : proportion of users from cluster2 in cluster1
     """
+    if seed is not None:
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        np.random.seed(seed)
+
     if clusters is None:
         cluster1 = cluster(
             cluster_centroid = {"period":10, "offset":10, "shift":1e-2, "std":5e-2},
@@ -105,12 +110,3 @@ def build_dataset(data_path, clusters=None, n1=100, n2=100, r1=0, r2=0, dates=20
         os.makedirs(data_path + "clusters/")
     torch.save(list(range(0,100)), data_path + "clusters/" + "node0.pt")
     torch.save(list(range(100,200)), data_path + "clusters/" + "node1.pt")
-
-    #output
-    if output_format == "csv":
-        context_df = pd.DataFrame(context_pt.squeeze(1).transpose(1,0), index=datetimes)
-        return values_df, context_df, datetimes
-    elif output_format == "torch":
-        return values_pt, context_pt, datetimes
-    else:
-        raise ValueError("Unsupported output format")

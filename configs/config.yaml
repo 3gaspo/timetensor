@@ -12,19 +12,22 @@ training:
 task:
   lags: 336
   horizon: 48
-  rebuild_pt: False
-  new_example: False
-  replot: False
-  heterogeneity: False
-  recluster: False
   splits:
   rounds: 10
   sampled_clients: 1
+  fedmin: False
+  
+load:
+  rebuild: False
+  example: False
+  replot: False
+  heterogeneity: False
+  clusters: False
+  logs: True
 
 misc:
   seed: 1
   output_dir: ../outputs/new/
-  benchmark: True
   save_name:
   verbose: 1
   complete_evaluation: False

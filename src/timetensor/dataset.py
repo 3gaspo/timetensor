@@ -9,6 +9,7 @@ import warnings
 import json
 
 from .utils import normalize
+from .analysis import get_dataset_stats
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
@@ -47,11 +48,12 @@ class TimeSeriesDataset(Dataset):
         self.by_date = by_date
         self.return_all_individuals, self.context_by_individuals = return_all_individuals, context_by_individuals
         self.remove_cte = remove_cte
+        
         self.stats = stats #global normalization
         if self.stats is not None:
-            self.values = normalize(self.values, self.stats["train"]["mean"], self.stats["train"]["std"])
+            self.values = normalize(self.values, self.stats["mean"], self.stats["std"])
 
-        self.weight = weight
+        self.weight = weight #modulus for get item
         if self.by_date:
             self.true_len = self.dates - (self.lags + self.horizon)
         else:
@@ -68,8 +70,10 @@ class TimeSeriesDataset(Dataset):
         return self.weight * self.true_len
 
     def get_df(self, dim=0):
-        return pd.DataFrame(self.values[:, 0, :].transpose(0,1), index=self.datetimes)
-
+        return pd.DataFrame(self.values[:, dim, :].transpose(0,1), index=self.datetimes)
+    def set_stats(self, stats):
+        self.stats = stats
+        self.values = normalize(self.values, self.stats["mean"], self.stats["std"])
 
     def __getitem__(self, raw_idx):
         idx = raw_idx % self.true_len
@@ -78,8 +82,8 @@ class TimeSeriesDataset(Dataset):
             if self.return_all_individuals: #1 batch = all individuals, batch of dates
                 values = self.values[:, :, idx : idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
                 if self.remove_cte:
-                    std = values[:, :, :self.lags].std(dim=-1).detach()
-                    mask = (std > 0).all(dim=1)
+                    std = values[:, :, :self.lags].std(dim=-1).detach() # (individuals, dim_values, 1)
+                    mask = (std > 0).any(dim=1)
                     values = values[mask]
                 if self.context is not None:
                     context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
@@ -90,8 +94,8 @@ class TimeSeriesDataset(Dataset):
                 indiv = np.random.randint(self.individuals)
                 values = self.values[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
                 if self.remove_cte: #skip constant windows
-                    std = values[:, :, :self.lags].std(dim=-1).detach()
-                    while (std == 0).any():
+                    std = values[:, :, :self.lags].std(dim=-1).detach() # (1, dim_values, 1)
+                    while (std == 0).all():
                         indiv = np.random.randint(self.individuals) 
                         values = self.values[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0)
                         std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach()
@@ -106,7 +110,7 @@ class TimeSeriesDataset(Dataset):
             values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
             if self.remove_cte: #skip constant windows
                 std = values[:, :, :self.lags].std(dim=-1).detach() # (1, dim_values, 1)
-                while (std == 0).any():
+                while (std == 0).all():
                     t = np.random.randint(self.dates - self.lags - self.horizon)
                     values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0)
                     std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach()
@@ -235,7 +239,7 @@ def fetch_csv(data_path, data_name, context_cols=None, drop=None):
         values_df = df.drop(columns=context_cols)
     values_df.columns = range(values_df.shape[1])
     datetimes = list(df.index)
-    if drop is not None and drop is not False:
+    if drop:
         drop = drop.split(";")
         drop = [int(idx) for idx in drop]
         values_df = values_df.drop(columns=drop)
@@ -243,11 +247,11 @@ def fetch_csv(data_path, data_name, context_cols=None, drop=None):
     return values_df, context_df, datetimes
 
 
-def build_dataset(data_path, data_name, context_cols=None, raw_format="csv", output_format="torch"):
+def build_dataset(data_path, data_name, context_cols=None, drop_users=None, raw_format="csv"):
     """fetches univariate csv (optional context) and saves pytorch. TODO: for multivariate"""
     #load csv
     if raw_format == "csv":
-        values_df, context_df, datetimes = fetch_csv(data_path, data_name, context_cols)
+        values_df, context_df, datetimes = fetch_csv(data_path, data_name, context_cols, drop=drop_users)
     else:
         raise ValueError("Unsupported input format")
     
@@ -325,75 +329,49 @@ def get_subset_indices(dataset, ratio, subset_mode=None):
     return indices
 
 
-def split_3_way(values, context, datetimes, date_splits, save_path="", reshuffle=False):
+def split_3_way(values, context, datetimes, date_splits):
     """returns dict of train/valid/test of provided values,context,datetimes
     """
     dates = len(datetimes)
-
-    split_dir = save_path + str(date_splits) + "/"
-    if reshuffle:
-        if os.path.exists(split_dir):
-            shutil.rmtree(split_dir)
-    if not os.path.exists(split_dir):
-        os.makedirs(split_dir)
-
-        stop_date1, stop_date2 = int(date_splits[0] * dates), int((date_splits[0] + date_splits[1])*dates)
-        dates_idx1, dates_idx2, dates_idx3 = list(range(stop_date1)), list(range(stop_date1, stop_date2)), list(range(stop_date2, dates))
-        dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
-
-        torch.save(dates_idx1, split_dir + "date_split1.pt")
-        torch.save(dates_idx2, split_dir + "date_split2.pt")
-        torch.save(dates_idx3, split_dir + "date_split3.pt")
-    else:
-        stop_date1, stop_date2 = int(date_splits[0] * dates), int((date_splits[0] + date_splits[1])*dates)
-        dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
-        dates_idx1 = torch.load(split_dir + "date_split1.pt")
-        dates_idx2 = torch.load(split_dir + "date_split2.pt")
-        dates_idx3 = torch.load(split_dir + "date_split3.pt")
-    
+    stop_date1, stop_date2 = int(date_splits[0] * dates), int((date_splits[0] + date_splits[1])*dates)
+    dates_idx1, dates_idx2, dates_idx3 = list(range(stop_date1)), list(range(stop_date1, stop_date2)), list(range(stop_date2, dates))
+    dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])    
     if context is not None:
-        context1 = context[:, :, :][: , :, dates_idx1]
-        context2 = context[:, :, :][: , :, dates_idx2]
-        context3 = context[:, :, :][: , :, dates_idx3]
+        context1 = context[: , :, dates_idx1]
+        context2 = context[: , :, dates_idx2]
+        context3 = context[: , :, dates_idx3]
     else:
         context1, context2, context3 = None, None, None
-    return {"train": (values[:,:,dates_idx1], context1, dates1), "valid":(values[:,:,dates_idx2], context2, dates2), "test":(values[:,:,dates_idx3], context3, dates3)}    
+    return {"train": (values[:,:,dates_idx1], context1, dates1), "valid1":(values[:,:,dates_idx2], context2, dates2), "test1":(values[:,:,dates_idx3], context3, dates3)}    
 
 
-def split_4_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals=True, save_path="", reshuffle=False):
+def split_4_way(values, context, datetimes, indiv_split, date_split, context_by_individuals=True, save_path=None, reshuffle=True):
     """returns dict of train/valid/test of provided values,context,datetimes
     split parameters can be in [0,1] or str path to indices
     """
     dates = len(datetimes)
-
-    split_dir = save_path + str(indiv_split) + ";" + str(date_splits) + "/"
-    if reshuffle:
-        if os.path.exists(split_dir):
-            shutil.rmtree(split_dir)
-    if not os.path.exists(split_dir):
-        os.makedirs(split_dir)
-
-        stop_date = int(date_splits * dates)
-        dates_idx1, dates_idx2 = list(range(stop_date)), list(range(stop_date, dates))
-        dates1, dates2 = list(datetimes[:stop_date]), list(datetimes[stop_date:])
-        torch.save(dates_idx1, split_dir + "date_split1.pt")
-        torch.save(dates_idx2, split_dir + "date_split2.pt")
-        
+    stop_date = int(date_split * dates)
+    dates_idx1, dates_idx2 = list(range(stop_date)), list(range(stop_date, dates))
+    dates1, dates2 = list(datetimes[:stop_date]), list(datetimes[stop_date:])
+    
+    save = (save_path is not None)
+    if save:
+        split_dir = save_path + str(indiv_split) + ";" + str(date_split) + "/"
+    if save and (not reshuffle):
+        indices1 = list(torch.load(split_dir + "indiv_split1.pt", weights_only=False))
+        indices2 = list(torch.load(split_dir + "indiv_split2.pt", weights_only=False))
+    else:
         individuals = values.shape[0]
         stop_indiv = int(indiv_split * individuals)
         indices = np.random.permutation(individuals)
         indices1, indices2 = list(indices[:stop_indiv]), list(indices[stop_indiv:])
-        torch.save(indices1, split_dir + "indiv_split1.pt")
-        torch.save(indices2, split_dir + "indiv_split2.pt")
-    
-    else:
-        stop_date = int(date_splits * dates)
-        dates1, dates2 = list(datetimes[:stop_date]), list(datetimes[stop_date:])
-        dates_idx1 = torch.load(split_dir + "date_split1.pt")
-        dates_idx2 = torch.load(split_dir + "date_split2.pt")
-        indices1 = list(torch.load(split_dir + "indiv_split1.pt", weights_only=False))
-        indices2 = list(torch.load(split_dir + "indiv_split2.pt", weights_only=False))
-        
+        if save:
+            if os.path.exists(split_dir):
+                shutil.rmtree(split_dir)
+            os.makedirs(split_dir)
+            torch.save(indices1, split_dir + "indiv_split1.pt")
+            torch.save(indices2, split_dir + "indiv_split2.pt")
+
     values1 = values[indices1, :, :][: , :, dates_idx1]
     values2 = values[indices1, :, :][: , :, dates_idx2]
     values3 = values[indices2, :, :][: , :, dates_idx1]
@@ -405,50 +383,42 @@ def split_4_way(values, context, datetimes, indiv_split, date_splits, context_by
             context3 = context[indices2, :, :][: , :, dates_idx1]
             context4 = context[indices2, :, :][: , :, dates_idx2]
         else:
-            context1 = context[:, :, :][: , :, dates_idx1]
-            context2 = context[:, :, :][: , :, dates_idx2]
-            context3 = context[:, :, :][: , :, dates_idx1]
-            context4 = context[:, :, :][: , :, dates_idx2]
+            context1 = context[: , :, dates_idx1]
+            context2 = context[: , :, dates_idx2]
+            context3 = context[: , :, dates_idx1]
+            context4 = context[: , :, dates_idx2]
     else:
         context1, context2, context3, context4 = None, None, None, None
     return {"train":(values1, context1, dates1), "valid":(values2, context2, dates2), "valid2":(values3, context3, dates1), "test": (values4, context4, dates2)}
 
 
-def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals=True, save_path="", reshuffle=False):
+def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals=True, save_path=False, reshuffle=True):
     """returns dict of train/valid/test of provided values,context,datetimes
     split parameters can be in [0,1] or str path to indices
     """
     dates = len(datetimes)
-    split_dir = save_path + str(indiv_split) + ";" + str(date_splits) + "/"
-    if reshuffle:
-        if os.path.exists(split_dir):
-            shutil.rmtree(split_dir)
-    if not os.path.exists(split_dir):
-        os.makedirs(split_dir)
-
-        dates = len(datetimes)
-        stop_date1, stop_date2 = int(date_splits[0] * dates), int((date_splits[0] + date_splits[1])*dates)
-        dates_idx1, dates_idx2, dates_idx3 = list(range(stop_date1)), list(range(stop_date1, stop_date2)), list(range(stop_date2, dates))
-        dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
-        torch.save(dates_idx1, split_dir + "date_split1.pt")
-        torch.save(dates_idx2, split_dir + "date_split2.pt")
-        torch.save(dates_idx3, split_dir + "date_split3.pt")
-
+    dates = len(datetimes)
+    stop_date1, stop_date2 = int(date_splits[0] * dates), int((date_splits[0] + date_splits[1])*dates)
+    dates_idx1, dates_idx2, dates_idx3 = list(range(stop_date1)), list(range(stop_date1, stop_date2)), list(range(stop_date2, dates))
+    dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
+    
+    save = (save_path is not None)
+    if save:
+        split_dir = save_path + str(indiv_split) + ";" + str(date_splits) + "/"
+    if save and (not reshuffle):
+        indices1 = list(torch.load(split_dir + "indiv_split1.pt", weights_only=False))
+        indices2 = list(torch.load(split_dir + "indiv_split2.pt", weights_only=False))
+    else:
         individuals = values.shape[0]
         stop_indiv = int(indiv_split * individuals)
         indices = np.random.permutation(individuals)
         indices1, indices2 = list(indices[:stop_indiv]), list(indices[stop_indiv:])
-        torch.save(indices1, split_dir + "indiv_split1.pt")
-        torch.save(indices2, split_dir + "indiv_split2.pt")
-
-    else:
-        stop_date1, stop_date2 = int(date_splits[0] * dates), int((date_splits[0] + date_splits[1])*dates)
-        dates1, dates2, dates3 = list(datetimes[:stop_date1]), list(datetimes[stop_date1:stop_date2]), list(datetimes[stop_date2:])
-        dates_idx1 = torch.load(split_dir + "date_split1.pt")
-        dates_idx2 = torch.load(split_dir + "date_split2.pt")
-        dates_idx3 = torch.load(split_dir + "date_split3.pt")
-        indices1 = list(torch.load(split_dir + "indiv_split1.pt", weights_only=False))
-        indices2 = list(torch.load(split_dir + "indiv_split2.pt", weights_only=False))
+        if save:
+            if os.path.exists(split_dir):
+                shutil.rmtree(split_dir)
+            os.makedirs(split_dir)
+            torch.save(indices1, split_dir + "indiv_split1.pt")
+            torch.save(indices2, split_dir + "indiv_split2.pt")
 
     values1 = values[indices1, :, :][: , :, dates_idx1]
     values2 = values[indices1, :, :][: , :, dates_idx2]
@@ -485,10 +455,12 @@ def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by
     return dico
 
 
-
-def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None, context_by_individuals=True, save_path=None, reshuffle=False, data=None, cluster_path=None, set_cluster=None):
+# def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None, context_by_individuals=True, save_path=None, reshuffle=True, cluster_path=None, set_cluster=None, data=None):
+def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None, set_cluster=None, data=None):
     """splits data from path. If str splits, will load given split, if float will save new split"""
-    
+    context_by_indiv, reshuffle = splits.context_by_individuals, splits.reshuffle 
+    date_splits, indiv_split = splits.date_splits, splits.indiv_split
+
     #load whole data
     if data is None:
         values, context, datetimes = load_data(data_path) #load dataset
@@ -498,20 +470,12 @@ def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None
     #filter values at cluster path
     if cluster_path is not None:
         indices = list(torch.load(cluster_path, weights_only=False))
-        try:
-            values = values[indices]
-        except:
-            raise ValueError(f"{type(cluster_path)}: {cluster_path} | {type(indices)}: {indices} ")
-        if context is not None and context_by_individuals:
+        values = values[indices]
+        if context is not None and context_by_indiv:
             context = context[indices]
-        else:
-            if set_cluster is not None:
-                context = torch.tensor([set_cluster for _ in range(len(indices))]).unsqueeze(dim=1).unsqueeze(dim=1).repeat(1, values.shape[1], values.shape[2])
+        if set_cluster is not None:
+            context = torch.tensor([set_cluster for _ in range(len(indices))]).unsqueeze(dim=1).unsqueeze(dim=1).repeat(1, values.shape[1], values.shape[2])
 
-    if save_path is None:
-        split_path = data_path+"splits/"
-    else:
-        split_path = save_path
     if type(date_splits) == str:
         date_splits = date_splits.split(";")
         date_splits = [float(txt) for txt in date_splits]
@@ -522,11 +486,11 @@ def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None
     else:
         type_split = 6
     if type_split == 3:
-        data_dict = split_3_way(values, context, datetimes, date_splits, split_path, reshuffle=reshuffle)
+        data_dict = split_3_way(values, context, datetimes, date_splits)
     elif type_split == 4:
-        data_dict = split_4_way(values, context, datetimes, indiv_split, date_splits[0], context_by_individuals, split_path, reshuffle=reshuffle)
+        data_dict = split_4_way(values, context, datetimes, indiv_split, date_splits[0], context_by_indiv, save_path, reshuffle=reshuffle)
     elif type_split == 6:
-        data_dict = split_6_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals, split_path, reshuffle=reshuffle)
+        data_dict = split_6_way(values, context, datetimes, indiv_split, date_splits, context_by_indiv, save_path, reshuffle=reshuffle)
     else:
         raise ValueError(f"Unrecognized type_split: {type_split}")
 
@@ -534,59 +498,53 @@ def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None
 
 
 
-def get_train_loaders(data_dict, batch_size, lags, horizon, by_date=True, subsets=None, save_path="", subset_mode="dates", context_by_individuals=True, remove_cte=True, stats=None, reshuffle=False):
+def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, save_path=None, stats=None):
     """returns dataloaders from data_dict as eventual subsets"""
-    loaders_dict = {}
+    subset_mode, subsets  = subsets.mode, subsets.sizes
+    by_date = splits.by_idx == "date"
+    reshuffle, context_by_indiv = splits.reshuffle, splits.context_by_individuals
+    remove_train_cte, remove_eval_cte = splits.remove_train_cte, splits.remove_eval_cte
     
-    if subsets is not None and subsets != "1;1;1;1;1;1":
-        subsets = subsets.split(";")
-        subsets = [float(txt) for txt in subsets]
+    if subsets is not None:
+        subsets = [float(txt) for txt in subsets.split(";")]
+        assert len(subsets) == len(data_dict)
+    else:
+        subsets = [1 for _ in range(len(data_dict))]
+    save = (save_path is not None)
+    if save:
         subset_dir = save_path + subset_mode + str(subsets) + "/"
-        if reshuffle:
-            if os.path.exists(subset_dir):
-                shutil.rmtree(subset_dir)
-        if not os.path.exists(subset_dir):
-            os.makedirs(subset_dir)
-            make_subsets=True
-        else:
-            make_subsets=False
+    loaders_dict = {}
 
-        if len(subsets)==3:
-            subsets = {"train": subsets[0], "valid": subsets[1], "test": subsets[2]}
-        elif len(subsets)==4:
-            subsets = {"train": subsets[0], "valid1": subsets[1], "valid2": subsets[2], "test": subsets[3]}
-        else:
-            subsets = {"train": subsets[0], "valid1": subsets[1], "valid2": subsets[2], "valid3": subsets[3], "test1": subsets[4], "test2": subsets[5]}
-    
-    for key, (values, context, datetimes) in data_dict.items():
-        individuals = values.shape[0]
-        
-
+    for i, (key, (values, context, datetimes)) in enumerate(data_dict.items()):
         if key == "train":
-            weight=1
-            if not by_date and batch_size != 1:
-                virtual_bs = min(individuals, batch_size)
-                if virtual_bs == 1:
-                    weight = batch_size
-            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=by_date, context_by_individuals=context_by_individuals, remove_cte=remove_cte, stats=stats, weight=weight)
+            if values.shape[0]==1 and batch_size>1:
+                weight=batch_size
+            else:
+                weight=1
+            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date, return_all_individuals=True, context_by_individuals=context_by_indiv, remove_cte=remove_train_cte, weight=weight, stats=stats)
         else:
-            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True, context_by_individuals=context_by_individuals, return_all_individuals=True, remove_cte=remove_cte, stats=stats)
-        
-        if subsets is not None and subsets != "1;1;1;1;1;1":
-            subset = subsets.get(key)
-            if subset != 1:
-                if make_subsets:
-                    subset_indices = get_subset_indices(dataset, subset, subset_mode)
-                    torch.save(subset_indices, subset_dir + f"{key}_subset.pt")
-                else:
-                    subset_indices = list(torch.load(subset_dir + f"{key}_subset.pt", weights_only=False))
-                dataset = TimeSeriesSubset(dataset, subset_indices, subset_mode)
+            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True, return_all_individuals=True, context_by_individuals=context_by_indiv, remove_cte=remove_eval_cte, stats=stats)
 
-        local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_cte)
-        if key=="train":
-            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=local_collate_fn)#, generator=g)
+        subset = subsets[i]
+        if subset != 1:
+            if save and (not reshuffle):
+                subset_indices = list(torch.load(subset_dir + f"{key}_subset.pt", weights_only=False))
+            else:
+                subset_indices = get_subset_indices(dataset, subset, subset_mode)
+            if save:
+                if os.path.exists(subset_dir):
+                    shutil.rmtree(subset_dir)
+                os.makedirs(subset_dir)
+                torch.save(subset_indices, subset_dir + f"{key}_subset.pt")
+            dataset = TimeSeriesSubset(dataset, subset_indices, subset_mode)
+
+        if key =="train":
+            local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_train_cte)
+            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=local_collate_fn)
         else:
-            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=local_collate_fn)
+            local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_eval_cte)
+            effective_bs = max(int(batch_size // values.shape[0]),1)
+            loaders_dict[key] = DataLoader(dataset, batch_size=effective_bs, shuffle=False, collate_fn=local_collate_fn)
        
     return loaders_dict
 
@@ -609,7 +567,7 @@ def collate_fn(data, remove_cte=False):
 
     if remove_cte: #remove constant windows
         stds = inputs.std(dim=-1) #(bs * indiv, dim)
-        non_constant_mask = (stds > 0).all(dim=1)  # (bs * indiv)
+        non_constant_mask = (stds > 0).any(dim=1)  # (bs * indiv)
         inputs, targets = inputs[non_constant_mask], targets[non_constant_mask]
         if contexts is not None:
             contexts = contexts[non_constant_mask]
@@ -659,7 +617,7 @@ def get_sizes(loaders_dict, str_info=False):
         return shape
     else:
         shapes = {key: loaders_dict[key].dataset.shape for key in loaders_dict}
-        shape_str = "Splits shapes:\n" + "\n".join("{}\t{}".format(k, v) for k, v in shapes.items())        
+        shape_str = "Splits shapes:\n" + "\n".join(f"{k}\t{v}" for k, v in shapes.items())        
         if c is not None:
             batch_str = f"Batches: {len(loaders_dict["train"])} * (X={list(X.shape)}, c={list(c.shape)}, y={list(y.shape)})"
         else:
@@ -668,51 +626,78 @@ def get_sizes(loaders_dict, str_info=False):
         return shape, shape_str, batch_str
 
 
-
-def fetch_training_data(data_path, indiv_split, date_splits, subsets, batch_size, lags, horizon, by_date=False, context_by_individuals=True, reshuffle=False, remove_cte=True, clusters=None, stats=None, aggregate=True, seed=None):
+def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, clusters=None, aggregate=True, seed=None, save=False):
     """returns loaders dict (clusters=> nested dict)"""
     if seed is not None: 
         torch.manual_seed(seed)
         torch.cuda.manual_seed(seed)
         np.random.seed(seed)
-    if clusters is not None and subsets["cluster"] in ["None", None]: #fetch clusters
-        cluster_names = [name for name in os.listdir(data_path + clusters) if name[-3:]==".pt"]
+
+    #save paths
+    if save:
+        save_path = data_path
+    else:
+        save_path = None
+    if clusters is not None:
+        cluster_path = data_path + clusters + "/"
+        if save:
+            save_path += clusters + "/" 
+
+    if (clusters is not None) and (subsets.cluster is None): #clustered splits
+        cluster_names = [name for name in os.listdir(cluster_path) if name[-3:]==".pt"]
         loaders_dicts = []
-        for k, cluster_name in enumerate(cluster_names): #TODO include stats for clusters
-            data_dict = get_dataset_splits(data_path, indiv_split, date_splits, context_by_individuals=context_by_individuals, reshuffle=reshuffle, save_path=data_path+clusters+"splits/"+cluster_name[:-3]+"_", cluster_path=data_path+clusters+cluster_name, set_cluster=k)
-            #TODO: add stats=stats after proper cluster stats dict done
-            loaders_dicts.append(get_train_loaders(data_dict, batch_size, lags, horizon, by_date=False, save_path=data_path+clusters+"subsets/"+cluster_name[:-3]+"_")) #stats=stats
+        for k, cluster_name in enumerate(cluster_names):
+            if save:
+                split_path = save_path+cluster_name[:-3]+"splits/"
+                subset_path = save_path+cluster_name[:-3]+"subsets/"
+            else:
+                split_path, subset_path = None, None
+            cluster_path_ = cluster_path+cluster_name
+            data_dict = get_dataset_splits(splits, data_path, split_path, cluster_path_, set_cluster=k)
+            loaders_dicts.append(get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path))
         if aggregate:
-            loaders_dict = aggregate_loaders_dict(loaders_dicts)  
+            loaders_dict = aggregate_loaders_dict(loaders_dicts)
         else:
             loaders_dict = {f"node{k}": loaders_dicts[k] for k in range(len(loaders_dicts))}
 
-    else:
-        if subsets["cluster"] not in ["None", None]: #fetch one cluster
-            cluster_path = data_path+clusters+subsets["cluster"] + ".pt"
-            data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle, save_path=data_path+clusters+"splits/"+subsets["cluster"]+"_", cluster_path=cluster_path)
-            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date, subsets=subsets["sizes"], subset_mode=subsets["mode"], remove_cte=remove_cte, stats=stats, save_path=data_path+clusters+"subsets/"+subsets["cluster"]+"_")
-        else: #fetch all
-            data_dict = get_dataset_splits(data_path, indiv_split, date_splits, reshuffle=reshuffle)
-            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, by_date=by_date, subsets=subsets["sizes"], subset_mode=subsets["mode"], save_path=data_path+"subsets/", remove_cte=remove_cte, stats=stats)
-    
-    return loaders_dict
+    else: #1 split
+        if subsets["cluster"] is not None:
+            cluster_name = subsets["cluster"]
+            cluster_path += cluster_name + ".pt"
+            if save:
+                split_path = save_path+cluster_name[:-3]+"splits/"
+                subset_path = save_path+cluster_name[:-3]+"subsets/"
+            else:
+                split_path, subset_path = None, None
+            data_dict = get_dataset_splits(splits, data_path, split_path, cluster_path)
+            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path)
+        else:
+            if save:
+                split_path = save_path + "splits/"
+                subset_path = save_path+ "subsets/"
+            else:
+                split_path, subset_path = None, None
+            data_dict = get_dataset_splits(splits, data_path, split_path)
+            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path)
 
-
-def fetch_dicts(data_path, cfg, remove_cte=True, clusters=None, seed=None, stats_dict=None, aggregate=True):
-    """return dataframe and loaders dicts for dataset analysis"""
-    loaders_dict = fetch_training_data(data_path,
-                                       cfg.data.indiv_split, cfg.data.date_splits, cfg.data.subsets, cfg.training.bs, cfg.task.lags, cfg.task.horizon,
-                                       by_date=True, context_by_individuals=cfg.data.context_by_individuals,
-                                       reshuffle=cfg.data.reshuffle, remove_cte=remove_cte, clusters=clusters, seed=seed,  stats=stats_dict, aggregate=aggregate)
+    #stats
     if clusters is not None and not aggregate:
         df_dict = {key : {subkey: loader.dataset.get_df() for subkey, loader in load_dict.items()} for key, load_dict in loaders_dict.items()}
+        stats_dict = {}
+        for node, node_dict in df_dict.items():
+            if save:
+                save_path = save_path+node[:-3] + "/"
+            stats_dict[node] = get_dataset_stats(node_dict, lags, horizon, splits["remove_train_cte"], splits["remove_eval_cte"], save_path)
     else:
         df_dict = {key: loader.dataset.get_df() for key, loader in loaders_dict.items()}
+        stats_dict = get_dataset_stats(df_dict, lags, horizon, splits["remove_train_cte"], splits["remove_eval_cte"], save_path)
 
-    return loaders_dict, df_dict
+    return loaders_dict, stats_dict
 
-
+def apply_stats(loaders_dict, stats_dict):
+    """apply global normalization to loaders using stats_dict"""
+    for key, loader in loaders_dict.items():
+        loader.dataset.set_stats(stats_dict[key])
 
 
 def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_by_individuals=True, prefix=""):

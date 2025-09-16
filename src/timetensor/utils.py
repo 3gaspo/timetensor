@@ -6,24 +6,21 @@ import hydra
 import pandas as pd
 
 
-def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_name=None, subsets=None):
+def get_dirs(output_dir, save_name, model_name, norm_name=None, criterion_name=None, subsets=None):
     
-    get_training = ("revin" in normalization) or (normalization=="mIN") or (model_name not in ["persistence", "repeat", "lookback", "expected"])
+    get_training = ((norm_name is not None) and (("revin" in norm_name) or ("mIN" in norm_name))) or (model_name not in ["persistence", "repeat", "lookback", "expected"])
     if subsets is not None:
         subset = float(subsets.split(";")[0])
     else:
         subset=None
     if save_name is None:
         save_name = model_name
-        if get_training and (normalization is not None):
-            if normalization != "None":
-                save_name = save_name + "_" + normalization
-        if get_training and (criterion_name is not None) and ("sklinear" not in model_name):
-            if criterion_name != "MSE":
-                save_name = save_name + "_" + criterion_name
-        if get_training and subset is not None:
-            if subset != 1:
-                save_name = save_name + "_" + str(subset)
+        if get_training and (norm_name is not None):
+            save_name = save_name + "_" + norm_name
+        if get_training and (criterion_name is not None) and (criterion_name != "MSE"):# and ("sklinear" not in model_name):
+            save_name = save_name + "_" + criterion_name
+        if get_training and (subset is not None) and (subset != 1):
+            save_name = save_name + "_" + str(subset)
     save_dir = output_dir + save_name + "/" #current experiment dir
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -36,24 +33,7 @@ def get_dirs(output_dir, save_name, model_name, normalization=None, criterion_na
         os.makedirs(save_dir + "plots/")
     return save_name, save_dir
 
-
-# def get_temporal_features(date):
-#     """returns list of size context(=3) for a given date"""
-#     features = []
-#     hour, weekday, posan = date.hour, date.weekday(), date.timetuple().tm_yday
-
-#     features.append(np.cos((2*np.pi / 23) * hour)) # cos(hour)
-#     features.append(np.sin((2*np.pi / 23) * hour)) # sin
-#     features.append(np.cos((2*np.pi / 6)* weekday)) # cos(weekday)
-#     features.append(np.sin((2*np.pi / 6)* weekday)) # sin
-#     features.append(np.cos((2*np.pi / 365) * posan)) # cos(position in year)
-#     features.append(np.sin((2*np.pi / 365) * posan)) # sin
-
-#     return features
-
-
-
-def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, mIN=False):#, std_cst=1e-6):
+def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, mIN=False):
     """unrolls (x,y) examples of dataloaders (typically individuals*dates examples)"""
     ###TODO: remove std=0 windows for sklearn fitting
     X = []
@@ -83,35 +63,9 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, b
     return torch.concat(X), torch.concat(Y)
 
 
-# def get_stats(values, stat, dim=0):
-#     """returns tensor of given stats for a loader
-#     values (Nindiv, Ndim, Ndates)
-#     """
-#     if stat == "mean":
-#         values_stat = values.mean(axis=-1) #(Nindiv, Ndim)
-#         total_stat = values.mean()
-#     elif stat == "max":
-#         values_stat, _ = values.max(axis=-1) #(Nindiv, Ndim)
-#         total_stat = values.max()
-#     elif stat == "std":
-#         values_stat = values.std(axis=-1) #(Nindiv, Ndim)
-#         total_stat = values.std()
-#     else:
-#         raise ValueError("Unrecognized stat name")
-#     if dim is not None:
-#         values_stat = values_stat[:, dim]
-#     return values_stat, total_stat #(Nindiv), (1)
-
-
-def get_normal_stats(x):#, std_cst=1e-6):
-  """
-  X: tensor (B, dim, features)
-  normalize for each B
-  """
-  mean = x.mean(dim=-1, keepdim=True).detach()
-  std =  x.std(dim=-1, keepdim=True).detach()
-  #std = torch.where(std != 0, std, std_cst)
-
+def get_normal_stats(x): #(B, dim, T)
+  mean = x.mean(dim=-1, keepdim=True).detach() #(B, dim, 1)
+  std =  x.std(dim=-1, keepdim=True).detach() #(B, dim, 1)
   return mean, std
 
 
@@ -134,7 +88,7 @@ def save_results(value, path, name, model_name, metric_name):
             print(dico)
 
 
-def normalize(x, mean, std, eps=1e-6):
+def normalize(x, mean, std, eps=1e-8):
     return (x - mean) / (std + eps)
 
 
