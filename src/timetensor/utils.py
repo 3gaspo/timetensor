@@ -119,3 +119,8 @@ def filter_df(df, mask):
     clean_df = df.copy()
     clean_df[mask] = pd.NA
     return clean_df
+
+
+def is_cte(x, dim=-1):
+    """checks if x is constant along dim"""
+    return (x.min(dim=dim).values == x.max(dim=dim).values).all()

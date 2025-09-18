@@ -2,9 +2,11 @@ import hydra
 import logging
 import torch
 import numpy as np
+from time import perf_counter
 
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_stats
 from src.timetensor.models import load_model
+from src.timetensor.pipeline import Learner, get_losses
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -39,23 +41,26 @@ def run(cfg):
     if cfg.data.normalize:
         apply_stats(loaders_dict, stats_dict)
     shape, _, _ = get_sizes(loaders_dict, str_info=True)
-    x, c, y = next(iter(loaders_dict["train"]))
     logger.info("Fetched dataloaders")
 
     #model
-    model = load_model(model_name, shape, norm_name, init_path, cfg.training.freeze_core, cfg.model.constants, **kwargs)
+    criterion_name = "NMSE"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = load_model(model_name, shape, norm_name, init_path, constants=False, **kwargs).to(device)
+    logger.info("Fetched learner")
 
     #test
-    if cfg.training.freeze_core:
-        trainable_params = []
-        for name, param in model.named_parameters():
-            if param.requires_grad:
-                trainable_params.append(name)
-        logger.info(f"Trainable params: {trainable_params}")
-
+    x = loaders_dict["valid1"].dataset.values[205, :, :lags].unsqueeze(0).to(device)
+    norm = model.InstanceNorm(x)
     pred = model(x)
-    print(pred.shape)
+    print(norm)
+    print(pred)
 
+    model2 = load_model(model_name, shape, None, init_path, constants=False, **kwargs).to(device)
+    norm = model.InstanceNorm(x)
+    pred = model(x)
+    print(norm)
+    print(pred)
 
     logger.info('End of script\n')
 

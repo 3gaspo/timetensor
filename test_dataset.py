@@ -2,7 +2,7 @@ import hydra
 import logging
 import torch
 import numpy as np
-from src.timetensor.dataset import fetch_training_data, apply_stats
+from src.timetensor.dataset import fetch_training_data, apply_stats, get_sizes
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -25,14 +25,18 @@ def run(cfg):
         np.random.seed(seed)
 
     #data
-    loaders_dict, stats_dict = fetch_training_data(data_path, split_kwargs, subset_kwargs, cfg.training.bs, lags, horizon, clusters=clusters, seed=seed)
-    if cfg.data.normalize:
-        apply_stats(loaders_dict, stats_dict)
+    for cluster in [None, clusters]:
+        print(cluster)
+        loaders_dict, stats_dict = fetch_training_data(data_path, split_kwargs, subset_kwargs, cfg.training.bs, lags, horizon, clusters=cluster, seed=seed)
+        if cfg.data.normalize:
+            apply_stats(loaders_dict, stats_dict)
 
-    #test
-    x, c, y = next(iter(loaders_dict["train"]))
-    print("context: ", c.shape)
-
+        #test
+        data = loaders_dict["valid1"].dataset
+        print("len", len(data))
+        print("shape", data.shape)
+        print(next(iter(loaders_dict["valid1"]))[0][0])
+    
     logger.info('End of script\n')
 
 if __name__ == "__main__":

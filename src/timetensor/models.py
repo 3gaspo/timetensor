@@ -227,7 +227,7 @@ class InstanceNorm(DefaultNorm):
         """Z-normalizes using instance lookback mean and std"""
         super().__init__(model, latent)
         self.norm_name = "instance"
-        self.specific, self.last, self.eps = eps, last, specific
+        self.eps, self.last, self.specific = eps, last, specific
     def norm(self, x):
         if self.last: #last value
             self.mu = x[:, :, -1].unsqueeze(2).detach()

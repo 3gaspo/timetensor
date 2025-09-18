@@ -81,10 +81,12 @@ def plot_stats(data, path="", name="stats.pdf", per_user=True, lookback=336, sam
             means = clean_df.mean(axis=0)
             stds = clean_df.std(axis=0)
             if remove_cte and np.any(stds==0):
-                raise ValueError("Constant windows wrongly kept")
+                print(f"Users with only constant windows on {key} : {np.where(stds==0)[0]}")
+                means = means[stds!=0]
+                stds = stds[stds!=0]
         else:
-            means = df.rolling(window=lookback).mean()[lookback:].stack()#.sample(samples)
-            stds = df.rolling(window=lookback).std()[lookback:].stack()#.sample(samples)
+            means = df.rolling(window=lookback).mean()[lookback:].stack()
+            stds = df.rolling(window=lookback).std()[lookback:].stack()
             sampled_idx = np.random.choice(len(means), size=samples, replace=False)
             means = means.iloc[sampled_idx]
             stds = stds.iloc[sampled_idx]

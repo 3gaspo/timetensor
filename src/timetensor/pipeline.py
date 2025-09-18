@@ -313,13 +313,14 @@ def launch_training(model, normalization, criterion, lr, bs, epochs, loaders_dic
     return learner
 
 
-def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complete_evaluation, logger):
-    logger.info("Computing test metrics")
-    test_losses1 = learner.eval(loaders_dict["test1"], return_all=True, verbose=1, logger=logger) #(ndates*nindividuals, dim, horizon)
-    test_losses2 = learner.eval(loaders_dict["test2"], return_all=True, verbose=1, logger=logger) #(ndates*nindividuals, dim, horizon)
-    torch.save(test_losses1, save_dir + "test_losses1.pt")
-    torch.save(test_losses2, save_dir + "test_losses2.pt")
-
+def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complete_evaluation, save=True):
+    test_losses1 = learner.eval(loaders_dict["test1"], return_all=True, verbose=1) #(ndates*nindividuals, dim, horizon)
+    test_losses2 = learner.eval(loaders_dict["test2"], return_all=True, verbose=1) #(ndates*nindividuals, dim, horizon)
+    if save:
+        torch.save(test_losses1, save_dir + "test_losses1.pt")
+        torch.save(test_losses2, save_dir + "test_losses2.pt")
+    else:
+        return test_losses1, test_losses2
     for loss_name in eval_losses:
         mean, std = test_losses1[loss_name].mean(), test_losses1[loss_name].std()
         save_results(mean, save_dir, "test1_mean_results.json", save_name, f"Test {loss_name}")
@@ -336,16 +337,17 @@ def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complet
             plot_horizon_errors(test_losses2[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test2_horizon_{loss_name}.pdf", f"Test 2 {loss_name} of {save_name} : {mean}")
 
 
-def launch_example(data_path, model, lags, horizon, device, save_dir, save_name, logger):
-    ex_dir = data_path + "examples/" + f"{lags}_{horizon}/"
-    if not os.path.exists(ex_dir):
-        set_random_data(data_path, lags, horizon, name="rand")
-        plot_named_example(ex_dir, f"rand")
-    dico = fetch_example_data(ex_dir)
-    for data_name, data_tuple in dico.items():
-        x, c, y = data_tuple[0].unsqueeze(0).to(device), data_tuple[1], data_tuple[2].unsqueeze(0).to(device)
-        if c is not None:
-            c = c.unsqueeze(0).to(device)
-        pred = model(x,c)
-        plot_pred(x[0,0].cpu().detach().numpy(), y[0,0].cpu().detach().numpy(), pred[0,0].cpu().detach().numpy(), save_dir + "examples/", f"{data_name}_predictions.pdf", f"Example {data_name} prediction for {save_name}")        
-    logger.info('Saved plots')
+def launch_example(data_path, model, lags, horizon, device, save_dir, save_name):
+    #TODO gerer ce cas
+    if model.name not in ["crevin", "cmIN"]:
+        ex_dir = data_path + "examples/" + f"{lags}_{horizon}/"
+        if not os.path.exists(ex_dir):
+            set_random_data(data_path, lags, horizon, name="rand")
+            plot_named_example(ex_dir, f"rand")
+        dico = fetch_example_data(ex_dir)
+        for data_name, data_tuple in dico.items():
+            x, c, y = data_tuple[0].unsqueeze(0).to(device), data_tuple[1], data_tuple[2].unsqueeze(0).to(device)
+            if c is not None:
+                c = c.unsqueeze(0).to(device)
+            pred = model(x,c)
+            plot_pred(x[0,0].cpu().detach().numpy(), y[0,0].cpu().detach().numpy(), pred[0,0].cpu().detach().numpy(), save_dir + "examples/", f"{data_name}_predictions.pdf", f"Example {data_name} prediction for {save_name}")

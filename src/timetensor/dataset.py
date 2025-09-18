@@ -8,12 +8,14 @@ import pandas as pd
 import warnings
 import json
 
-from .utils import normalize
+from .utils import normalize, is_cte
 from .analysis import get_dataset_stats
+
+#TODO: vérif que l'aggregation dataste clusters fonctionne bien
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
-    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, by_date=True, return_all_individuals=True, context_by_individuals=True, remove_cte=False, stats=None, weight=1):   
+    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, by_date=True, context_by_individuals=True, return_all_individuals=True, remove_cte=False, stats=None, weight=1):   
         """
         values (N_individuals, dim_values, dates):  past target values 
         datetimes (dates): list of dates in datetime Y-m-d H:M:S format
@@ -76,7 +78,10 @@ class TimeSeriesDataset(Dataset):
         self.values = normalize(self.values, self.stats["mean"], self.stats["std"])
 
     def __getitem__(self, raw_idx):
-        idx = raw_idx % self.true_len
+        if self.weight > 1:
+            idx = raw_idx % self.true_len
+        else:
+            idx = raw_idx
 
         if self.by_date:
             if self.return_all_individuals: #1 batch = all individuals, batch of dates
@@ -85,6 +90,12 @@ class TimeSeriesDataset(Dataset):
                     std = values[:, :, :self.lags].std(dim=-1).detach() # (individuals, dim_values, 1)
                     mask = (std > 0).any(dim=1)
                     values = values[mask]
+                    while values.numel() == 0:
+                        idx = np.random.randint(self.individuals)
+                        values = self.values[:, :, idx : idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
+                        std = values[:, :, :self.lags].std(dim=-1).detach() # (individuals, dim_values, 1)
+                        mask = (std > 0).any(dim=1)
+                        values = values[mask]
                 if self.context is not None:
                     context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
                     if self.remove_cte:
@@ -94,11 +105,12 @@ class TimeSeriesDataset(Dataset):
                 indiv = np.random.randint(self.individuals)
                 values = self.values[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
                 if self.remove_cte: #skip constant windows
-                    std = values[:, :, :self.lags].std(dim=-1).detach() # (1, dim_values, 1)
-                    while (std == 0).all():
+                    # std = values[:, :, :self.lags].std(dim=-1).detach() # (1, dim_values, 1)
+                    # while (std == 0).all():
+                    while is_cte(values[:, :, :self.lags]):
                         indiv = np.random.randint(self.individuals) 
                         values = self.values[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0)
-                        std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach()
+                        # std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach()
                 if self.context is not None:
                     if self.context_by_individuals:
                         context = self.context[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
@@ -106,14 +118,19 @@ class TimeSeriesDataset(Dataset):
                         context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
 
         else: #1 batch = batch of individuals, random date
-            t = np.random.randint(self.dates - self.lags - self.horizon)
-            values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
-            if self.remove_cte: #skip constant windows
-                std = values[:, :, :self.lags].std(dim=-1).detach() # (1, dim_values, 1)
-                while (std == 0).all():
-                    t = np.random.randint(self.dates - self.lags - self.horizon)
-                    values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0)
-                    std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach()
+            if self.remove_cte and (self.values[idx, :, :].std(dim=-1)==0).all():
+                if is_cte(self.values[idx, :, :]):
+                    values = self.values[idx, :, :self.lags+self.horizon]
+            else:
+                t = np.random.randint(self.dates - self.lags - self.horizon)
+                values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
+                if self.remove_cte: #skip constant windows
+                    # std = values[:, :, :self.lags].std(dim=-1).detach() # (1, dim_values, 1)
+                    # while (std == 0).all():
+                    while is_cte(values[:, :, :self.lags]):
+                        t = np.random.randint(self.dates - self.lags - self.horizon)
+                        values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0)
+                        # std = values[:, :, :self.lags].std(dim=-1, keepdim=True).detach()
             if self.context is not None:
                 if self.context_by_individuals:
                     context = self.context[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
@@ -521,9 +538,9 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, sav
                 weight=batch_size
             else:
                 weight=1
-            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date, return_all_individuals=True, context_by_individuals=context_by_indiv, remove_cte=remove_train_cte, weight=weight, stats=stats)
+            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date, context_by_indiv, remove_cte=remove_train_cte, weight=weight, stats=stats)
         else:
-            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True, return_all_individuals=True, context_by_individuals=context_by_indiv, remove_cte=remove_eval_cte, stats=stats)
+            dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon, by_date=True, context_by_individuals=context_by_indiv, remove_cte=remove_eval_cte, stats=stats)
 
         subset = subsets[i]
         if subset != 1:
@@ -574,18 +591,31 @@ def collate_fn(data, remove_cte=False):
 
     return inputs, contexts, targets
     
-def aggregate_loaders_dict(loaders_dicts):
+def aggregate_loaders_dict(loaders_dicts, lags, horizon, splits, batch_size):
     """aggregates loaders of different individuals. Expects same dates."""
     loaders_dict = {}
     keys = list(loaders_dicts[0].keys())
-    example_dataset = loaders_dicts[0][keys[0]].dataset
-    lags, horizon = example_dataset.lags, example_dataset.horizon
-    by_date, context_by_individuals, return_all_individuals = example_dataset.by_date, example_dataset.context_by_individuals, example_dataset.return_all_individuals
-    
+    by_date, context_by_individuals = splits.by_idx == "date", splits.context_by_individuals
+    remove_train_cte, remove_test_cte = splits.remove_train_cte, splits.remove_eval_cte
+
     for key in keys:
-        batch_size = loaders_dicts[0][key].batch_size
-        shuffle = isinstance(loaders_dicts[0][key].sampler, torch.utils.data.RandomSampler)
-        collate_fn = loaders_dicts[0][key].collate_fn
+        # shuffle = isinstance(loaders_dicts[0][key].sampler, torch.utils.data.RandomSampler)
+        # collate_fn = loaders_dicts[0][key].collate_fn
+        if key =="train":
+            remove_cte = remove_train_cte
+            local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_cte)
+            shuffle = True
+            by_date_ = by_date
+            effective_bs = batch_size
+
+        else:
+            remove_cte = remove_test_cte
+            local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_cte)
+            shuffle = False
+            by_date_ = True
+            effective_bs = max(int(batch_size // values.shape[0]),1)
+
+
         datetimes = loaders_dicts[0][key].dataset.datetimes
         if context_by_individuals:
             context_list = []
@@ -603,8 +633,8 @@ def aggregate_loaders_dict(loaders_dicts):
                 context = None
             else:
                 context = torch.cat(context_list, dim=0)
-        extended_dataset = TimeSeriesDataset(torch.cat(values_list, dim=0), datetimes, context, lags, horizon, by_date, return_all_individuals, context_by_individuals)
-        extended_loader = DataLoader(extended_dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=collate_fn)
+        extended_dataset = TimeSeriesDataset(torch.cat(values_list, dim=0), datetimes, context, lags, horizon, by_date_, context_by_individuals, remove_cte=remove_cte, stats=None)
+        extended_loader = DataLoader(extended_dataset, batch_size=effective_bs, shuffle=shuffle, collate_fn=local_collate_fn)
         loaders_dict[key] = extended_loader
     return loaders_dict
 
@@ -656,7 +686,7 @@ def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, c
             data_dict = get_dataset_splits(splits, data_path, split_path, cluster_path_, set_cluster=k)
             loaders_dicts.append(get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path))
         if aggregate:
-            loaders_dict = aggregate_loaders_dict(loaders_dicts)
+            loaders_dict = aggregate_loaders_dict(loaders_dicts, lags, horizon, splits, batch_size)
         else:
             loaders_dict = {f"node{k}": loaders_dicts[k] for k in range(len(loaders_dicts))}
 
