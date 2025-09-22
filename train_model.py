@@ -56,19 +56,26 @@ def run(cfg):
         np.random.seed(seed)
 
     #data
-    loaders_dict, stats_dict = fetch_training_data(data_path, split_kwargs, subset_kwargs, batch_size, lags, horizon, clusters=clusters, seed=seed)
+    loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(data_path, split_kwargs, subset_kwargs, batch_size, lags, horizon, clusters=clusters, seed=seed)
     if cfg.data.normalize:
         apply_stats(loaders_dict, stats_dict)
-    shape, _, batch_str = get_sizes(loaders_dict, str_info=True)
+    shape, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
     if verbose:
         logger.info("Fetched dataloaders")
+        logger.info(shape_str)
         logger.info(batch_str)
 
     #model
     if kwargs.get("init_alpha") is True:
-        kwargs["init_alpha"] = stats_dict["train"]["alpha"]
+        if clusters is not None:
+            kwargs["init_alpha"] = [nodes_stats_dict[node]["train"]["alpha"] for node in nodes_stats_dict]
+        else:
+            kwargs["init_alpha"] = stats_dict["train"]["alpha"]
     if kwargs.get("init_beta") is True:
-        kwargs["init_beta"] = stats_dict["train"]["beta"]
+        if clusters is not None:
+            kwargs["init_beta"] = [nodes_stats_dict[node]["train"]["alpha"] for node in nodes_stats_dict]
+        else:
+            kwargs["init_beta"] = stats_dict["train"]["beta"]
     model = load_model(model_name, shape, norm_name, init_path, cfg.training.freeze_core, cfg.model.constants, **kwargs)
     if cfg.training.freeze_core:
         trainable_params = []
@@ -78,9 +85,11 @@ def run(cfg):
         logger.info(f"Trainable params: {trainable_params}")
     
     #training
+    logger.info("--Training--")
     learner = launch_training(model, norm_name, criterion, lr, batch_size, epochs, loaders_dict, eval_losses, device, save_dir, save_name, eval_freq, print_freq, logger, retrain)
-    launch_eval(learner, loaders_dict, eval_losses, output_dir, save_name, complete_evaluation, logger)
-    launch_example(data_path, model, lags, horizon, device, save_dir, save_name, logger)
+    logger.info("--Eval--")
+    launch_eval(learner, loaders_dict, eval_losses, output_dir, save_name, complete_evaluation)
+    launch_example(data_path, model, lags, horizon, device, save_dir, save_name)
 
     #weights
     plot_weights(model, learner, save_dir, save_name)

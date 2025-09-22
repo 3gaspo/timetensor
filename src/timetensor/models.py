@@ -247,7 +247,7 @@ class InstanceNorm(DefaultNorm):
 class RevIN(DefaultNorm):
     def __init__(self, model, dim, eps=1e-8, latent=False, **kwargs):
         """RevIN: Reversible Instance Normalization for Time Series Forecasting"""
-        super().__init__(model, latent=False)
+        super().__init__(model, latent)
         self.norm_name = "revin"
         self.dim, self.eps = dim, eps
         self.alpha = nn.Parameter(torch.ones(1, dim, 1))  #scale
@@ -272,9 +272,9 @@ class RevIN(DefaultNorm):
         return output
     
 class FlexRevIN(DefaultNorm):
-    def __init__(self, model, dim, eps=1e-8, start=True, **kwargs):
+    def __init__(self, model, dim, eps=1e-8, start=True, latent=False, **kwargs):
         """Flexible RevIn module"""
-        super().__init__(model, latent=False)
+        super().__init__(model, latent)
         self.norm_name = "flexrevin"
         self.dim, self.eps = dim, eps
 
@@ -313,9 +313,9 @@ class FlexRevIN(DefaultNorm):
     
 
 class mIN(DefaultNorm):
-    def __init__(self, model, dim, eps=1e-8, init_alpha=False, init_beta=False, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, latent=False, **kwargs):
+    def __init__(self, model, dim, eps=1e-8, init_alpha=False, init_beta=False, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, latent=False,**kwargs):
         """mIN: Modulated Instance Normalization"""
-        super().__init__(model, latent=False)
+        super().__init__(model, latent)
         self.norm_name = "mIN"
         self.dim, self.eps = dim, eps
 
@@ -345,7 +345,6 @@ class mIN(DefaultNorm):
         self.use_gamma, self.inverse_gamma = use_gamma, inverse_gamma
         if self.inverse_gamma:
             assert self.use_gamma
-        self.latent = latent
     
     def norm(self, x):
         self.mu, self.std = get_normal_stats(x)
@@ -370,7 +369,7 @@ class mIN(DefaultNorm):
 class cmIN(mIN):
     def __init__(self, model, dim, n_clusters=2, eps=1e-8, init_alpha=False, init_beta=False, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, latent=False, **kwargs):
         """clustered mIN"""
-        super().__init__(model, dim, eps, use_gamma=use_gamma, inverse_gamma=inverse_gamma, latent=False, **kwargs)
+        super().__init__(model, dim, eps, use_gamma=use_gamma, inverse_gamma=inverse_gamma, latent=latent, **kwargs)
         self.norm_name="cmIN"
         assert n_clusters is not None
 
@@ -461,6 +460,58 @@ class cRevIN(RevIN):
         return output
 
 
+class cflexRevIN(DefaultNorm):
+    def __init__(self, model, dim, n_clusters=2, latent=False, start=True, **kwargs):
+        """clustered RevIN"""
+        super().__init__(model, latent, **kwargs)
+        self.norm_name="cflexrevin"
+        assert n_clusters is not None
+
+        #flex in
+        if start:
+            self.nus = nn.ParameterList([nn.Parameter(torch.ones(1, dim, 1)) for _ in range(n_clusters)])  #scale
+            self.etas = nn.ParameterList([nn.Parameter(torch.ones(1, dim, 1)) for _ in range(n_clusters)])  #shift
+        else:
+            self.nus = nn.ParameterList([nn.Parameter(torch.zeros(1, dim, 1)) for _ in range(n_clusters)])  #scale
+            self.etas = nn.ParameterList([nn.Parameter(torch.zeros(1, dim, 1)) for _ in range(n_clusters)])  #shift
+        #input modulations
+        self.gammas = nn.ParameterList([nn.Parameter(torch.ones(1, dim, 1)) for _ in range(n_clusters)]) #scale
+        self.omegas = nn.ParameterList([nn.Parameter(torch.zeros(1, dim, 1)) for _ in range(n_clusters)]) #shift
+        #output modulations
+        self.alphas = nn.ParameterList([nn.Parameter(torch.ones(1, dim, 1)) for _ in range(n_clusters)])  #scale
+        self.betas = nn.ParameterList([nn.Parameter(torch.zeros(1, dim, 1)) for _ in range(n_clusters)])  #shift
+
+    def get_alpha_beta(self, cluster):
+        alpha = torch.cat([self.alphas[int(k)] for k in cluster])
+        beta  = torch.cat([self.betas[int(k)] for k in cluster])
+        eta = torch.cat([self.etas[int(k)] for k in cluster])
+        nu = torch.cat([self.nus[int(k)] for k in cluster])
+        gamma = torch.cat([self.gammas[int(k)] for k in cluster])
+        omega = torch.cat([self.omegas[int(k)] for k in cluster])
+        return alpha, beta, eta, nu, gamma, omega
+
+    def norm(self, x, cluster):
+        self.mu, self.std = get_normal_stats(x)
+        alpha, beta, eta, nu, gamma, omega = self.get_alpha_beta(cluster)
+        self.offset = self.nu*self.mu
+        self.scale = 1 + self.eta*( 1/(self.std+self.eps) - 1)
+        x = (x-self.offset) * self.scale # (B, dim, lags)
+        x = x * self.gamma + self.omega
+        return x
+    def denorm(self, y, cluster):
+        alpha, beta, eta, nu, gamma, omega = self.get_alpha_beta(cluster)
+        y = (y - omega) / gamma 
+        y = y / self.scale + self.offset
+        y = y * self.alpha + self.beta
+        return y
+    def forward(self, x, c=None): #(B, dim, lags)
+        assert c is not None
+        x  = self.norm(x, c[:, 0, 0]) #(B, dim, lags)
+        pred = self.model(x, c) #(B, dim, horizon)
+        output = self.denorm(pred, c[:, 0, 0]) #(B, dim, horizon)
+        return output
+
+
 ######
 
 def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=False, constants=True, **kwargs):
@@ -508,6 +559,8 @@ def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=Fa
             model = mIN(model, dim, **kwargs)
         elif norm_name == "cmIN":
             model = cmIN(model, dim, **kwargs)
+        elif norm_name == "cflexrevin":
+            model = cflexRevIN(model, dim, **kwargs)
         else:
             ValueError(f"Normalization not recognized : {norm_name}")
     elif ("sk" not in model_name):

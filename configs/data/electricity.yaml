@@ -8,9 +8,9 @@ clustering:
   n_clusters: 2
 
 splits:
-  indiv_split: 0.7 
-  date_splits: 0.6;0.2;0.3
-  by_idx: individuals
+  indiv_split: 0.8
+  date_splits: 0.6;0.2;0.2
+  idx_mode: indiv
   context_by_individuals: True
   reshuffle: True
   remove_train_cte: True

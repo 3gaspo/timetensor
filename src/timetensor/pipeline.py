@@ -338,8 +338,8 @@ def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complet
 
 
 def launch_example(data_path, model, lags, horizon, device, save_dir, save_name):
-    #TODO gerer ce cas
-    if model.name not in ["crevin", "cmIN"]:
+    """runs model on example"""
+    if model.norm_name not in ["crevin", "cmIN", "cflexrevin"]:#TODO gerer ce cas
         ex_dir = data_path + "examples/" + f"{lags}_{horizon}/"
         if not os.path.exists(ex_dir):
             set_random_data(data_path, lags, horizon, name="rand")
