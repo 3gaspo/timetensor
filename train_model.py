@@ -86,7 +86,7 @@ def run(cfg):
     
     #training
     logger.info("--Training--")
-    learner = launch_training(model, norm_name, criterion, lr, batch_size, epochs, loaders_dict, eval_losses, device, save_dir, save_name, eval_freq, print_freq, logger, retrain)
+    learner = launch_training(model, norm_name, criterion, lr, epochs, loaders_dict, eval_losses, device, save_dir, save_name, eval_freq, print_freq, logger, retrain)
     logger.info("--Eval--")
     launch_eval(learner, loaders_dict, eval_losses, output_dir, save_name, complete_evaluation)
     launch_example(data_path, model, lags, horizon, device, save_dir, save_name)

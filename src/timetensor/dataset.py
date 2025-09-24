@@ -676,9 +676,9 @@ def get_sizes(loaders_dict, str_info=False):
         shapes = {key: loaders_dict[key].dataset.shape for key in loaders_dict}
         shape_str = "Splits shapes:\n" + "\n".join(f"{k}\t{v}" for k, v in shapes.items())        
         if c is not None:
-            batch_str = f"Batches: {len(loaders_dict["train"])} * (X={list(X.shape)}, c={list(c.shape)}, y={list(y.shape)})"
+            batch_str = f"Batches:\n X={list(X.shape)}\n c={list(c.shape)}\n y={list(y.shape)}"
         else:
-            batch_str = f"Batches: {len(loaders_dict["train"])} * (X={list(X.shape)},  y={list(y.shape)})"
+            batch_str = f"Batches:\n X={list(X.shape)}\n y={list(y.shape)}"
 
         return shape, shape_str, batch_str
 

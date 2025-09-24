@@ -1,0 +1,23 @@
+dataset: saturation
+path: ../datasets/saturation/
+context_cols:
+normalize: False
+
+clustering:
+  clusters:
+  n_clusters:
+
+splits:
+  indiv_split:
+  date_splits: 0.6;0.2;0.2
+  idx_mode: date
+  context_by_individuals: True
+  reshuffle: True
+  remove_train_cte: True
+  remove_eval_cte: True
+  drop_users:
+
+subsets:
+  mode: dates
+  sizes:
+  cluster:

@@ -87,9 +87,10 @@ def plot_stats(data, path="", name="stats.pdf", per_user=True, lookback=336, sam
         else:
             means = df.rolling(window=lookback).mean()[lookback:].stack()
             stds = df.rolling(window=lookback).std()[lookback:].stack()
-            sampled_idx = np.random.choice(len(means), size=samples, replace=False)
-            means = means.iloc[sampled_idx]
-            stds = stds.iloc[sampled_idx]
+            if samples < len(means):
+                sampled_idx = np.random.choice(len(means), size=samples, replace=False)
+                means = means.iloc[sampled_idx]
+                stds = stds.iloc[sampled_idx]
             if remove_cte:
                 keep_idx = np.where(stds>0)[0]
                 means, stds = means.iloc[keep_idx], stds.iloc[keep_idx]
@@ -173,9 +174,10 @@ def plot_means(data, path="", name="stats.pdf", per_user=True, lookback=336, sam
         else:
             means = df.rolling(window=lookback).mean()[lookback:].stack()#.sample(samples)
             stds = df.rolling(window=lookback).std()[lookback:].stack()#.sample(samples)
-            sampled_idx = np.random.choice(len(means), size=samples, replace=False)
-            means = means.iloc[sampled_idx]
-            stds = stds.iloc[sampled_idx]
+            if samples<len(means):
+                sampled_idx = np.random.choice(len(means), size=samples, replace=False)
+                means = means.iloc[sampled_idx]
+                stds = stds.iloc[sampled_idx]
             if remove_cte:
                 keep_idx = np.where(stds>0)[0]
                 means = means.iloc[keep_idx]
@@ -220,10 +222,11 @@ def plot_losses(train_losses, valid_losses_dict=None, path="", name="losses.pdf"
         for key, values in valid_losses_dict.items():
             T = [1]
             k = 1
-            while len(T) < len(values)-1:
-                T.append(eval_freq * k)
-                k+=1
-            T.append(len(train_losses))
+            if len(values)>1:
+                while len(T) < len(values)-1:
+                    T.append(eval_freq * k)
+                    k+=1
+                T.append(len(train_losses))
             plt.plot(T, values, label=key)
         plt.legend()
     else:

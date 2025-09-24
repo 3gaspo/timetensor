@@ -29,12 +29,19 @@ def run(cfg):
     split_kwargs, subset_kwargs = cfg.data.splits, cfg.data.subsets
     clusters, n_clusters = cfg.data.clustering.clusters, cfg.data.clustering.n_clusters
 
-    for suffix in ["plots/", "examples/", "fourier_clusters/", "gamma_clusters/"]:
+    #dirs
+    for suffix in ["plots/", "examples/"]:
         if not os.path.exists(data_path+suffix):
             os.makedirs(data_path+suffix)
-    for suffix in ["fourier_clusters/", "gamma_clusters/", "gammas/", "stats/"]:
+    for suffix in ["gammas/", "stats/"]:
         if not os.path.exists(data_path+"plots/" + suffix):
             os.makedirs(data_path+"plots/" + suffix)
+    if clusters is not None:
+        for suffix in ["fourier_clusters/", "gamma_clusters/"]:
+            if not os.path.exists(data_path+suffix):
+                os.makedirs(data_path+suffix)
+            if not os.path.exists(data_path+"plots/" + suffix):
+                os.makedirs(data_path+"plots/" + suffix)
 
     rebuild = cfg.load.rebuild
     new_example = cfg.load.example
@@ -51,6 +58,9 @@ def run(cfg):
         if "synthetic" in dataset_name:
             from src.timetensor.synthetic import build_dataset
             build_dataset(data_path, n1=cfg.data.n1, n2=cfg.data.n2, r1=cfg.data.r1, r2=cfg.data.r2, seed=seed)
+        if "saturation" in dataset_name:
+            from src.timetensor.saturation import build_dataset
+            build_dataset(data_path, seed=seed)
         else:
             from src.timetensor.dataset import build_dataset
             build_dataset(data_path, dataset_name, context_cols, drop_users=split_kwargs.drop_users)
@@ -68,6 +78,7 @@ def run(cfg):
 
     #constant windows
     df, _, _ = fetch_csv(data_path, dataset_name, context_cols, split_kwargs["drop_users"])
+    dates, individuals = df.shape
     _, counts = identify_cte(df, lags)
     if len(counts)>0:
         logger.info("Found constant windows!")
@@ -76,43 +87,44 @@ def run(cfg):
 
             
     #splits
-    loaders_dict, stats_dict = fetch_training_data(data_path, split_kwargs, subset_kwargs, cfg.training.bs, lags, horizon, clusters=clusters, seed=seed)
+    loaders_dict, stats_dict, nodes_data_dict = fetch_training_data(data_path, split_kwargs, subset_kwargs, cfg.training.bs, lags, horizon, clusters=clusters, seed=seed)
     _, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
     if verbose:
         logger.info("Fetched dataloaders")
         logger.info(shape_str)
         logger.info(batch_str)
-    for key in ["train", "test1", "test2"]:
+    for key in stats_dict:
         stats_str = "\n".join(f"{k}\t{v:.4f}" for k, v in stats_dict[key].items())
         logger.info(f"{key} stats:\n{stats_str}")
-    if cfg.data.normalize:
-        apply_stats(loaders_dict, stats_dict)
-        df = (df-stats_dict["train"]["mean"])/(stats_dict["train"]["std"]+1e-8)
+
 
     #plots
-    if replot: 
+    if replot:
         main_plot_dir = data_path + "plots/"
         remove_cte, logs = split_kwargs.remove_train_cte, cfg.load.logs
         df_dict = {key: loader.dataset.get_df() for key, loader in loaders_dict.items()}
+        samples = 1000
 
         #stats
         plot_dir = main_plot_dir + "stats/"
-        plot_stats(df, plot_dir, "user_stats.pdf", per_user=True, lookback=lags, title=f"{dataset_name} user statistics", remove_cte=remove_cte, log=logs)
-        plot_stats(df, plot_dir, "input_stats.pdf", per_user=False, lookback=lags, samples=1000, title=f"{dataset_name} input statistics", remove_cte=remove_cte, log=logs)
-        plot_stats(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, "temporal_stats.pdf", per_user=True, lookback=lags, title=f"{dataset_name} temporal splits statistics", remove_cte=remove_cte, log=logs)
+        if individuals>3:
+            plot_stats(df, plot_dir, "user_stats.pdf", per_user=True, lookback=lags, title=f"{dataset_name} user statistics", remove_cte=remove_cte, log=logs)
+        plot_stats(df, plot_dir, "input_stats.pdf", per_user=False, samples=samples, lookback=lags, title=f"{dataset_name} input statistics", remove_cte=remove_cte, log=logs)
         if "test2" in df_dict:
             plot_stats(filter_dict(df_dict, keys=["test1", "test2"]), plot_dir, "spatial_stats.pdf", per_user=True, lookback=lags, title=f"{dataset_name} spatial splits statistics", remove_cte=remove_cte, log=logs)
-        plot_means(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, "input_temporal_means.pdf", per_user=False, lookback=lags, title=f"{dataset_name} input means", log=logs)
+            plot_stats(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, "temporal_stats.pdf", per_user=True, lookback=lags, title=f"{dataset_name} temporal splits statistics", remove_cte=remove_cte, log=logs)
+        plot_means(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, "input_temporal_means.pdf", per_user=False, samples=samples, lookback=lags, title=f"{dataset_name} input means", log=logs)
 
         #gamma
         plot_dir = main_plot_dir + "gammas/"
-        plot_gamma(df, plot_dir, "gammas.pdf", per_user=True, lookback=lags, horizon=horizon, log=False)
-        plot_gamma(df, plot_dir, "input_gammas.pdf", per_user=False, lookback=lags, horizon=horizon, samples=1000, log=False)
-        plot_gamma(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, name="temporal_gammas.pdf", per_user=True,  lookback=lags, title=f"{dataset_name} temporal splits statistics", remove_cte=remove_cte, log=False)
+        if individuals>3:
+            plot_gamma(df, plot_dir, "gammas.pdf", per_user=True, lookback=lags, horizon=horizon, log=False)
+        plot_gamma(df, plot_dir, "input_gammas.pdf", per_user=False, samples=samples, lookback=lags, horizon=horizon, log=False)
         if "test2" in df_dict:
             plot_gamma(filter_dict(df_dict, keys=["test1", "test2"]), plot_dir, name="spatial_gammas.pdf", per_user=True,  lookback=lags, title=f"{dataset_name} spatial splits statistics", remove_cte=remove_cte, log=False)
+            plot_gamma(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, name="temporal_gammas.pdf", per_user=True,  lookback=lags, title=f"{dataset_name} temporal splits statistics", remove_cte=remove_cte, log=False)
 
-    if recluster:
+    if recluster and individuals>3:
         #fourier clustering
         plot_dir = main_plot_dir + "fourier_clusters/"
         logger.info("==Fourier clustering==")

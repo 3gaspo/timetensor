@@ -234,10 +234,11 @@ def plot_gamma(data, path="", name="stats.pdf", per_user=True, lookback=336, hor
             alpha_means = alphas.stack()
             beta_means = betas.stack()
             stds = df.rolling(window=lookback).std()[lookback:].stack()
-            sampled_idx = np.random.choice(len(alpha_means), size=samples, replace=False)
-            alpha_means = alpha_means.iloc[sampled_idx]
-            beta_means = beta_means.iloc[sampled_idx]
-            stds = stds.iloc[sampled_idx]
+            if samples < len(alpha_means):
+                sampled_idx = np.random.choice(len(alpha_means), size=samples, replace=False)
+                alpha_means = alpha_means.iloc[sampled_idx]
+                beta_means = beta_means.iloc[sampled_idx]
+                stds = stds.iloc[sampled_idx]
             if remove_cte:
                 keep_idx = np.where(stds>0)[0]
                 alpha_means, beta_means = alpha_means.iloc[keep_idx], beta_means.iloc[keep_idx]
