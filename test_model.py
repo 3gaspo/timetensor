@@ -6,7 +6,7 @@ from time import perf_counter
 
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_stats
 from src.timetensor.models import load_model
-from src.timetensor.pipeline import Learner, get_losses
+from src.timetensor.pipeline import Learner, get_losses, launch_eval
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -47,21 +47,20 @@ def run(cfg):
     criterion_name = "NMSE"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = load_model(model_name, shape, norm_name, init_path, constants=False, **kwargs).to(device)
+    
+    criterion, eval_losses = get_losses("NMSE")
+    learner = Learner(model, criterion, 1, eval_losses, device=device)
     logger.info("Fetched learner")
 
     #test
-    x = loaders_dict["valid1"].dataset.values[205, :, :lags].unsqueeze(0).to(device)
-    norm = model.InstanceNorm(x)
-    pred = model(x)
-    print(norm)
-    print(pred)
-
-    model2 = load_model(model_name, shape, None, init_path, constants=False, **kwargs).to(device)
-    norm = model.InstanceNorm(x)
-    pred = model(x)
-    print(norm)
-    print(pred)
-
+    logger.info(f"{loaders_dict["test1"].dataset.shape}")
+    t1 = perf_counter()
+    logger.info("launching eval")
+    test_losses1, test_losses2 = launch_eval(learner, loaders_dict, eval_losses, None, None, False, save=False)
+    t2 = perf_counter()
+    logger.info(f"Done in {(t2-t1)/60:.2f} min")
+    logger.info(f"{test_losses1["NMSE"].shape}")
+    logger.info(f"{np.where(np.isnan(test_losses1["NMSE"]))}")
     logger.info('End of script\n')
 
 if __name__ == "__main__":

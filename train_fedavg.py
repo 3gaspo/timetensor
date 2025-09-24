@@ -4,15 +4,17 @@ import os
 import torch
 import numpy as np
 
-from src.timetensor.dataset import fetch_training_data, get_sizes, set_random_data, fetch_example_data, fetch_stats
+from src.timetensor.dataset import fetch_training_data, get_sizes
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import get_losses
-from src.timetensor.visu import plot_pred, plot_named_example
-from src.timetensor.utils import save_results, get_dirs
+from src.timetensor.utils import get_dirs
 
 from src.timetensor.dataset import get_train_loaders
-from src.timetensor.federated import get_client_splits, eval_nodes, get_node_metrics, launch_training
+from src.timetensor.federated import get_client_splits
 from src.timetensor.fedavg import LocalFedAvg, GlobalFedAvg, FedAvgScheme
+
+from src.timetensor.federated import launch_training, launch_eval
+from src.timetensor.pipeline import launch_example
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -29,8 +31,9 @@ def run(cfg):
     lags, horizon = int(cfg.task.lags), int(cfg.task.horizon)
     batch_size, lr, epochs, criterion_name = cfg.training.bs, cfg.training.lr, cfg.training.epochs, cfg.training.loss
     
-    retrain, init_path = cfg.training.retrain, cfg.training.init
-    eval_freq, print_freq, complete_evaluation = cfg.training.eval_freq, cfg.training.print_freq, cfg.misc.complete_evaluation
+    # retrain, init_path = cfg.training.retrain, cfg.training.init
+    # eval_freq, print_freq, complete_evaluation = cfg.training.eval_freq, cfg.training.print_freq, cfg.misc.complete_evaluation
+    complete_evaluation = cfg.misc.complete_evaluation
     model_name, normalization, norm_kwargs, model_kwargs = cfg.model.name, cfg.normalization.name, cfg.normalization.configs, cfg.model.configs
     kwargs = {**(norm_kwargs or {}), **(model_kwargs or {})}
 
@@ -44,13 +47,21 @@ def run(cfg):
 
     benchmark, output_dir, save_name = cfg.misc.benchmark, cfg.misc.output_dir, cfg.misc.save_name, 
     save_name, save_dir = get_dirs(output_dir, save_name, model_name, normalization, criterion_name, subsets["sizes"])
-
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     criterion, eval_losses = get_losses(criterion_name, mean=None, std=None, complete_evaluation=complete_evaluation)
+
+    E, K, B, fedmin = cfg.training.epochs, cfg.task.rounds, cfg.task.sampled_clients, cfg.task.fedmin
+    if fedmin:
+        from src.timetensor.fedmin import LocalFedmIN
 
     if verbose:
         logger.info(f"Fetched main configs, save directory : {save_dir}")
         logger.info(f"Model {model_name}, normalization {normalization}, criterion {criterion_name}, kwargs {kwargs}")
+        if fedmin:
+            logger.info("Training FedmIN (local modulations)")
+        if not fedmin:
+            logger.info("Training FedAvg")
 
     if seed is not None:
         torch.manual_seed(seed)
@@ -88,65 +99,38 @@ def run(cfg):
     global_model = load_model(model_name, shape, normalization, **kwargs)
 
     #training
-    E, K, B = cfg.training.epochs, cfg.task.rounds, cfg.task.sampled_clients
     def client_builder(client, learner):
-        return LocalFedAvg(client, learner)
+        if fedmin:
+            return LocalFedmIN(client, learner, device)
+        else:
+            return LocalFedAvg(client, learner)
     def server_builder(global_model):
         return GlobalFedAvg(global_model)
     def scheme_builder(server, nodes, shadow_server=None, shadow_nodes=None):
-        return FedAvgScheme(E, K, B, server, nodes, shadow_server, shadow_nodes, plus=True, server_side="partial")
+        return FedAvgScheme(E, K, B, server, nodes, shadow_server, shadow_nodes, plus=True, server_side="full")
   
     server, shadow_server, nodes, shadow_nodes, size_weights = launch_training(client_builder, server_builder, scheme_builder, loaders_dicts, global_model,
-        criterion, lr, eval_losses, device, logger,
-        save_dir, retrain=True, verbose=1)
+        E, K, criterion, lr, eval_losses, device, logger,
+        save_dir, save_name, retrain=True, verbose=1)
 
     #example
     global_model.load_state_dict(server.update)
-    ex_dir = data_path + "examples/" + f"{lags}_{horizon}/"
-    if not os.path.exists(ex_dir):
-        set_random_data(data_path, lags, horizon, name="rand")
-        plot_named_example(ex_dir, f"rand")
-    dico = fetch_example_data(ex_dir)
-    for data_name, data_tuple in dico.items():
-        x, c, y = data_tuple[0].unsqueeze(0).to(device), data_tuple[1], data_tuple[2].unsqueeze(0).to(device)
-        if c is not None:
-            c = c.unsqueeze(0).to(device)
-        pred = global_model(x,c)
-        plot_pred(x[0,0].cpu().detach().numpy(), y[0,0].cpu().detach().numpy(), pred[0,0].cpu().detach().numpy(), save_dir + "examples/", f"{data_name}_predictions.pdf", f"Example {data_name} prediction for {save_name}")        
-    logger.info('Saved plots')
+    global_model.to(device)
+    launch_example(data_path, global_model, lags, horizon, device, save_dir, save_name, logger)
 
     #eval
-    if verbose:
-        logger.info("Computing test metrics")
-    tune_losses_dict = eval_nodes(nodes)
-    global_losses_dict = shadow_server.eval()
-    tune_avg_loss_dict, tune_mean_losses_dict, tune_flop_losses_dict = get_node_metrics(tune_losses_dict, size_weights)
+    launch_eval(global_model, nodes, shadow_server, eval_losses, size_weights, output_dir, save_name, logger)
 
-    for k in range(M):
-        flat_losses_dict = eval_nodes(nodes, global_model.state_dict())
-        flat_avg_loss_dict, flat_mean_losses_dict, flat_flop_losses_dict = get_node_metrics(flat_losses_dict, size_weights)
-
-    if benchmark:
-        test_dir = output_dir + "errors/"
-    else:
-        test_dir = save_dir + "errors/"
-    for loss_name in eval_losses:
-        save_results(global_losses_dict[loss_name], test_dir, f"{loss_name}_mean_results.json", save_name, f"Global {loss_name}")
-        save_results(tune_avg_loss_dict[loss_name], test_dir, f"{loss_name}_mean_results.json", save_name, f"Tuned Uniform {loss_name}")
-        save_results(tune_mean_losses_dict[loss_name], test_dir, f"{loss_name}_mean_results.json", save_name, f"Tuned Weighted {loss_name}")
-        save_results(tune_flop_losses_dict[loss_name], test_dir, f"{loss_name}_mean_results.json", save_name, f"Tuned Flop10 {loss_name}")
-        save_results(flat_avg_loss_dict[loss_name], test_dir, f"{loss_name}_mean_results.json", save_name, f"Flat Uniform {loss_name}")
-        save_results(flat_mean_losses_dict[loss_name], test_dir, f"{loss_name}_mean_results.json", save_name, f"Flat Weighted {loss_name}")
-        save_results(flat_flop_losses_dict[loss_name], test_dir, f"{loss_name}_mean_results.json", save_name, f"Flat Flop10 {loss_name}")
-   
+    #betas
     if verbose and ("revin" in normalization or "mIN" in normalization):
-        global_params = {"beta": global_model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": global_model.alpha.data.detach().cpu().numpy()[0][0][0]}
-        logger.info(f"Final global modulations: {global_params}")
+        params = {"beta": global_model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": global_model.alpha.data.detach().cpu().numpy()[0][0][0]}
+        logger.info(f"Final global modulations: {params}")
         if M<=10:
             for k in range(M):
-                model = nodes[k].get_latest_weights()
-                global_params = {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
-                logger.info(f"Final global modulations: {global_params}")
+                #model = nodes[k].get_client_weights()
+                model = nodes[k].client.model
+                params = {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
+                logger.info(f"Final global modulations node{k}: {params}")
 
     logger.info('End of script\n')
 
