@@ -5,5 +5,3 @@ __pycache__/
 *.pt
 *.egg-info
 hydra_dir.txt
-saved/
-scripts/

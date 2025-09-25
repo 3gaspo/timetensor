@@ -1,0 +1,961 @@
+[2025-09-24 17:46:08,541][__main__][INFO] - =====Running train script=====
+[2025-09-24 17:46:08,623][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_1/instance_NMSE/
+[2025-09-24 17:46:08,625][__main__][INFO] - Model PatchTST, norma instance, criterion NMSE, kwargs {'last': False, 'latent': False}
+[2025-09-24 17:46:10,111][__main__][INFO] - Fetched dataloaders
+[2025-09-24 17:46:10,112][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 17:46:10,112][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 17:46:10,122][__main__][INFO] - --Training--
+[2025-09-24 17:46:13,464][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 17:46:13,469][__main__][INFO] - Using device: cuda
+[2025-09-24 17:46:13,469][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 17:48:18,312][__main__][INFO] - Step 1 | valid1 MSE : 102.3896 | valid1 NMSE : 1.3783
+[2025-09-24 17:50:25,373][__main__][INFO] - Step 100 | valid1 MSE : 30.2569 | valid1 NMSE : 0.5001
+[2025-09-24 17:52:32,586][__main__][INFO] - Step 200 | valid1 MSE : 21.3406 | valid1 NMSE : 0.3692
+[2025-09-24 17:54:39,880][__main__][INFO] - Step 300 | valid1 MSE : 18.8581 | valid1 NMSE : 0.3277
+[2025-09-24 17:56:47,322][__main__][INFO] - Step 400 | valid1 MSE : 17.8622 | valid1 NMSE : 0.3060
+[2025-09-24 17:58:54,656][__main__][INFO] - Step 500 | valid1 MSE : 17.1982 | valid1 NMSE : 0.2912
+[2025-09-24 18:01:01,910][__main__][INFO] - Step 600 | valid1 MSE : 16.4560 | valid1 NMSE : 0.2790
+[2025-09-24 18:03:09,155][__main__][INFO] - Step 700 | valid1 MSE : 15.9696 | valid1 NMSE : 0.2711
+[2025-09-24 18:05:16,388][__main__][INFO] - Step 800 | valid1 MSE : 15.5510 | valid1 NMSE : 0.2650
+[2025-09-24 18:07:23,793][__main__][INFO] - Step 900 | valid1 MSE : 15.5015 | valid1 NMSE : 0.2609
+[2025-09-24 18:09:30,980][__main__][INFO] - Step 1000 | valid1 MSE : 15.1494 | valid1 NMSE : 0.2560
+[2025-09-24 18:11:38,166][__main__][INFO] - Step 1100 | valid1 MSE : 14.9517 | valid1 NMSE : 0.2535
+[2025-09-24 18:13:45,122][__main__][INFO] - Step 1200 | valid1 MSE : 14.8281 | valid1 NMSE : 0.2513
+[2025-09-24 18:13:45,123][__main__][INFO] - Training done in 27.528 min
+[2025-09-24 18:13:45,123][__main__][INFO] - Average time per step: 1.376 s
+[2025-09-24 18:13:46,690][__main__][INFO] - End of training
+[2025-09-24 18:13:46,690][__main__][INFO] - --Eval--
+[2025-09-24 18:15:05,026][__main__][INFO] - End of script
+
+[2025-09-24 18:15:19,920][__main__][INFO] - =====Running train script=====
+[2025-09-24 18:15:19,978][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_1/revin_NMSE/
+[2025-09-24 18:15:19,978][__main__][INFO] - Model PatchTST, norma revin, criterion NMSE, kwargs {'latent': False}
+[2025-09-24 18:15:21,520][__main__][INFO] - Fetched dataloaders
+[2025-09-24 18:15:21,520][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 18:15:21,520][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 18:15:21,529][__main__][INFO] - --Training--
+[2025-09-24 18:15:24,685][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 18:15:24,685][__main__][INFO] - Using device: cuda
+[2025-09-24 18:15:24,685][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 18:17:29,555][__main__][INFO] - Step 1 | valid1 MSE : 102.3896 | valid1 NMSE : 1.3783
+[2025-09-24 18:19:36,954][__main__][INFO] - Step 100 | valid1 MSE : 30.2647 | valid1 NMSE : 0.5001
+[2025-09-24 18:21:44,479][__main__][INFO] - Step 200 | valid1 MSE : 21.3463 | valid1 NMSE : 0.3692
+[2025-09-24 18:23:52,317][__main__][INFO] - Step 300 | valid1 MSE : 18.8610 | valid1 NMSE : 0.3277
+[2025-09-24 18:25:59,909][__main__][INFO] - Step 400 | valid1 MSE : 17.8636 | valid1 NMSE : 0.3059
+[2025-09-24 18:28:07,675][__main__][INFO] - Step 500 | valid1 MSE : 17.1975 | valid1 NMSE : 0.2910
+[2025-09-24 18:30:15,081][__main__][INFO] - Step 600 | valid1 MSE : 16.4535 | valid1 NMSE : 0.2789
+[2025-09-24 18:32:22,493][__main__][INFO] - Step 700 | valid1 MSE : 15.9623 | valid1 NMSE : 0.2709
+[2025-09-24 18:34:29,826][__main__][INFO] - Step 800 | valid1 MSE : 15.5410 | valid1 NMSE : 0.2648
+[2025-09-24 18:36:37,451][__main__][INFO] - Step 900 | valid1 MSE : 15.4881 | valid1 NMSE : 0.2607
+[2025-09-24 18:38:45,032][__main__][INFO] - Step 1000 | valid1 MSE : 15.1363 | valid1 NMSE : 0.2558
+[2025-09-24 18:40:52,416][__main__][INFO] - Step 1100 | valid1 MSE : 14.9371 | valid1 NMSE : 0.2533
+[2025-09-24 18:42:59,729][__main__][INFO] - Step 1200 | valid1 MSE : 14.8122 | valid1 NMSE : 0.2510
+[2025-09-24 18:42:59,730][__main__][INFO] - Training done in 27.584 min
+[2025-09-24 18:42:59,730][__main__][INFO] - Average time per step: 1.379 s
+[2025-09-24 18:43:01,355][__main__][INFO] - End of training
+[2025-09-24 18:43:01,355][__main__][INFO] - --Eval--
+[2025-09-24 18:44:19,474][__main__][INFO] - Final modulations: {'beta': np.float32(-0.004081854), 'alpha': np.float32(1.0058057)}
+[2025-09-24 18:44:19,475][__main__][INFO] - End of script
+
+[2025-09-24 18:44:33,251][__main__][INFO] - =====Running train script=====
+[2025-09-24 18:44:33,302][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_1/flexrevin_NMSE/
+[2025-09-24 18:44:33,302][__main__][INFO] - Model PatchTST, norma flexrevin, criterion NMSE, kwargs {'latent': False, 'start': True}
+[2025-09-24 18:44:34,757][__main__][INFO] - Fetched dataloaders
+[2025-09-24 18:44:34,757][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 18:44:34,757][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 18:44:34,766][__main__][INFO] - --Training--
+[2025-09-24 18:44:37,695][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 18:44:37,696][__main__][INFO] - Using device: cuda
+[2025-09-24 18:44:37,696][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 18:46:42,146][__main__][INFO] - Step 1 | valid1 MSE : 102.3893 | valid1 NMSE : 1.3783
+[2025-09-24 18:48:49,369][__main__][INFO] - Step 100 | valid1 MSE : 30.3052 | valid1 NMSE : 0.5008
+[2025-09-24 18:50:56,703][__main__][INFO] - Step 200 | valid1 MSE : 21.3589 | valid1 NMSE : 0.3695
+[2025-09-24 18:53:04,064][__main__][INFO] - Step 300 | valid1 MSE : 18.8626 | valid1 NMSE : 0.3280
+[2025-09-24 18:55:11,619][__main__][INFO] - Step 400 | valid1 MSE : 17.8656 | valid1 NMSE : 0.3062
+[2025-09-24 18:57:19,191][__main__][INFO] - Step 500 | valid1 MSE : 17.2076 | valid1 NMSE : 0.2913
+[2025-09-24 18:59:26,490][__main__][INFO] - Step 600 | valid1 MSE : 16.4736 | valid1 NMSE : 0.2792
+[2025-09-24 19:01:34,298][__main__][INFO] - Step 700 | valid1 MSE : 15.9822 | valid1 NMSE : 0.2713
+[2025-09-24 19:03:41,805][__main__][INFO] - Step 800 | valid1 MSE : 15.5597 | valid1 NMSE : 0.2651
+[2025-09-24 19:05:49,092][__main__][INFO] - Step 900 | valid1 MSE : 15.5125 | valid1 NMSE : 0.2610
+[2025-09-24 19:07:56,314][__main__][INFO] - Step 1000 | valid1 MSE : 15.1611 | valid1 NMSE : 0.2561
+[2025-09-24 19:10:03,281][__main__][INFO] - Step 1100 | valid1 MSE : 14.9526 | valid1 NMSE : 0.2536
+[2025-09-24 19:12:10,670][__main__][INFO] - Step 1200 | valid1 MSE : 14.8213 | valid1 NMSE : 0.2513
+[2025-09-24 19:12:10,678][__main__][INFO] - Training done in 27.550 min
+[2025-09-24 19:12:10,678][__main__][INFO] - Average time per step: 1.377 s
+[2025-09-24 19:12:12,404][__main__][INFO] - End of training
+[2025-09-24 19:12:12,404][__main__][INFO] - --Eval--
+[2025-09-24 19:13:30,268][__main__][INFO] - Final modulations: {'beta': np.float32(0.005709326), 'alpha': np.float32(0.9972827)}
+[2025-09-24 19:13:30,268][__main__][INFO] - End of script
+
+[2025-09-24 19:13:43,787][__main__][INFO] - =====Running train script=====
+[2025-09-24 19:13:43,842][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_1/min_init/
+[2025-09-24 19:13:43,842][__main__][INFO] - Model PatchTST, norma mIN, criterion NMSE, kwargs {'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': False, 'inverse_gamma': False}
+[2025-09-24 19:13:45,330][__main__][INFO] - Fetched dataloaders
+[2025-09-24 19:13:45,330][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 19:13:45,330][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 19:13:45,339][__main__][INFO] - --Training--
+[2025-09-24 19:13:48,194][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 19:13:48,194][__main__][INFO] - Using device: cuda
+[2025-09-24 19:13:48,194][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 19:15:57,228][__main__][INFO] - Step 1 | valid1 MSE : 90.8854 | valid1 NMSE : 1.2478
+[2025-09-24 19:18:08,780][__main__][INFO] - Step 100 | valid1 MSE : 50.9635 | valid1 NMSE : 0.7702
+[2025-09-24 19:20:20,266][__main__][INFO] - Step 200 | valid1 MSE : 31.3314 | valid1 NMSE : 0.5201
+[2025-09-24 19:22:32,020][__main__][INFO] - Step 300 | valid1 MSE : 23.9014 | valid1 NMSE : 0.4121
+[2025-09-24 19:24:43,737][__main__][INFO] - Step 400 | valid1 MSE : 20.5243 | valid1 NMSE : 0.3549
+[2025-09-24 19:26:55,377][__main__][INFO] - Step 500 | valid1 MSE : 18.5109 | valid1 NMSE : 0.3155
+[2025-09-24 19:29:06,962][__main__][INFO] - Step 600 | valid1 MSE : 17.1244 | valid1 NMSE : 0.2883
+[2025-09-24 19:31:18,475][__main__][INFO] - Step 700 | valid1 MSE : 16.2946 | valid1 NMSE : 0.2712
+[2025-09-24 19:33:30,131][__main__][INFO] - Step 800 | valid1 MSE : 15.8647 | valid1 NMSE : 0.2651
+[2025-09-24 19:35:41,893][__main__][INFO] - Step 900 | valid1 MSE : 15.7381 | valid1 NMSE : 0.2617
+[2025-09-24 19:37:53,299][__main__][INFO] - Step 1000 | valid1 MSE : 15.5767 | valid1 NMSE : 0.2566
+[2025-09-24 19:40:05,691][__main__][INFO] - Step 1100 | valid1 MSE : 15.4794 | valid1 NMSE : 0.2585
+[2025-09-24 19:42:17,379][__main__][INFO] - Step 1200 | valid1 MSE : 15.3290 | valid1 NMSE : 0.2544
+[2025-09-24 19:42:17,379][__main__][INFO] - Training done in 28.486 min
+[2025-09-24 19:42:17,379][__main__][INFO] - Average time per step: 1.424 s
+[2025-09-24 19:42:18,423][__main__][INFO] - End of training
+[2025-09-24 19:42:18,423][__main__][INFO] - --Eval--
+[2025-09-24 19:43:39,056][__main__][INFO] - Final modulations: {'beta': np.float32(0.056841653), 'alpha': np.float32(0.32911754)}
+[2025-09-24 19:43:39,056][__main__][INFO] - End of script
+
+[2025-09-24 19:43:44,689][__main__][INFO] - =====Running train script=====
+[2025-09-24 19:43:44,747][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_1/min_revin/
+[2025-09-24 19:43:44,747][__main__][INFO] - Model PatchTST, norma mIN, criterion NMSE, kwargs {'latent': False, 'init_beta': False, 'fixed_beta': False, 'init_alpha': False, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-24 19:43:46,159][__main__][INFO] - Fetched dataloaders
+[2025-09-24 19:43:46,160][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 19:43:46,160][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 19:43:46,165][__main__][INFO] - --Training--
+[2025-09-24 19:43:47,514][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 19:43:47,514][__main__][INFO] - Using device: cuda
+[2025-09-24 19:43:47,514][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 19:45:52,985][__main__][INFO] - Step 1 | valid1 MSE : 102.3893 | valid1 NMSE : 1.3783
+[2025-09-24 19:48:01,492][__main__][INFO] - Step 100 | valid1 MSE : 30.2724 | valid1 NMSE : 0.5002
+[2025-09-24 19:50:10,111][__main__][INFO] - Step 200 | valid1 MSE : 21.3520 | valid1 NMSE : 0.3692
+[2025-09-24 19:52:18,648][__main__][INFO] - Step 300 | valid1 MSE : 18.8647 | valid1 NMSE : 0.3277
+[2025-09-24 19:54:27,235][__main__][INFO] - Step 400 | valid1 MSE : 17.8658 | valid1 NMSE : 0.3058
+[2025-09-24 19:56:35,907][__main__][INFO] - Step 500 | valid1 MSE : 17.1975 | valid1 NMSE : 0.2910
+[2025-09-24 19:58:44,275][__main__][INFO] - Step 600 | valid1 MSE : 16.4521 | valid1 NMSE : 0.2788
+[2025-09-24 20:00:52,685][__main__][INFO] - Step 700 | valid1 MSE : 15.9559 | valid1 NMSE : 0.2708
+[2025-09-24 20:03:00,999][__main__][INFO] - Step 800 | valid1 MSE : 15.5323 | valid1 NMSE : 0.2646
+[2025-09-24 20:05:09,490][__main__][INFO] - Step 900 | valid1 MSE : 15.4764 | valid1 NMSE : 0.2605
+[2025-09-24 20:07:17,948][__main__][INFO] - Step 1000 | valid1 MSE : 15.1246 | valid1 NMSE : 0.2556
+[2025-09-24 20:09:26,472][__main__][INFO] - Step 1100 | valid1 MSE : 14.9252 | valid1 NMSE : 0.2531
+[2025-09-24 20:11:34,951][__main__][INFO] - Step 1200 | valid1 MSE : 14.8001 | valid1 NMSE : 0.2509
+[2025-09-24 20:11:34,953][__main__][INFO] - Training done in 27.791 min
+[2025-09-24 20:11:34,953][__main__][INFO] - Average time per step: 1.390 s
+[2025-09-24 20:11:36,701][__main__][INFO] - End of training
+[2025-09-24 20:11:36,701][__main__][INFO] - --Eval--
+[2025-09-24 20:12:55,256][__main__][INFO] - Final modulations: {'beta': np.float32(0.0037454816), 'alpha': np.float32(0.9954621)}
+[2025-09-24 20:12:55,256][__main__][INFO] - End of script
+
+[2025-09-24 20:13:15,634][__main__][INFO] - =====Running train script=====
+[2025-09-24 20:13:15,677][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_2/instance_NMSE/
+[2025-09-24 20:13:15,677][__main__][INFO] - Model PatchTST, norma instance, criterion NMSE, kwargs {'last': False, 'latent': False}
+[2025-09-24 20:13:17,211][__main__][INFO] - Fetched dataloaders
+[2025-09-24 20:13:17,211][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 20:13:17,211][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 20:13:17,219][__main__][INFO] - --Training--
+[2025-09-24 20:13:20,357][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 20:13:20,358][__main__][INFO] - Using device: cuda
+[2025-09-24 20:13:20,358][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 20:15:23,299][__main__][INFO] - Step 1 | valid1 MSE : 89.5627 | valid1 NMSE : 1.2274
+[2025-09-24 20:17:29,103][__main__][INFO] - Step 100 | valid1 MSE : 28.3640 | valid1 NMSE : 0.4810
+[2025-09-24 20:19:34,705][__main__][INFO] - Step 200 | valid1 MSE : 21.3066 | valid1 NMSE : 0.3718
+[2025-09-24 20:21:40,397][__main__][INFO] - Step 300 | valid1 MSE : 19.3325 | valid1 NMSE : 0.3346
+[2025-09-24 20:23:45,880][__main__][INFO] - Step 400 | valid1 MSE : 18.0914 | valid1 NMSE : 0.3126
+[2025-09-24 20:25:51,608][__main__][INFO] - Step 500 | valid1 MSE : 17.5036 | valid1 NMSE : 0.2947
+[2025-09-24 20:27:57,565][__main__][INFO] - Step 600 | valid1 MSE : 16.6720 | valid1 NMSE : 0.2801
+[2025-09-24 20:30:03,097][__main__][INFO] - Step 700 | valid1 MSE : 16.0478 | valid1 NMSE : 0.2711
+[2025-09-24 20:32:08,661][__main__][INFO] - Step 800 | valid1 MSE : 15.4484 | valid1 NMSE : 0.2634
+[2025-09-24 20:34:14,065][__main__][INFO] - Step 900 | valid1 MSE : 15.3756 | valid1 NMSE : 0.2591
+[2025-09-24 20:36:19,832][__main__][INFO] - Step 1000 | valid1 MSE : 14.9764 | valid1 NMSE : 0.2538
+[2025-09-24 20:38:25,639][__main__][INFO] - Step 1100 | valid1 MSE : 14.7954 | valid1 NMSE : 0.2508
+[2025-09-24 20:40:31,038][__main__][INFO] - Step 1200 | valid1 MSE : 14.4640 | valid1 NMSE : 0.2484
+[2025-09-24 20:40:31,039][__main__][INFO] - Training done in 27.178 min
+[2025-09-24 20:40:31,039][__main__][INFO] - Average time per step: 1.359 s
+[2025-09-24 20:40:32,549][__main__][INFO] - End of training
+[2025-09-24 20:40:32,549][__main__][INFO] - --Eval--
+[2025-09-24 20:41:49,683][__main__][INFO] - End of script
+
+[2025-09-24 20:42:04,647][__main__][INFO] - =====Running train script=====
+[2025-09-24 20:42:04,691][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_2/revin_NMSE/
+[2025-09-24 20:42:04,691][__main__][INFO] - Model PatchTST, norma revin, criterion NMSE, kwargs {'latent': False}
+[2025-09-24 20:42:06,257][__main__][INFO] - Fetched dataloaders
+[2025-09-24 20:42:06,257][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 20:42:06,257][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 20:42:06,266][__main__][INFO] - --Training--
+[2025-09-24 20:42:09,663][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 20:42:09,663][__main__][INFO] - Using device: cuda
+[2025-09-24 20:42:09,664][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 20:44:13,160][__main__][INFO] - Step 1 | valid1 MSE : 89.5627 | valid1 NMSE : 1.2274
+[2025-09-24 20:46:19,081][__main__][INFO] - Step 100 | valid1 MSE : 28.3707 | valid1 NMSE : 0.4810
+[2025-09-24 20:48:25,287][__main__][INFO] - Step 200 | valid1 MSE : 21.3126 | valid1 NMSE : 0.3718
+[2025-09-24 20:50:31,369][__main__][INFO] - Step 300 | valid1 MSE : 19.3379 | valid1 NMSE : 0.3345
+[2025-09-24 20:52:37,749][__main__][INFO] - Step 400 | valid1 MSE : 18.0945 | valid1 NMSE : 0.3126
+[2025-09-24 20:54:43,791][__main__][INFO] - Step 500 | valid1 MSE : 17.5040 | valid1 NMSE : 0.2946
+[2025-09-24 20:56:50,672][__main__][INFO] - Step 600 | valid1 MSE : 16.6694 | valid1 NMSE : 0.2800
+[2025-09-24 20:58:56,434][__main__][INFO] - Step 700 | valid1 MSE : 16.0411 | valid1 NMSE : 0.2710
+[2025-09-24 21:01:02,143][__main__][INFO] - Step 800 | valid1 MSE : 15.4433 | valid1 NMSE : 0.2633
+[2025-09-24 21:03:07,921][__main__][INFO] - Step 900 | valid1 MSE : 15.3694 | valid1 NMSE : 0.2590
+[2025-09-24 21:05:13,473][__main__][INFO] - Step 1000 | valid1 MSE : 14.9707 | valid1 NMSE : 0.2537
+[2025-09-24 21:07:19,240][__main__][INFO] - Step 1100 | valid1 MSE : 14.7858 | valid1 NMSE : 0.2507
+[2025-09-24 21:09:24,705][__main__][INFO] - Step 1200 | valid1 MSE : 14.4573 | valid1 NMSE : 0.2483
+[2025-09-24 21:09:24,705][__main__][INFO] - Training done in 27.251 min
+[2025-09-24 21:09:24,705][__main__][INFO] - Average time per step: 1.363 s
+[2025-09-24 21:09:26,311][__main__][INFO] - End of training
+[2025-09-24 21:09:26,311][__main__][INFO] - --Eval--
+[2025-09-24 21:10:43,133][__main__][INFO] - Final modulations: {'beta': np.float32(-0.0037539653), 'alpha': np.float32(1.0070773)}
+[2025-09-24 21:10:43,133][__main__][INFO] - End of script
+
+[2025-09-24 21:10:55,064][__main__][INFO] - =====Running train script=====
+[2025-09-24 21:10:55,107][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_2/flexrevin_NMSE/
+[2025-09-24 21:10:55,107][__main__][INFO] - Model PatchTST, norma flexrevin, criterion NMSE, kwargs {'latent': False, 'start': True}
+[2025-09-24 21:10:56,605][__main__][INFO] - Fetched dataloaders
+[2025-09-24 21:10:56,605][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 21:10:56,605][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 21:10:56,612][__main__][INFO] - --Training--
+[2025-09-24 21:10:59,276][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 21:10:59,276][__main__][INFO] - Using device: cuda
+[2025-09-24 21:10:59,276][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 21:13:03,848][__main__][INFO] - Step 1 | valid1 MSE : 89.5623 | valid1 NMSE : 1.2274
+[2025-09-24 21:15:11,172][__main__][INFO] - Step 100 | valid1 MSE : 28.3977 | valid1 NMSE : 0.4815
+[2025-09-24 21:17:18,818][__main__][INFO] - Step 200 | valid1 MSE : 21.3202 | valid1 NMSE : 0.3721
+[2025-09-24 21:19:26,207][__main__][INFO] - Step 300 | valid1 MSE : 19.3440 | valid1 NMSE : 0.3348
+[2025-09-24 21:21:33,912][__main__][INFO] - Step 400 | valid1 MSE : 18.1107 | valid1 NMSE : 0.3131
+[2025-09-24 21:23:41,478][__main__][INFO] - Step 500 | valid1 MSE : 17.5492 | valid1 NMSE : 0.2952
+[2025-09-24 21:25:48,973][__main__][INFO] - Step 600 | valid1 MSE : 16.7247 | valid1 NMSE : 0.2808
+[2025-09-24 21:27:57,136][__main__][INFO] - Step 700 | valid1 MSE : 16.0962 | valid1 NMSE : 0.2718
+[2025-09-24 21:30:04,397][__main__][INFO] - Step 800 | valid1 MSE : 15.4969 | valid1 NMSE : 0.2642
+[2025-09-24 21:32:12,160][__main__][INFO] - Step 900 | valid1 MSE : 15.4358 | valid1 NMSE : 0.2600
+[2025-09-24 21:34:19,819][__main__][INFO] - Step 1000 | valid1 MSE : 15.0233 | valid1 NMSE : 0.2548
+[2025-09-24 21:36:27,472][__main__][INFO] - Step 1100 | valid1 MSE : 14.8365 | valid1 NMSE : 0.2516
+[2025-09-24 21:38:34,811][__main__][INFO] - Step 1200 | valid1 MSE : 14.4942 | valid1 NMSE : 0.2492
+[2025-09-24 21:38:34,811][__main__][INFO] - Training done in 27.592 min
+[2025-09-24 21:38:34,811][__main__][INFO] - Average time per step: 1.380 s
+[2025-09-24 21:38:36,053][__main__][INFO] - End of training
+[2025-09-24 21:38:36,053][__main__][INFO] - --Eval--
+[2025-09-24 21:39:53,807][__main__][INFO] - Final modulations: {'beta': np.float32(0.0056931814), 'alpha': np.float32(0.9960704)}
+[2025-09-24 21:39:53,807][__main__][INFO] - End of script
+
+[2025-09-24 21:40:01,308][__main__][INFO] - =====Running train script=====
+[2025-09-24 21:40:01,424][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_2/min_init/
+[2025-09-24 21:40:01,424][__main__][INFO] - Model PatchTST, norma mIN, criterion NMSE, kwargs {'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': False, 'inverse_gamma': False}
+[2025-09-24 21:40:02,811][__main__][INFO] - Fetched dataloaders
+[2025-09-24 21:40:02,812][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 21:40:02,812][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 21:40:02,819][__main__][INFO] - --Training--
+[2025-09-24 21:40:04,202][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 21:40:04,202][__main__][INFO] - Using device: cuda
+[2025-09-24 21:40:04,202][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 21:42:09,484][__main__][INFO] - Step 1 | valid1 MSE : 87.5739 | valid1 NMSE : 1.2075
+[2025-09-24 21:44:17,797][__main__][INFO] - Step 100 | valid1 MSE : 48.2231 | valid1 NMSE : 0.7406
+[2025-09-24 21:46:26,198][__main__][INFO] - Step 200 | valid1 MSE : 29.6022 | valid1 NMSE : 0.5001
+[2025-09-24 21:48:34,550][__main__][INFO] - Step 300 | valid1 MSE : 23.2277 | valid1 NMSE : 0.4016
+[2025-09-24 21:50:43,141][__main__][INFO] - Step 400 | valid1 MSE : 20.4024 | valid1 NMSE : 0.3521
+[2025-09-24 21:52:51,466][__main__][INFO] - Step 500 | valid1 MSE : 18.2303 | valid1 NMSE : 0.3071
+[2025-09-24 21:54:59,696][__main__][INFO] - Step 600 | valid1 MSE : 16.7739 | valid1 NMSE : 0.2783
+[2025-09-24 21:57:08,043][__main__][INFO] - Step 700 | valid1 MSE : 16.0437 | valid1 NMSE : 0.2673
+[2025-09-24 21:59:16,231][__main__][INFO] - Step 800 | valid1 MSE : 15.7456 | valid1 NMSE : 0.2624
+[2025-09-24 22:01:24,522][__main__][INFO] - Step 900 | valid1 MSE : 15.6486 | valid1 NMSE : 0.2589
+[2025-09-24 22:03:32,686][__main__][INFO] - Step 1000 | valid1 MSE : 15.4202 | valid1 NMSE : 0.2550
+[2025-09-24 22:05:40,780][__main__][INFO] - Step 1100 | valid1 MSE : 15.1996 | valid1 NMSE : 0.2537
+[2025-09-24 22:07:49,194][__main__][INFO] - Step 1200 | valid1 MSE : 15.0010 | valid1 NMSE : 0.2511
+[2025-09-24 22:07:49,195][__main__][INFO] - Training done in 27.750 min
+[2025-09-24 22:07:49,195][__main__][INFO] - Average time per step: 1.387 s
+[2025-09-24 22:07:50,751][__main__][INFO] - End of training
+[2025-09-24 22:07:50,751][__main__][INFO] - --Eval--
+[2025-09-24 22:09:09,436][__main__][INFO] - Final modulations: {'beta': np.float32(0.05600108), 'alpha': np.float32(0.32888693)}
+[2025-09-24 22:09:09,436][__main__][INFO] - End of script
+
+[2025-09-24 22:09:22,473][__main__][INFO] - =====Running train script=====
+[2025-09-24 22:09:22,529][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_2/min_revin/
+[2025-09-24 22:09:22,529][__main__][INFO] - Model PatchTST, norma mIN, criterion NMSE, kwargs {'latent': False, 'init_beta': False, 'fixed_beta': False, 'init_alpha': False, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-24 22:09:23,974][__main__][INFO] - Fetched dataloaders
+[2025-09-24 22:09:23,974][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 22:09:23,974][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 22:09:23,982][__main__][INFO] - --Training--
+[2025-09-24 22:09:26,759][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 22:09:26,759][__main__][INFO] - Using device: cuda
+[2025-09-24 22:09:26,759][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 22:11:30,917][__main__][INFO] - Step 1 | valid1 MSE : 89.5626 | valid1 NMSE : 1.2274
+[2025-09-24 22:13:37,407][__main__][INFO] - Step 100 | valid1 MSE : 28.3771 | valid1 NMSE : 0.4810
+[2025-09-24 22:15:44,131][__main__][INFO] - Step 200 | valid1 MSE : 21.3180 | valid1 NMSE : 0.3718
+[2025-09-24 22:17:51,050][__main__][INFO] - Step 300 | valid1 MSE : 19.3433 | valid1 NMSE : 0.3345
+[2025-09-24 22:19:57,797][__main__][INFO] - Step 400 | valid1 MSE : 18.0987 | valid1 NMSE : 0.3125
+[2025-09-24 22:22:04,663][__main__][INFO] - Step 500 | valid1 MSE : 17.5063 | valid1 NMSE : 0.2945
+[2025-09-24 22:24:11,320][__main__][INFO] - Step 600 | valid1 MSE : 16.6690 | valid1 NMSE : 0.2799
+[2025-09-24 22:26:18,003][__main__][INFO] - Step 700 | valid1 MSE : 16.0360 | valid1 NMSE : 0.2709
+[2025-09-24 22:28:24,387][__main__][INFO] - Step 800 | valid1 MSE : 15.4396 | valid1 NMSE : 0.2632
+[2025-09-24 22:30:30,607][__main__][INFO] - Step 900 | valid1 MSE : 15.3645 | valid1 NMSE : 0.2589
+[2025-09-24 22:32:36,882][__main__][INFO] - Step 1000 | valid1 MSE : 14.9664 | valid1 NMSE : 0.2537
+[2025-09-24 22:34:43,020][__main__][INFO] - Step 1100 | valid1 MSE : 14.7782 | valid1 NMSE : 0.2506
+[2025-09-24 22:36:49,238][__main__][INFO] - Step 1200 | valid1 MSE : 14.4522 | valid1 NMSE : 0.2482
+[2025-09-24 22:36:49,240][__main__][INFO] - Training done in 27.375 min
+[2025-09-24 22:36:49,240][__main__][INFO] - Average time per step: 1.369 s
+[2025-09-24 22:36:50,892][__main__][INFO] - End of training
+[2025-09-24 22:36:50,892][__main__][INFO] - --Eval--
+[2025-09-24 22:38:08,059][__main__][INFO] - Final modulations: {'beta': np.float32(0.0035016635), 'alpha': np.float32(0.9942252)}
+[2025-09-24 22:38:08,059][__main__][INFO] - End of script
+
+[2025-09-24 22:38:28,334][__main__][INFO] - =====Running train script=====
+[2025-09-24 22:38:28,408][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_3/instance_NMSE/
+[2025-09-24 22:38:28,408][__main__][INFO] - Model PatchTST, norma instance, criterion NMSE, kwargs {'last': False, 'latent': False}
+[2025-09-24 22:38:29,896][__main__][INFO] - Fetched dataloaders
+[2025-09-24 22:38:29,897][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 22:38:29,897][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 22:38:29,904][__main__][INFO] - --Training--
+[2025-09-24 22:38:32,689][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 22:38:32,689][__main__][INFO] - Using device: cuda
+[2025-09-24 22:38:32,689][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 22:40:37,019][__main__][INFO] - Step 1 | valid1 MSE : 107.4697 | valid1 NMSE : 1.4445
+[2025-09-24 22:42:43,578][__main__][INFO] - Step 100 | valid1 MSE : 31.1297 | valid1 NMSE : 0.5236
+[2025-09-24 22:44:50,267][__main__][INFO] - Step 200 | valid1 MSE : 21.6093 | valid1 NMSE : 0.3799
+[2025-09-24 22:46:57,021][__main__][INFO] - Step 300 | valid1 MSE : 18.9563 | valid1 NMSE : 0.3355
+[2025-09-24 22:49:03,516][__main__][INFO] - Step 400 | valid1 MSE : 17.5548 | valid1 NMSE : 0.3090
+[2025-09-24 22:51:10,504][__main__][INFO] - Step 500 | valid1 MSE : 16.8849 | valid1 NMSE : 0.2935
+[2025-09-24 22:53:16,860][__main__][INFO] - Step 600 | valid1 MSE : 16.1270 | valid1 NMSE : 0.2802
+[2025-09-24 22:55:22,954][__main__][INFO] - Step 700 | valid1 MSE : 15.9248 | valid1 NMSE : 0.2714
+[2025-09-24 22:57:29,086][__main__][INFO] - Step 800 | valid1 MSE : 15.3467 | valid1 NMSE : 0.2644
+[2025-09-24 22:59:35,342][__main__][INFO] - Step 900 | valid1 MSE : 15.2182 | valid1 NMSE : 0.2598
+[2025-09-24 23:01:41,800][__main__][INFO] - Step 1000 | valid1 MSE : 14.8346 | valid1 NMSE : 0.2547
+[2025-09-24 23:03:47,804][__main__][INFO] - Step 1100 | valid1 MSE : 14.7819 | valid1 NMSE : 0.2506
+[2025-09-24 23:05:53,657][__main__][INFO] - Step 1200 | valid1 MSE : 14.4302 | valid1 NMSE : 0.2466
+[2025-09-24 23:05:53,658][__main__][INFO] - Training done in 27.349 min
+[2025-09-24 23:05:53,658][__main__][INFO] - Average time per step: 1.367 s
+[2025-09-24 23:05:54,855][__main__][INFO] - End of training
+[2025-09-24 23:05:54,855][__main__][INFO] - --Eval--
+[2025-09-24 23:07:12,381][__main__][INFO] - End of script
+
+[2025-09-24 23:07:24,211][__main__][INFO] - =====Running train script=====
+[2025-09-24 23:07:24,314][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_3/revin_NMSE/
+[2025-09-24 23:07:24,314][__main__][INFO] - Model PatchTST, norma revin, criterion NMSE, kwargs {'latent': False}
+[2025-09-24 23:07:25,820][__main__][INFO] - Fetched dataloaders
+[2025-09-24 23:07:25,820][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 23:07:25,820][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 23:07:25,827][__main__][INFO] - --Training--
+[2025-09-24 23:07:28,470][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 23:07:28,470][__main__][INFO] - Using device: cuda
+[2025-09-24 23:07:28,470][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 23:09:33,429][__main__][INFO] - Step 1 | valid1 MSE : 107.4697 | valid1 NMSE : 1.4445
+[2025-09-24 23:11:40,956][__main__][INFO] - Step 100 | valid1 MSE : 31.1370 | valid1 NMSE : 0.5237
+[2025-09-24 23:13:48,361][__main__][INFO] - Step 200 | valid1 MSE : 21.6149 | valid1 NMSE : 0.3799
+[2025-09-24 23:15:55,687][__main__][INFO] - Step 300 | valid1 MSE : 18.9597 | valid1 NMSE : 0.3355
+[2025-09-24 23:18:03,510][__main__][INFO] - Step 400 | valid1 MSE : 17.5554 | valid1 NMSE : 0.3089
+[2025-09-24 23:20:11,164][__main__][INFO] - Step 500 | valid1 MSE : 16.8805 | valid1 NMSE : 0.2934
+[2025-09-24 23:22:18,696][__main__][INFO] - Step 600 | valid1 MSE : 16.1184 | valid1 NMSE : 0.2800
+[2025-09-24 23:24:26,046][__main__][INFO] - Step 700 | valid1 MSE : 15.9146 | valid1 NMSE : 0.2712
+[2025-09-24 23:26:33,564][__main__][INFO] - Step 800 | valid1 MSE : 15.3354 | valid1 NMSE : 0.2642
+[2025-09-24 23:28:41,830][__main__][INFO] - Step 900 | valid1 MSE : 15.2047 | valid1 NMSE : 0.2596
+[2025-09-24 23:30:49,265][__main__][INFO] - Step 1000 | valid1 MSE : 14.8191 | valid1 NMSE : 0.2545
+[2025-09-24 23:32:56,728][__main__][INFO] - Step 1100 | valid1 MSE : 14.7684 | valid1 NMSE : 0.2504
+[2025-09-24 23:35:03,939][__main__][INFO] - Step 1200 | valid1 MSE : 14.4195 | valid1 NMSE : 0.2465
+[2025-09-24 23:35:03,940][__main__][INFO] - Training done in 27.591 min
+[2025-09-24 23:35:03,940][__main__][INFO] - Average time per step: 1.380 s
+[2025-09-24 23:35:05,041][__main__][INFO] - End of training
+[2025-09-24 23:35:05,041][__main__][INFO] - --Eval--
+[2025-09-24 23:36:22,940][__main__][INFO] - Final modulations: {'beta': np.float32(-0.0044175806), 'alpha': np.float32(1.0061095)}
+[2025-09-24 23:36:22,940][__main__][INFO] - End of script
+
+[2025-09-24 23:36:30,391][__main__][INFO] - =====Running train script=====
+[2025-09-24 23:36:30,448][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_3/flexrevin_NMSE/
+[2025-09-24 23:36:30,448][__main__][INFO] - Model PatchTST, norma flexrevin, criterion NMSE, kwargs {'latent': False, 'start': True}
+[2025-09-24 23:36:31,835][__main__][INFO] - Fetched dataloaders
+[2025-09-24 23:36:31,835][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-24 23:36:31,835][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-24 23:36:31,840][__main__][INFO] - --Training--
+[2025-09-24 23:36:33,314][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 23:36:33,314][__main__][INFO] - Using device: cuda
+[2025-09-24 23:36:33,314][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 23:38:38,419][__main__][INFO] - Step 1 | valid1 MSE : 107.4691 | valid1 NMSE : 1.4445
+[2025-09-24 23:40:46,128][__main__][INFO] - Step 100 | valid1 MSE : 31.1772 | valid1 NMSE : 0.5244
+[2025-09-24 23:42:53,910][__main__][INFO] - Step 200 | valid1 MSE : 21.6300 | valid1 NMSE : 0.3802
+[2025-09-24 23:45:01,668][__main__][INFO] - Step 300 | valid1 MSE : 18.9648 | valid1 NMSE : 0.3358
+[2025-09-24 23:47:09,276][__main__][INFO] - Step 400 | valid1 MSE : 17.5694 | valid1 NMSE : 0.3093
+[2025-09-24 23:49:16,688][__main__][INFO] - Step 500 | valid1 MSE : 16.8960 | valid1 NMSE : 0.2939
+[2025-09-24 23:51:24,261][__main__][INFO] - Step 600 | valid1 MSE : 16.1360 | valid1 NMSE : 0.2805
+[2025-09-24 23:53:31,838][__main__][INFO] - Step 700 | valid1 MSE : 15.9451 | valid1 NMSE : 0.2716
+[2025-09-24 23:55:39,439][__main__][INFO] - Step 800 | valid1 MSE : 15.3638 | valid1 NMSE : 0.2648
+[2025-09-24 23:57:47,152][__main__][INFO] - Step 900 | valid1 MSE : 15.2337 | valid1 NMSE : 0.2601
+[2025-09-24 23:59:54,679][__main__][INFO] - Step 1000 | valid1 MSE : 14.8372 | valid1 NMSE : 0.2549
+[2025-09-25 00:02:02,482][__main__][INFO] - Step 1100 | valid1 MSE : 14.8029 | valid1 NMSE : 0.2508
+[2025-09-25 00:04:10,111][__main__][INFO] - Step 1200 | valid1 MSE : 14.4531 | valid1 NMSE : 0.2469
+[2025-09-25 00:04:10,112][__main__][INFO] - Training done in 27.613 min
+[2025-09-25 00:04:10,112][__main__][INFO] - Average time per step: 1.381 s
+[2025-09-25 00:04:11,236][__main__][INFO] - End of training
+[2025-09-25 00:04:11,236][__main__][INFO] - --Eval--
+[2025-09-25 00:05:30,209][__main__][INFO] - Final modulations: {'beta': np.float32(0.0055484506), 'alpha': np.float32(0.9967898)}
+[2025-09-25 00:05:30,209][__main__][INFO] - End of script
+
+[2025-09-25 00:05:36,136][__main__][INFO] - =====Running train script=====
+[2025-09-25 00:05:36,187][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_3/min_init/
+[2025-09-25 00:05:36,187][__main__][INFO] - Model PatchTST, norma mIN, criterion NMSE, kwargs {'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': False, 'inverse_gamma': False}
+[2025-09-25 00:05:37,588][__main__][INFO] - Fetched dataloaders
+[2025-09-25 00:05:37,588][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-25 00:05:37,588][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-25 00:05:37,593][__main__][INFO] - --Training--
+[2025-09-25 00:05:39,112][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 00:05:39,113][__main__][INFO] - Using device: cuda
+[2025-09-25 00:05:39,113][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 00:07:43,026][__main__][INFO] - Step 1 | valid1 MSE : 91.6404 | valid1 NMSE : 1.2635
+[2025-09-25 00:09:48,908][__main__][INFO] - Step 100 | valid1 MSE : 51.4922 | valid1 NMSE : 0.7842
+[2025-09-25 00:11:54,887][__main__][INFO] - Step 200 | valid1 MSE : 31.1847 | valid1 NMSE : 0.5238
+[2025-09-25 00:14:00,769][__main__][INFO] - Step 300 | valid1 MSE : 23.8093 | valid1 NMSE : 0.4158
+[2025-09-25 00:16:06,817][__main__][INFO] - Step 400 | valid1 MSE : 20.3758 | valid1 NMSE : 0.3570
+[2025-09-25 00:18:12,835][__main__][INFO] - Step 500 | valid1 MSE : 18.2507 | valid1 NMSE : 0.3186
+[2025-09-25 00:20:18,908][__main__][INFO] - Step 600 | valid1 MSE : 16.6577 | valid1 NMSE : 0.2885
+[2025-09-25 00:22:25,066][__main__][INFO] - Step 700 | valid1 MSE : 15.9891 | valid1 NMSE : 0.2715
+[2025-09-25 00:24:31,069][__main__][INFO] - Step 800 | valid1 MSE : 15.5560 | valid1 NMSE : 0.2649
+[2025-09-25 00:26:37,185][__main__][INFO] - Step 900 | valid1 MSE : 15.5304 | valid1 NMSE : 0.2620
+[2025-09-25 00:28:43,035][__main__][INFO] - Step 1000 | valid1 MSE : 15.2612 | valid1 NMSE : 0.2557
+[2025-09-25 00:30:48,904][__main__][INFO] - Step 1100 | valid1 MSE : 15.1585 | valid1 NMSE : 0.2528
+[2025-09-25 00:32:55,116][__main__][INFO] - Step 1200 | valid1 MSE : 14.8694 | valid1 NMSE : 0.2498
+[2025-09-25 00:32:55,117][__main__][INFO] - Training done in 27.267 min
+[2025-09-25 00:32:55,117][__main__][INFO] - Average time per step: 1.363 s
+[2025-09-25 00:32:56,818][__main__][INFO] - End of training
+[2025-09-25 00:32:56,818][__main__][INFO] - --Eval--
+[2025-09-25 00:34:13,861][__main__][INFO] - Final modulations: {'beta': np.float32(0.05618926), 'alpha': np.float32(0.32910082)}
+[2025-09-25 00:34:13,861][__main__][INFO] - End of script
+
+[2025-09-25 00:34:26,654][__main__][INFO] - =====Running train script=====
+[2025-09-25 00:34:26,711][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_3/min_revin/
+[2025-09-25 00:34:26,711][__main__][INFO] - Model PatchTST, norma mIN, criterion NMSE, kwargs {'latent': False, 'init_beta': False, 'fixed_beta': False, 'init_alpha': False, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-25 00:34:28,165][__main__][INFO] - Fetched dataloaders
+[2025-09-25 00:34:28,165][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-25 00:34:28,165][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-25 00:34:28,173][__main__][INFO] - --Training--
+[2025-09-25 00:34:30,831][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 00:34:30,831][__main__][INFO] - Using device: cuda
+[2025-09-25 00:34:30,831][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 00:36:34,571][__main__][INFO] - Step 1 | valid1 MSE : 107.4694 | valid1 NMSE : 1.4445
+[2025-09-25 00:38:41,289][__main__][INFO] - Step 100 | valid1 MSE : 31.1445 | valid1 NMSE : 0.5237
+[2025-09-25 00:40:47,780][__main__][INFO] - Step 200 | valid1 MSE : 21.6205 | valid1 NMSE : 0.3798
+[2025-09-25 00:42:54,413][__main__][INFO] - Step 300 | valid1 MSE : 18.9638 | valid1 NMSE : 0.3354
+[2025-09-25 00:45:00,763][__main__][INFO] - Step 400 | valid1 MSE : 17.5568 | valid1 NMSE : 0.3088
+[2025-09-25 00:47:06,887][__main__][INFO] - Step 500 | valid1 MSE : 16.8773 | valid1 NMSE : 0.2933
+[2025-09-25 00:49:12,716][__main__][INFO] - Step 600 | valid1 MSE : 16.1116 | valid1 NMSE : 0.2799
+[2025-09-25 00:51:18,609][__main__][INFO] - Step 700 | valid1 MSE : 15.9059 | valid1 NMSE : 0.2710
+[2025-09-25 00:53:24,993][__main__][INFO] - Step 800 | valid1 MSE : 15.3260 | valid1 NMSE : 0.2641
+[2025-09-25 00:55:31,109][__main__][INFO] - Step 900 | valid1 MSE : 15.1935 | valid1 NMSE : 0.2594
+[2025-09-25 00:57:37,363][__main__][INFO] - Step 1000 | valid1 MSE : 14.8067 | valid1 NMSE : 0.2543
+[2025-09-25 00:59:43,463][__main__][INFO] - Step 1100 | valid1 MSE : 14.7579 | valid1 NMSE : 0.2503
+[2025-09-25 01:01:49,593][__main__][INFO] - Step 1200 | valid1 MSE : 14.4113 | valid1 NMSE : 0.2464
+[2025-09-25 01:01:49,594][__main__][INFO] - Training done in 27.313 min
+[2025-09-25 01:01:49,594][__main__][INFO] - Average time per step: 1.366 s
+[2025-09-25 01:01:51,164][__main__][INFO] - End of training
+[2025-09-25 01:01:51,165][__main__][INFO] - --Eval--
+[2025-09-25 01:03:08,401][__main__][INFO] - Final modulations: {'beta': np.float32(0.0038907432), 'alpha': np.float32(0.9949151)}
+[2025-09-25 01:03:08,402][__main__][INFO] - End of script
+
+[2025-09-25 01:03:28,397][__main__][INFO] - =====Running train script=====
+[2025-09-25 01:03:28,468][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_4/instance_NMSE/
+[2025-09-25 01:03:28,469][__main__][INFO] - Model PatchTST, norma instance, criterion NMSE, kwargs {'last': False, 'latent': False}
+[2025-09-25 01:03:29,921][__main__][INFO] - Fetched dataloaders
+[2025-09-25 01:03:29,921][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-25 01:03:29,921][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-25 01:03:29,930][__main__][INFO] - --Training--
+[2025-09-25 01:03:32,678][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 01:03:32,678][__main__][INFO] - Using device: cuda
+[2025-09-25 01:03:32,678][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 01:05:37,078][__main__][INFO] - Step 1 | valid1 MSE : 99.5151 | valid1 NMSE : 1.4069
+[2025-09-25 01:07:44,061][__main__][INFO] - Step 100 | valid1 MSE : 29.8313 | valid1 NMSE : 0.5218
+[2025-09-25 01:09:50,612][__main__][INFO] - Step 200 | valid1 MSE : 20.8127 | valid1 NMSE : 0.3862
+[2025-09-25 01:11:57,498][__main__][INFO] - Step 300 | valid1 MSE : 18.5001 | valid1 NMSE : 0.3409
+[2025-09-25 01:14:04,585][__main__][INFO] - Step 400 | valid1 MSE : 17.2317 | valid1 NMSE : 0.3166
+[2025-09-25 01:16:11,298][__main__][INFO] - Step 500 | valid1 MSE : 16.0918 | valid1 NMSE : 0.3000
+[2025-09-25 01:18:18,442][__main__][INFO] - Step 600 | valid1 MSE : 15.5795 | valid1 NMSE : 0.2876
+[2025-09-25 01:20:25,536][__main__][INFO] - Step 700 | valid1 MSE : 15.2863 | valid1 NMSE : 0.2773
+[2025-09-25 01:22:33,117][__main__][INFO] - Step 800 | valid1 MSE : 14.9851 | valid1 NMSE : 0.2698
+[2025-09-25 01:24:40,023][__main__][INFO] - Step 900 | valid1 MSE : 14.3847 | valid1 NMSE : 0.2625
+[2025-09-25 01:26:46,707][__main__][INFO] - Step 1000 | valid1 MSE : 14.1758 | valid1 NMSE : 0.2575
+[2025-09-25 01:28:53,471][__main__][INFO] - Step 1100 | valid1 MSE : 13.8447 | valid1 NMSE : 0.2533
+[2025-09-25 01:31:00,372][__main__][INFO] - Step 1200 | valid1 MSE : 13.9316 | valid1 NMSE : 0.2508
+[2025-09-25 01:31:00,374][__main__][INFO] - Training done in 27.462 min
+[2025-09-25 01:31:00,374][__main__][INFO] - Average time per step: 1.373 s
+[2025-09-25 01:31:01,674][__main__][INFO] - End of training
+[2025-09-25 01:31:01,674][__main__][INFO] - --Eval--
+[2025-09-25 01:32:19,200][__main__][INFO] - End of script
+
+[2025-09-25 01:32:31,462][__main__][INFO] - =====Running train script=====
+[2025-09-25 01:32:31,517][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_4/revin_NMSE/
+[2025-09-25 01:32:31,518][__main__][INFO] - Model PatchTST, norma revin, criterion NMSE, kwargs {'latent': False}
+[2025-09-25 01:32:32,979][__main__][INFO] - Fetched dataloaders
+[2025-09-25 01:32:32,979][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-25 01:32:32,979][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-25 01:32:32,987][__main__][INFO] - --Training--
+[2025-09-25 01:32:35,729][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 01:32:35,729][__main__][INFO] - Using device: cuda
+[2025-09-25 01:32:35,729][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 01:34:39,050][__main__][INFO] - Step 1 | valid1 MSE : 99.5151 | valid1 NMSE : 1.4069
+[2025-09-25 01:36:45,035][__main__][INFO] - Step 100 | valid1 MSE : 29.8400 | valid1 NMSE : 0.5219
+[2025-09-25 01:38:51,277][__main__][INFO] - Step 200 | valid1 MSE : 20.8194 | valid1 NMSE : 0.3862
+[2025-09-25 01:40:57,263][__main__][INFO] - Step 300 | valid1 MSE : 18.5048 | valid1 NMSE : 0.3408
+[2025-09-25 01:43:03,358][__main__][INFO] - Step 400 | valid1 MSE : 17.2341 | valid1 NMSE : 0.3165
+[2025-09-25 01:45:09,440][__main__][INFO] - Step 500 | valid1 MSE : 16.0929 | valid1 NMSE : 0.2999
+[2025-09-25 01:47:15,279][__main__][INFO] - Step 600 | valid1 MSE : 15.5781 | valid1 NMSE : 0.2875
+[2025-09-25 01:49:21,015][__main__][INFO] - Step 700 | valid1 MSE : 15.2820 | valid1 NMSE : 0.2772
+[2025-09-25 01:51:26,871][__main__][INFO] - Step 800 | valid1 MSE : 14.9761 | valid1 NMSE : 0.2696
+[2025-09-25 01:53:32,678][__main__][INFO] - Step 900 | valid1 MSE : 14.3761 | valid1 NMSE : 0.2623
+[2025-09-25 01:55:38,504][__main__][INFO] - Step 1000 | valid1 MSE : 14.1658 | valid1 NMSE : 0.2573
+[2025-09-25 01:57:44,279][__main__][INFO] - Step 1100 | valid1 MSE : 13.8354 | valid1 NMSE : 0.2532
+[2025-09-25 01:59:51,030][__main__][INFO] - Step 1200 | valid1 MSE : 13.9197 | valid1 NMSE : 0.2507
+[2025-09-25 01:59:51,030][__main__][INFO] - Training done in 27.255 min
+[2025-09-25 01:59:51,030][__main__][INFO] - Average time per step: 1.363 s
+[2025-09-25 01:59:51,998][__main__][INFO] - End of training
+[2025-09-25 01:59:51,998][__main__][INFO] - --Eval--
+[2025-09-25 02:01:09,039][__main__][INFO] - Final modulations: {'beta': np.float32(-0.004248574), 'alpha': np.float32(1.0059757)}
+[2025-09-25 02:01:09,039][__main__][INFO] - End of script
+
+[2025-09-25 02:01:15,003][__main__][INFO] - =====Running train script=====
+[2025-09-25 02:01:15,044][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_4/flexrevin_NMSE/
+[2025-09-25 02:01:15,045][__main__][INFO] - Model PatchTST, norma flexrevin, criterion NMSE, kwargs {'latent': False, 'start': True}
+[2025-09-25 02:01:16,452][__main__][INFO] - Fetched dataloaders
+[2025-09-25 02:01:16,452][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-25 02:01:16,452][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-25 02:01:16,457][__main__][INFO] - --Training--
+[2025-09-25 02:01:17,983][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 02:01:17,983][__main__][INFO] - Using device: cuda
+[2025-09-25 02:01:17,983][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 02:03:23,271][__main__][INFO] - Step 1 | valid1 MSE : 99.5148 | valid1 NMSE : 1.4069
+[2025-09-25 02:05:31,409][__main__][INFO] - Step 100 | valid1 MSE : 29.8798 | valid1 NMSE : 0.5225
+[2025-09-25 02:07:39,563][__main__][INFO] - Step 200 | valid1 MSE : 20.8292 | valid1 NMSE : 0.3866
+[2025-09-25 02:09:47,555][__main__][INFO] - Step 300 | valid1 MSE : 18.5011 | valid1 NMSE : 0.3411
+[2025-09-25 02:11:55,784][__main__][INFO] - Step 400 | valid1 MSE : 17.2333 | valid1 NMSE : 0.3169
+[2025-09-25 02:14:03,901][__main__][INFO] - Step 500 | valid1 MSE : 16.1070 | valid1 NMSE : 0.3005
+[2025-09-25 02:16:11,934][__main__][INFO] - Step 600 | valid1 MSE : 15.6031 | valid1 NMSE : 0.2883
+[2025-09-25 02:18:19,877][__main__][INFO] - Step 700 | valid1 MSE : 15.3289 | valid1 NMSE : 0.2780
+[2025-09-25 02:20:27,910][__main__][INFO] - Step 800 | valid1 MSE : 15.0239 | valid1 NMSE : 0.2703
+[2025-09-25 02:22:36,063][__main__][INFO] - Step 900 | valid1 MSE : 14.4188 | valid1 NMSE : 0.2631
+[2025-09-25 02:24:44,212][__main__][INFO] - Step 1000 | valid1 MSE : 14.2105 | valid1 NMSE : 0.2580
+[2025-09-25 02:26:52,324][__main__][INFO] - Step 1100 | valid1 MSE : 13.8741 | valid1 NMSE : 0.2540
+[2025-09-25 02:29:00,476][__main__][INFO] - Step 1200 | valid1 MSE : 13.9714 | valid1 NMSE : 0.2515
+[2025-09-25 02:29:00,478][__main__][INFO] - Training done in 27.708 min
+[2025-09-25 02:29:00,478][__main__][INFO] - Average time per step: 1.385 s
+[2025-09-25 02:29:02,022][__main__][INFO] - End of training
+[2025-09-25 02:29:02,023][__main__][INFO] - --Eval--
+[2025-09-25 02:30:20,511][__main__][INFO] - Final modulations: {'beta': np.float32(0.005573691), 'alpha': np.float32(0.9967165)}
+[2025-09-25 02:30:20,511][__main__][INFO] - End of script
+
+[2025-09-25 02:30:33,895][__main__][INFO] - =====Running train script=====
+[2025-09-25 02:30:33,950][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_4/min_init/
+[2025-09-25 02:30:33,950][__main__][INFO] - Model PatchTST, norma mIN, criterion NMSE, kwargs {'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': False, 'inverse_gamma': False}
+[2025-09-25 02:30:35,419][__main__][INFO] - Fetched dataloaders
+[2025-09-25 02:30:35,420][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-25 02:30:35,420][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-25 02:30:35,427][__main__][INFO] - --Training--
+[2025-09-25 02:30:38,294][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 02:30:38,294][__main__][INFO] - Using device: cuda
+[2025-09-25 02:30:38,294][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 02:32:42,624][__main__][INFO] - Step 1 | valid1 MSE : 87.1881 | valid1 NMSE : 1.2543
+[2025-09-25 02:34:49,497][__main__][INFO] - Step 100 | valid1 MSE : 48.0608 | valid1 NMSE : 0.7653
+[2025-09-25 02:36:56,685][__main__][INFO] - Step 200 | valid1 MSE : 29.8685 | valid1 NMSE : 0.5221
+[2025-09-25 02:39:03,913][__main__][INFO] - Step 300 | valid1 MSE : 22.6893 | valid1 NMSE : 0.4129
+[2025-09-25 02:41:11,018][__main__][INFO] - Step 400 | valid1 MSE : 19.4579 | valid1 NMSE : 0.3578
+[2025-09-25 02:43:18,216][__main__][INFO] - Step 500 | valid1 MSE : 17.4802 | valid1 NMSE : 0.3233
+[2025-09-25 02:45:25,264][__main__][INFO] - Step 600 | valid1 MSE : 16.0536 | valid1 NMSE : 0.2954
+[2025-09-25 02:47:32,589][__main__][INFO] - Step 700 | valid1 MSE : 15.1796 | valid1 NMSE : 0.2743
+[2025-09-25 02:49:39,551][__main__][INFO] - Step 800 | valid1 MSE : 14.7644 | valid1 NMSE : 0.2636
+[2025-09-25 02:51:46,670][__main__][INFO] - Step 900 | valid1 MSE : 14.3855 | valid1 NMSE : 0.2581
+[2025-09-25 02:53:53,849][__main__][INFO] - Step 1000 | valid1 MSE : 14.2305 | valid1 NMSE : 0.2538
+[2025-09-25 02:56:00,938][__main__][INFO] - Step 1100 | valid1 MSE : 14.0236 | valid1 NMSE : 0.2513
+[2025-09-25 02:58:08,320][__main__][INFO] - Step 1200 | valid1 MSE : 13.9748 | valid1 NMSE : 0.2484
+[2025-09-25 02:58:08,322][__main__][INFO] - Training done in 27.500 min
+[2025-09-25 02:58:08,322][__main__][INFO] - Average time per step: 1.375 s
+[2025-09-25 02:58:09,970][__main__][INFO] - End of training
+[2025-09-25 02:58:09,970][__main__][INFO] - --Eval--
+[2025-09-25 02:59:27,757][__main__][INFO] - Final modulations: {'beta': np.float32(0.056786776), 'alpha': np.float32(0.32917756)}
+[2025-09-25 02:59:27,757][__main__][INFO] - End of script
+
+[2025-09-25 02:59:40,712][__main__][INFO] - =====Running train script=====
+[2025-09-25 02:59:40,769][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_4/min_revin/
+[2025-09-25 02:59:40,769][__main__][INFO] - Model PatchTST, norma mIN, criterion NMSE, kwargs {'latent': False, 'init_beta': False, 'fixed_beta': False, 'init_alpha': False, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-25 02:59:42,216][__main__][INFO] - Fetched dataloaders
+[2025-09-25 02:59:42,216][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-25 02:59:42,216][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-25 02:59:42,224][__main__][INFO] - --Training--
+[2025-09-25 02:59:45,046][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 02:59:45,046][__main__][INFO] - Using device: cuda
+[2025-09-25 02:59:45,046][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 03:01:49,734][__main__][INFO] - Step 1 | valid1 MSE : 99.5149 | valid1 NMSE : 1.4069
+[2025-09-25 03:03:56,764][__main__][INFO] - Step 100 | valid1 MSE : 29.8486 | valid1 NMSE : 0.5219
+[2025-09-25 03:06:04,005][__main__][INFO] - Step 200 | valid1 MSE : 20.8257 | valid1 NMSE : 0.3862
+[2025-09-25 03:08:11,845][__main__][INFO] - Step 300 | valid1 MSE : 18.5094 | valid1 NMSE : 0.3408
+[2025-09-25 03:10:19,423][__main__][INFO] - Step 400 | valid1 MSE : 17.2368 | valid1 NMSE : 0.3165
+[2025-09-25 03:12:27,042][__main__][INFO] - Step 500 | valid1 MSE : 16.0944 | valid1 NMSE : 0.2998
+[2025-09-25 03:14:35,098][__main__][INFO] - Step 600 | valid1 MSE : 15.5776 | valid1 NMSE : 0.2874
+[2025-09-25 03:16:42,861][__main__][INFO] - Step 700 | valid1 MSE : 15.2788 | valid1 NMSE : 0.2771
+[2025-09-25 03:18:50,454][__main__][INFO] - Step 800 | valid1 MSE : 14.9685 | valid1 NMSE : 0.2694
+[2025-09-25 03:20:57,943][__main__][INFO] - Step 900 | valid1 MSE : 14.3688 | valid1 NMSE : 0.2622
+[2025-09-25 03:23:05,527][__main__][INFO] - Step 1000 | valid1 MSE : 14.1576 | valid1 NMSE : 0.2572
+[2025-09-25 03:25:13,104][__main__][INFO] - Step 1100 | valid1 MSE : 13.8279 | valid1 NMSE : 0.2530
+[2025-09-25 03:27:20,585][__main__][INFO] - Step 1200 | valid1 MSE : 13.9098 | valid1 NMSE : 0.2505
+[2025-09-25 03:27:20,586][__main__][INFO] - Training done in 27.592 min
+[2025-09-25 03:27:20,586][__main__][INFO] - Average time per step: 1.380 s
+[2025-09-25 03:27:22,244][__main__][INFO] - End of training
+[2025-09-25 03:27:22,244][__main__][INFO] - --Eval--
+[2025-09-25 03:28:40,082][__main__][INFO] - Final modulations: {'beta': np.float32(0.0037718355), 'alpha': np.float32(0.99505645)}
+[2025-09-25 03:28:40,082][__main__][INFO] - End of script
+
+[2025-09-25 03:28:59,188][__main__][INFO] - =====Running train script=====
+[2025-09-25 03:28:59,245][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_5/instance_NMSE/
+[2025-09-25 03:28:59,245][__main__][INFO] - Model PatchTST, norma instance, criterion NMSE, kwargs {'last': False, 'latent': False}
+[2025-09-25 03:29:00,774][__main__][INFO] - Fetched dataloaders
+[2025-09-25 03:29:00,774][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-25 03:29:00,775][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-25 03:29:00,782][__main__][INFO] - --Training--
+[2025-09-25 03:29:03,506][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 03:29:03,507][__main__][INFO] - Using device: cuda
+[2025-09-25 03:29:03,507][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 03:31:11,250][__main__][INFO] - Step 1 | valid1 MSE : 95.9720 | valid1 NMSE : 1.3422
+[2025-09-25 03:33:20,809][__main__][INFO] - Step 100 | valid1 MSE : 29.4346 | valid1 NMSE : 0.5085
+[2025-09-25 03:35:30,538][__main__][INFO] - Step 200 | valid1 MSE : 20.8434 | valid1 NMSE : 0.3751
+[2025-09-25 03:37:40,387][__main__][INFO] - Step 300 | valid1 MSE : 18.6967 | valid1 NMSE : 0.3333
+[2025-09-25 03:39:50,244][__main__][INFO] - Step 400 | valid1 MSE : 17.1526 | valid1 NMSE : 0.3067
+[2025-09-25 03:42:00,063][__main__][INFO] - Step 500 | valid1 MSE : 16.4689 | valid1 NMSE : 0.2920
+[2025-09-25 03:44:09,709][__main__][INFO] - Step 600 | valid1 MSE : 15.9526 | valid1 NMSE : 0.2811
+[2025-09-25 03:46:19,284][__main__][INFO] - Step 700 | valid1 MSE : 15.4390 | valid1 NMSE : 0.2723
+[2025-09-25 03:48:28,748][__main__][INFO] - Step 800 | valid1 MSE : 15.0392 | valid1 NMSE : 0.2660
+[2025-09-25 03:50:38,399][__main__][INFO] - Step 900 | valid1 MSE : 14.7299 | valid1 NMSE : 0.2612
+[2025-09-25 03:52:48,908][__main__][INFO] - Step 1000 | valid1 MSE : 14.5017 | valid1 NMSE : 0.2542
+[2025-09-25 03:54:58,495][__main__][INFO] - Step 1100 | valid1 MSE : 14.2287 | valid1 NMSE : 0.2508
+[2025-09-25 03:57:08,263][__main__][INFO] - Step 1200 | valid1 MSE : 14.0226 | valid1 NMSE : 0.2476
+[2025-09-25 03:57:08,263][__main__][INFO] - Training done in 28.079 min
+[2025-09-25 03:57:08,263][__main__][INFO] - Average time per step: 1.404 s
+[2025-09-25 03:57:09,164][__main__][INFO] - End of training
+[2025-09-25 03:57:09,164][__main__][INFO] - --Eval--
+[2025-09-25 03:58:28,592][__main__][INFO] - End of script
+
+[2025-09-25 03:58:34,571][__main__][INFO] - =====Running train script=====
+[2025-09-25 03:58:34,665][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_5/revin_NMSE/
+[2025-09-25 03:58:34,665][__main__][INFO] - Model PatchTST, norma revin, criterion NMSE, kwargs {'latent': False}
+[2025-09-25 03:58:36,066][__main__][INFO] - Fetched dataloaders
+[2025-09-25 03:58:36,066][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-25 03:58:36,067][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-25 03:58:36,071][__main__][INFO] - --Training--
+[2025-09-25 03:58:37,468][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 03:58:37,468][__main__][INFO] - Using device: cuda
+[2025-09-25 03:58:37,468][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 04:00:43,366][__main__][INFO] - Step 1 | valid1 MSE : 95.9720 | valid1 NMSE : 1.3422
+[2025-09-25 04:02:51,768][__main__][INFO] - Step 100 | valid1 MSE : 29.4406 | valid1 NMSE : 0.5086
+[2025-09-25 04:05:00,339][__main__][INFO] - Step 200 | valid1 MSE : 20.8467 | valid1 NMSE : 0.3750
+[2025-09-25 04:07:09,197][__main__][INFO] - Step 300 | valid1 MSE : 18.6974 | valid1 NMSE : 0.3332
+[2025-09-25 04:09:17,977][__main__][INFO] - Step 400 | valid1 MSE : 17.1501 | valid1 NMSE : 0.3066
+[2025-09-25 04:11:26,953][__main__][INFO] - Step 500 | valid1 MSE : 16.4627 | valid1 NMSE : 0.2919
+[2025-09-25 04:13:35,748][__main__][INFO] - Step 600 | valid1 MSE : 15.9422 | valid1 NMSE : 0.2809
+[2025-09-25 04:15:44,488][__main__][INFO] - Step 700 | valid1 MSE : 15.4244 | valid1 NMSE : 0.2721
+[2025-09-25 04:17:53,337][__main__][INFO] - Step 800 | valid1 MSE : 15.0236 | valid1 NMSE : 0.2657
+[2025-09-25 04:20:02,144][__main__][INFO] - Step 900 | valid1 MSE : 14.7122 | valid1 NMSE : 0.2610
+[2025-09-25 04:22:10,898][__main__][INFO] - Step 1000 | valid1 MSE : 14.4890 | valid1 NMSE : 0.2540
+[2025-09-25 04:24:19,523][__main__][INFO] - Step 1100 | valid1 MSE : 14.2160 | valid1 NMSE : 0.2506
+[2025-09-25 04:26:28,153][__main__][INFO] - Step 1200 | valid1 MSE : 14.0089 | valid1 NMSE : 0.2474
+[2025-09-25 04:26:28,154][__main__][INFO] - Training done in 27.845 min
+[2025-09-25 04:26:28,154][__main__][INFO] - Average time per step: 1.392 s
+[2025-09-25 04:26:29,844][__main__][INFO] - End of training
+[2025-09-25 04:26:29,844][__main__][INFO] - --Eval--
+[2025-09-25 04:27:48,389][__main__][INFO] - Final modulations: {'beta': np.float32(-0.0042165173), 'alpha': np.float32(1.0060698)}
+[2025-09-25 04:27:48,389][__main__][INFO] - End of script
+
+[2025-09-25 04:28:01,795][__main__][INFO] - =====Running train script=====
+[2025-09-25 04:28:01,852][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_5/flexrevin_NMSE/
+[2025-09-25 04:28:01,852][__main__][INFO] - Model PatchTST, norma flexrevin, criterion NMSE, kwargs {'latent': False, 'start': True}
+[2025-09-25 04:28:03,328][__main__][INFO] - Fetched dataloaders
+[2025-09-25 04:28:03,328][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-25 04:28:03,328][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-25 04:28:03,337][__main__][INFO] - --Training--
+[2025-09-25 04:28:06,161][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 04:28:06,161][__main__][INFO] - Using device: cuda
+[2025-09-25 04:28:06,161][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 04:30:11,747][__main__][INFO] - Step 1 | valid1 MSE : 95.9718 | valid1 NMSE : 1.3422
+[2025-09-25 04:32:19,657][__main__][INFO] - Step 100 | valid1 MSE : 29.4719 | valid1 NMSE : 0.5091
+[2025-09-25 04:34:27,629][__main__][INFO] - Step 200 | valid1 MSE : 20.8481 | valid1 NMSE : 0.3752
+[2025-09-25 04:36:35,627][__main__][INFO] - Step 300 | valid1 MSE : 18.6940 | valid1 NMSE : 0.3333
+[2025-09-25 04:38:43,674][__main__][INFO] - Step 400 | valid1 MSE : 17.1504 | valid1 NMSE : 0.3068
+[2025-09-25 04:40:51,698][__main__][INFO] - Step 500 | valid1 MSE : 16.4677 | valid1 NMSE : 0.2922
+[2025-09-25 04:42:59,825][__main__][INFO] - Step 600 | valid1 MSE : 15.9505 | valid1 NMSE : 0.2814
+[2025-09-25 04:45:07,728][__main__][INFO] - Step 700 | valid1 MSE : 15.4333 | valid1 NMSE : 0.2725
+[2025-09-25 04:47:15,569][__main__][INFO] - Step 800 | valid1 MSE : 15.0311 | valid1 NMSE : 0.2663
+[2025-09-25 04:49:23,456][__main__][INFO] - Step 900 | valid1 MSE : 14.7142 | valid1 NMSE : 0.2615
+[2025-09-25 04:51:31,649][__main__][INFO] - Step 1000 | valid1 MSE : 14.5125 | valid1 NMSE : 0.2546
+[2025-09-25 04:53:39,589][__main__][INFO] - Step 1100 | valid1 MSE : 14.2397 | valid1 NMSE : 0.2512
+[2025-09-25 04:55:48,023][__main__][INFO] - Step 1200 | valid1 MSE : 14.0292 | valid1 NMSE : 0.2480
+[2025-09-25 04:55:48,023][__main__][INFO] - Training done in 27.698 min
+[2025-09-25 04:55:48,023][__main__][INFO] - Average time per step: 1.385 s
+[2025-09-25 04:55:49,089][__main__][INFO] - End of training
+[2025-09-25 04:55:49,089][__main__][INFO] - --Eval--
+[2025-09-25 04:57:07,499][__main__][INFO] - Final modulations: {'beta': np.float32(0.0054532303), 'alpha': np.float32(0.9969626)}
+[2025-09-25 04:57:07,499][__main__][INFO] - End of script
+
+[2025-09-25 04:57:13,165][__main__][INFO] - =====Running train script=====
+[2025-09-25 04:57:13,217][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_5/min_init/
+[2025-09-25 04:57:13,217][__main__][INFO] - Model PatchTST, norma mIN, criterion NMSE, kwargs {'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': False, 'inverse_gamma': False}
+[2025-09-25 04:57:14,652][__main__][INFO] - Fetched dataloaders
+[2025-09-25 04:57:14,652][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-25 04:57:14,652][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-25 04:57:14,657][__main__][INFO] - --Training--
+[2025-09-25 04:57:16,080][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 04:57:16,080][__main__][INFO] - Using device: cuda
+[2025-09-25 04:57:16,080][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 04:59:19,364][__main__][INFO] - Step 1 | valid1 MSE : 86.7407 | valid1 NMSE : 1.2327
+[2025-09-25 05:01:25,546][__main__][INFO] - Step 100 | valid1 MSE : 48.8344 | valid1 NMSE : 0.7650
+[2025-09-25 05:03:31,516][__main__][INFO] - Step 200 | valid1 MSE : 29.5646 | valid1 NMSE : 0.5101
+[2025-09-25 05:05:37,458][__main__][INFO] - Step 300 | valid1 MSE : 22.4707 | valid1 NMSE : 0.4013
+[2025-09-25 05:07:44,367][__main__][INFO] - Step 400 | valid1 MSE : 19.3187 | valid1 NMSE : 0.3444
+[2025-09-25 05:09:50,555][__main__][INFO] - Step 500 | valid1 MSE : 17.3978 | valid1 NMSE : 0.3079
+[2025-09-25 05:11:56,755][__main__][INFO] - Step 600 | valid1 MSE : 16.0973 | valid1 NMSE : 0.2823
+[2025-09-25 05:14:02,758][__main__][INFO] - Step 700 | valid1 MSE : 15.4353 | valid1 NMSE : 0.2704
+[2025-09-25 05:16:08,930][__main__][INFO] - Step 800 | valid1 MSE : 15.0959 | valid1 NMSE : 0.2643
+[2025-09-25 05:18:15,249][__main__][INFO] - Step 900 | valid1 MSE : 14.9006 | valid1 NMSE : 0.2611
+[2025-09-25 05:20:21,214][__main__][INFO] - Step 1000 | valid1 MSE : 14.8075 | valid1 NMSE : 0.2557
+[2025-09-25 05:22:27,354][__main__][INFO] - Step 1100 | valid1 MSE : 14.6179 | valid1 NMSE : 0.2535
+[2025-09-25 05:24:33,297][__main__][INFO] - Step 1200 | valid1 MSE : 14.4617 | valid1 NMSE : 0.2505
+[2025-09-25 05:24:33,297][__main__][INFO] - Training done in 27.287 min
+[2025-09-25 05:24:33,298][__main__][INFO] - Average time per step: 1.364 s
+[2025-09-25 05:24:34,958][__main__][INFO] - End of training
+[2025-09-25 05:24:34,958][__main__][INFO] - --Eval--
+[2025-09-25 05:25:51,686][__main__][INFO] - Final modulations: {'beta': np.float32(0.056748997), 'alpha': np.float32(0.32910916)}
+[2025-09-25 05:25:51,686][__main__][INFO] - End of script
+
+[2025-09-25 05:26:04,535][__main__][INFO] - =====Running train script=====
+[2025-09-25 05:26:04,578][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/solar/lags168_horizon24/seed_5/min_revin/
+[2025-09-25 05:26:04,578][__main__][INFO] - Model PatchTST, norma mIN, criterion NMSE, kwargs {'latent': False, 'init_beta': False, 'fixed_beta': False, 'init_alpha': False, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-25 05:26:06,089][__main__][INFO] - Fetched dataloaders
+[2025-09-25 05:26:06,090][__main__][INFO] - Splits shapes:
+train	(109, 1, 31536)
+valid1	(109, 1, 10512)
+valid2	(28, 1, 31536)
+valid3	(28, 1, 10512)
+test1	(109, 1, 10512)
+test2	(28, 1, 10512)
+[2025-09-25 05:26:06,090][__main__][INFO] - Batches:
+ X=[109, 1, 168]
+ y=[109, 1, 24]
+[2025-09-25 05:26:06,098][__main__][INFO] - --Training--
+[2025-09-25 05:26:08,865][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 05:26:08,865][__main__][INFO] - Using device: cuda
+[2025-09-25 05:26:08,865][__main__][INFO] - Training 1200 epochs of 1 batches (1200 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 05:28:13,155][__main__][INFO] - Step 1 | valid1 MSE : 95.9718 | valid1 NMSE : 1.3422
+[2025-09-25 05:30:20,273][__main__][INFO] - Step 100 | valid1 MSE : 29.4468 | valid1 NMSE : 0.5086
+[2025-09-25 05:32:27,466][__main__][INFO] - Step 200 | valid1 MSE : 20.8499 | valid1 NMSE : 0.3750
+[2025-09-25 05:34:34,491][__main__][INFO] - Step 300 | valid1 MSE : 18.6986 | valid1 NMSE : 0.3331
+[2025-09-25 05:36:41,761][__main__][INFO] - Step 400 | valid1 MSE : 17.1485 | valid1 NMSE : 0.3065
+[2025-09-25 05:38:48,803][__main__][INFO] - Step 500 | valid1 MSE : 16.4575 | valid1 NMSE : 0.2917
+[2025-09-25 05:40:55,616][__main__][INFO] - Step 600 | valid1 MSE : 15.9332 | valid1 NMSE : 0.2807
+[2025-09-25 05:43:02,866][__main__][INFO] - Step 700 | valid1 MSE : 15.4114 | valid1 NMSE : 0.2719
+[2025-09-25 05:45:10,343][__main__][INFO] - Step 800 | valid1 MSE : 15.0100 | valid1 NMSE : 0.2655
+[2025-09-25 05:47:17,591][__main__][INFO] - Step 900 | valid1 MSE : 14.6973 | valid1 NMSE : 0.2607
+[2025-09-25 05:49:24,225][__main__][INFO] - Step 1000 | valid1 MSE : 14.4783 | valid1 NMSE : 0.2538
+[2025-09-25 05:51:31,090][__main__][INFO] - Step 1100 | valid1 MSE : 14.2057 | valid1 NMSE : 0.2504
+[2025-09-25 05:53:38,046][__main__][INFO] - Step 1200 | valid1 MSE : 13.9982 | valid1 NMSE : 0.2473
+[2025-09-25 05:53:38,046][__main__][INFO] - Training done in 27.486 min
+[2025-09-25 05:53:38,046][__main__][INFO] - Average time per step: 1.374 s
+[2025-09-25 05:53:39,431][__main__][INFO] - End of training
+[2025-09-25 05:53:39,431][__main__][INFO] - --Eval--
+[2025-09-25 05:54:56,990][__main__][INFO] - Final modulations: {'beta': np.float32(0.0037580256), 'alpha': np.float32(0.9950928)}
+[2025-09-25 05:54:56,990][__main__][INFO] - End of script
+
+==Table of ../outputs/norm/solar/lags168_horizon24/==
++----------------+-------------------+-------------------+-------------------+-------------------+-------------------+
+|                | instance_NMSE     | revin_NMSE        | flexrevin_NMSE    | min_init          | min_revin         |
++================+===================+===================+===================+===================+===================+
+| Test MSE * 1e1 | 144.4901 ± 3.0113 | 144.5792 ± 3.0091 | 145.5190 ± 2.9968 | 157.1840 ± 3.8493 | 144.6401 ± 3.0075 |
++----------------+-------------------+-------------------+-------------------+-------------------+-------------------+
+| Test NMSE      | 0.8631 ± 0.0078   | 0.8631 ± 0.0077   | 0.8660 ± 0.0081   | 0.8729 ± 0.0090   | 0.8632 ± 0.0077   |
++----------------+-------------------+-------------------+-------------------+-------------------+-------------------+
+==Table of ../outputs/norm/solar/lags168_horizon24/==
++----------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+|                | instance_NMSE      | revin_NMSE         | flexrevin_NMSE     | min_init           | min_revin          |
++================+====================+====================+====================+====================+====================+
+| Test MSE * 1e1 | 139.6042 ± 14.5835 | 139.6924 ± 14.5703 | 140.5129 ± 14.8928 | 152.5721 ± 15.8053 | 139.7524 ± 14.5576 |
++----------------+--------------------+--------------------+--------------------+--------------------+--------------------+
+| Test NMSE      | 0.9058 ± 0.0455    | 0.9059 ± 0.0455    | 0.9091 ± 0.0455    | 0.9138 ± 0.0382    | 0.9059 ± 0.0455    |
++----------------+--------------------+--------------------+--------------------+--------------------+--------------------+

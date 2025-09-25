@@ -1,0 +1,340 @@
+[2025-09-24 17:46:08,541][__main__][INFO] - =====Running train script=====
+[2025-09-24 17:46:08,595][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/electricity/lags504_horizon504/seed_1/instance_NMSE/
+[2025-09-24 17:46:08,596][__main__][INFO] - Model PatchTST, norma instance, criterion NMSE, kwargs {'last': False, 'latent': False}
+[2025-09-24 17:46:10,427][__main__][INFO] - Fetched dataloaders
+[2025-09-24 17:46:10,427][__main__][INFO] - Splits shapes:
+train	(252, 1, 15782)
+valid1	(252, 1, 5261)
+valid2	(64, 1, 15782)
+valid3	(64, 1, 5261)
+test1	(252, 1, 5261)
+test2	(64, 1, 5261)
+[2025-09-24 17:46:10,427][__main__][INFO] - Batches:
+ X=[64, 1, 504]
+ y=[64, 1, 504]
+[2025-09-24 17:46:10,450][__main__][INFO] - --Training--
+[2025-09-24 17:46:13,465][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 17:46:13,469][__main__][INFO] - Using device: cuda
+[2025-09-24 17:46:13,469][__main__][INFO] - Training 1200 epochs of 4 batches (4800 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 17:50:36,652][__main__][INFO] - Step 1 | valid1 MSE : 0.1832 | valid1 NMSE : 1.4601
+[2025-09-24 17:55:03,344][__main__][INFO] - Step 100 | valid1 MSE : 0.0307 | valid1 NMSE : 0.6737
+[2025-09-24 17:59:30,358][__main__][INFO] - Step 200 | valid1 MSE : 0.0273 | valid1 NMSE : 0.6281
+[2025-09-24 18:03:57,525][__main__][INFO] - Step 300 | valid1 MSE : 0.0261 | valid1 NMSE : 0.6079
+[2025-09-24 18:08:25,114][__main__][INFO] - Step 400 | valid1 MSE : 0.0253 | valid1 NMSE : 0.5931
+[2025-09-24 18:12:52,662][__main__][INFO] - Step 500 | valid1 MSE : 0.0247 | valid1 NMSE : 0.5830
+[2025-09-24 18:17:20,294][__main__][INFO] - Step 600 | valid1 MSE : 0.0244 | valid1 NMSE : 0.5763
+[2025-09-24 18:21:47,442][__main__][INFO] - Step 700 | valid1 MSE : 0.0242 | valid1 NMSE : 0.5715
+[2025-09-24 18:26:14,642][__main__][INFO] - Step 800 | valid1 MSE : 0.0238 | valid1 NMSE : 0.5674
+[2025-09-24 18:30:41,051][__main__][INFO] - Step 900 | valid1 MSE : 0.0240 | valid1 NMSE : 0.5657
+[2025-09-24 18:35:08,395][__main__][INFO] - Step 1000 | valid1 MSE : 0.0236 | valid1 NMSE : 0.5623
+[2025-09-24 18:39:35,318][__main__][INFO] - Step 1100 | valid1 MSE : 0.0232 | valid1 NMSE : 0.5594
+[2025-09-24 18:44:01,775][__main__][INFO] - Step 1200 | valid1 MSE : 0.0229 | valid1 NMSE : 0.5576
+[2025-09-24 18:48:29,388][__main__][INFO] - Step 1300 | valid1 MSE : 0.0228 | valid1 NMSE : 0.5564
+[2025-09-24 18:52:56,067][__main__][INFO] - Step 1400 | valid1 MSE : 0.0227 | valid1 NMSE : 0.5548
+[2025-09-24 18:57:23,138][__main__][INFO] - Step 1500 | valid1 MSE : 0.0227 | valid1 NMSE : 0.5533
+[2025-09-24 19:01:50,453][__main__][INFO] - Step 1600 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5522
+[2025-09-24 19:06:17,526][__main__][INFO] - Step 1700 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5510
+[2025-09-24 19:10:44,103][__main__][INFO] - Step 1800 | valid1 MSE : 0.0234 | valid1 NMSE : 0.5543
+[2025-09-24 19:15:10,713][__main__][INFO] - Step 1900 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5499
+[2025-09-24 19:19:37,112][__main__][INFO] - Step 2000 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5498
+[2025-09-24 19:24:03,671][__main__][INFO] - Step 2100 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5488
+[2025-09-24 19:28:29,798][__main__][INFO] - Step 2200 | valid1 MSE : 0.0227 | valid1 NMSE : 0.5486
+[2025-09-24 19:32:56,490][__main__][INFO] - Step 2300 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5492
+[2025-09-24 19:37:23,119][__main__][INFO] - Step 2400 | valid1 MSE : 0.0223 | valid1 NMSE : 0.5473
+[2025-09-24 19:41:50,565][__main__][INFO] - Step 2500 | valid1 MSE : 0.0221 | valid1 NMSE : 0.5467
+[2025-09-24 19:46:17,533][__main__][INFO] - Step 2600 | valid1 MSE : 0.0221 | valid1 NMSE : 0.5456
+[2025-09-24 19:50:43,906][__main__][INFO] - Step 2700 | valid1 MSE : 0.0223 | valid1 NMSE : 0.5465
+[2025-09-24 19:55:10,442][__main__][INFO] - Step 2800 | valid1 MSE : 0.0221 | valid1 NMSE : 0.5451
+[2025-09-24 19:59:37,497][__main__][INFO] - Step 2900 | valid1 MSE : 0.0220 | valid1 NMSE : 0.5452
+[2025-09-24 20:04:04,604][__main__][INFO] - Step 3000 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5466
+[2025-09-24 20:08:31,346][__main__][INFO] - Step 3100 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5441
+[2025-09-24 20:12:57,338][__main__][INFO] - Step 3200 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5459
+[2025-09-24 20:17:24,935][__main__][INFO] - Step 3300 | valid1 MSE : 0.0222 | valid1 NMSE : 0.5441
+[2025-09-24 20:21:50,782][__main__][INFO] - Step 3400 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5450
+[2025-09-24 20:26:17,560][__main__][INFO] - Step 3500 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5456
+[2025-09-24 20:30:43,501][__main__][INFO] - Step 3600 | valid1 MSE : 0.0227 | valid1 NMSE : 0.5459
+[2025-09-24 20:35:09,181][__main__][INFO] - Step 3700 | valid1 MSE : 0.0227 | valid1 NMSE : 0.5443
+[2025-09-24 20:39:35,211][__main__][INFO] - Step 3800 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5441
+[2025-09-24 20:44:02,012][__main__][INFO] - Step 3900 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5426
+[2025-09-24 20:48:28,275][__main__][INFO] - Step 4000 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5424
+[2025-09-24 20:52:54,718][__main__][INFO] - Step 4100 | valid1 MSE : 0.0229 | valid1 NMSE : 0.5446
+[2025-09-24 20:57:22,621][__main__][INFO] - Step 4200 | valid1 MSE : 0.0220 | valid1 NMSE : 0.5423
+[2025-09-24 21:01:50,122][__main__][INFO] - Step 4300 | valid1 MSE : 0.0222 | valid1 NMSE : 0.5416
+[2025-09-24 21:06:17,830][__main__][INFO] - Step 4400 | valid1 MSE : 0.0222 | valid1 NMSE : 0.5414
+[2025-09-24 21:10:45,408][__main__][INFO] - Step 4500 | valid1 MSE : 0.0220 | valid1 NMSE : 0.5409
+[2025-09-24 21:15:13,113][__main__][INFO] - Step 4600 | valid1 MSE : 0.0218 | valid1 NMSE : 0.5409
+[2025-09-24 21:19:40,587][__main__][INFO] - Step 4700 | valid1 MSE : 0.0223 | valid1 NMSE : 0.5418
+[2025-09-24 21:24:08,263][__main__][INFO] - Step 4800 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5434
+[2025-09-24 21:24:08,265][__main__][INFO] - Training done in 217.913 min
+[2025-09-24 21:24:08,265][__main__][INFO] - Average time per step: 2.724 s
+[2025-09-24 21:24:09,633][__main__][INFO] - End of training
+[2025-09-24 21:24:09,633][__main__][INFO] - --Eval--
+[2025-09-24 21:26:50,003][__main__][INFO] - End of script
+
+[2025-09-24 21:27:02,919][__main__][INFO] - =====Running train script=====
+[2025-09-24 21:27:02,993][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/electricity/lags504_horizon504/seed_1/revin_NMSE/
+[2025-09-24 21:27:02,994][__main__][INFO] - Model PatchTST, norma revin, criterion NMSE, kwargs {'latent': False}
+[2025-09-24 21:27:04,522][__main__][INFO] - Fetched dataloaders
+[2025-09-24 21:27:04,522][__main__][INFO] - Splits shapes:
+train	(252, 1, 15782)
+valid1	(252, 1, 5261)
+valid2	(64, 1, 15782)
+valid3	(64, 1, 5261)
+test1	(252, 1, 5261)
+test2	(64, 1, 5261)
+[2025-09-24 21:27:04,522][__main__][INFO] - Batches:
+ X=[64, 1, 504]
+ y=[64, 1, 504]
+[2025-09-24 21:27:04,546][__main__][INFO] - --Training--
+[2025-09-24 21:27:07,362][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-24 21:27:07,363][__main__][INFO] - Using device: cuda
+[2025-09-24 21:27:07,363][__main__][INFO] - Training 1200 epochs of 4 batches (4800 steps): , eval_freq: 100, print_freq: 100
+[2025-09-24 21:31:35,473][__main__][INFO] - Step 1 | valid1 MSE : 0.1832 | valid1 NMSE : 1.4601
+[2025-09-24 21:36:06,953][__main__][INFO] - Step 100 | valid1 MSE : 0.0307 | valid1 NMSE : 0.6737
+[2025-09-24 21:40:38,716][__main__][INFO] - Step 200 | valid1 MSE : 0.0273 | valid1 NMSE : 0.6280
+[2025-09-24 21:45:10,284][__main__][INFO] - Step 300 | valid1 MSE : 0.0261 | valid1 NMSE : 0.6078
+[2025-09-24 21:49:41,835][__main__][INFO] - Step 400 | valid1 MSE : 0.0253 | valid1 NMSE : 0.5930
+[2025-09-24 21:54:12,763][__main__][INFO] - Step 500 | valid1 MSE : 0.0247 | valid1 NMSE : 0.5829
+[2025-09-24 21:58:43,845][__main__][INFO] - Step 600 | valid1 MSE : 0.0243 | valid1 NMSE : 0.5762
+[2025-09-24 22:03:14,374][__main__][INFO] - Step 700 | valid1 MSE : 0.0242 | valid1 NMSE : 0.5714
+[2025-09-24 22:07:45,079][__main__][INFO] - Step 800 | valid1 MSE : 0.0238 | valid1 NMSE : 0.5673
+[2025-09-24 22:12:17,115][__main__][INFO] - Step 900 | valid1 MSE : 0.0239 | valid1 NMSE : 0.5656
+[2025-09-24 22:16:47,696][__main__][INFO] - Step 1000 | valid1 MSE : 0.0235 | valid1 NMSE : 0.5622
+[2025-09-24 22:21:15,359][__main__][INFO] - Step 1100 | valid1 MSE : 0.0231 | valid1 NMSE : 0.5594
+[2025-09-24 22:25:41,472][__main__][INFO] - Step 1200 | valid1 MSE : 0.0229 | valid1 NMSE : 0.5575
+[2025-09-24 22:30:06,851][__main__][INFO] - Step 1300 | valid1 MSE : 0.0228 | valid1 NMSE : 0.5564
+[2025-09-24 22:34:32,491][__main__][INFO] - Step 1400 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5547
+[2025-09-24 22:38:58,987][__main__][INFO] - Step 1500 | valid1 MSE : 0.0227 | valid1 NMSE : 0.5533
+[2025-09-24 22:43:24,650][__main__][INFO] - Step 1600 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5521
+[2025-09-24 22:47:49,944][__main__][INFO] - Step 1700 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5510
+[2025-09-24 22:52:15,882][__main__][INFO] - Step 1800 | valid1 MSE : 0.0233 | valid1 NMSE : 0.5542
+[2025-09-24 22:56:40,934][__main__][INFO] - Step 1900 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5499
+[2025-09-24 23:01:06,502][__main__][INFO] - Step 2000 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5497
+[2025-09-24 23:05:31,721][__main__][INFO] - Step 2100 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5488
+[2025-09-24 23:09:57,721][__main__][INFO] - Step 2200 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5486
+[2025-09-24 23:14:23,135][__main__][INFO] - Step 2300 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5490
+[2025-09-24 23:18:48,189][__main__][INFO] - Step 2400 | valid1 MSE : 0.0223 | valid1 NMSE : 0.5473
+[2025-09-24 23:23:12,542][__main__][INFO] - Step 2500 | valid1 MSE : 0.0221 | valid1 NMSE : 0.5467
+[2025-09-24 23:27:37,679][__main__][INFO] - Step 2600 | valid1 MSE : 0.0221 | valid1 NMSE : 0.5455
+[2025-09-24 23:32:02,610][__main__][INFO] - Step 2700 | valid1 MSE : 0.0223 | valid1 NMSE : 0.5464
+[2025-09-24 23:36:27,452][__main__][INFO] - Step 2800 | valid1 MSE : 0.0221 | valid1 NMSE : 0.5450
+[2025-09-24 23:40:52,115][__main__][INFO] - Step 2900 | valid1 MSE : 0.0220 | valid1 NMSE : 0.5451
+[2025-09-24 23:45:16,637][__main__][INFO] - Step 3000 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5464
+[2025-09-24 23:49:41,281][__main__][INFO] - Step 3100 | valid1 MSE : 0.0223 | valid1 NMSE : 0.5441
+[2025-09-24 23:54:05,695][__main__][INFO] - Step 3200 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5459
+[2025-09-24 23:58:30,316][__main__][INFO] - Step 3300 | valid1 MSE : 0.0222 | valid1 NMSE : 0.5440
+[2025-09-25 00:02:54,649][__main__][INFO] - Step 3400 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5450
+[2025-09-25 00:07:20,417][__main__][INFO] - Step 3500 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5455
+[2025-09-25 00:11:44,585][__main__][INFO] - Step 3600 | valid1 MSE : 0.0227 | valid1 NMSE : 0.5458
+[2025-09-25 00:16:09,207][__main__][INFO] - Step 3700 | valid1 MSE : 0.0227 | valid1 NMSE : 0.5442
+[2025-09-25 00:20:33,537][__main__][INFO] - Step 3800 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5441
+[2025-09-25 00:24:58,457][__main__][INFO] - Step 3900 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5426
+[2025-09-25 00:29:23,177][__main__][INFO] - Step 4000 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5423
+[2025-09-25 00:33:47,814][__main__][INFO] - Step 4100 | valid1 MSE : 0.0229 | valid1 NMSE : 0.5445
+[2025-09-25 00:38:12,955][__main__][INFO] - Step 4200 | valid1 MSE : 0.0220 | valid1 NMSE : 0.5422
+[2025-09-25 00:42:37,788][__main__][INFO] - Step 4300 | valid1 MSE : 0.0222 | valid1 NMSE : 0.5415
+[2025-09-25 00:47:03,325][__main__][INFO] - Step 4400 | valid1 MSE : 0.0222 | valid1 NMSE : 0.5413
+[2025-09-25 00:51:29,148][__main__][INFO] - Step 4500 | valid1 MSE : 0.0220 | valid1 NMSE : 0.5408
+[2025-09-25 00:55:54,628][__main__][INFO] - Step 4600 | valid1 MSE : 0.0218 | valid1 NMSE : 0.5408
+[2025-09-25 01:00:20,213][__main__][INFO] - Step 4700 | valid1 MSE : 0.0223 | valid1 NMSE : 0.5417
+[2025-09-25 01:04:46,018][__main__][INFO] - Step 4800 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5434
+[2025-09-25 01:04:46,019][__main__][INFO] - Training done in 217.644 min
+[2025-09-25 01:04:46,019][__main__][INFO] - Average time per step: 2.721 s
+[2025-09-25 01:04:47,176][__main__][INFO] - End of training
+[2025-09-25 01:04:47,177][__main__][INFO] - --Eval--
+[2025-09-25 01:07:27,102][__main__][INFO] - Final modulations: {'beta': np.float32(-0.0057333685), 'alpha': np.float32(1.0278918)}
+[2025-09-25 01:07:27,103][__main__][INFO] - End of script
+
+[2025-09-25 01:07:34,676][__main__][INFO] - =====Running train script=====
+[2025-09-25 01:07:34,733][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/electricity/lags504_horizon504/seed_1/flexrevin_NMSE/
+[2025-09-25 01:07:34,733][__main__][INFO] - Model PatchTST, norma flexrevin, criterion NMSE, kwargs {'latent': False, 'start': True}
+[2025-09-25 01:07:36,347][__main__][INFO] - Fetched dataloaders
+[2025-09-25 01:07:36,348][__main__][INFO] - Splits shapes:
+train	(252, 1, 15782)
+valid1	(252, 1, 5261)
+valid2	(64, 1, 15782)
+valid3	(64, 1, 5261)
+test1	(252, 1, 5261)
+test2	(64, 1, 5261)
+[2025-09-25 01:07:36,348][__main__][INFO] - Batches:
+ X=[64, 1, 504]
+ y=[64, 1, 504]
+[2025-09-25 01:07:36,372][__main__][INFO] - --Training--
+[2025-09-25 01:07:37,850][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 01:07:37,850][__main__][INFO] - Using device: cuda
+[2025-09-25 01:07:37,850][__main__][INFO] - Training 1200 epochs of 4 batches (4800 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 01:12:07,987][__main__][INFO] - Step 1 | valid1 MSE : 0.1832 | valid1 NMSE : 1.4590
+[2025-09-25 01:16:41,459][__main__][INFO] - Step 100 | valid1 MSE : 0.0307 | valid1 NMSE : 0.6832
+[2025-09-25 01:21:15,430][__main__][INFO] - Step 200 | valid1 MSE : 0.0273 | valid1 NMSE : 0.6288
+[2025-09-25 01:25:48,473][__main__][INFO] - Step 300 | valid1 MSE : 0.0261 | valid1 NMSE : 0.6098
+[2025-09-25 01:30:21,664][__main__][INFO] - Step 400 | valid1 MSE : 0.0253 | valid1 NMSE : 0.6004
+[2025-09-25 01:34:55,952][__main__][INFO] - Step 500 | valid1 MSE : 0.0248 | valid1 NMSE : 0.5816
+[2025-09-25 01:39:30,240][__main__][INFO] - Step 600 | valid1 MSE : 0.0244 | valid1 NMSE : 0.5770
+[2025-09-25 01:44:05,307][__main__][INFO] - Step 700 | valid1 MSE : 0.0242 | valid1 NMSE : 0.5761
+[2025-09-25 01:48:39,439][__main__][INFO] - Step 800 | valid1 MSE : 0.0239 | valid1 NMSE : 0.5671
+[2025-09-25 01:53:13,687][__main__][INFO] - Step 900 | valid1 MSE : 0.0241 | valid1 NMSE : 0.5767
+[2025-09-25 01:57:48,212][__main__][INFO] - Step 1000 | valid1 MSE : 0.0237 | valid1 NMSE : 0.5629
+[2025-09-25 02:02:22,549][__main__][INFO] - Step 1100 | valid1 MSE : 0.0233 | valid1 NMSE : 0.5595
+[2025-09-25 02:06:56,968][__main__][INFO] - Step 1200 | valid1 MSE : 0.0232 | valid1 NMSE : 0.5592
+[2025-09-25 02:11:31,287][__main__][INFO] - Step 1300 | valid1 MSE : 0.0231 | valid1 NMSE : 0.5566
+[2025-09-25 02:16:06,061][__main__][INFO] - Step 1400 | valid1 MSE : 0.0230 | valid1 NMSE : 0.5539
+[2025-09-25 02:20:40,457][__main__][INFO] - Step 1500 | valid1 MSE : 0.0230 | valid1 NMSE : 0.5535
+[2025-09-25 02:25:15,194][__main__][INFO] - Step 1600 | valid1 MSE : 0.0229 | valid1 NMSE : 0.5572
+[2025-09-25 02:29:48,882][__main__][INFO] - Step 1700 | valid1 MSE : 0.0228 | valid1 NMSE : 0.5507
+[2025-09-25 02:34:22,623][__main__][INFO] - Step 1800 | valid1 MSE : 0.0237 | valid1 NMSE : 0.5609
+[2025-09-25 02:38:56,106][__main__][INFO] - Step 1900 | valid1 MSE : 0.0230 | valid1 NMSE : 0.5490
+[2025-09-25 02:43:29,802][__main__][INFO] - Step 2000 | valid1 MSE : 0.0230 | valid1 NMSE : 0.5491
+[2025-09-25 02:48:03,536][__main__][INFO] - Step 2100 | valid1 MSE : 0.0230 | valid1 NMSE : 0.5549
+[2025-09-25 02:52:37,088][__main__][INFO] - Step 2200 | valid1 MSE : 0.0233 | valid1 NMSE : 0.5478
+[2025-09-25 02:57:10,471][__main__][INFO] - Step 2300 | valid1 MSE : 0.0231 | valid1 NMSE : 0.5483
+[2025-09-25 03:01:44,638][__main__][INFO] - Step 2400 | valid1 MSE : 0.0228 | valid1 NMSE : 0.5484
+[2025-09-25 03:06:17,660][__main__][INFO] - Step 2500 | valid1 MSE : 0.0227 | valid1 NMSE : 0.5463
+[2025-09-25 03:10:50,961][__main__][INFO] - Step 2600 | valid1 MSE : 0.0228 | valid1 NMSE : 0.5447
+[2025-09-25 03:15:23,885][__main__][INFO] - Step 2700 | valid1 MSE : 0.0230 | valid1 NMSE : 0.5456
+[2025-09-25 03:19:56,036][__main__][INFO] - Step 2800 | valid1 MSE : 0.0228 | valid1 NMSE : 0.5446
+[2025-09-25 03:24:28,223][__main__][INFO] - Step 2900 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5465
+[2025-09-25 03:29:01,599][__main__][INFO] - Step 3000 | valid1 MSE : 0.0231 | valid1 NMSE : 0.5456
+[2025-09-25 03:33:34,562][__main__][INFO] - Step 3100 | valid1 MSE : 0.0233 | valid1 NMSE : 0.5583
+[2025-09-25 03:38:08,364][__main__][INFO] - Step 3200 | valid1 MSE : 0.0232 | valid1 NMSE : 0.5452
+[2025-09-25 03:42:41,993][__main__][INFO] - Step 3300 | valid1 MSE : 0.0230 | valid1 NMSE : 0.5440
+[2025-09-25 03:47:15,457][__main__][INFO] - Step 3400 | valid1 MSE : 0.0234 | valid1 NMSE : 0.5715
+[2025-09-25 03:51:49,255][__main__][INFO] - Step 3500 | valid1 MSE : 0.0232 | valid1 NMSE : 0.5449
+[2025-09-25 03:56:23,343][__main__][INFO] - Step 3600 | valid1 MSE : 0.0235 | valid1 NMSE : 0.5513
+[2025-09-25 04:00:57,764][__main__][INFO] - Step 3700 | valid1 MSE : 0.0238 | valid1 NMSE : 0.5449
+[2025-09-25 04:05:31,462][__main__][INFO] - Step 3800 | valid1 MSE : 0.0234 | valid1 NMSE : 0.5487
+[2025-09-25 04:10:05,077][__main__][INFO] - Step 3900 | valid1 MSE : 0.0236 | valid1 NMSE : 0.5464
+[2025-09-25 04:14:38,660][__main__][INFO] - Step 4000 | valid1 MSE : 0.0235 | valid1 NMSE : 0.5418
+[2025-09-25 04:19:12,062][__main__][INFO] - Step 4100 | valid1 MSE : 0.0240 | valid1 NMSE : 0.5447
+[2025-09-25 04:23:45,609][__main__][INFO] - Step 4200 | valid1 MSE : 0.0231 | valid1 NMSE : 0.5414
+[2025-09-25 04:28:19,617][__main__][INFO] - Step 4300 | valid1 MSE : 0.0234 | valid1 NMSE : 0.5412
+[2025-09-25 04:32:53,365][__main__][INFO] - Step 4400 | valid1 MSE : 0.0235 | valid1 NMSE : 0.5451
+[2025-09-25 04:37:27,037][__main__][INFO] - Step 4500 | valid1 MSE : 0.0233 | valid1 NMSE : 0.5429
+[2025-09-25 04:42:00,163][__main__][INFO] - Step 4600 | valid1 MSE : 0.0230 | valid1 NMSE : 0.5407
+[2025-09-25 04:46:32,782][__main__][INFO] - Step 4700 | valid1 MSE : 0.0237 | valid1 NMSE : 0.5412
+[2025-09-25 04:51:05,517][__main__][INFO] - Step 4800 | valid1 MSE : 0.0239 | valid1 NMSE : 0.5428
+[2025-09-25 04:51:05,525][__main__][INFO] - Training done in 223.461 min
+[2025-09-25 04:51:05,525][__main__][INFO] - Average time per step: 2.793 s
+[2025-09-25 04:51:07,275][__main__][INFO] - End of training
+[2025-09-25 04:51:07,275][__main__][INFO] - --Eval--
+[2025-09-25 04:53:50,481][__main__][INFO] - Final modulations: {'beta': np.float32(2.4598443e-05), 'alpha': np.float32(0.99995255)}
+[2025-09-25 04:53:50,482][__main__][INFO] - End of script
+
+[2025-09-25 04:54:03,908][__main__][INFO] - =====Running train script=====
+[2025-09-25 04:54:03,960][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/electricity/lags504_horizon504/seed_1/min_init/
+[2025-09-25 04:54:03,961][__main__][INFO] - Model PatchTST, norma mIN, criterion NMSE, kwargs {'latent': False, 'init_beta': True, 'fixed_beta': False, 'init_alpha': True, 'fixed_alpha': False, 'use_gamma': False, 'inverse_gamma': False}
+[2025-09-25 04:54:05,820][__main__][INFO] - Fetched dataloaders
+[2025-09-25 04:54:05,820][__main__][INFO] - Splits shapes:
+train	(252, 1, 15782)
+valid1	(252, 1, 5261)
+valid2	(64, 1, 15782)
+valid3	(64, 1, 5261)
+test1	(252, 1, 5261)
+test2	(64, 1, 5261)
+[2025-09-25 04:54:05,820][__main__][INFO] - Batches:
+ X=[64, 1, 504]
+ y=[64, 1, 504]
+[2025-09-25 04:54:05,846][__main__][INFO] - --Training--
+[2025-09-25 04:54:08,703][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 04:54:08,703][__main__][INFO] - Using device: cuda
+[2025-09-25 04:54:08,703][__main__][INFO] - Training 1200 epochs of 4 batches (4800 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 04:58:36,354][__main__][INFO] - Step 1 | valid1 MSE : 0.1836 | valid1 NMSE : 1.4653
+[2025-09-25 05:03:06,556][__main__][INFO] - Step 100 | valid1 MSE : 0.0305 | valid1 NMSE : 0.6750
+[2025-09-25 05:07:37,704][__main__][INFO] - Step 200 | valid1 MSE : 0.0271 | valid1 NMSE : 0.6290
+[2025-09-25 05:12:08,144][__main__][INFO] - Step 300 | valid1 MSE : 0.0260 | valid1 NMSE : 0.6087
+[2025-09-25 05:16:38,692][__main__][INFO] - Step 400 | valid1 MSE : 0.0251 | valid1 NMSE : 0.5936
+[2025-09-25 05:21:08,164][__main__][INFO] - Step 500 | valid1 MSE : 0.0246 | valid1 NMSE : 0.5834
+[2025-09-25 05:25:38,048][__main__][INFO] - Step 600 | valid1 MSE : 0.0242 | valid1 NMSE : 0.5766
+[2025-09-25 05:30:08,688][__main__][INFO] - Step 700 | valid1 MSE : 0.0241 | valid1 NMSE : 0.5718
+[2025-09-25 05:34:39,766][__main__][INFO] - Step 800 | valid1 MSE : 0.0237 | valid1 NMSE : 0.5677
+[2025-09-25 05:39:10,839][__main__][INFO] - Step 900 | valid1 MSE : 0.0238 | valid1 NMSE : 0.5659
+[2025-09-25 05:43:42,232][__main__][INFO] - Step 1000 | valid1 MSE : 0.0234 | valid1 NMSE : 0.5626
+[2025-09-25 05:48:13,522][__main__][INFO] - Step 1100 | valid1 MSE : 0.0231 | valid1 NMSE : 0.5597
+[2025-09-25 05:52:41,189][__main__][INFO] - Step 1200 | valid1 MSE : 0.0228 | valid1 NMSE : 0.5579
+[2025-09-25 05:57:09,626][__main__][INFO] - Step 1300 | valid1 MSE : 0.0227 | valid1 NMSE : 0.5566
+[2025-09-25 06:01:36,365][__main__][INFO] - Step 1400 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5550
+[2025-09-25 06:06:02,545][__main__][INFO] - Step 1500 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5536
+[2025-09-25 06:10:28,372][__main__][INFO] - Step 1600 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5524
+[2025-09-25 06:14:54,022][__main__][INFO] - Step 1700 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5512
+[2025-09-25 06:19:20,422][__main__][INFO] - Step 1800 | valid1 MSE : 0.0233 | valid1 NMSE : 0.5546
+[2025-09-25 06:23:47,900][__main__][INFO] - Step 1900 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5501
+[2025-09-25 06:28:14,615][__main__][INFO] - Step 2000 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5500
+[2025-09-25 06:32:41,178][__main__][INFO] - Step 2100 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5491
+[2025-09-25 06:37:07,354][__main__][INFO] - Step 2200 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5488
+[2025-09-25 06:41:33,057][__main__][INFO] - Step 2300 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5494
+[2025-09-25 06:45:59,069][__main__][INFO] - Step 2400 | valid1 MSE : 0.0222 | valid1 NMSE : 0.5476
+[2025-09-25 06:50:25,345][__main__][INFO] - Step 2500 | valid1 MSE : 0.0221 | valid1 NMSE : 0.5469
+[2025-09-25 06:54:51,801][__main__][INFO] - Step 2600 | valid1 MSE : 0.0221 | valid1 NMSE : 0.5457
+[2025-09-25 06:59:18,035][__main__][INFO] - Step 2700 | valid1 MSE : 0.0223 | valid1 NMSE : 0.5467
+[2025-09-25 07:03:45,139][__main__][INFO] - Step 2800 | valid1 MSE : 0.0220 | valid1 NMSE : 0.5453
+[2025-09-25 07:08:11,010][__main__][INFO] - Step 2900 | valid1 MSE : 0.0219 | valid1 NMSE : 0.5453
+[2025-09-25 07:12:37,329][__main__][INFO] - Step 3000 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5469
+[2025-09-25 07:17:03,903][__main__][INFO] - Step 3100 | valid1 MSE : 0.0223 | valid1 NMSE : 0.5443
+[2025-09-25 07:21:30,606][__main__][INFO] - Step 3200 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5461
+[2025-09-25 07:25:57,189][__main__][INFO] - Step 3300 | valid1 MSE : 0.0222 | valid1 NMSE : 0.5442
+[2025-09-25 07:30:24,090][__main__][INFO] - Step 3400 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5452
+[2025-09-25 07:34:49,878][__main__][INFO] - Step 3500 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5457
+[2025-09-25 07:39:16,798][__main__][INFO] - Step 3600 | valid1 MSE : 0.0227 | valid1 NMSE : 0.5460
+[2025-09-25 07:43:43,046][__main__][INFO] - Step 3700 | valid1 MSE : 0.0227 | valid1 NMSE : 0.5444
+[2025-09-25 07:48:09,514][__main__][INFO] - Step 3800 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5442
+[2025-09-25 07:52:35,750][__main__][INFO] - Step 3900 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5428
+[2025-09-25 07:57:02,004][__main__][INFO] - Step 4000 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5425
+[2025-09-25 08:01:27,972][__main__][INFO] - Step 4100 | valid1 MSE : 0.0229 | valid1 NMSE : 0.5448
+[2025-09-25 08:05:53,309][__main__][INFO] - Step 4200 | valid1 MSE : 0.0220 | valid1 NMSE : 0.5424
+[2025-09-25 08:10:18,960][__main__][INFO] - Step 4300 | valid1 MSE : 0.0222 | valid1 NMSE : 0.5417
+[2025-09-25 08:14:44,836][__main__][INFO] - Step 4400 | valid1 MSE : 0.0222 | valid1 NMSE : 0.5415
+[2025-09-25 08:19:10,930][__main__][INFO] - Step 4500 | valid1 MSE : 0.0220 | valid1 NMSE : 0.5410
+[2025-09-25 08:23:36,364][__main__][INFO] - Step 4600 | valid1 MSE : 0.0218 | valid1 NMSE : 0.5410
+[2025-09-25 08:28:01,968][__main__][INFO] - Step 4700 | valid1 MSE : 0.0223 | valid1 NMSE : 0.5419
+[2025-09-25 08:32:27,754][__main__][INFO] - Step 4800 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5435
+[2025-09-25 08:32:27,755][__main__][INFO] - Training done in 218.318 min
+[2025-09-25 08:32:27,755][__main__][INFO] - Average time per step: 2.729 s
+[2025-09-25 08:32:29,396][__main__][INFO] - End of training
+[2025-09-25 08:32:29,396][__main__][INFO] - --Eval--
+[2025-09-25 08:35:08,630][__main__][INFO] - Final modulations: {'beta': np.float32(0.024018914), 'alpha': np.float32(0.9963674)}
+[2025-09-25 08:35:08,631][__main__][INFO] - End of script
+
+[2025-09-25 08:35:21,829][__main__][INFO] - =====Running train script=====
+[2025-09-25 08:35:21,880][__main__][INFO] - Fetched main configs, save directory : ../outputs/norm/electricity/lags504_horizon504/seed_1/min_revin/
+[2025-09-25 08:35:21,880][__main__][INFO] - Model PatchTST, norma mIN, criterion NMSE, kwargs {'latent': False, 'init_beta': False, 'fixed_beta': False, 'init_alpha': False, 'fixed_alpha': False, 'use_gamma': True, 'inverse_gamma': True}
+[2025-09-25 08:35:23,495][__main__][INFO] - Fetched dataloaders
+[2025-09-25 08:35:23,495][__main__][INFO] - Splits shapes:
+train	(252, 1, 15782)
+valid1	(252, 1, 5261)
+valid2	(64, 1, 15782)
+valid3	(64, 1, 5261)
+test1	(252, 1, 5261)
+test2	(64, 1, 5261)
+[2025-09-25 08:35:23,495][__main__][INFO] - Batches:
+ X=[64, 1, 504]
+ y=[64, 1, 504]
+[2025-09-25 08:35:23,520][__main__][INFO] - --Training--
+[2025-09-25 08:35:26,406][__main__][INFO] - Starting training pytorch with lr=1e-05
+[2025-09-25 08:35:26,407][__main__][INFO] - Using device: cuda
+[2025-09-25 08:35:26,407][__main__][INFO] - Training 1200 epochs of 4 batches (4800 steps): , eval_freq: 100, print_freq: 100
+[2025-09-25 08:39:50,676][__main__][INFO] - Step 1 | valid1 MSE : 0.1832 | valid1 NMSE : 1.4601
+[2025-09-25 08:44:18,210][__main__][INFO] - Step 100 | valid1 MSE : 0.0307 | valid1 NMSE : 0.6736
+[2025-09-25 08:48:46,613][__main__][INFO] - Step 200 | valid1 MSE : 0.0273 | valid1 NMSE : 0.6279
+[2025-09-25 08:53:15,745][__main__][INFO] - Step 300 | valid1 MSE : 0.0261 | valid1 NMSE : 0.6077
+[2025-09-25 08:57:43,888][__main__][INFO] - Step 400 | valid1 MSE : 0.0252 | valid1 NMSE : 0.5929
+[2025-09-25 09:02:11,832][__main__][INFO] - Step 500 | valid1 MSE : 0.0247 | valid1 NMSE : 0.5828
+[2025-09-25 09:06:40,600][__main__][INFO] - Step 600 | valid1 MSE : 0.0243 | valid1 NMSE : 0.5761
+[2025-09-25 09:11:09,087][__main__][INFO] - Step 700 | valid1 MSE : 0.0241 | valid1 NMSE : 0.5713
+[2025-09-25 09:15:37,131][__main__][INFO] - Step 800 | valid1 MSE : 0.0238 | valid1 NMSE : 0.5672
+[2025-09-25 09:20:04,942][__main__][INFO] - Step 900 | valid1 MSE : 0.0239 | valid1 NMSE : 0.5655
+[2025-09-25 09:24:32,205][__main__][INFO] - Step 1000 | valid1 MSE : 0.0235 | valid1 NMSE : 0.5622
+[2025-09-25 09:29:00,659][__main__][INFO] - Step 1100 | valid1 MSE : 0.0231 | valid1 NMSE : 0.5593
+[2025-09-25 09:33:28,343][__main__][INFO] - Step 1200 | valid1 MSE : 0.0229 | valid1 NMSE : 0.5575
+[2025-09-25 09:37:54,921][__main__][INFO] - Step 1300 | valid1 MSE : 0.0228 | valid1 NMSE : 0.5563
+[2025-09-25 09:42:21,278][__main__][INFO] - Step 1400 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5547
+[2025-09-25 09:46:48,535][__main__][INFO] - Step 1500 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5532
+[2025-09-25 09:51:18,102][__main__][INFO] - Step 1600 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5520
+[2025-09-25 09:55:45,917][__main__][INFO] - Step 1700 | valid1 MSE : 0.0224 | valid1 NMSE : 0.5509
+[2025-09-25 10:00:13,955][__main__][INFO] - Step 1800 | valid1 MSE : 0.0233 | valid1 NMSE : 0.5541
+[2025-09-25 10:04:41,788][__main__][INFO] - Step 1900 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5498
+[2025-09-25 10:09:09,172][__main__][INFO] - Step 2000 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5496
+[2025-09-25 10:13:37,255][__main__][INFO] - Step 2100 | valid1 MSE : 0.0225 | valid1 NMSE : 0.5487
+[2025-09-25 10:18:05,353][__main__][INFO] - Step 2200 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5485
+[2025-09-25 10:22:32,721][__main__][INFO] - Step 2300 | valid1 MSE : 0.0226 | valid1 NMSE : 0.5489
+[2025-09-25 10:27:01,413][__main__][INFO] - Step 2400 | valid1 MSE : 0.0223 | valid1 NMSE : 0.5472
+[2025-09-25 10:31:29,031][__main__][INFO] - Step 2500 | valid1 MSE : 0.0221 | valid1 NMSE : 0.5466
+[2025-09-25 10:35:56,652][__main__][INFO] - Step 2600 | valid1 MSE : 0.0221 | valid1 NMSE : 0.5454
