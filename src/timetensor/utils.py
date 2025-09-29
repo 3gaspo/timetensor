@@ -33,13 +33,15 @@ def get_dirs(output_dir, save_name, model_name, norm_name=None, criterion_name=N
         os.makedirs(save_dir + "plots/")
     return save_name, save_dir
 
-def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, mIN=False):
+def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, mIN=False, do_context=False):
     """unrolls (x,y) examples of dataloaders (typically individuals*dates examples)"""
     ###TODO: remove std=0 windows for sklearn fitting
     X = []
     Y = []
+    C = []
     i = 0
     for x, c, y in dataloader:
+        i+=x.shape[0]
         if normal:
             mean, std = get_normal_stats(x)
             nx = normalize(x, mean, std)
@@ -52,15 +54,21 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, b
         else:
             X.append(x)
             Y.append(y)
-        if cap is not None and i == cap and not shuffle:
+        C.append(c)
+
+        if cap is not None and i+x.shape[0] > cap and not shuffle:
             break
-        i+=1
+
     if shuffle:
         idx = np.random.permutation(len(X))
-        X, Y = [X[i] for i in idx], [Y[i] for i in idx]
+        X, Y, C = [X[i] for i in idx], [Y[i] for i in idx], [C[i] for i in idx]
         if cap:
-            X, Y = X[:cap], Y[:cap]
-    return torch.concat(X), torch.concat(Y)
+            X, Y, C = X[:cap], Y[:cap], C[:cap]
+    if do_context:
+        return torch.concat(X), torch.concat(Y), torch.concat(C)
+
+    else:
+        return torch.concat(X), torch.concat(Y)
 
 
 def get_normal_stats(x): #(B, dim, T)
