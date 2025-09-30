@@ -626,3 +626,67 @@ def plot_expe(losses_path, eval_freq=10, names=None, save_path=None, lr=None, bs
             plot_multi_losses(losses_dict1[loss_name], save_path, f"{loss_name}_valid1.pdf", f"Valid {loss_name}" + title_sfx, eval_freq=eval_freq)
             plot_multi_losses(losses_dict2[loss_name], save_path, f"{loss_name}_valid2.pdf", f"Valid2 {loss_name}" + title_sfx, eval_freq=eval_freq)
             plot_multi_losses(losses_dict3[loss_name], save_path, f"{loss_name}_valid3.pdf", f"Valid3 {loss_name}"+ title_sfx, eval_freq=eval_freq)
+
+
+
+
+def latex_colored_number(value, decimals=2):
+    """return colored string value"""
+    if value is None:
+        return "--"
+    fmt = f"{{:.{decimals}f}}"
+    s = fmt.format(value)
+    if value > 0:
+        return r"{\color{red}" + s + "}"
+    elif value < 0:
+        return r"{\color{green}" + s + "}"
+    else:
+        return s
+
+def build_results_table_latex(
+    save_dir, datasets, settings, show_row=0, model="RevIN", decimals=2, file_name="results.csv", n_paths=1, multipliers=None, baseline=None, title="1e5 * MSE", save_name="results.tex"):
+    """
+    Returns a LaTeX tabular string
+    Directory layout assumed: {save_dir}/{dataset}/lags{L}_horizon{H}/
+    """
+    datasets = [text for text in datasets.split(";")]
+    settings = [text for text in settings.split(";")]
+    norm_settings = []
+    pretty_headers = []
+    for s in settings:
+        _s = s.split("-")
+        L, H = int(_s[0]), int(_s[1])
+        norm_settings.append((L, H))
+        pretty_headers.append(f"{L}-{H}")
+
+    # Collect values
+    values = {ds: [] for ds in datasets} 
+    for ds in datasets:
+        for (L, H) in norm_settings:
+            dir_name = save_dir + f"{ds}/lags{L}_horizon{H}/"
+            df, _ = get_multiple_errors_df(
+                    dir_name=dir_name,
+                    file_name=file_name,
+                    n_paths=n_paths,
+                    multipliers=multipliers,
+                    baseline=baseline
+                )
+            values[ds].append(df.iloc[show_row][model])
+
+    lines = []
+    colspec = "l" + "c" * len(pretty_headers)
+    lines.append(f"\\begin{{tabular}}{{{colspec}}}")
+    lines.append("\\toprule")
+    lines.append(title + " & " + " & ".join(pretty_headers) + r" \\")
+    lines.append("\\midrule")
+
+    for ds in datasets:
+        ds_latex = ds.replace("_", r"\_").capitalize()
+        cells = [latex_colored_number(v, decimals=decimals) for v in values[ds]]
+        lines.append(ds_latex + " & " + " & ".join(cells) + r" \\")
+    lines.append("\\bottomrule")
+    lines.append("\\end{tabular}")
+    latex = "\n".join(lines)
+    
+    with open(save_dir + save_name, "w", encoding="utf-8") as f:
+        f.write(latex)

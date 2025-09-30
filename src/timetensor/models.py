@@ -46,7 +46,7 @@ class Persistence(nn.Module):
     """Repeats last value"""
     def __init__(self, horizon):
         super().__init__()
-        self.model_name = "persistence"
+        self.name = "persistence"
         self.horizon = horizon
     def forward(self, x, context=None):
         #past_values = x[:, :, -1].unsqueeze(2) # (B, dim, 1)
@@ -58,7 +58,7 @@ class Expected(nn.Module):
     """Repeats lookback mean"""
     def __init__(self, horizon):
         super().__init__()
-        self.model_name = "expected"
+        self.name = "expected"
         self.horizon = horizon
     def forward(self, x, context=None):
         mean = x.mean(dim=-1, keepdim=True).detach()
@@ -69,7 +69,7 @@ class Repeat(nn.Module):
     """Repeats last segment of horizon size"""
     def __init__(self, horizon):
         super().__init__()
-        self.model_name = "repeat"
+        self.name = "repeat"
         self.horizon = horizon
     def forward(self, x, context=None):
         output = x[:, :, -self.horizon:] # (B, dim, horizon)
@@ -79,7 +79,7 @@ class Lookback(nn.Module):
     """Repeats segment of horizon size starting at idx"""
     def __init__(self, horizon, idx):
         super().__init__()
-        self.model_name = "lookback"
+        self.name = "lookback"
         self.horizon = horizon
         self.idx  = idx
     def forward(self, x, context=None):
@@ -90,7 +90,7 @@ class Linear(nn.Module):
     """Linear layer over lookback"""
     def __init__(self, lags, dim, horizon):
         super().__init__()
-        self.model_name = "linear"
+        self.name = "linear"
         self.lags, self.dim, self.horizon  = lags, dim, horizon
         self.fc = nn.Linear(lags * dim, horizon * dim)
     def forward(self, x, context=None):
@@ -104,7 +104,7 @@ class Weekly(nn.Module):
     """Linear layer over subset indexes of lookback windows"""
     def __init__(self, lags, dim, horizon):
         super().__init__()
-        self.model_name = "weekly"
+        self.name = "weekly"
         self.dim, self.horizon  = dim, horizon
         indexes=list(range(horizon))
         idx = 7*24

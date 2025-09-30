@@ -317,7 +317,10 @@ def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, e
     return learner
 
 
-def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complete_evaluation, save=False):
+def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complete_evaluation, save=False, results_dir=None):
+    """evaluating model script"""
+    if results_dir is None:
+        results_dir = save_dir
     test_losses1 = learner.eval(loaders_dict["test1"], return_all=True) #(steps, dim, horizon)
     test_losses2 = learner.eval(loaders_dict["test2"], return_all=True) #(steps, dim, horizon)
     if save:
@@ -327,7 +330,7 @@ def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complet
     for loss_name in eval_losses:
         mean = test_losses1[loss_name].mean() 
         #std = test_losses1[loss_name].std()
-        save_results(mean, save_dir, "test1_mean_results.json", save_name, f"Test {loss_name}")
+        save_results(mean, results_dir, "test1_mean_results.json", save_name, f"Test {loss_name}")
         # save_results(std, save_dir, "test1_std_results.json", save_name, f"Test {loss_name}")
         if complete_evaluation:
             # plot_errors(test_losses1[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"test1_{loss_name}.pdf", f"Test 1 {loss_name} of {save_name} : {mean}")
@@ -335,7 +338,7 @@ def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complet
     for loss_name in eval_losses:
         mean = test_losses2[loss_name].mean()
         # std = test_losses2[loss_name].std()
-        save_results(mean, save_dir, "test2_mean_results.json", save_name, f"Test {loss_name}")
+        save_results(mean, results_dir, "test2_mean_results.json", save_name, f"Test {loss_name}")
         # save_results(std, save_dir, "test2_std_results.json", save_name, f"Test {loss_name}")
         if complete_evaluation:
             # plot_errors(test_losses2[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"test2_{loss_name}.pdf", f"Test 2 {loss_name} of {save_name} : {mean}")
