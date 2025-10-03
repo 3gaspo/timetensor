@@ -132,3 +132,11 @@ def filter_df(df, mask):
 def is_cte(x, dim=-1):
     """checks if x is constant along dim"""
     return (x.min(dim=dim).values == x.max(dim=dim).values).all()
+
+def text_list(L):
+    if type(L) == list:
+        return L
+    elif type(L) == str:
+        return L.split(";")
+    else:
+        return [L]

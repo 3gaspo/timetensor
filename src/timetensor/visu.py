@@ -12,7 +12,7 @@ import seaborn as sns
 
 from .dataset import fetch_example_data
 from .analysis import *
-
+from .utils import text_list
 
 ## series plots
 
@@ -423,7 +423,7 @@ def get_expe_results(dir_name, file_name, multipliers=None, names=None, print_ta
     plt.close()
 
 
-def get_multiple_errors_df(dir_name, file_name, n_paths, multipliers=None, names=None, baseline=None, save=False):
+def get_multiple_errors_df(dir_name, file_name, n_paths, multipliers=None, names=None, baseline=None, save=False, percents=False):
     """formats errors json from multipled seeds in dir_name"""
     paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
     dfs = []
@@ -439,7 +439,10 @@ def get_multiple_errors_df(dir_name, file_name, n_paths, multipliers=None, names
             df = df[names]
 
         if baseline is not None and baseline in df.columns:
-            df = df.subtract(df[baseline], axis=0)
+            baseline_vals = df[baseline].copy()
+            df = df.subtract(baseline_vals, axis=0)
+            if percents:
+                df = 100 * df.divide(baseline_vals, axis=0)
         dfs.append(df)
 
     df_mean = pd.concat(dfs).groupby(level=0).mean()
@@ -630,60 +633,117 @@ def plot_expe(losses_path, eval_freq=10, names=None, save_path=None, lr=None, bs
 
 
 
-def latex_colored_number(value, decimals=2):
+def latex_colored_number(value, decimals=2, color=False, row=None, std=None):
     """return colored string value"""
     if value is None:
         return "--"
-    fmt = f"{{:.{decimals}f}}"
-    s = fmt.format(value)
-    if value > 0:
-        return r"{\color{red}" + s + "}"
-    elif value < 0:
-        return r"{\color{green}" + s + "}"
+
+    if std is not None:
+        fmt = f"{{:.{decimals}f}}" + " ± " + f"{std:.2f}"
     else:
-        return s
+        fmt = f"{{:.{decimals}f}}"
+    s = fmt.format(value)
+
+    if row is not None:
+        m = min(row)
+        if value == m:
+            s = r"\textbf{" + s + "}"
+    if color:
+        if value > 0:
+            return r"{\color{red}" + s + "}"
+        elif value < 0:
+            return r"{\color{green}" + s + "}"
+    return s
 
 def build_results_table_latex(
-    save_dir, datasets, settings, show_row=0, model="RevIN", decimals=2, file_name="results.csv", n_paths=1, multipliers=None, baseline=None, title="1e5 * MSE", save_name="results.tex"):
+    save_dir, datasets, settings, show_row=0, models="RevIN", file_name="test1_mean_results.json", n_paths=1, multipliers=None, baseline=None, title="1e5 * MSE", save_name="test1_mean_results.tex", color=False, decimals=2, show_std=True):
     """
     Returns a LaTeX tabular string
     Directory layout assumed: {save_dir}/{dataset}/lags{L}_horizon{H}/
     """
-    datasets = [text for text in datasets.split(";")]
-    settings = [text for text in settings.split(";")]
+    datasets = text_list(datasets)
+    settings = text_list(settings) #of size datasets * settings per dataset
     norm_settings = []
-    pretty_headers = []
     for s in settings:
         _s = s.split("-")
         L, H = int(_s[0]), int(_s[1])
         norm_settings.append((L, H))
-        pretty_headers.append(f"{L}-{H}")
+
+    n_paths = text_list(n_paths)
+    n_paths = [int(text) for text in n_paths]
+    if len(n_paths) == 1 and len(settings)>1:
+        n_paths = [n_paths[0] for _ in range(len(settings))]
+    models = text_list(models)
 
     # Collect values
-    values = {ds: [] for ds in datasets} 
-    for ds in datasets:
-        for (L, H) in norm_settings:
+    values = {}
+    values_percent = {}
+    values_std = {}
+    for i, (L, H) in enumerate(norm_settings):
+        for model in models:
+            ds = datasets[i // len(datasets)]
             dir_name = save_dir + f"{ds}/lags{L}_horizon{H}/"
-            df, _ = get_multiple_errors_df(
+            df, df_std = get_multiple_errors_df(
                     dir_name=dir_name,
                     file_name=file_name,
-                    n_paths=n_paths,
+                    n_paths=n_paths[i],
                     multipliers=multipliers,
-                    baseline=baseline
+                    baseline=None
                 )
-            values[ds].append(df.iloc[show_row][model])
 
+            # if show_std:
+            #     for col in df.columns:
+            #         df[col] = df[col].map("{:.2f}".format) + " ± " + df_std[col].map("{:.2f}".format)
+
+            key = f"{ds}_{L}_{H}"
+            if key not in values:
+                values[key] = []
+                values_percent[key] = []
+                values_std[key] = []
+
+            values[key].append(df.iloc[show_row][model])
+            values_std[key].append(df_std.iloc[show_row][model])
+            if baseline is not None:
+                df, _ = get_multiple_errors_df(
+                        dir_name=dir_name,
+                        file_name=file_name,
+                        n_paths=n_paths[i],
+                        multipliers=None,
+                        baseline=baseline,
+                        percents=True
+                    )
+                values_percent[key].append(df.iloc[show_row][model])
+    
     lines = []
-    colspec = "l" + "c" * len(pretty_headers)
+    colspec = "l" + "c" + "c" * len(models)
     lines.append(f"\\begin{{tabular}}{{{colspec}}}")
     lines.append("\\toprule")
-    lines.append(title + " & " + " & ".join(pretty_headers) + r" \\")
+    # lines.append(title + " & " + " & ".join(pretty_headers) + r" \\")
+    lines.append(title + " & " + "L-H" + " & " + " & ".join([model.replace("_", r"\_") for model in models]) + r" \\")
     lines.append("\\midrule")
 
-    for ds in datasets:
+    # for ds in datasets:
+    for i, (L, H) in enumerate(norm_settings):
+        ds_idx = i // len(datasets)
+        ds = datasets[ds_idx]
+        key = f"{ds}_{L}_{H}"
         ds_latex = ds.replace("_", r"\_").capitalize()
-        cells = [latex_colored_number(v, decimals=decimals) for v in values[ds]]
-        lines.append(ds_latex + " & " + " & ".join(cells) + r" \\")
+    
+        cells = [latex_colored_number(v, decimals=decimals, color=color, row=values[key], std=values_std[key][i]) for i, v in enumerate(values[key])]
+        if i % len(datasets) == 0:
+            lines.append("\\multirow{" + str(len(datasets)) + "}{*}{" + ds_latex + "}" + " & " + f"{L}-{H}" + " & " + " & ".join(cells) + r" \\")
+        else:
+            lines.append(" & " + f"{L}-{H}" + " & " + " & ".join(cells) + r" \\")
+        if i % len(datasets) == len(datasets) - 1:
+            lines.append("\\midrule")
+
+    if baseline is not None:
+        lines.append("\\midrule")
+        values_percent = pd.DataFrame.from_dict(values_percent, orient="index")
+        values_percent.columns = models
+        means = values_percent.mean(axis=0).values
+        lines.append("Improvements" + " & " + " & " + " & ".join([str(round(mean,2)) + r" \% " for mean in means]) + r" \\")
+
     lines.append("\\bottomrule")
     lines.append("\\end{tabular}")
     latex = "\n".join(lines)

@@ -500,7 +500,7 @@ def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by
 
 
 # def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None, context_by_individuals=True, save_path=None, reshuffle=True, cluster_path=None, set_cluster=None, data=None):
-def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None, set_cluster=None, data=None):
+def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None, set_cluster=None, data=None, fetch_cluster=None):
     """splits data from path. If str splits, will load given split, if float will save new split"""
     context_by_indiv, reshuffle = splits.context_by_individuals, splits.reshuffle 
     date_splits, indiv_split = splits.date_splits, splits.indiv_split
@@ -512,8 +512,11 @@ def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None
         values, context, datetimes = data
     
     #filter values at cluster path
-    if cluster_path is not None:
-        indices = list(torch.load(cluster_path, weights_only=False))
+    if cluster_path is not None or fetch_cluster is not None:
+        if cluster_path is not None:
+            indices = list(torch.load(cluster_path, weights_only=False))
+        else:
+            indices = [fetch_cluster]
         values = values[indices]
         if context is not None and context_by_indiv:
             context = context[indices]
@@ -542,7 +545,7 @@ def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None
 
 
 
-def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, save_path=None, stats=None):
+def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, save_path=None, stats=None,shuffle_eval=False):
     """returns dataloaders from data_dict as eventual subsets"""
     subset_mode, subsets  = subsets.mode, subsets.sizes
     idx_mode = splits.idx_mode
@@ -551,7 +554,6 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, sav
     
     if subsets is not None:
         subsets = [float(txt) for txt in subsets.split(";")]
-        assert len(subsets) == len(data_dict)
     else:
         subsets = [1 for _ in range(len(data_dict))]
     save = (save_path is not None)
@@ -588,7 +590,7 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, sav
         else:
             local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_eval_cte)
             # effective_bs = max(int(batch_size // values.shape[0]),1)
-            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=local_collate_fn)
+            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle_eval, collate_fn=local_collate_fn)
        
     return loaders_dict
 
@@ -683,7 +685,7 @@ def get_sizes(loaders_dict, str_info=False):
         return shape, shape_str, batch_str
 
 
-def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, clusters=None, aggregate=True, seed=None, save=False):
+def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, clusters=None, aggregate=True, seed=None, save=False, shuffle_eval=False, fetch_cluster=None):
     """returns loaders dict (clusters=> nested dict)"""
     if seed is not None: 
         torch.manual_seed(seed)
@@ -711,7 +713,7 @@ def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, c
                 split_path, subset_path = None, None
             cluster_path_ = cluster_path+cluster_name
             data_dict = get_dataset_splits(splits, data_path, split_path, cluster_path_, set_cluster=k)
-            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path)
+            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path, shuffle_eval=shuffle_eval)
             loaders_dicts.append(loaders_dict)
 
             node_dict = {subkey: loader.dataset.get_df() for subkey, loader in loaders_dict.items()}
@@ -738,15 +740,15 @@ def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, c
             else:
                 split_path, subset_path = None, None
             data_dict = get_dataset_splits(splits, data_path, split_path, cluster_path)
-            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path)
+            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path, shuffle_eval=shuffle_eval)
         else:
             if save:
                 split_path = save_path + "splits/"
                 subset_path = save_path+ "subsets/"
             else:
                 split_path, subset_path = None, None
-            data_dict = get_dataset_splits(splits, data_path, split_path)
-            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path)
+            data_dict = get_dataset_splits(splits, data_path, split_path, fetch_cluster=fetch_cluster)
+            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path, shuffle_eval=shuffle_eval)
 
         df_dict = {key: loader.dataset.get_df() for key, loader in loaders_dict.items()}
         stats_dict = get_dataset_stats(df_dict, lags, horizon, splits["remove_train_cte"], splits["remove_eval_cte"], save_path)
