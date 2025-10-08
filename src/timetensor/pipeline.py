@@ -122,7 +122,7 @@ class Learner:
         if self.pytorch:
             return self.model.state_dict()
         else:
-            return self.model.model.reg.coef_        
+            return self.model.reg.coef_        
 
     def compute_step(self, X_batch, context_batch, y_batch):
         """computes forward and backward on batch"""

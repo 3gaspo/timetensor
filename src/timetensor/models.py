@@ -42,6 +42,51 @@ class ConstantModel(nn.Module):
         else:
             raise AttributeError(f"{type(self).__name__} has no attribute {name!r}")
 
+class ResidualModel(nn.Module):
+    """Wrapper for model, sums linear(mu,std) and residual=model(x)"""
+    def __init__(self, model, dim, horizon):
+        super().__init__()
+        self.model = model
+        self.dim, self.horizon = dim, horizon
+        self.fc = nn.Linear((2+self.horizon) * self.dim, self.horizon * self.dim)
+
+        # --- custom init ---
+        with torch.no_grad():
+            # Zero all weights and biases
+            self.fc.weight.zero_()
+            self.fc.bias.zero_()
+            # Identity mapping for latent part
+            # For each (dim, horizon), connect latent -> pred directly
+            for d in range(dim):
+                for h in range(horizon):
+                    out_idx = d * horizon + h
+                    in_idx = d * (2 + horizon) + 2 + h  # skip mu,std
+                    self.fc.weight[out_idx, in_idx] = 1.0
+
+    def forward(self, x, c=None): #x : (B, dim, lags)
+        batch_size = x.shape[0]
+        mu = x.mean(dim=-1, keepdim=True).detach() #(B, dim, 1)
+        std =  x.std(dim=-1, keepdim=True).detach() #(B, dim, 1)
+
+        latent = self.model(x, c) #(B, dim, horizon)
+        stats = torch.cat((mu,std), dim=-1) # (B, dim, 2)
+
+        features = torch.cat((stats,latent), dim=-1) # (B, dim, 2+horizon)
+        pred = self.fc(features) # (B, dim _ horizon)
+        pred = pred.view(batch_size, self.dim, self.horizon) #(B, dim, horizon)
+
+        return pred
+     
+    def __getattr__(self, name): # only called if attribute not found normally
+        try:
+            return super().__getattr__(name)
+        except AttributeError:
+            pass
+        if hasattr(self.model, name):
+            return getattr(self.model, name)
+        else:
+            raise AttributeError(f"{type(self).__name__} has no attribute {name!r}")
+
 class Persistence(nn.Module):
     """Repeats last value"""
     def __init__(self, horizon):
@@ -313,7 +358,7 @@ class FlexRevIN(DefaultNorm):
     
 
 class mIN(DefaultNorm):
-    def __init__(self, model, dim, eps=1e-8, init_alpha=False, init_beta=False, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, latent=False,**kwargs):
+    def __init__(self, model, dim, eps=1e-8, init_alpha=True, init_beta=True, fixed_alpha=False, fixed_beta=False, use_gamma=True, inverse_gamma=True, latent=False,**kwargs):
         """mIN: Modulated Instance Normalization"""
         super().__init__(model, latent)
         self.norm_name = "mIN"
@@ -514,7 +559,7 @@ class cflexRevIN(DefaultNorm):
 
 ######
 
-def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=False, constants=True, **kwargs):
+def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=False, constants=True, residuals=False, **kwargs):
     """loads models from str model name"""
     lags, dim, horizon = shape[0], shape[1], shape[2]
     
@@ -569,6 +614,10 @@ def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=Fa
     #constants
     if constants and ("sk" not in model_name):
         model = ConstantModel(model, horizon)
+
+    #residuals
+    if residuals and ("sk" not in model_name):
+        model = ResidualModel(model, dim, horizon)
 
     #init
     if init_path is not None and ("sk" not in model_name):

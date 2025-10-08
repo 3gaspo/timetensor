@@ -1,3 +1,4 @@
 name: PatchTST
 constants: True
+residuals: False
 configs:

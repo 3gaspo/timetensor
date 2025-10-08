@@ -76,7 +76,7 @@ def run(cfg):
             kwargs["init_beta"] = [nodes_stats_dict[node]["train"]["alpha"] for node in nodes_stats_dict]
         else:
             kwargs["init_beta"] = stats_dict["train"]["beta"]
-    model = load_model(model_name, shape, norm_name, init_path, cfg.training.freeze_core, cfg.model.constants, **kwargs)
+    model = load_model(model_name, shape, norm_name, init_path, cfg.training.freeze_core, cfg.model.constants, cfg.model.residuals, **kwargs)
     if cfg.training.freeze_core:
         trainable_params = []
         for name, param in model.named_parameters():

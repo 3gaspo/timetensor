@@ -1,3 +1,4 @@
 name: sklinear
 constants: True
+residuals: False
 configs:

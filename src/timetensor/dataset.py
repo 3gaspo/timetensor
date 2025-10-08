@@ -22,7 +22,7 @@ class TimeSeriesDataset(Dataset):
         context (N_contexts, dim_context, dates): exogenous variates  e.g N_contexts=1 or N_contexts=N_individuals
         lags (int): size of lookback window
         horizon (int): size of target horizon
-        idx_mode (bool): access items by date or individuals
+        idx_mode (str): access items by date or individuals, or both
         return_all_individuals (bool): return all individuals or a random
         context_by_individuals(bool): return one context per individual or all
         """
@@ -60,9 +60,11 @@ class TimeSeriesDataset(Dataset):
             self.true_len = self.dates - (self.lags + self.horizon)
         elif self.idx_mode == "indiv":
             self.true_len = self.individuals
-        else:
+        elif self.idx_mode == "all":
             self.true_len = self.individuals * (self.dates - (self.lags + self.horizon))
-
+        else:
+            raise ValueError(f"Unrecognized idx_mode: {idx_mode}")
+        
     @property
     def shape(self):
         if self.context is not None:
@@ -79,14 +81,10 @@ class TimeSeriesDataset(Dataset):
         self.stats = stats
         self.values = normalize(self.values, self.stats["mean"], self.stats["std"])
 
-    def __getitem__(self, raw_idx):
-        if self.weight > 1:
-            idx = raw_idx % self.true_len
-        else:
-            idx = raw_idx
+    def __getitem__(self, raw_idx):        
+        idx = raw_idx % self.true_len
         
         remove_cte_counter = 0
-
         if self.idx_mode == "date":
             if self.return_all_individuals: #1 batch = all individuals, batch of dates
                 values = self.values[:, :, idx : idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
@@ -145,16 +143,17 @@ class TimeSeriesDataset(Dataset):
                 else:
                     context = self.context[:, :, t: t + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
 
-        else:
-            date, indiv = raw_idx // self.individuals, raw_idx % self.individuals
+        elif self.idx_mode == "all":
+            date, indiv = idx // self.individuals, idx % self.individuals
             values = self.values[indiv, :, date : date + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
-            while is_cte(values[:, :, :self.lags]):
-                if remove_cte_counter > 100:
-                        raise ValueError("Overflow constant windows")
-                idx = np.random.randint(self.weight * self.true_len)
-                date, indiv = idx // self.individuals, idx % self.individuals
-                values = self.values[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0)
-                remove_cte_counter += 1
+            if self.remove_cte:
+                while is_cte(values[:, :, :self.lags]):
+                    if remove_cte_counter > 100:
+                            raise ValueError("Overflow constant windows")
+                    idx = np.random.randint(self.weight * self.true_len)
+                    date, indiv = idx // self.individuals, idx % self.individuals
+                    values = self.values[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0)
+                    remove_cte_counter += 1
             if self.context is not None:
                 if self.context_by_individuals:
                     context = self.context[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
@@ -163,7 +162,6 @@ class TimeSeriesDataset(Dataset):
 
         inputs = values[:, :, :self.lags] # (individuals, dim, lags)
         target = values[:, :, self.lags:] # (individuals, dim, horizon)
-        
         if self.context is not None:
             return inputs, context, target
         else:
@@ -177,11 +175,16 @@ class TimeSeriesSubset(Dataset):
         self.mode = subset_mode
         self.lags, self.horizon = dataset.lags, dataset.horizon 
 
-        if self.mode == "indiv":
+        if dataset.context is not None:
+            self.original_shape, _ = dataset.shape
+        else:
+            self.original_shape = dataset.shape
+
+        if self.mode == "individuals":
             if dataset.idx_mode == "date":
                 self.dataset = copy.deepcopy(dataset)
                 self.dataset.values = self.dataset.values[self.indices]
-                self.dataset.individuals = len(self.indices)
+                self.dataset.individuals = len(indices)
                 if self.dataset.context is not None and self.dataset.context_by_individual:
                     self.dataset.context = self.dataset.context[self.indices]
             else:
@@ -191,56 +194,68 @@ class TimeSeriesSubset(Dataset):
             self.dim_values = self.dataset.dim_values
             if self.dataset.context is not None:
                 if self.dataset.context_by_individuals:
-                    self.contexts = self.individuals
+                    self.contexts = len(indices)
                 else:
                     self.contexts = self.dataset.contexts
-            else:
-                self.context = None
 
         elif self.mode == "dates":
             assert len(indices) > self.lags + self.horizon, "not enough dates for this lag and horizon"
-            if not dataset.by_date:
+            if dataset.idx_mode == "indiv":
                 self.dataset = copy.deepcopy(dataset)
                 self.dataset.values = self.dataset.values[:, :, self.indices]
                 self.dataset.datetimes = self.dataset.datetimes[self.indices]
-                self.dataset.dates = len(indices)
+                if self.dataset.context is not None:
+                    self.dataset.context = self.dataset.context[:, :, self.indices]
             else:
-                self.dataset = dataset
+                self.dataset = copy.deepcopy(dataset)
             self.individuals = self.dataset.individuals
             self.dates = len(indices)
-            self.context = self.dataset.context
             self.dim_values = self.dataset.dim_values
+            if self.dataset.context is not None:
+                self.contexts = self.dataset.contexts
 
         elif self.mode == "dim":
-            self.dataset = dataset
             self.individuals = self.dataset.individuals
             self.dates = self.dataset.dates
-            self.context = self.dataset.context
+            self.contexts = self.dataset.contexts
             self.dim_values = len(self.indices)
 
     def __getitem__(self, idx):
+        if self.dataset.idx_mode == "all":
+            date, indiv = idx // self.original_shape[0], idx % self.original_shape[0]
+            if self.mode == "dates":
+                date = self.indices[date]
+            elif self.mode == "individuals":
+                indiv = self.indices[indiv]
+            idx = indiv * date
+            return self.dataset[idx]
         if self.mode == "dim":
             return self.dataset[idx][:, self.indices, :]
-        elif (self.mode=="dates" and self.dataset.by_date) or (self.mode=="individuals" and not self.dataset.by_date):
+        elif (self.mode=="dates" and self.dataset.idx_mode=="date") or (self.mode=="individuals" and not self.dataset.idx_mode=="date"):
             return self.dataset[self.indices[idx]]
         else:
             return self.dataset[idx]
         
     def __len__(self):
-        if self.dataset.by_date:
+        if self.dataset.idx_mode == "date":
             if self.mode == "individuals":
                 return len(self.dataset)
-            else:
+            elif self.mode == "dates":
                 return len(self.indices) - (self.lags + self.horizon)
-        else:
+        elif self.dataset.idx_mode == "indiv":
             if self.mode == "individuals":
                 return len(self.indices)
-            else:
+            elif self.mode == "dates":
                 return len(self.dataset)
+        elif self.dataset.idx_mode == "all":
+            if self.mode == "individuals":
+                return self.dataset.weight * len(self.indices) * (self.dates - (self.lags + self.horizon))
+            elif self.mode == "dates":
+                return self.dataset.weight * self.individuals * (len(self.indices) - (self.lags + self.horizon))
 
     @property
     def shape(self):
-        if self.context is not None:
+        if self.dataset.context is not None:
             return (self.individuals, self.dim_values, self.dates), (self.dataset.contexts, self.dataset.dim_context, self.dates)
         else:
             return (self.individuals, self.dim_values, self.dates)
@@ -250,9 +265,16 @@ class TimeSeriesSubset(Dataset):
         if self.mode == "dim":
             return self.dataset.values[:, self.indices, :]
         elif self.mode=="dates":
-            return self.dataset.values[:, :, self.indices]
+            if self.dataset.idx_mode=="date" or self.dataset.idx_mode=="all":
+                return self.dataset.values[:, :, self.indices]
+            else:
+                return self.dataset.values
         elif self.mode=="individuals":
-            return self.dataset.values[self.indices, :, :]
+            if self.dataset.idx_mode=="indiv" or self.dataset.idx_mode=="all":
+                return self.dataset.values[self.indices, :, :]
+            else:
+                return self.dataset.values
+            
     @property
     def datetimes(self):
         if self.mode == "dates":
@@ -261,7 +283,9 @@ class TimeSeriesSubset(Dataset):
             return self.dataset.datetimes
 
     def get_df(self, dim=0):
-        return pd.DataFrame(self.values[:, 0, :].transpose(0,1), index=self.datetimes)
+        return pd.DataFrame(self.values[:, dim, :].transpose(0,1), index=self.datetimes)
+    def set_stats(self, stats):
+        self.dataset.set_stats(stats)
 
 
 def fetch_csv(data_path, data_name, context_cols=None, drop=None):
@@ -545,7 +569,7 @@ def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None
 
 
 
-def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, save_path=None, stats=None,shuffle_eval=False):
+def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, save_path=None, stats=None, shuffle_eval=False):
     """returns dataloaders from data_dict as eventual subsets"""
     subset_mode, subsets  = subsets.mode, subsets.sizes
     idx_mode = splits.idx_mode
