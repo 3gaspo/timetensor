@@ -67,12 +67,12 @@ def run(cfg):
 
     #model
     if kwargs.get("init_alpha") is True:
-        if clusters is not None:
+        if "cmIN" in model_name:
             kwargs["init_alpha"] = [nodes_stats_dict[node]["train"]["alpha"] for node in nodes_stats_dict]
         else:
             kwargs["init_alpha"] = stats_dict["train"]["alpha"]
     if kwargs.get("init_beta") is True:
-        if clusters is not None:
+        if "cmIN" in model_name:
             kwargs["init_beta"] = [nodes_stats_dict[node]["train"]["alpha"] for node in nodes_stats_dict]
         else:
             kwargs["init_beta"] = stats_dict["train"]["beta"]
