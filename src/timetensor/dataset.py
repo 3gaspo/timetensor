@@ -526,8 +526,8 @@ def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by
 # def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None, context_by_individuals=True, save_path=None, reshuffle=True, cluster_path=None, set_cluster=None, data=None):
 def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None, set_cluster=None, data=None, fetch_cluster=None):
     """splits data from path. If str splits, will load given split, if float will save new split"""
-    context_by_indiv, reshuffle = splits.context_by_individuals, splits.reshuffle 
-    date_splits, indiv_split = splits.date_splits, splits.indiv_split
+    context_by_indiv, reshuffle = splits["context_by_individuals"], splits["reshuffle"]
+    date_splits, indiv_split = splits["date_splits"], splits["indiv_split"]
 
     #load whole data
     if data is None:
@@ -571,10 +571,10 @@ def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None
 
 def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, save_path=None, stats=None, shuffle_eval=False):
     """returns dataloaders from data_dict as eventual subsets"""
-    subset_mode, subsets  = subsets.mode, subsets.sizes
-    idx_mode = splits.idx_mode
-    reshuffle, context_by_indiv = splits.reshuffle, splits.context_by_individuals
-    remove_train_cte, remove_eval_cte = splits.remove_train_cte, splits.remove_eval_cte
+    subset_mode, subsets  = subsets["mode"], subsets["sizes"]
+    idx_mode = splits["idx_mode"]
+    reshuffle, context_by_indiv = splits["reshuffle"], splits["context_by_individuals"]
+    remove_train_cte, remove_eval_cte = splits["remove_train_cte"], splits["remove_eval_cte"]
     
     if subsets is not None:
         subsets = [float(txt) for txt in subsets.split(";")]
@@ -613,7 +613,6 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, sav
             loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=local_collate_fn)
         else:
             local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_eval_cte)
-            # effective_bs = max(int(batch_size // values.shape[0]),1)
             loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle_eval, collate_fn=local_collate_fn)
        
     return loaders_dict
@@ -648,12 +647,10 @@ def aggregate_loaders_dict(loaders_dicts, lags, horizon, splits, batch_size):
     """aggregates loaders of different individuals. Expects same dates."""
     loaders_dict = {}
     keys = list(loaders_dicts[0].keys())
-    idx_mode, context_by_individuals = splits.idx_mode, splits.context_by_individuals
-    remove_train_cte, remove_test_cte = splits.remove_train_cte, splits.remove_eval_cte
+    idx_mode, context_by_individuals = splits["idx_mode"], splits["context_by_individuals"]
+    remove_train_cte, remove_test_cte = splits["remove_train_cte"], splits["remove_eval_cte"]
 
     for key in keys:
-        # shuffle = isinstance(loaders_dicts[0][key].sampler, torch.utils.data.RandomSampler)
-        # collate_fn = loaders_dicts[0][key].collate_fn
         if key =="train":
             remove_cte = remove_train_cte
             local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_cte)
@@ -666,7 +663,6 @@ def aggregate_loaders_dict(loaders_dicts, lags, horizon, splits, batch_size):
             local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_cte)
             shuffle = False
             idx_mode_ = "all"
-            # effective_bs = max(int(batch_size // values.shape[0]),1)
             effective_bs = batch_size
 
         datetimes = loaders_dicts[0][key].dataset.datetimes
@@ -710,7 +706,7 @@ def get_sizes(loaders_dict, str_info=False):
 
 
 def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, clusters=None, aggregate=True, seed=None, save=False, shuffle_eval=False, fetch_cluster=None):
-    """returns loaders dict (clusters=> nested dict)"""
+    """returns loaders dict and stats dicts"""
     if seed is not None: 
         torch.manual_seed(seed)
         torch.cuda.manual_seed(seed)
@@ -726,9 +722,10 @@ def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, c
         if save:
             save_path += clusters + "/" 
 
-    if (clusters is not None) and (subsets.cluster is None): #clustered splits
+    nodes_stats_dict = {}
+    if (clusters is not None) and (subsets["cluster"] is None): #clustered splits
         cluster_names = [name for name in os.listdir(cluster_path) if name[-3:]==".pt"]
-        loaders_dicts, nodes_stats_dict = [], {}
+        loaders_dicts = []
         for k, cluster_name in enumerate(cluster_names):
             if save:
                 split_path = save_path+cluster_name[:-3]+"splits/"
@@ -776,7 +773,21 @@ def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, c
 
         df_dict = {key: loader.dataset.get_df() for key, loader in loaders_dict.items()}
         stats_dict = get_dataset_stats(df_dict, lags, horizon, splits["remove_train_cte"], splits["remove_eval_cte"], save_path)
-        return loaders_dict, stats_dict, None
+        
+        #individuals nodes
+        splits_ = copy.deepcopy(splits)
+        splits_["indiv_split"] = None
+        subsets_ = copy.deepcopy(subsets)
+        if len(subsets_["sizes"].split(";")) > 3:
+            subsets_sizes_ = subsets_["sizes"].split(";")
+            subsets_["sizes"] = ";".join([subsets_sizes_[0], subsets_sizes_[1], subsets_sizes_[4]])
+        for cluster in range(df_dict["train"].shape[-1]):
+            data_dict_ = get_dataset_splits(splits_, data_path, split_path, fetch_cluster=cluster)
+            loaders_dict_ = get_train_loaders(data_dict_, batch_size, lags, horizon, splits_, subsets_, subset_path, shuffle_eval=shuffle_eval)
+            node_dict_ = {subkey: loader.dataset.get_df() for subkey, loader in loaders_dict_.items()}
+            nodes_stats_dict[f"node{cluster}"] = get_dataset_stats(node_dict_, lags, horizon, splits_["remove_train_cte"], splits_["remove_eval_cte"], save_path)
+
+        return loaders_dict, stats_dict, nodes_stats_dict
 
 
 def apply_stats(loaders_dict, stats_dict):
@@ -823,29 +834,29 @@ def fetch_example_data(path="datasets/examples/", names=None):
     return dico
 
 
-def fetch_stats(data_path, clusters, normalization, subsets):
-    """returns correct stats dict"""
-    if normalization == "cmIN":
-        assert clusters is not None
-        #total stats
-        stats_path = data_path + "raw_stats.json"
-        with open(stats_path) as file:
-            stats_dict = json.load(file)
-        stats_dict["train"]["alpha"], stats_dict["train"]["beta"] = [], []
-        #cluster stats
-        cluster_names = [name[:-3] for name in os.listdir(data_path + clusters) if name[-3:]==".pt"]
-        for cluster_name in cluster_names:
-            stats_path = data_path + clusters + "stats/" + cluster_name + "_raw_stats.json"
-            with open(stats_path) as file:
-                stats_dict_ = json.load(file)
-            stats_dict["train"]["alpha"].append(stats_dict_["train"]["alpha"])
-            stats_dict["train"]["beta"].append(stats_dict_["train"]["beta"])
-    else:
-        if subsets["cluster"] is not None:
-            stats_path = data_path + clusters + "stats/" + subsets["cluster"] + "_raw_stats.json"
-        else:
-            stats_path = data_path + "raw_stats.json"
-        with open(stats_path) as file:
-            stats_dict = json.load(file)
-        #TODO stats_dict with means,std aggregate when clusters is not None
-    return stats_dict
+# def fetch_stats(data_path, clusters, normalization, subsets):
+#     """returns correct stats dict"""
+#     if normalization == "cmIN":
+#         assert clusters is not None
+#         #total stats
+#         stats_path = data_path + "raw_stats.json"
+#         with open(stats_path) as file:
+#             stats_dict = json.load(file)
+#         stats_dict["train"]["alpha"], stats_dict["train"]["beta"] = [], []
+#         #cluster stats
+#         cluster_names = [name[:-3] for name in os.listdir(data_path + clusters) if name[-3:]==".pt"]
+#         for cluster_name in cluster_names:
+#             stats_path = data_path + clusters + "stats/" + cluster_name + "_raw_stats.json"
+#             with open(stats_path) as file:
+#                 stats_dict_ = json.load(file)
+#             stats_dict["train"]["alpha"].append(stats_dict_["train"]["alpha"])
+#             stats_dict["train"]["beta"].append(stats_dict_["train"]["beta"])
+#     else:
+#         if subsets["cluster"] is not None:
+#             stats_path = data_path + clusters + "stats/" + subsets["cluster"] + "_raw_stats.json"
+#         else:
+#             stats_path = data_path + "raw_stats.json"
+#         with open(stats_path) as file:
+#             stats_dict = json.load(file)
+#         #TODO stats_dict with means,std aggregate when clusters is not None
+#     return stats_dict

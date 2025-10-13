@@ -656,7 +656,7 @@ def latex_colored_number(value, decimals=2, color=False, row=None, std=None):
     return s
 
 def build_results_table_latex(
-    save_dir, datasets, settings, show_row=0, models="RevIN", file_name="test1_mean_results.json", n_paths=1, multipliers=None, baseline=None, title="1e5 * MSE", save_name="test1_mean_results.tex", color=False, decimals=2, show_std=True):
+    save_dir, datasets, settings, show_row=0, models="RevIN", file_name="test1_mean_results.json", n_paths=1, multipliers=None, baseline=None, title="1e5 * MSE", save_name="test1_mean_results.tex", color=False, decimals=2, show_std=False):
     """
     Returns a LaTeX tabular string
     Directory layout assumed: {save_dir}/{dataset}/lags{L}_horizon{H}/
@@ -691,10 +691,6 @@ def build_results_table_latex(
                     baseline=None
                 )
 
-            # if show_std:
-            #     for col in df.columns:
-            #         df[col] = df[col].map("{:.2f}".format) + " ± " + df_std[col].map("{:.2f}".format)
-
             key = f"{ds}_{L}_{H}"
             if key not in values:
                 values[key] = []
@@ -702,7 +698,8 @@ def build_results_table_latex(
                 values_std[key] = []
 
             values[key].append(df.iloc[show_row][model])
-            values_std[key].append(df_std.iloc[show_row][model])
+            if show_std:
+                values_std[key].append(df_std.iloc[show_row][model])
             if baseline is not None:
                 df, _ = get_multiple_errors_df(
                         dir_name=dir_name,
@@ -728,8 +725,11 @@ def build_results_table_latex(
         ds = datasets[ds_idx]
         key = f"{ds}_{L}_{H}"
         ds_latex = ds.replace("_", r"\_").capitalize()
-    
-        cells = [latex_colored_number(v, decimals=decimals, color=color, row=values[key], std=values_std[key][i]) for i, v in enumerate(values[key])]
+        if show_std:
+            std = values_std[key][i]
+        else:
+            std = None
+        cells = [latex_colored_number(v, decimals=decimals, color=color, row=values[key], std=std) for i, v in enumerate(values[key])]
         if i % len(datasets) == 0:
             lines.append("\\multirow{" + str(len(datasets)) + "}{*}{" + ds_latex + "}" + " & " + f"{L}-{H}" + " & " + " & ".join(cells) + r" \\")
         else:
