@@ -315,11 +315,19 @@ def get_dataset_stats(df_dict, lags, horizon, remove_train_cte=True, remove_eval
             clean_df, clean_alphas, clean_betas = df_dict[key], gammas_dict[key][0], gammas_dict[key][1]
         stats_dict[key] = {
             "mean": float(np.nanmean(clean_df.values)),
-            "stds": float(np.nanmean(np.nanstd(clean_df.values, axis=1))),
+            "stds": float(np.nanmean(np.nanstd(clean_df.values, axis=0))),
             "std": float(np.nanstd(clean_df.values)),
             "alpha": float(np.nanmean(clean_alphas)),
             "beta": float(np.nanmean(clean_betas))
         }
+        # for key_, value in stats_dict[key].items():
+        #     if np.isnan(value) or value==0:
+        #         print("debug", clean_df.shape)
+        #         print("debug", float(np.nanmean(np.nanstd(clean_df.values, axis=1))))
+        #         print("debug", float(np.nanmean(np.nanstd(clean_df.values, axis=0))))
+        #         print("debug", np.nanstd(clean_df.values))
+        #         raise ValueError(f"nan in get stats, {key} {key_} {value}")
+            
 
     if save_path is not None:
         with open(save_path, "w") as file:

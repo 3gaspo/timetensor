@@ -291,7 +291,7 @@ def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, e
         learner = Learner(model, criterion, lr, eval_losses, device=device)
         if retrain:
             logger.info(f"Starting training pytorch with lr={lr}")
-            if normalization is not None and (("revin" in normalization) or ("mIN" in normalization)):
+            if normalization is not None and (("revin" in normalization) or ("mIN" in normalization and "cmIN" not in normalization)):
                 weight_follow = lambda model: {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
             else:
                 weight_follow = None

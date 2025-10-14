@@ -93,7 +93,7 @@ def run(cfg):
 
     #weights
     plot_weights(model, learner, save_dir, save_name)
-    if (norm_name is not None) and (("revin" in norm_name) or ("mIN" in norm_name)):
+    if (norm_name is not None) and (("revin" in norm_name) or ("mIN" in norm_name and "cmIN" not in norm_name)):
         params = {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
         logger.info(f"Final modulations: {params}")
 
