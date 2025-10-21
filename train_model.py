@@ -48,7 +48,7 @@ def run(cfg):
 
     if verbose:
         logger.info(f"Fetched main configs, save directory : {save_dir}")
-        logger.info(f"Model {model_name}, norma {norm_name}, criterion {criterion_name}, kwargs {kwargs}")
+        logger.info(f"Model {model_name}, norm {norm_name}, criterion {criterion_name}, kwargs {kwargs}")
 
     if seed is not None:
         torch.manual_seed(seed)
@@ -67,15 +67,17 @@ def run(cfg):
 
     #model
     if kwargs.get("init_alpha") is True:
-        if "cmIN" in model_name:
+        if "cmIN" in norm_name:
             kwargs["init_alpha"] = [nodes_stats_dict[node]["train"]["alpha"] for node in nodes_stats_dict]
         else:
             kwargs["init_alpha"] = stats_dict["train"]["alpha"]
     if kwargs.get("init_beta") is True:
-        if "cmIN" in model_name:
+        if "cmIN" in norm_name:
             kwargs["init_beta"] = [nodes_stats_dict[node]["train"]["alpha"] for node in nodes_stats_dict]
         else:
             kwargs["init_beta"] = stats_dict["train"]["beta"]
+    if "cmIN" in norm_name and kwargs.get("n_clusters") is None and (kwargs.get("init_alpha") is False or kwargs.get("init_alpha")):
+            kwargs["n_clusters"] = len(nodes_stats_dict)
     model = load_model(model_name, shape, norm_name, init_path, cfg.training.freeze_core, cfg.model.constants, cfg.model.residuals, **kwargs)
     if cfg.training.freeze_core:
         trainable_params = []
