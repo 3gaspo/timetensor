@@ -23,6 +23,19 @@ def get_gammas(data, lookback, horizon, eps=1e-8):
 
     return alphas, betas
 
+def get_marginals(data, lookback, horizon, eps=1e-8):
+    """compute alpha and beta series. data must be pandas dataframe"""
+    lookback_means = data.rolling(window=lookback).mean()[lookback:]
+    lookback_stds = data.rolling(window=lookback).std()[lookback:]
+
+    horizon_means = data.rolling(window=horizon).mean().shift(-horizon)[:-horizon]
+    horizon_stds = data.rolling(window=horizon).std().shift(-horizon)[:-horizon]
+
+    alphas = horizon_stds[lookback:] / (lookback_stds[:-horizon] + eps)
+    betas = horizon_means[lookback:] / (lookback_means[:-horizon]  + eps)
+
+    return alphas, betas
+
 def fourier(df):
     """transforms user series into their fft"""
     df = df.apply(lambda x: np.abs(np.fft.fft((x-np.mean(x))/np.std(x))))
@@ -302,6 +315,93 @@ def plot_gamma(data, path="", name="stats.pdf", per_user=True, lookback=336, hor
         plt.savefig(path+name)
     plt.close()
 
+def plot_marginals(data, path="", name="stats.pdf", per_user=True, lookback=336, horizon=48, samples=1000, title=None, remove_cte=True, log=False, show=False):
+    """plots means and stds. data must be pandas dataframe or dict of df"""
+    if type(data) != dict:
+        data = {"data":data}
+
+    keys, alpha_means_list, beta_means_list = [], [], []
+    for key, df in data.items():
+        alphas, betas = get_marginals(df, lookback, horizon)
+        if per_user:
+            clean_alphas, clean_betas = alphas.copy(), betas.copy()
+            if remove_cte:
+                cte_mask, _ = identify_cte(df.iloc[lookback:-horizon], lookback)
+                clean_alphas[cte_mask] = pd.NA
+                clean_betas[cte_mask] = pd.NA
+            alpha_means = clean_alphas.mean(axis=0)
+            beta_means = clean_betas.mean(axis=0)
+        else:
+            alpha_means = alphas.stack()
+            beta_means = betas.stack()
+            stds = df.rolling(window=lookback).std()[lookback:].stack()
+            if samples < len(alpha_means):
+                sampled_idx = np.random.choice(len(alpha_means), size=samples, replace=False)
+                alpha_means = alpha_means.iloc[sampled_idx]
+                beta_means = beta_means.iloc[sampled_idx]
+                stds = stds.iloc[sampled_idx]
+            if remove_cte:
+                keep_idx = np.where(stds>0)[0]
+                alpha_means, beta_means = alpha_means.iloc[keep_idx], beta_means.iloc[keep_idx]
+
+        keys += [key + f" (stds ratio: {alpha_means.mean():.2f} | means ratio: {beta_means.mean():.2f})" for _ in range(len(alpha_means))]
+        if log:
+            alpha_means_list += np.log(np.where(alpha_means>0, alpha_means, 1e-8)).tolist()
+            beta_means_list += np.log(np.where(beta_means>0, beta_means, 1e-8)).tolist()
+        else:
+            alpha_means_list += alpha_means.tolist()
+            beta_means_list += beta_means.tolist()
+
+    stats_df = pd.DataFrame({
+        'key': keys,
+        'beta': beta_means_list,
+        'alpha': alpha_means_list})
+
+    g = sns.jointplot(
+        data=stats_df,
+        x='beta',
+        y='alpha',
+        hue='key',
+        kind='scatter',
+        palette='Set1',
+        marginal_kws=dict(common_norm=False, fill=True, alpha=0.5)
+    )
+
+    # g.plot_joint(sns.kdeplot, hue='key', fill=False, alpha=0.3)
+    ax = g.ax_joint
+    hue_order = list(dict.fromkeys(stats_df["key"]))  # preserves first-seen order
+    palette = sns.color_palette("Set1", n_colors=len(hue_order))
+    color_for = dict(zip(hue_order, palette))
+    for key, sub in stats_df.groupby("key"):
+        if not valid_for_kde(sub, "beta", "alpha"):
+            continue
+        try:
+            sns.kdeplot(
+                data=sub,
+                x="beta", y="alpha",
+                ax=ax,
+                color=color_for[key],   # match scatter color
+                fill=False, alpha=0.3,
+                levels=5,              # strictly increasing
+                thresh=1e-6,
+                bw_adjust=1.2,
+                warn_singular=False,
+                common_norm=False,
+                legend=False,           # avoid legend duplication
+            )
+        except ValueError: # If a group still blows up, just skip its KDE
+            pass
+
+    if title is None:
+        plt.suptitle("Statistics distribution")#, y=1.02)
+    else:
+        plt.suptitle(title)
+    plt.tight_layout()
+    if show:
+        plt.show()
+    else:
+        plt.savefig(path+name)
+    plt.close()
 
 def get_dataset_stats(df_dict, lags, horizon, remove_train_cte=True, remove_eval_cte=True, save_path=None):
     """produces and dictionary of dataset stats (raw and splits)"""
@@ -336,3 +436,53 @@ def get_dataset_stats(df_dict, lags, horizon, remove_train_cte=True, remove_eval
     return stats_dict
     
     
+
+def get_spatial_distance(df, normalize=True, multiplier=1e14):
+    """returns spatial distance of dataset"""
+    df_ = df.copy()
+    if normalize:
+        df_ = (df - df.mean()) / df.std()
+    means = df_.mean(axis=0)
+    stds = df_.std(axis=0)
+
+    points = np.stack((means.values, stds.values), axis=1)
+
+    dist_matrix = np.sqrt(((points[:, None, :] - points[None, :, :]) ** 2).sum(axis=2))
+    max_dist = dist_matrix.max() * multiplier
+
+    return max_dist 
+
+
+def get_temporal_distance(df, t1, t2, normalize=True, multiplier=1e1):
+    """returns spatial distance of dataset"""
+    df_ = df.copy()
+    if normalize:
+        df_ = (df - df.mean()) / df.std()
+
+    train_data = df_.iloc[:t1]
+    test_data = df_.iloc[t2:]
+
+    train_mean = train_data.values.mean()
+    train_std = test_data.values.std()
+
+    test_mean = test_data.values.mean()
+    test_std = test_data.values.std()
+
+    dist = np.sqrt((train_mean-test_mean)**2 + (train_std-test_std)**2) * multiplier
+
+    return dist
+
+
+def get_modulation_distance(df, lags=168, horizon=24, normalize=True, multiplier=1e-7):
+    df_ = df.copy()
+    if normalize:
+      df_ = (df - df.mean()) / df.std()
+
+    alphas_df, betas_df = get_gammas(df_, lags, horizon)
+
+    delta_range = alphas_df.max() - alphas_df.min()
+    lambda_range = betas_df.max() - betas_df.min()
+    total_range = delta_range + lambda_range
+    user_max = total_range.idxmax()
+    max_ = total_range[user_max] * multiplier
+    return max_

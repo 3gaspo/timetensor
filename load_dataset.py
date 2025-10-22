@@ -78,6 +78,8 @@ def run(cfg):
 
     #constant windows
     df, _, _ = fetch_csv(data_path, dataset_name, context_cols, split_kwargs["drop_users"])
+    d_space, d_temps, d_modulations = get_spatial_distance(df), get_temporal_distance(df, int(len(df) * 0.6), int(len(df) * 0.8)), get_modulation_distance(df, lags=lags, horizon=horizon)
+    logger.info(f"Spatial distance: {d_space:.3f}, Temporal distance: {d_temps:.3f}, Modulations distance: {d_modulations:.3f}")
     dates, individuals = df.shape
     _, counts = identify_cte(df, lags)
     if len(counts)>0:
@@ -122,7 +124,10 @@ def run(cfg):
         plot_gamma(df, plot_dir, "input_gammas.pdf", per_user=False, samples=samples, lookback=lags, horizon=horizon, log=False)
         if "test2" in df_dict:
             plot_gamma(filter_dict(df_dict, keys=["test1", "test2"]), plot_dir, name="spatial_gammas.pdf", per_user=True,  lookback=lags, title=f"{dataset_name} spatial splits statistics", remove_cte=remove_cte, log=False)
-            plot_gamma(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, name="temporal_gammas.pdf", per_user=True,  lookback=lags, title=f"{dataset_name} temporal splits statistics", remove_cte=remove_cte, log=False)
+        plot_gamma(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, name="temporal_gammas.pdf", per_user=True,  lookback=lags, title=f"{dataset_name} temporal splits statistics", remove_cte=remove_cte, log=False)
+        if "test2" in df_dict:
+            plot_marginals(filter_dict(df_dict, keys=["test1", "test2"]), plot_dir, name="spatial_marginals.pdf", per_user=True,  lookback=lags, title=f"{dataset_name} spatial splits statistics", remove_cte=remove_cte, log=False)
+        plot_marginals(filter_dict(df_dict, keys=["train", "test1"]), plot_dir, name="temporal_marginals.pdf", per_user=True,  lookback=lags, title=f"{dataset_name} temporal splits statistics", remove_cte=remove_cte, log=False)
 
     if recluster and individuals>3:
         #fourier clustering

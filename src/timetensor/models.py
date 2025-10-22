@@ -69,10 +69,11 @@ class ResidualModel(nn.Module):
         std =  x.std(dim=-1, keepdim=True).detach() #(B, dim, 1)
 
         latent = self.model(x, c) #(B, dim, horizon)
-        stats = torch.cat((mu,std), dim=-1) # (B, dim, 2)
-
-        features = torch.cat((stats,latent), dim=-1) # (B, dim, 2+horizon)
-        pred = self.fc(features) # (B, dim _ horizon)
+        # stats = torch.cat((mu,std), dim=-1) # (B, dim, 2)
+        # features = torch.cat((stats,latent), dim=-1) # (B, dim, 2+horizon)
+        features = torch.cat((mu, std, latent), dim=-1)   # (B, dim, 2+horizon)
+        features = features.reshape(batch_size, self.dim * (2 + self.horizon)) 
+        pred = self.fc(features) # (B, dim * horizon)
         pred = pred.view(batch_size, self.dim, self.horizon) #(B, dim, horizon)
 
         return pred
@@ -317,9 +318,9 @@ class RevIN(DefaultNorm):
         return output
     
 class SoftmIN(DefaultNorm):
-    def __init__(self, model, dim, eps=1e-8, start=True, latent=False, **kwargs):
+    def __init__(self, model, dim, eps=1e-8, start=True, **kwargs):
         """Flexible RevIn module"""
-        super().__init__(model, latent)
+        super().__init__(model)
         self.norm_name = "softmin"
         self.dim, self.eps = dim, eps
 
@@ -338,10 +339,14 @@ class SoftmIN(DefaultNorm):
         self.alpha = nn.Parameter(torch.ones(1, dim, 1))  #scale
         self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
 
+        #activations
+        self.sig1 = nn.Sigmoid()
+        self.sig2 = nn.Sigmoid()
+
     def norm(self, x):
         self.mu, self.std = get_normal_stats(x)
-        self.offset = self.nu*self.mu
-        self.scale = 1 + self.eta*( 1/(self.std+self.eps) - 1)
+        self.offset = self.sig1(self.nu)*self.mu
+        self.scale = 1 + self.sig2(self.eta)*( 1/(self.std+self.eps) - 1)
         x = (x-self.offset) * self.scale # (B, dim, lags)
         x = x * self.gamma + self.omega
         return x
@@ -423,11 +428,11 @@ class cmIN(DefaultNorm):
         else:
             self.n_clusters = n_clusters
 
-        if init_alpha:
+        if init_alpha is not False and init_alpha is not None:
             self.init_alphas = [float(value) for value in init_alpha]
         else:
             self.init_alphas = [1.0 for _ in range(n_clusters)]
-        if init_beta:
+        if init_beta is not False and init_beta is not None:
             self.init_betas = [float(value) for value in init_beta]
         else:
             self.init_betas = [0.0 for _ in range(n_clusters)]
@@ -448,18 +453,24 @@ class cmIN(DefaultNorm):
         else:
             self.betas = nn.ParameterList([nn.Parameter(torch.full((1, self.dim, 1), self.init_betas[k])) for k in range(len(self.init_betas))])
 
-        self.gamma =  nn.Parameter(torch.ones(1, self.dim, 1))
-        self.omega = nn.Parameter(torch.zeros(1, self.dim, 1))
+        self.register_buffer("gamma_out", torch.ones(1, self.dim, 1))
+        self.gammas = nn.ParameterList([nn.Parameter(torch.ones(1, self.dim, 1)) for _ in range(n_clusters)])
+        # self.gamma =  nn.Parameter(torch.ones(1, self.dim, 1))
+        self.register_buffer("omega_out", torch.zeros(1, self.dim, 1))
+        self.omegas = nn.ParameterList([nn.Parameter(torch.zeros(1, self.dim, 1)) for _ in range(n_clusters)])
+        # self.omega = nn.Parameter(torch.zeros(1, self.dim, 1))
         self.use_gamma, self.inverse_gamma = use_gamma, inverse_gamma
         if self.inverse_gamma:
             assert self.use_gamma
 
-    def get_alpha_beta(self, cluster):
-        alpha, beta = [], []
+    def get_modulations(self, cluster):
+        alpha, beta, gamma, omega = [], [], [], []
         for k in cluster:
             if k >= self.n_clusters:
                 alpha.append(getattr(self, f"alpha_out"))
                 beta.append(getattr(self, f"beta_out"))
+                gamma.append(getattr(self, f"gamma_out"))
+                omega.append(getattr(self, f"omega_out"))
             else:
                 if self.fixed_alpha:
                     alpha.append(getattr(self, f"alpha_{int(k)}"))
@@ -469,20 +480,24 @@ class cmIN(DefaultNorm):
                     beta.append(getattr(self, f"beta_{int(k)}"))
                 else:
                     beta.append(self.betas[int(k)])
-        alpha = torch.cat(alpha)
-        beta = torch.cat(beta)
-        return alpha, beta
+                gamma.append(self.gammas[int(k)])
+                omega.append(self.omegas[int(k)])
+        alpha, beta, gamma, omega = torch.cat(alpha), torch.cat(beta), torch.cat(gamma), torch.cat(omega)
+        return alpha, beta, gamma, omega
 
-    def norm(self, x):
+    def norm(self, x, cluster):
         self.mu, self.std = get_normal_stats(x)
+        alpha, beta, gamma, omega = self.get_modulations(cluster)
         x = (x - self.mu) / (self.std+self.eps)
         if self.use_gamma:
-            x = self.gamma * x + self.omega
+            # x = self.gamma * x + self.omega
+            x = gamma * x + omega
         return x
     def denorm(self, y, cluster):
+        alpha, beta, gamma, omega = self.get_modulations(cluster)
         if self.inverse_gamma:
-            y = (y - self.omega) / self.gamma 
-        alpha,beta = self.get_alpha_beta(cluster)
+            # y = (y - self.omega) / self.gamma 
+            y = (y - omega) / gamma 
         y = y * alpha + beta
         if self.latent:
             return y
@@ -490,7 +505,7 @@ class cmIN(DefaultNorm):
         return y
     def forward(self, x, c=None): #(B, dim, lags)
         assert c is not None
-        x  = self.norm(x) #(B, dim, lags)
+        x  = self.norm(x, c[:, 0, 0]) #(B, dim, lags)
         pred = self.model(x, c) #(B, dim, horizon)
         output = self.denorm(pred, c[:, 0, 0]) #(B, dim, horizon)
         return output
