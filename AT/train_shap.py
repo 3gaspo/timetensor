@@ -19,6 +19,10 @@ def run(cfg):
     #configs
     data_path = cfg.data.path
     lags, horizon = cfg.task.lags, cfg.task.horizon
+    model_name, norm_name, norm_kwargs, model_kwargs = cfg.model.name, cfg.normalization.name, cfg.normalization.configs, cfg.model.configs
+    init_path = cfg.training.init
+    kwargs = {**(norm_kwargs or {}), **(model_kwargs or {})}
+
     verbose = cfg.misc.verbose
     if verbose:
         logger.info("Fetched main configs")
@@ -29,7 +33,9 @@ def run(cfg):
     
     #model
     shape = (lags, values.shape[1], horizon)
-    model = load_model("lookback", shape, "None")
+    # model = load_model("lookback", shape, "None")
+    model = load_model(model_name, shape, norm_name, init_path, cfg.training.freeze_core, cfg.model.constants, cfg.model.residuals, **kwargs)
+
 
     #game
     background = BackgroundDataset(dataset)
