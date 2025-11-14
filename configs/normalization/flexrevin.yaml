@@ -1,4 +1,0 @@
-name: flexrevin
-configs:
-  latent: False
-  start: True

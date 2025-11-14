@@ -8,7 +8,7 @@ import pandas as pd
 import warnings
 import json
 
-from .utils import normalize, is_cte
+from .utils import normalize, is_cte, set_seed
 from .analysis import get_dataset_stats
 
 #TODO: vérif que l'aggregation dataste clusters fonctionne bien
@@ -22,7 +22,7 @@ class TimeSeriesDataset(Dataset):
         context (N_contexts, dim_context, dates): exogenous variates  e.g N_contexts=1 or N_contexts=N_individuals
         lags (int): size of lookback window
         horizon (int): size of target horizon
-        idx_mode (bool): access items by date or individuals
+        idx_mode (str): access items by date or individuals, or both
         return_all_individuals (bool): return all individuals or a random
         context_by_individuals(bool): return one context per individual or all
         """
@@ -60,9 +60,11 @@ class TimeSeriesDataset(Dataset):
             self.true_len = self.dates - (self.lags + self.horizon)
         elif self.idx_mode == "indiv":
             self.true_len = self.individuals
-        else:
+        elif self.idx_mode == "all" or self.idx_mode == "random":
             self.true_len = self.individuals * (self.dates - (self.lags + self.horizon))
-
+        else:
+            raise ValueError(f"Unrecognized idx_mode: {idx_mode}")
+        
     @property
     def shape(self):
         if self.context is not None:
@@ -79,14 +81,10 @@ class TimeSeriesDataset(Dataset):
         self.stats = stats
         self.values = normalize(self.values, self.stats["mean"], self.stats["std"])
 
-    def __getitem__(self, raw_idx):
-        if self.weight > 1:
-            idx = raw_idx % self.true_len
-        else:
-            idx = raw_idx
+    def __getitem__(self, raw_idx):        
+        idx = raw_idx % self.true_len
         
         remove_cte_counter = 0
-
         if self.idx_mode == "date":
             if self.return_all_individuals: #1 batch = all individuals, batch of dates
                 values = self.values[:, :, idx : idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
@@ -145,43 +143,69 @@ class TimeSeriesDataset(Dataset):
                 else:
                     context = self.context[:, :, t: t + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
 
-        else:
-            date, indiv = raw_idx // self.individuals, raw_idx % self.individuals
+        elif self.idx_mode == "all":
+            date, indiv = idx // self.individuals, idx % self.individuals
             values = self.values[indiv, :, date : date + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
-            while is_cte(values[:, :, :self.lags]):
-                if remove_cte_counter > 100:
-                        raise ValueError("Overflow constant windows")
-                idx = np.random.randint(self.weight * self.true_len)
-                date, indiv = idx // self.individuals, idx % self.individuals
-                values = self.values[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0)
-                remove_cte_counter += 1
+            if self.remove_cte:
+                while is_cte(values[:, :, :self.lags]):
+                    if remove_cte_counter > 100:
+                            raise ValueError("Overflow constant windows")
+                    idx = np.random.randint(self.weight * self.true_len)
+                    date, indiv = idx // self.individuals, idx % self.individuals
+                    values = self.values[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0)
+                    remove_cte_counter += 1
             if self.context is not None:
                 if self.context_by_individuals:
                     context = self.context[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
                 else:
                     context = self.context[:, :, date: date + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
 
+        elif self.idx_mode == "random":
+            indiv = np.random.randint(self.individuals)
+            date = np.random.randint(self.dates - self.lags - self.horizon)
+            values = self.values[indiv, :, date : date + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
+            if self.remove_cte:
+                while is_cte(values[:, :, :self.lags]):
+                    if remove_cte_counter > 100:
+                            raise ValueError("Overflow constant windows")
+                    indiv = np.random.randint(self.individuals)
+                    date = np.random.randint(self.dates - self.lags - self.horizon)
+                    values = self.values[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0)
+                    remove_cte_counter += 1
+            if self.context is not None:
+                if self.context_by_individuals:
+                    context = self.context[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
+                else:
+                    context = self.context[:, :, date: date + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
+
+        else:
+            raise ValueError(f"Unrecognized idx_mode: {self.idx_mode}")
+
         inputs = values[:, :, :self.lags] # (individuals, dim, lags)
         target = values[:, :, self.lags:] # (individuals, dim, horizon)
-        
         if self.context is not None:
             return inputs, context, target
         else:
             return inputs, target
 
 
-#TODO relire subset, upgrade avec idx_mode
+#TODO relire subset, upgrade avec idx_mode all / random
 class TimeSeriesSubset(Dataset):
     def __init__(self, dataset, indices, subset_mode="date"):
         self.indices = indices
         self.mode = subset_mode
         self.lags, self.horizon = dataset.lags, dataset.horizon 
 
-        if self.mode == "indiv":
+        if dataset.context is not None:
+            self.original_shape, _ = dataset.shape
+        else:
+            self.original_shape = dataset.shape
+
+        if self.mode == "individuals":
             if dataset.idx_mode == "date":
                 self.dataset = copy.deepcopy(dataset)
                 self.dataset.values = self.dataset.values[self.indices]
-                self.dataset.individuals = len(self.indices)
+                self.dataset.individuals = len(indices)
                 if self.dataset.context is not None and self.dataset.context_by_individual:
                     self.dataset.context = self.dataset.context[self.indices]
             else:
@@ -191,56 +215,68 @@ class TimeSeriesSubset(Dataset):
             self.dim_values = self.dataset.dim_values
             if self.dataset.context is not None:
                 if self.dataset.context_by_individuals:
-                    self.contexts = self.individuals
+                    self.contexts = len(indices)
                 else:
                     self.contexts = self.dataset.contexts
-            else:
-                self.context = None
 
         elif self.mode == "dates":
             assert len(indices) > self.lags + self.horizon, "not enough dates for this lag and horizon"
-            if not dataset.by_date:
+            if dataset.idx_mode == "indiv":
                 self.dataset = copy.deepcopy(dataset)
                 self.dataset.values = self.dataset.values[:, :, self.indices]
                 self.dataset.datetimes = self.dataset.datetimes[self.indices]
-                self.dataset.dates = len(indices)
+                if self.dataset.context is not None:
+                    self.dataset.context = self.dataset.context[:, :, self.indices]
             else:
-                self.dataset = dataset
+                self.dataset = copy.deepcopy(dataset)
             self.individuals = self.dataset.individuals
             self.dates = len(indices)
-            self.context = self.dataset.context
             self.dim_values = self.dataset.dim_values
+            if self.dataset.context is not None:
+                self.contexts = self.dataset.contexts
 
         elif self.mode == "dim":
-            self.dataset = dataset
             self.individuals = self.dataset.individuals
             self.dates = self.dataset.dates
-            self.context = self.dataset.context
+            self.contexts = self.dataset.contexts
             self.dim_values = len(self.indices)
 
     def __getitem__(self, idx):
+        if self.dataset.idx_mode == "all":
+            date, indiv = idx // self.original_shape[0], idx % self.original_shape[0]
+            if self.mode == "dates":
+                date = self.indices[date]
+            elif self.mode == "individuals":
+                indiv = self.indices[indiv]
+            idx = indiv * date
+            return self.dataset[idx]
         if self.mode == "dim":
             return self.dataset[idx][:, self.indices, :]
-        elif (self.mode=="dates" and self.dataset.by_date) or (self.mode=="individuals" and not self.dataset.by_date):
+        elif (self.mode=="dates" and self.dataset.idx_mode=="date") or (self.mode=="individuals" and not self.dataset.idx_mode=="date"):
             return self.dataset[self.indices[idx]]
         else:
             return self.dataset[idx]
         
     def __len__(self):
-        if self.dataset.by_date:
+        if self.dataset.idx_mode == "date":
             if self.mode == "individuals":
                 return len(self.dataset)
-            else:
+            elif self.mode == "dates":
                 return len(self.indices) - (self.lags + self.horizon)
-        else:
+        elif self.dataset.idx_mode == "indiv":
             if self.mode == "individuals":
                 return len(self.indices)
-            else:
+            elif self.mode == "dates":
                 return len(self.dataset)
+        elif self.dataset.idx_mode == "all":
+            if self.mode == "individuals":
+                return self.dataset.weight * len(self.indices) * (self.dates - (self.lags + self.horizon))
+            elif self.mode == "dates":
+                return self.dataset.weight * self.individuals * (len(self.indices) - (self.lags + self.horizon))
 
     @property
     def shape(self):
-        if self.context is not None:
+        if self.dataset.context is not None:
             return (self.individuals, self.dim_values, self.dates), (self.dataset.contexts, self.dataset.dim_context, self.dates)
         else:
             return (self.individuals, self.dim_values, self.dates)
@@ -250,9 +286,16 @@ class TimeSeriesSubset(Dataset):
         if self.mode == "dim":
             return self.dataset.values[:, self.indices, :]
         elif self.mode=="dates":
-            return self.dataset.values[:, :, self.indices]
+            if self.dataset.idx_mode=="date" or self.dataset.idx_mode=="all":
+                return self.dataset.values[:, :, self.indices]
+            else:
+                return self.dataset.values
         elif self.mode=="individuals":
-            return self.dataset.values[self.indices, :, :]
+            if self.dataset.idx_mode=="indiv" or self.dataset.idx_mode=="all":
+                return self.dataset.values[self.indices, :, :]
+            else:
+                return self.dataset.values
+            
     @property
     def datetimes(self):
         if self.mode == "dates":
@@ -261,7 +304,9 @@ class TimeSeriesSubset(Dataset):
             return self.dataset.datetimes
 
     def get_df(self, dim=0):
-        return pd.DataFrame(self.values[:, 0, :].transpose(0,1), index=self.datetimes)
+        return pd.DataFrame(self.values[:, dim, :].transpose(0,1), index=self.datetimes)
+    def set_stats(self, stats):
+        self.dataset.set_stats(stats)
 
 
 def fetch_csv(data_path, data_name, context_cols=None, drop=None):
@@ -433,7 +478,7 @@ def split_4_way(values, context, datetimes, indiv_split, date_split, context_by_
             context4 = context[: , :, dates_idx2]
     else:
         context1, context2, context3, context4 = None, None, None, None
-    return {"train":(values1, context1, dates1), "valid":(values2, context2, dates2), "valid2":(values3, context3, dates1), "test": (values4, context4, dates2)}
+    return {"train":(values1, context1, dates1), "valid1":(values2, context2, dates2), "valid2":(values3, context3, dates1), "test": (values4, context4, dates2)}
 
 
 def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals=True, save_path=False, reshuffle=True):
@@ -500,10 +545,10 @@ def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by
 
 
 # def get_dataset_splits(data_path="datasets/", indiv_split=None, date_splits=None, context_by_individuals=True, save_path=None, reshuffle=True, cluster_path=None, set_cluster=None, data=None):
-def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None, set_cluster=None, data=None):
+def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None, set_cluster=None, data=None, fetch_cluster=None):
     """splits data from path. If str splits, will load given split, if float will save new split"""
-    context_by_indiv, reshuffle = splits.context_by_individuals, splits.reshuffle 
-    date_splits, indiv_split = splits.date_splits, splits.indiv_split
+    context_by_indiv, reshuffle = splits["context_by_individuals"], splits["reshuffle"]
+    date_splits, indiv_split = splits["date_splits"], splits["indiv_split"]
 
     #load whole data
     if data is None:
@@ -512,8 +557,11 @@ def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None
         values, context, datetimes = data
     
     #filter values at cluster path
-    if cluster_path is not None:
-        indices = list(torch.load(cluster_path, weights_only=False))
+    if cluster_path is not None or fetch_cluster is not None:
+        if cluster_path is not None:
+            indices = list(torch.load(cluster_path, weights_only=False))
+        else:
+            indices = [fetch_cluster]
         values = values[indices]
         if context is not None and context_by_indiv:
             context = context[indices]
@@ -542,16 +590,15 @@ def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None
 
 
 
-def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, save_path=None, stats=None):
+def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, save_path=None, stats=None, shuffle_eval=False):
     """returns dataloaders from data_dict as eventual subsets"""
-    subset_mode, subsets  = subsets.mode, subsets.sizes
-    idx_mode = splits.idx_mode
-    reshuffle, context_by_indiv = splits.reshuffle, splits.context_by_individuals
-    remove_train_cte, remove_eval_cte = splits.remove_train_cte, splits.remove_eval_cte
+    subset_mode, subsets  = subsets["mode"], subsets["sizes"]
+    idx_mode = splits["idx_mode"]
+    reshuffle, context_by_indiv = splits["reshuffle"], splits["context_by_individuals"]
+    remove_train_cte, remove_eval_cte = splits["remove_train_cte"], splits["remove_eval_cte"]
     
     if subsets is not None:
         subsets = [float(txt) for txt in subsets.split(";")]
-        assert len(subsets) == len(data_dict)
     else:
         subsets = [1 for _ in range(len(data_dict))]
     save = (save_path is not None)
@@ -587,8 +634,7 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, sav
             loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=local_collate_fn)
         else:
             local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_eval_cte)
-            # effective_bs = max(int(batch_size // values.shape[0]),1)
-            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=local_collate_fn)
+            loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle_eval, collate_fn=local_collate_fn)
        
     return loaders_dict
 
@@ -622,12 +668,10 @@ def aggregate_loaders_dict(loaders_dicts, lags, horizon, splits, batch_size):
     """aggregates loaders of different individuals. Expects same dates."""
     loaders_dict = {}
     keys = list(loaders_dicts[0].keys())
-    idx_mode, context_by_individuals = splits.idx_mode, splits.context_by_individuals
-    remove_train_cte, remove_test_cte = splits.remove_train_cte, splits.remove_eval_cte
+    idx_mode, context_by_individuals = splits["idx_mode"], splits["context_by_individuals"]
+    remove_train_cte, remove_test_cte = splits["remove_train_cte"], splits["remove_eval_cte"]
 
     for key in keys:
-        # shuffle = isinstance(loaders_dicts[0][key].sampler, torch.utils.data.RandomSampler)
-        # collate_fn = loaders_dicts[0][key].collate_fn
         if key =="train":
             remove_cte = remove_train_cte
             local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_cte)
@@ -640,7 +684,6 @@ def aggregate_loaders_dict(loaders_dicts, lags, horizon, splits, batch_size):
             local_collate_fn = lambda x: collate_fn(x, remove_cte=remove_cte)
             shuffle = False
             idx_mode_ = "all"
-            # effective_bs = max(int(batch_size // values.shape[0]),1)
             effective_bs = batch_size
 
         datetimes = loaders_dicts[0][key].dataset.datetimes
@@ -683,12 +726,10 @@ def get_sizes(loaders_dict, str_info=False):
         return shape, shape_str, batch_str
 
 
-def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, clusters=None, aggregate=True, seed=None, save=False):
-    """returns loaders dict (clusters=> nested dict)"""
-    if seed is not None: 
-        torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
-        np.random.seed(seed)
+def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, clusters=None, aggregate=True, seed=None, save=False, shuffle_eval=False, fetch_cluster=None):
+    """returns loaders dict and stats dicts"""
+    
+    set_seed(seed)
 
     #save paths
     if save:
@@ -700,9 +741,10 @@ def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, c
         if save:
             save_path += clusters + "/" 
 
-    if (clusters is not None) and (subsets.cluster is None): #clustered splits
+    nodes_stats_dict = {}
+    if (clusters is not None) and (subsets["cluster"] is None): #clustered splits
         cluster_names = [name for name in os.listdir(cluster_path) if name[-3:]==".pt"]
-        loaders_dicts, nodes_stats_dict = [], {}
+        loaders_dicts = []
         for k, cluster_name in enumerate(cluster_names):
             if save:
                 split_path = save_path+cluster_name[:-3]+"splits/"
@@ -711,7 +753,7 @@ def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, c
                 split_path, subset_path = None, None
             cluster_path_ = cluster_path+cluster_name
             data_dict = get_dataset_splits(splits, data_path, split_path, cluster_path_, set_cluster=k)
-            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path)
+            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path, shuffle_eval=shuffle_eval)
             loaders_dicts.append(loaders_dict)
 
             node_dict = {subkey: loader.dataset.get_df() for subkey, loader in loaders_dict.items()}
@@ -738,19 +780,33 @@ def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, c
             else:
                 split_path, subset_path = None, None
             data_dict = get_dataset_splits(splits, data_path, split_path, cluster_path)
-            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path)
+            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path, shuffle_eval=shuffle_eval)
         else:
             if save:
                 split_path = save_path + "splits/"
                 subset_path = save_path+ "subsets/"
             else:
                 split_path, subset_path = None, None
-            data_dict = get_dataset_splits(splits, data_path, split_path)
-            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path)
+            data_dict = get_dataset_splits(splits, data_path, split_path, fetch_cluster=fetch_cluster)
+            loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon, splits, subsets, subset_path, shuffle_eval=shuffle_eval)
 
         df_dict = {key: loader.dataset.get_df() for key, loader in loaders_dict.items()}
         stats_dict = get_dataset_stats(df_dict, lags, horizon, splits["remove_train_cte"], splits["remove_eval_cte"], save_path)
-        return loaders_dict, stats_dict, None
+        
+        #individuals nodes
+        splits_ = copy.deepcopy(splits)
+        splits_["indiv_split"] = None
+        subsets_ = copy.deepcopy(subsets)
+        if len(subsets_["sizes"].split(";")) > 3:
+            subsets_sizes_ = subsets_["sizes"].split(";")
+            subsets_["sizes"] = ";".join([subsets_sizes_[0], subsets_sizes_[1], subsets_sizes_[4]])
+        for cluster in range(df_dict["train"].shape[-1]):
+            data_dict_ = get_dataset_splits(splits_, data_path, split_path, fetch_cluster=cluster)
+            loaders_dict_ = get_train_loaders(data_dict_, batch_size, lags, horizon, splits_, subsets_, subset_path, shuffle_eval=shuffle_eval)
+            node_dict_ = {subkey: loader.dataset.get_df() for subkey, loader in loaders_dict_.items()}
+            nodes_stats_dict[f"node{cluster}"] = get_dataset_stats(node_dict_, lags, horizon, splits_["remove_train_cte"], splits_["remove_eval_cte"], save_path)
+
+        return loaders_dict, stats_dict, nodes_stats_dict
 
 
 def apply_stats(loaders_dict, stats_dict):
@@ -797,29 +853,29 @@ def fetch_example_data(path="datasets/examples/", names=None):
     return dico
 
 
-def fetch_stats(data_path, clusters, normalization, subsets):
-    """returns correct stats dict"""
-    if normalization == "cmIN":
-        assert clusters is not None
-        #total stats
-        stats_path = data_path + "raw_stats.json"
-        with open(stats_path) as file:
-            stats_dict = json.load(file)
-        stats_dict["train"]["alpha"], stats_dict["train"]["beta"] = [], []
-        #cluster stats
-        cluster_names = [name[:-3] for name in os.listdir(data_path + clusters) if name[-3:]==".pt"]
-        for cluster_name in cluster_names:
-            stats_path = data_path + clusters + "stats/" + cluster_name + "_raw_stats.json"
-            with open(stats_path) as file:
-                stats_dict_ = json.load(file)
-            stats_dict["train"]["alpha"].append(stats_dict_["train"]["alpha"])
-            stats_dict["train"]["beta"].append(stats_dict_["train"]["beta"])
-    else:
-        if subsets["cluster"] is not None:
-            stats_path = data_path + clusters + "stats/" + subsets["cluster"] + "_raw_stats.json"
-        else:
-            stats_path = data_path + "raw_stats.json"
-        with open(stats_path) as file:
-            stats_dict = json.load(file)
-        #TODO stats_dict with means,std aggregate when clusters is not None
-    return stats_dict
+# def fetch_stats(data_path, clusters, normalization, subsets):
+#     """returns correct stats dict"""
+#     if normalization == "cmIN":
+#         assert clusters is not None
+#         #total stats
+#         stats_path = data_path + "raw_stats.json"
+#         with open(stats_path) as file:
+#             stats_dict = json.load(file)
+#         stats_dict["train"]["alpha"], stats_dict["train"]["beta"] = [], []
+#         #cluster stats
+#         cluster_names = [name[:-3] for name in os.listdir(data_path + clusters) if name[-3:]==".pt"]
+#         for cluster_name in cluster_names:
+#             stats_path = data_path + clusters + "stats/" + cluster_name + "_raw_stats.json"
+#             with open(stats_path) as file:
+#                 stats_dict_ = json.load(file)
+#             stats_dict["train"]["alpha"].append(stats_dict_["train"]["alpha"])
+#             stats_dict["train"]["beta"].append(stats_dict_["train"]["beta"])
+#     else:
+#         if subsets["cluster"] is not None:
+#             stats_path = data_path + clusters + "stats/" + subsets["cluster"] + "_raw_stats.json"
+#         else:
+#             stats_path = data_path + "raw_stats.json"
+#         with open(stats_path) as file:
+#             stats_dict = json.load(file)
+#         #TODO stats_dict with means,std aggregate when clusters is not None
+#     return stats_dict

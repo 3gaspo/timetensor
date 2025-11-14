@@ -1,14 +1,15 @@
 training:
   init:
   freeze_core: False
-  retrain: True
   loss: MSE
   bs: 28
   lr: 0.0001
   epochs: 10
   eval_freq: 10
   print_freq: 10
-
+  valid_eval: False
+  test_eval: True
+  
 task:
   lags: 336
   horizon: 48

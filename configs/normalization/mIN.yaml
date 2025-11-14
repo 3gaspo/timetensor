@@ -5,5 +5,5 @@ configs:
   fixed_beta: False
   init_alpha: False
   fixed_alpha: False
-  use_gamma: False
-  inverse_gamma: False
+  use_gamma: True
+  inverse_gamma: True
