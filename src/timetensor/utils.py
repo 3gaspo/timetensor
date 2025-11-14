@@ -33,22 +33,24 @@ def get_dirs(output_dir, save_name, model_name, norm_name=None, criterion_name=N
         os.makedirs(save_dir + "plots/")
     return save_name, save_dir
 
-def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, mIN=False, do_context=False):
+def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, mean=None, std=None, do_context=False, seed=None):
     """unrolls (x,y) examples of dataloaders (typically individuals*dates examples)"""
-    ###TODO: remove std=0 windows for sklearn fitting
+    ###TODO: remove std=0 windows for sklearn fitting/ Already in dataloader no?
     X = []
     Y = []
     C = []
     i = 0
+    if seed is not None:
+        set_seed(seed)
     for x, c, y in dataloader:
         i+=x.shape[0]
         if normal:
-            mean, std = get_normal_stats(x)
+            if mean is None and std is None:
+                mean, std = get_normal_stats(x)
             nx = normalize(x, mean, std)
             ny = normalize(y, mean, std)
-            if mIN:
-                nx = beta*nx + alpha
-                ny = beta*ny + alpha
+            nx = alpha*nx + beta
+            ny = alpha*ny + beta
             X.append(nx)
             Y.append(ny)
         else:
@@ -70,6 +72,9 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, b
     else:
         return torch.concat(X), torch.concat(Y)
 
+
+def symlog(x, linthresh=1):
+    return np.sign(x) * np.log1p(np.abs(x / linthresh)) * linthresh
 
 def get_normal_stats(x): #(B, dim, T)
   mean = x.mean(dim=-1, keepdim=True).detach() #(B, dim, 1)
@@ -140,3 +145,8 @@ def text_list(L):
         return L.split(";")
     else:
         return [L]
+    
+def set_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    np.random.seed(seed)

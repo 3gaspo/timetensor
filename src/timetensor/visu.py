@@ -641,12 +641,12 @@ def plot_clustering(raw_df, feature_df, n_clusters, lags, horizon, clustering_na
     return cluster_indices
 
 
-def plot_weights(model, learner, save_dir, save_name, residuals=False):
+def plot_weights(model, save_dir, save_name):
     """plotting weights scripts"""
     model_name = model.name
     if model_name in ["linear", "sklinear"]:
         if model_name == "sklinear":
-            weights = learner.get_weights()
+            weights = model.reg.coef_
         else:
             weights = model.fc.weight.detach().cpu().numpy()
         plot_weights_(weights, save_dir + "plots/", title=f'{save_name} weights')
@@ -657,8 +657,15 @@ def plot_weights(model, learner, save_dir, save_name, residuals=False):
         plot_weights_(linear_weights, save_dir + "plots/", name="season_weights.pdf", title=f'{save_name} seasonal weights')
         plot_weights_(season_weights, save_dir + "plots/", name="trend_weights.pdf", title=f'{save_name} trend weights')
     
-    if residuals:
-        pass
+    if model.does_residual:
+        residual_weights = model.fc.weight.detach().cpu().numpy()
+        
+        horizon, dim = model.horizon, model.dim
+        mask = np.zeros((horizon*dim, (2+horizon)*dim))
+        for d in range(dim):
+            for h in range(horizon):
+                mask[d * horizon + h, d * (2 + horizon) + 2 + h] = 1.0 # skip mu,std
+        plot_weights_(residual_weights - mask, save_dir, name="residual_weights.pdf", title=f'{save_name} residual weights')
         #TODO (trouver layer residual dans model)
 
 def plot_expe(losses_path, eval_freq=10, names=None, save_path=None, lr=None, bs=None, epochs=None):

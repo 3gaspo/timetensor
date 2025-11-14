@@ -13,7 +13,6 @@ import scipy.cluster.hierarchy as shc
 from scipy.spatial.distance import squareform
 from scipy.spatial.distance import cosine
 from scipy.cluster.hierarchy import fcluster
-from scripy.cluster.distance import pdist
 
 def fourier(df, eps=1e-8):
     """transforms user series into their fft"""
@@ -151,6 +150,7 @@ def plot_heterogeneity(df, show=False, path="", name="heterogeneity.pdf"):
         centroids = get_centroids(df, cluster_indices)
         heterogeneity = get_cluster_heterogeneity(df, cluster_indices, centroids)
         heterogeneities.append(heterogeneity)
+    plt.figure(figsize=(10, 7))
     plt.plot(N_clusters, heterogeneities)
     plt.xlabel("Number of clusters")
     plt.ylabel("Heterogeneity")
@@ -177,7 +177,6 @@ def identify_cte(df, lookback, save_path=None):
 
     #plots
     if (save_path is not None) and (len(counts)>0):
-        plt.clf()
         fig = plt.figure(figsize=(10,5))
         plt.hist(np.log(list(counts.values())), bins=100)
         plt.yscale("log")

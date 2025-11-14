@@ -1,7 +1,7 @@
 dataset: synthetic
 path: ../datasets/synthetic/
 context_cols:
-normalize: True
+normalize: False
 
 n1: 100
 n2: 100

@@ -15,6 +15,7 @@ class ConstantModel(nn.Module):
     def __init__(self, model, horizon):
         super().__init__()
         self.model = model
+        self.does_constant = True
         self.horizon = horizon
 
     def forward(self, x, c=None): #x : (B, dim, lags)
@@ -47,9 +48,10 @@ class ResidualModel(nn.Module):
     def __init__(self, model, dim, horizon):
         super().__init__()
         self.model = model
+        self.does_residual = True
+
         self.dim, self.horizon = dim, horizon
         self.fc = nn.Linear((2+self.horizon) * self.dim, self.horizon * self.dim)
-
         # --- custom init ---
         with torch.no_grad():
             # Zero all weights and biases
@@ -510,98 +512,9 @@ class cmIN(DefaultNorm):
         output = self.denorm(pred, c[:, 0, 0]) #(B, dim, horizon)
         return output
 
-
-# class cRevIN(RevIN):
-#     def __init__(self, model, dim, n_clusters=2, eps=1e-8, latent=False, **kwargs):
-#         """clustered RevIN"""
-#         super().__init__(model, dim, eps, latent=latent, **kwargs)
-#         self.norm_name="crevin"
-#         assert n_clusters is not None
-#         self.alphas = nn.ParameterList([nn.Parameter(torch.ones((1, self.dim, 1))) for _ in range(n_clusters)])
-#         self.betas = nn.ParameterList([nn.Parameter(torch.zeros((1, self.dim, 1))) for _ in range(n_clusters)])
-
-#     def get_alpha_beta(self, cluster):
-#         alpha = torch.cat([self.alphas[int(k)] for k in cluster])
-#         beta  = torch.cat([self.betas[int(k)] for k in cluster])
-#         return alpha, beta
-
-#     def norm(self, x, cluster):
-#         self.mu, self.std = get_normal_stats(x)
-#         x = (x - self.mu) / (self.std+self.eps) # (B, dim, lags)
-#         alpha, beta = self.get_alpha_beta(cluster)
-#         x = x * alpha + beta
-#         return x
-#     def denorm(self, y, cluster):
-#         alpha, beta = self.get_alpha_beta(cluster)
-#         y = (y - beta) / alpha 
-#         if self.latent:
-#             return y
-#         else:
-#             y = y * (self.std+self.eps) + self.mu
-#             return y
-#     def forward(self, x, c=None): #(B, dim, lags)
-#         assert c is not None
-#         x  = self.norm(x, c[:, 0, 0]) #(B, dim, lags)
-#         pred = self.model(x, c) #(B, dim, horizon)
-#         output = self.denorm(pred, c[:, 0, 0]) #(B, dim, horizon)
-#         return output
-
-
-# class cflexRevIN(DefaultNorm):
-#     def __init__(self, model, dim, n_clusters=2, latent=False, start=True, **kwargs):
-#         """clustered RevIN"""
-#         super().__init__(model, latent, **kwargs)
-#         self.norm_name="cflexrevin"
-#         assert n_clusters is not None
-
-#         #flex in
-#         if start:
-#             self.nus = nn.ParameterList([nn.Parameter(torch.ones(1, dim, 1)) for _ in range(n_clusters)])  #scale
-#             self.etas = nn.ParameterList([nn.Parameter(torch.ones(1, dim, 1)) for _ in range(n_clusters)])  #shift
-#         else:
-#             self.nus = nn.ParameterList([nn.Parameter(torch.zeros(1, dim, 1)) for _ in range(n_clusters)])  #scale
-#             self.etas = nn.ParameterList([nn.Parameter(torch.zeros(1, dim, 1)) for _ in range(n_clusters)])  #shift
-#         #input modulations
-#         self.gammas = nn.ParameterList([nn.Parameter(torch.ones(1, dim, 1)) for _ in range(n_clusters)]) #scale
-#         self.omegas = nn.ParameterList([nn.Parameter(torch.zeros(1, dim, 1)) for _ in range(n_clusters)]) #shift
-#         #output modulations
-#         self.alphas = nn.ParameterList([nn.Parameter(torch.ones(1, dim, 1)) for _ in range(n_clusters)])  #scale
-#         self.betas = nn.ParameterList([nn.Parameter(torch.zeros(1, dim, 1)) for _ in range(n_clusters)])  #shift
-
-#     def get_alpha_beta(self, cluster):
-#         alpha = torch.cat([self.alphas[int(k)] for k in cluster])
-#         beta  = torch.cat([self.betas[int(k)] for k in cluster])
-#         eta = torch.cat([self.etas[int(k)] for k in cluster])
-#         nu = torch.cat([self.nus[int(k)] for k in cluster])
-#         gamma = torch.cat([self.gammas[int(k)] for k in cluster])
-#         omega = torch.cat([self.omegas[int(k)] for k in cluster])
-#         return alpha, beta, eta, nu, gamma, omega
-
-#     def norm(self, x, cluster):
-#         self.mu, self.std = get_normal_stats(x)
-#         alpha, beta, eta, nu, gamma, omega = self.get_alpha_beta(cluster)
-#         self.offset = self.nu*self.mu
-#         self.scale = 1 + self.eta*( 1/(self.std+self.eps) - 1)
-#         x = (x-self.offset) * self.scale # (B, dim, lags)
-#         x = x * self.gamma + self.omega
-#         return x
-#     def denorm(self, y, cluster):
-#         alpha, beta, eta, nu, gamma, omega = self.get_alpha_beta(cluster)
-#         y = (y - omega) / gamma 
-#         y = y / self.scale + self.offset
-#         y = y * self.alpha + self.beta
-#         return y
-#     def forward(self, x, c=None): #(B, dim, lags)
-#         assert c is not None
-#         x  = self.norm(x, c[:, 0, 0]) #(B, dim, lags)
-#         pred = self.model(x, c) #(B, dim, horizon)
-#         output = self.denorm(pred, c[:, 0, 0]) #(B, dim, horizon)
-#         return output
-
-
 ######
 
-def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=False, constants=True, residuals=False, **kwargs):
+def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=False, constants=True, residuals=False, cpu=False, **kwargs):
     """loads models from str model name"""
     lags, dim, horizon = shape[0], shape[1], shape[2]
     
@@ -640,30 +553,32 @@ def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=Fa
             model = RevIN(model, dim, **kwargs)
         elif norm_name == "softmin":
             model = SoftmIN(model, dim, **kwargs)
-        # elif norm_name == "crevin":
-        #     model = cRevIN(model, dim, **kwargs)
         elif norm_name == "mIN":
             model = mIN(model, dim, **kwargs)
         elif norm_name == "cmIN":
             model = cmIN(model, dim, **kwargs)
-        # elif norm_name == "cflexrevin":
-        #     model = cflexRevIN(model, dim, **kwargs)
         else:
-            ValueError(f"Normalization not recognized : {norm_name}")
+            raise ValueError(f"Normalization not recognized : {norm_name}")
     elif ("sk" not in model_name):
         model = DefaultNorm(model)
 
     #constants
     if constants and ("sk" not in model_name):
         model = ConstantModel(model, horizon)
-
+    else:
+        model.does_constant = False
     #residuals
     if residuals and ("sk" not in model_name):
         model = ResidualModel(model, dim, horizon)
-
+    else:
+        model.does_residual = False
+        
     #init
     if init_path is not None and ("sk" not in model_name):
-        weights = torch.load(init_path)
+        if cpu:
+            weights = torch.load(init_path, map_location=torch.device('cpu'))
+        else:
+            weights = torch.load(init_path)
         model.load_state_dict(weights)
     if freeze_core and ("sk" not in model_name):
         for param in model.parameters():
@@ -671,3 +586,25 @@ def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=Fa
                 param.requires_grad = False
 
     return model
+
+
+def format_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger):
+    """utils methods to format model kwargs"""
+    if kwargs.get("init_alpha") is True:
+        if "cmIN" in norm_name:
+            kwargs["init_alpha"] = [nodes_stats_dict[node]["train"]["alpha"] for node in nodes_stats_dict]
+            if len(kwargs["init_alpha"])<10:
+                logger.info(f"Loaded init_alphas: {kwargs['init_alpha']}")
+        else:
+            kwargs["init_alpha"] = stats_dict["train"]["alpha"]
+            logger.info(f"Loaded init_alphas: {kwargs['init_alpha']}")
+    if kwargs.get("init_beta") is True:
+        if "cmIN" in norm_name:
+            kwargs["init_beta"] = [nodes_stats_dict[node]["train"]["beta"] for node in nodes_stats_dict]
+            if len(kwargs["init_beta"])<10:
+                logger.info(f"Loaded init_alphas: {kwargs['init_beta']}")
+        else:
+            kwargs["init_beta"] = stats_dict["train"]["beta"]
+            logger.info(f"Loaded init_alphas: {kwargs['init_alpha']}")
+    if (norm_name is not None and "cmIN" in norm_name) and kwargs.get("n_clusters") is None and (kwargs.get("init_alpha") is False or kwargs.get("init_alpha")):
+            kwargs["n_clusters"] = len(nodes_stats_dict)

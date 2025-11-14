@@ -1,7 +1,7 @@
 dataset: electricity
 path: ../datasets/electricity/
 context_cols:
-normalize: True
+normalize: False
 
 clustering:
   clusters:

@@ -4,7 +4,8 @@ import torch
 
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_stats
 from src.timetensor.models import load_model, format_kwargs
-from src.timetensor.pipeline import get_losses
+from src.timetensor.pipeline import get_losses, load_learner
+from src.timetensor.visu import plot_weights
 from src.timetensor.utils import get_dirs, set_seed
 
 from src.timetensor.pipeline import launch_training, launch_eval, launch_example
@@ -17,7 +18,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def run(cfg):
     logger = logging.getLogger(__name__)
-    logger.info("=====Running train script=====")
+    logger.info("=====Running eval script=====")
 
     #configs
     data_path = cfg.data.path
@@ -59,16 +60,20 @@ def run(cfg):
     
     #training
     logger.info("--Training--")
-    learner = launch_training(model, norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict, eval_losses, device, save_dir, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger)
+    learner = load_learner(model, norm_name, criterion, cfg.training.lr, eval_losses, device)
+
     logger.info("--Eval--")
-    if cfg.training.valid_eval:
-        launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.misc.complete_evaluation, results_dir=output_dir, mode="Valid", denormalize=cfg.data.normalize)
-    if cfg.training.test_eval:
-        launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.misc.complete_evaluation, results_dir=output_dir, mode="Test", denormalize=cfg.data.normalize)
-        launch_example(data_path, model, lags, horizon, device, save_dir, save_name)
+    launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.misc.complete_evaluation, results_dir=output_dir, mode="Test", denormalize=cfg.data.normalize)
+    launch_example(data_path, model, lags, horizon, device, save_dir, save_name)
 
-
-
+    #weights
+    plot_weights(model, save_dir + "plots/", save_name)
+    if (norm_name is not None) and (("revin" in norm_name) or ("mIN" in norm_name and "cmIN" not in norm_name)):
+        params = {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
+        logger.info(f"Final modulations: {params}")
+    elif (norm_name is not None and "cmIN" in norm_name):
+        params = {f"beta_{k}": value.data.detach().cpu().numpy()[0][0][0] for k,value in enumerate(model.betas)}
+        logger.info(f"Final modulations: {params}")
 
     logger.info('End of script\n')
 

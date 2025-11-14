@@ -8,7 +8,7 @@ import pandas as pd
 import warnings
 import json
 
-from .utils import normalize, is_cte
+from .utils import normalize, is_cte, set_seed
 from .analysis import get_dataset_stats
 
 #TODO: vérif que l'aggregation dataste clusters fonctionne bien
@@ -60,7 +60,7 @@ class TimeSeriesDataset(Dataset):
             self.true_len = self.dates - (self.lags + self.horizon)
         elif self.idx_mode == "indiv":
             self.true_len = self.individuals
-        elif self.idx_mode == "all":
+        elif self.idx_mode == "all" or self.idx_mode == "random":
             self.true_len = self.individuals * (self.dates - (self.lags + self.horizon))
         else:
             raise ValueError(f"Unrecognized idx_mode: {idx_mode}")
@@ -160,6 +160,27 @@ class TimeSeriesDataset(Dataset):
                 else:
                     context = self.context[:, :, date: date + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
 
+        elif self.idx_mode == "random":
+            indiv = np.random.randint(self.individuals)
+            date = np.random.randint(self.dates - self.lags - self.horizon)
+            values = self.values[indiv, :, date : date + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
+            if self.remove_cte:
+                while is_cte(values[:, :, :self.lags]):
+                    if remove_cte_counter > 100:
+                            raise ValueError("Overflow constant windows")
+                    indiv = np.random.randint(self.individuals)
+                    date = np.random.randint(self.dates - self.lags - self.horizon)
+                    values = self.values[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0)
+                    remove_cte_counter += 1
+            if self.context is not None:
+                if self.context_by_individuals:
+                    context = self.context[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
+                else:
+                    context = self.context[:, :, date: date + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
+
+        else:
+            raise ValueError(f"Unrecognized idx_mode: {self.idx_mode}")
+
         inputs = values[:, :, :self.lags] # (individuals, dim, lags)
         target = values[:, :, self.lags:] # (individuals, dim, horizon)
         if self.context is not None:
@@ -168,7 +189,7 @@ class TimeSeriesDataset(Dataset):
             return inputs, target
 
 
-#TODO relire subset, upgrade avec idx_mode
+#TODO relire subset, upgrade avec idx_mode all / random
 class TimeSeriesSubset(Dataset):
     def __init__(self, dataset, indices, subset_mode="date"):
         self.indices = indices
@@ -457,7 +478,7 @@ def split_4_way(values, context, datetimes, indiv_split, date_split, context_by_
             context4 = context[: , :, dates_idx2]
     else:
         context1, context2, context3, context4 = None, None, None, None
-    return {"train":(values1, context1, dates1), "valid":(values2, context2, dates2), "valid2":(values3, context3, dates1), "test": (values4, context4, dates2)}
+    return {"train":(values1, context1, dates1), "valid1":(values2, context2, dates2), "valid2":(values3, context3, dates1), "test": (values4, context4, dates2)}
 
 
 def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals=True, save_path=False, reshuffle=True):
@@ -707,10 +728,8 @@ def get_sizes(loaders_dict, str_info=False):
 
 def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, clusters=None, aggregate=True, seed=None, save=False, shuffle_eval=False, fetch_cluster=None):
     """returns loaders dict and stats dicts"""
-    if seed is not None: 
-        torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
-        np.random.seed(seed)
+    
+    set_seed(seed)
 
     #save paths
     if save:
