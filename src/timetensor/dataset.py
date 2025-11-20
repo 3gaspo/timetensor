@@ -87,8 +87,9 @@ class TimeSeriesDataset(Dataset):
         
         remove_cte_counter = 0
         if self.idx_mode == "date":
+            indiv, date = None, idx
             if self.return_all_individuals: #1 batch = all individuals, batch of dates
-                values = self.values[:, :, idx : idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
+                values = self.values[:, :, date : date + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
                 if self.remove_cte:
                     std = values[:, :, :self.lags].std(dim=-1).detach() # (individuals, dim_values, 1)
                     mask = (std > 0).any(dim=1)
@@ -96,53 +97,52 @@ class TimeSeriesDataset(Dataset):
                     while values.numel() == 0:
                         if remove_cte_counter > 100:
                             raise ValueError("Overflow constant windows")
-                        idx = np.random.randint(self.dates - (self.lags + self.horizon))
-                        values = self.values[:, :, idx : idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
+                        date = np.random.randint(self.dates - (self.lags + self.horizon))
+                        values = self.values[:, :, date : date + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
                         std = values[:, :, :self.lags].std(dim=-1).detach() # (individuals, dim_values, 1)
                         mask = (std > 0).any(dim=1)
                         values = values[mask]
                         remove_cte_counter += 1
                         
                 if self.context is not None:
-                    context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
+                    context = self.context[:, :, date : date + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
                     if self.remove_cte:
                         context = context[mask]
-
             else: #1 batch = 1 individual, batch of dates
                 indiv = np.random.randint(self.individuals)
-                values = self.values[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
+                values = self.values[indiv, :, date : date + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
                 if self.remove_cte: #skip constant windows
                     while is_cte(values[:, :, :self.lags]):
                         if remove_cte_counter > 100:
                             raise ValueError("Overflow constant windows")
                         indiv = np.random.randint(self.individuals) 
-                        values = self.values[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0)
+                        values = self.values[indiv, :, date : date + self.lags + self.horizon].unsqueeze(0)
                         remove_cte_counter += 1
                 if self.context is not None:
                     if self.context_by_individuals:
-                        context = self.context[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
+                        context = self.context[indiv, :, date : date + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
                     else:
-                        context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
-
+                        context = self.context[:, :, date : date + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
         elif self.idx_mode == "indiv": #1 batch = batch of individuals, random date
-            if self.remove_cte and is_cte(self.values[idx, :, :]): #indiv is fully constant
-                t = 0
-                values = self.values[idx, :, t:self.lags+self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
+            indiv = idx 
+            if self.remove_cte and is_cte(self.values[indiv, :, :]): #indiv is fully constant
+                date = 0
+                values = self.values[indiv, :, date:self.lags+self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
             else:
-                t = np.random.randint(self.dates - self.lags - self.horizon)
-                values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
+                date = np.random.randint(self.dates - self.lags - self.horizon)
+                values = self.values[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
                 if self.remove_cte: #skip constant windows
                     while is_cte(values[:, :, :self.lags]):
                         if remove_cte_counter > 100:
                             raise ValueError("Overflow constant windows")
-                        t = np.random.randint(self.dates - self.lags - self.horizon)
-                        values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0)
+                        date = np.random.randint(self.dates - self.lags - self.horizon)
+                        values = self.values[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0)
                         remove_cte_counter += 1
             if self.context is not None:
                 if self.context_by_individuals:
-                    context = self.context[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
+                    context = self.context[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
                 else:
-                    context = self.context[:, :, t: t + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
+                    context = self.context[:, :, date: date + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
 
         elif self.idx_mode == "all":
             date, indiv = idx // self.individuals, idx % self.individuals
@@ -185,9 +185,9 @@ class TimeSeriesDataset(Dataset):
         inputs = values[:, :, :self.lags] # (individuals, dim, lags)
         target = values[:, :, self.lags:] # (individuals, dim, horizon)
         if self.context is not None:
-            return inputs, context, target
+            return inputs, context, target, indiv, date
         else:
-            return inputs, target
+            return inputs, None, target, indiv, date
 
 
 class TimeSeriesSubset(Dataset):
@@ -663,11 +663,7 @@ def collate_fn(data, remove_cte=False):
     """
        data: is a list of tuples with (input, (context), target)
     """
-    if len(data[0]) == 3:
-        inputs, contexts, targets = zip(*data)
-    else:
-        inputs, targets = zip(*data)
-        contexts = None
+    inputs, contexts, targets, dates, indivs = zip(*data)
 
     inputs = torch.cat(inputs, dim=0)   # shape: (bs*individuals, dim, lookback)
 
@@ -682,7 +678,7 @@ def collate_fn(data, remove_cte=False):
         if contexts is not None:
             contexts = contexts[non_constant_mask]
 
-    return inputs, contexts, targets
+    return inputs, contexts, targets, dates, indivs
     
 def aggregate_loaders_dict(loaders_dicts, lags, horizon, splits, batch_size):
     """aggregates loaders of different individuals. Expects same dates."""
@@ -732,7 +728,7 @@ def aggregate_loaders_dict(loaders_dicts, lags, horizon, splits, batch_size):
 def get_sizes(loaders_dict, str_info=False):
     """get data size from loaders"""
     loader = next(iter(loaders_dict.values()))
-    X, c, y = next(iter(loader)) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
+    X, c, y, indiv, date = next(iter(loader)) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
     shape = [X.shape[2], X.shape[1], y.shape[2]] #lags, dim, horizon
     if not str_info:
         return shape

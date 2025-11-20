@@ -3,9 +3,8 @@ import logging
 import torch
 
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_stats
-from src.timetensor.models import load_model
+from src.timetensor.models import load_model, format_min_kwargs
 from src.timetensor.pipeline import get_losses, load_learner
-from src.timetensor.visu import plot_weights
 from src.timetensor.utils import get_dirs, set_seed
 
 from tqdm import tqdm
@@ -66,19 +65,42 @@ def run(cfg):
     model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.training.freeze_core, cfg.model.constants, cfg.model.residuals, stats_dict, nodes_stats_dict, device=="cpu", logger, **kwargs)
     learner = load_learner(model, norm_name, criterion, cfg.training.lr, eval_losses, device)
 
-    logger.info("--Model eval--")
-    launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="Test", denormalize=cfg.data.normalize, runs=cfg.training.eval_runs)
-    launch_example(data_path, model, lags, horizon, device, save_dir, save_name)
+    #per user errors
+    logger.info("--Per user eval--")
+    suspects = [6, 111, 112, 113, 203]
+    per_user_losses = []
+    stds_per_user_losses = []
+    loss_name = "NMSE"
+    for indiv in suspects:#tqdm(range(loaders_dict["test1"].dataset.shape[0][0])):
+        loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(
+            data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon, seed=seed,
+            random_eval=cfg.training.random_eval, fetch_cluster=indiv)
+        if cfg.data.normalize:
+            apply_stats(loaders_dict, stats_dict)
+        losses1, exotics = learner.eval(loaders_dict["test1"], return_mode="all", runs=cfg.training.eval_runs, thresholds={loss_name:10})
+        logger.info(exotics)
+        mean = symlog(losses1[loss_name].mean())
+        std = symlog(losses1[loss_name].std())
+        per_user_losses.append(mean.item())
+        stds_per_user_losses.append(std.item())
+    stats_df = pd.DataFrame({
+        "log(mean_error)": per_user_losses,
+        "log(std_error)": stds_per_user_losses})
+    plt.figure(figsize=(10, 7))
+    g = sns.jointplot(
+        data=stats_df,
+        x="log(mean_error)",
+        y="log(std_error)",
+        kind='scatter',
+        palette='Set1',
+    )
+    plt.suptitle(f"Per-user Test 1 {loss_name} of {save_name}")
+    plt.tight_layout()
+    plt.savefig(save_dir+ "plots/" + "user_errors.pdf")
+    plt.close()
 
-    #weights
-    plot_weights(model, save_dir + "plots/", save_name)
-    if (norm_name is not None) and (("revin" in norm_name) or ("mIN" in norm_name and "cmIN" not in norm_name)):
-        params = {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
-        logger.info(f"Final modulations: {params}")
-    elif (norm_name is not None and "cmIN" in norm_name):
-        params = {f"beta_{k}": value.data.detach().cpu().numpy()[0][0][0] for k,value in enumerate(model.betas)}
-        logger.info(f"Final modulations: {params}")
-
+    exotics = np.where(np.array(per_user_losses)>1)
+    logger.info(exotics)
     logger.info('End of script\n')
 
 if __name__ == "__main__":

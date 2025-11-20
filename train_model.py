@@ -54,10 +54,8 @@ def run(cfg):
         logger.info(batch_str)
 
     #model
-    if norm_name is not None and "mIN" in norm_name:
-        format_min_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger)
-    model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.training.freeze_core, cfg.model.constants, cfg.model.residuals, **kwargs)
-    
+    model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.training.freeze_core, cfg.model.constants, cfg.model.residuals, stats_dict, nodes_stats_dict, device=="cpu", logger, **kwargs)
+
     #training
     logger.info("--Training--")
     learner = launch_training(model, norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict, eval_losses, device, save_dir, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger)

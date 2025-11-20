@@ -42,7 +42,7 @@ def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, b
     i = 0
     if seed is not None:
         set_seed(seed)
-    for x, c, y in dataloader:
+    for x, c, y, indiv, date in dataloader:
         i+=x.shape[0]
         if normal:
             if mean is None and std is None:

@@ -156,13 +156,11 @@ class Learner:
         Xtrain, Ytrain = unroll_windows(loader)#, shuffle=True)
         self.model.fit(Xtrain.cpu(), Ytrain.cpu())
 
-    def eval(self, loader, return_all=False, runs=1):
+    def eval(self, loader, return_mode="mean", runs=1, thresholds={}):
         """evaluates model on loader and returns mean loss
-        return_all True: stores each step's loss (mean over batch)
-        return_all False: overall mean loss
         """
         losses = {}
-
+        exotics = {}
         #sklearn
         if self.mode == "scikit-learn":       
             Xtest, Ytest = unroll_windows(loader)
@@ -170,9 +168,12 @@ class Learner:
             mean, std = get_normal_stats(Xtest)
             for loss_name, criterion in self.eval_losses.items():
                 losses[loss_name] = criterion(predictions, Ytest, mean, std).cpu() # (steps, dim, horizon)
-            if not return_all:
+            if return_mode == "mean":
                 for loss_name, criterion in self.eval_losses.items():
                     losses[loss_name] = losses[loss_name].mean().item() # scalar
+            elif return_mode == "dim":
+                for loss_name, criterion in self.eval_losses.items():
+                    losses[loss_name] = losses[loss_name].mean(dim=0) # (dim, horizon)
 
         #pytorch
         else:
@@ -181,7 +182,7 @@ class Learner:
                 self.model.eval()
             with torch.inference_mode():
                 for run in range(runs):
-                    for X_batch, context_batch, y_batch in loader:
+                    for X_batch, context_batch, y_batch, indiv_batch, date_batch in loader:
                         X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
                         if context_batch is not None:
                             context_batch = context_batch.to(self.device)
@@ -191,21 +192,46 @@ class Learner:
                         
                         for loss_name, criterion in self.eval_losses.items():
                             loss = criterion(predictions, y_batch, mean, std).detach() # (bs * individuals, dim, horizon)
-                            if return_all:
+                            
+                            if thresholds.get(loss_name) is not None:
+                                aggr_loss = loss.mean(dim=(1,2)) # (bs * individuals)
+                                high_mask = aggr_loss > thresholds[loss_name]
+                                high_indices = high_mask.nonzero(as_tuple=True)[0]
+                                if loss_name not in exotics:
+                                    exotics[loss_name] = []
+                                for idx in high_indices:
+                                    i = int(idx)
+                                    exotics[loss_name].append({
+                                        "indiv": indiv_batch[i],
+                                        "date": date_batch[i],
+                                        "loss": float(aggr_loss[i].cpu())
+                                    })
+                            if return_mode == "all": #may cause memory issues on cpu if too many samples
                                 if loss_name not in losses:
                                     losses[loss_name] = []
-                                losses[loss_name].append(loss.mean(dim=0).cpu()) # [ (dim, horizon) x steps]
-                            else:
-                                losses[loss_name] = losses.get(loss_name, 0) + loss.sum(dim=0).mean().item() #  scalar
+                                losses[loss_name] += [l.cpu() for l in loss] # [ (dim, horizon) x (steps*bs*individuals)]
+                            elif return_mode == "dim":
+                                if loss_name not in losses:
+                                    losses[loss_name] = []
+                                losses[loss_name].append(loss.sum(dim=0).cpu()) # [ (dim, horizon) x steps] 
                                 counts[loss_name] = counts.get(loss_name, 0) + loss.shape[0]
-
-            if return_all:
-                for loss_name, criterion in self.eval_losses.items():
-                    losses[loss_name] = torch.stack(losses[loss_name], dim=0) # (steps, dim, horizon)
-            else:
-                for loss_name, criterion in self.eval_losses.items():
-                    losses[loss_name] = losses[loss_name] / counts[loss_name] # scalar
-            
+                            elif return_mode == "mean":
+                                if loss_name not in losses:
+                                    losses[loss_name] = 0.0
+                                    counts[loss_name] = 0
+                                losses[loss_name] += loss.sum(dim=0).mean().item()
+                                counts[loss_name] += loss.shape[0]
+            for loss_name, criterion in self.eval_losses.items():           
+                if return_mode == "all":
+                    losses[loss_name] = torch.stack(losses[loss_name], dim=0) # ((steps*bs*individuals), dim, horizon)
+                elif return_mode == "dim":
+                    losses[loss_name] = torch.stack(losses[loss_name], dim=0).sum(dim=0) # (dim, horizon)
+                    losses[loss_name] /= counts[loss_name]
+                elif return_mode == "mean":
+                    losses[loss_name] /= counts[loss_name] # scalar
+        
+        if thresholds != {}:
+            return losses, exotics
         return losses
 
 
@@ -239,7 +265,7 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
     step = 0
     for epoch in range(epochs):
         #train_loader.dataset.add_epoch() #updates dataset epoch index for seeding
-        for X_batch, context_batch, y_batch in train_loader:
+        for X_batch, context_batch, y_batch, indiv, date in train_loader:
             step += 1
             loss = learner.compute_step(X_batch, context_batch, y_batch)
             train_losses.append(loss) #loss of batch
@@ -351,7 +377,7 @@ def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, e
     return learner
 
 
-def launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, complete_evaluation, save=False, results_dir=None, mode="Test", denormalize=False, runs=1):
+def launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, complete_evaluation, save=False, results_dir=None, mode="Test", denormalize=False, runs=1, return_mode="dim"):
     """evaluating model script"""
     if results_dir is None:
         results_dir = save_dir
@@ -359,24 +385,24 @@ def launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_n
     losses1, losses2, losses3 = None, None, None
     if mode == "Valid":
         sub_ = "valid"
-        losses1 = learner.eval(loaders_dict["valid1"], return_all=True, runs=runs) #(steps, dim, horizon)
+        losses1 = learner.eval(loaders_dict["valid1"], return_mode=return_mode, runs=runs) #(steps, dim, horizon)
         if save:
             torch.save(losses1, save_dir + "valid_losses1.pt")
         if loaders_dict.get("valid2") is not None:
-            losses2 = learner.eval(loaders_dict["valid2"], return_all=True, runs=runs)
+            losses2 = learner.eval(loaders_dict["valid2"], return_mode=return_mode, runs=runs)
             if save:
                 torch.save(losses2, save_dir + "valid_losses2.pt")
         if loaders_dict.get("valid3") is not None:
-            losses3 = learner.eval(loaders_dict["valid3"], return_all=True, runs=runs)
+            losses3 = learner.eval(loaders_dict["valid3"], return_mode=return_mode, runs=runs)
             if save:
                 torch.save(losses3, save_dir + "valid_losses3.pt")
     elif mode == "Test":
         sub_ = "test"
-        losses1 = learner.eval(loaders_dict["test1"], return_all=True, runs=runs)
+        losses1 = learner.eval(loaders_dict["test1"], return_mode=return_mode, runs=runs)
         if save:
             torch.save(losses1, save_dir + "test_losses1.pt")
         if loaders_dict.get("test2") is not None:
-            losses2 = learner.eval(loaders_dict["test2"], return_all=True, runs=runs) 
+            losses2 = learner.eval(loaders_dict["test2"], return_mode=return_mode, runs=runs) 
             if save:
                 torch.save(losses2, save_dir + "test_losses2.pt")
     else:
@@ -384,6 +410,7 @@ def launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_n
   
     for loss_name in eval_losses:
         if losses1 is not None:
+            #return_mode=all: (samples, dim, horizon), return_mode=dim! (dim, horizon)
             mean = losses1[loss_name].mean()
             if denormalize:
                 mean *= stats_dict["train"]["std"]**2
@@ -391,8 +418,11 @@ def launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_n
             if complete_evaluation:
                 std = losses1[loss_name].std()
                 save_results(std, save_dir, f"{sub_}1_std_results.json", save_name, f"{mode} {loss_name}")
-                plot_errors(losses1[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"{sub_}1_{loss_name}.pdf", f"{mode} 1 {loss_name} of {save_name} : {mean}")
-                plot_horizon_errors(losses1[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test1_horizon_{loss_name}.pdf", f"{mode} {loss_name} of {save_name} : {mean}")
+                if return_mode == "all":
+                    plot_errors(losses1[loss_name].mean(dim=(1,2)), save_dir + "plots/", f"{sub_}1_{loss_name}.pdf", f"{mode} 1 {loss_name} of {save_name} : {mean}")
+                    plot_horizon_errors(losses1[loss_name].mean(dim=(0,1)), save_dir + "plots/", f"{sub_}1_horizon_{loss_name}.pdf", f"{mode} 1 {loss_name} of {save_name} : {mean}")
+                elif return_mode == "dim":
+                    plot_horizon_errors(losses1[loss_name].mean(dim=0), save_dir + "plots/", f"{sub_}1_horizon_{loss_name}.pdf", f"{mode} {loss_name} 1 of {save_name} : {mean}")
         if losses2 is not None:
             mean = losses2[loss_name].mean()
             if denormalize:
@@ -401,19 +431,24 @@ def launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_n
             if complete_evaluation:
                 std = losses2[loss_name].std()
                 save_results(std, save_dir, f"{sub_}2_std_results.json", save_name, f"{mode} {loss_name}")
-                plot_errors(losses2[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"{sub_}2_{loss_name}.pdf", f"{mode} 1 {loss_name} of {save_name} : {mean}")
-                plot_horizon_errors(losses2[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"{sub_}2_horizon_{loss_name}.pdf", f"{mode} {loss_name} of {save_name} : {mean}")
+                if return_mode == "all":
+                    plot_errors(losses2[loss_name].mean(dim=(1,2)), save_dir + "plots/", f"{sub_}2_{loss_name}.pdf", f"{mode} 2 {loss_name} of {save_name} : {mean}")
+                    plot_horizon_errors(losses2[loss_name].mean(dim=(0,1)), save_dir + "plots/", f"{sub_}2_horizon_{loss_name}.pdf", f"{mode} {loss_name} 2 of {save_name} : {mean}")
+                elif return_mode == "dim":
+                    plot_horizon_errors(losses2[loss_name].mean(dim=0), save_dir + "plots/", f"{sub_}2_horizon_{loss_name}.pdf", f"{mode} {loss_name} 2 of {save_name} : {mean}")
         if losses3 is not None:
-            mean = losses3[loss_name].mean() 
+            mean = losses2[loss_name].mean()
             if denormalize:
                 mean *= stats_dict["train"]["std"]**2
-            save_results(mean, results_dir, f"{sub_}3_mean_results.json", save_name, f"{mode} {loss_name}")
+            save_results(mean, results_dir, f"{sub_}2_mean_results.json", save_name, f"{mode} {loss_name}")
             if complete_evaluation:
                 std = losses3[loss_name].std()
                 save_results(std, save_dir, f"{sub_}3_std_results.json", save_name, f"{mode} {loss_name}")
-                plot_errors(losses3[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"{sub_}3_{loss_name}.pdf", f"{mode} 1 {loss_name} of {save_name} : {mean}")
-                plot_horizon_errors(losses3[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"{sub_}3_horizon_{loss_name}.pdf", f"{mode} 1 {loss_name} of {save_name} : {mean}")
-
+                if return_mode == "all":
+                    plot_errors(losses3[loss_name].mean(dim=(1,2)), save_dir + "plots/", f"{sub_}3_{loss_name}.pdf", f"{mode} 3 {loss_name} of {save_name} : {mean}")
+                    plot_horizon_errors(losses3[loss_name].mean(dim=(0,1)), save_dir + "plots/", f"{sub_}3_horizon_{loss_name}.pdf", f"{mode} {loss_name} 3 of {save_name} : {mean}")
+                elif return_mode == "dim":
+                    plot_horizon_errors(losses3[loss_name].mean(dim=0), save_dir + "plots/", f"{sub_}3_horizon_{loss_name}.pdf", f"{mode} {loss_name} 3 of {save_name} : {mean}")
 
 def launch_example(data_path, model, lags, horizon, device, save_dir, save_name):
     """runs model on example"""
