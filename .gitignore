@@ -7,3 +7,4 @@ __pycache__/
 hydra_dir.txt
 saved/
 scripts/
+model.safetensors

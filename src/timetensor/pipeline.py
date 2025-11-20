@@ -3,9 +3,10 @@ import torch.nn as nn
 import torch.optim as optim
 from time import perf_counter
 import os
+from tqdm import tqdm
 
-from .utils import get_normal_stats, average_loss, append_in_dict, unroll_windows, normalize, save_results
-from .visu import plot_losses, plot_multi_losses, plot_serie, plot_named_example, plot_horizon_errors, plot_pred, plot_errors, plot_horizon_errors
+from .utils import get_normal_stats, append_in_dict, unroll_windows, normalize, save_results
+from .visu import plot_losses, plot_multi_losses, plot_serie, plot_named_example, plot_horizon_errors, plot_pred, plot_horizon_errors, plot_weights, plot_errors
 from .dataset import set_random_data, fetch_example_data
 
 class Loss():
@@ -15,29 +16,32 @@ class Loss():
 
         self.mean = mean
         self.std = std
-        self.standard_norm = (mean is not None and std is not None)
         self.eps = eps
         self.name = None
 
     def __call__(self, pred, y, mean=None, std=None):
-        if self.standard_norm:
+        if self.mode == "standard": #apply standard normalization
+            assert (self.mean is not None and self.std is not None)
             pred = normalize(pred, self.mean, self.std, self.eps)
             y = normalize(y, self.mean, self.std, self.eps)
-        if self.mode == "instance":
+        elif self.mode == "denorm": #remove standard normalization
+            assert (self.mean is not None and self.std is not None)
+            pred = (self.std + self.eps) * pred + self.mean
+            y = (self.std + self.eps) * y + self.mean
+        elif self.mode == "instance": #apply instance normalization
             assert (mean is not None and std is not None)
             pred = normalize(pred, mean, std, self.eps)
             y = normalize(y, mean, std, self.eps)
-        elif self.mode == "relative":
+        elif self.mode == "relative": #apply relative normalization
             assert (mean is not None and std is not None)
-            #mean = torch.where(mean != 0, mean, self.eps)
             mean = torch.abs(mean) + self.eps
             pred, y = pred/mean, y/mean
-        elif self.mode == "normalize_y":
-            assert (mean is not None and std is not None)
-            y = normalize(y, mean, std, self.eps)
-        elif self.mode == "denormalize_pred":
-            assert (mean is not None and std is not None)
-            pred = pred*(std+self.eps) + mean
+        # elif self.mode == "normalize_y":
+        #     assert (mean is not None and std is not None)
+        #     y = normalize(y, mean, std, self.eps)
+        # elif self.mode == "denormalize_pred":
+        #     assert (mean is not None and std is not None)
+        #     pred = pred*(std+self.eps) + mean
         return self.loss(pred, y)
 
 
@@ -46,7 +50,7 @@ def get_losses(criterion_name, mean=None, std=None, complete_evaluation=False):
     if criterion_name == "MSE":
         criterion = Loss(nn.MSELoss())
     elif criterion_name == "MMSE":
-        criterion = Loss(nn.MSELoss(), mean, std)
+        criterion = Loss(nn.MSELoss(), mean, std, mode ="standard")
     elif criterion_name == "NMSE":
         criterion = Loss(nn.MSELoss(), mode="instance")
     elif criterion_name == "RMSE":
@@ -80,7 +84,7 @@ def get_losses(criterion_name, mean=None, std=None, complete_evaluation=False):
     
 
 class Learner:
-    def __init__(self, model, criterion, lr, eval_losses, device=None, optimizer=None, scheduler=None, do_train=True, pytorch=True):
+    def __init__(self, model, criterion, lr, eval_losses, device=None, optimizer=None, scheduler=None, do_train=True, mode="pytorch"):
         """
         optimizer: to be called on model.parameters() and lr
         scheduler: to be called on optimizer(model)
@@ -91,62 +95,64 @@ class Learner:
             self.criterion = criterion
         self.eval_losses = eval_losses
 
-        if optimizer is None:
-            self.optimizer = lambda model: optim.Adam(model.parameters(), lr=lr)
-        else:
-            self.optimizer = optimizer
-        if scheduler is not None:
-            self.scheduler = lambda optimizer: scheduler(optimizer)
-        else:
-            self.scheduler = scheduler
+        self.mode = mode
+        if self.mode=="pytorch":
+            if optimizer is None:
+                self.optimizer = lambda model: optim.Adam(model.parameters(), lr=lr)
+            else:
+                self.optimizer = optimizer
+            if scheduler is not None:
+                self.scheduler = lambda optimizer: scheduler(optimizer)
+            else:
+                self.scheduler = scheduler
 
         if device is None:
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         else:
             self.device = device
+
         self.model = model
-        self.pytorch = pytorch
-        if self.pytorch:
+        if not self.mode == "scikit-learn":
             self.model.to(self.device)
         self.do_train = do_train
-        if self.pytorch and self.do_train:
+        if self.mode == "pytorch" and self.do_train:
             self.reset_optimizer()
 
     def reset_model(self, weights):
         self.model.load_state_dict(weights)
     def reset_optimizer(self):
-        self.curent_optimizer = self.optimizer(self.model)
+        self.current_optimizer = self.optimizer(self.model)
         if self.scheduler is not None:
-            self.current_scheduler = self.scheduler(self.curent_optimizer)
+            self.current_scheduler = self.scheduler(self.current_optimizer)
     def get_weights(self):
-        if self.pytorch:
-            return self.model.state_dict()
+        if self.mode == "scikit-learn":
+            return self.model.reg.coef_
         else:
-            return self.model.model.reg.coef_        
+            return self.model.state_dict()
 
     def compute_step(self, X_batch, context_batch, y_batch):
         """computes forward and backward on batch"""
-        assert self.model is not None and self.do_train and self.pytorch
+        assert self.model is not None and self.do_train and self.mode == "pytorch"
         self.model.train()
         X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
         if context_batch is not None:
             context_batch = context_batch.to(self.device)
         mean, std = get_normal_stats(X_batch) # (B, dim, 1)
         
-        self.curent_optimizer.zero_grad()
+        self.current_optimizer.zero_grad()
 
         predictions = self.model(X_batch, context_batch)
         loss = self.criterion(predictions, y_batch, mean, std)
 
         loss.backward()
-        self.curent_optimizer.step()
+        self.current_optimizer.step()
         if self.scheduler is not None:
             self.current_scheduler.step()
 
         return loss.item()
 
     def fit(self, loader):
-        assert not self.pytorch
+        assert self.mode == "scikit-learn"
         Xtrain, Ytrain = unroll_windows(loader)#, shuffle=True)
         self.model.fit(Xtrain.cpu(), Ytrain.cpu())
 
@@ -156,10 +162,23 @@ class Learner:
         return_all False: overall mean loss
         """
         losses = {}
+
+        #sklearn
+        if self.mode == "scikit-learn":       
+            Xtest, Ytest = unroll_windows(loader)
+            predictions = self.model(Xtest)
+            mean, std = get_normal_stats(Xtest)
+            for loss_name, criterion in self.eval_losses.items():
+                losses[loss_name] = criterion(predictions, Ytest, mean, std).cpu() # (steps, dim, horizon)
+            if not return_all:
+                for loss_name, criterion in self.eval_losses.items():
+                    losses[loss_name] = losses[loss_name].mean().item() # scalar
+
         #pytorch
-        if self.pytorch:
+        else:
             counts = {}
-            self.model.eval()
+            if self.mode == "pytorch":
+                self.model.eval()
             with torch.inference_mode():
                 for run in range(runs):
                     for X_batch, context_batch, y_batch in loader:
@@ -169,6 +188,7 @@ class Learner:
                         mean, std = get_normal_stats(X_batch)
                         
                         predictions = self.model(X_batch, context_batch)
+                        
                         for loss_name, criterion in self.eval_losses.items():
                             loss = criterion(predictions, y_batch, mean, std).detach() # (bs * individuals, dim, horizon)
                             if return_all:
@@ -185,18 +205,7 @@ class Learner:
             else:
                 for loss_name, criterion in self.eval_losses.items():
                     losses[loss_name] = losses[loss_name] / counts[loss_name] # scalar
-        
-        #sklearn
-        else:       
-            Xtest, Ytest = unroll_windows(loader)
-            predictions = self.model(Xtest)
-            mean, std = get_normal_stats(Xtest)
-            for loss_name, criterion in self.eval_losses.items():
-                losses[loss_name] = criterion(predictions, Ytest, mean, std).cpu() # (steps, dim, horizon)
-            if not return_all:
-                for loss_name, criterion in self.eval_losses.items():
-                    losses[loss_name] = losses[loss_name].mean().item() # scalar
-    
+            
         return losses
 
 
@@ -222,7 +231,7 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
     train_losses = []
     valid_losses1 = {}
     valid_losses2 = {}
-    valid_losses3= {}
+    valid_losses3 = {}
     weights = {}
     t1 = perf_counter()
 
@@ -240,13 +249,14 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
                 #valid eval
                 if valid_loader1 is not None:
                     average_eval_dict1 = learner.eval(valid_loader1, runs=eval_runs)
+                    append_in_dict(valid_losses1, average_eval_dict1)
                 if valid_loader2 is not None:
                     average_eval_dict2 = learner.eval(valid_loader2, runs=eval_runs)
+                    append_in_dict(valid_losses2, average_eval_dict2)
                 if valid_loader3 is not None:
                     average_eval_dict3 = learner.eval(valid_loader3, runs=eval_runs)
-                append_in_dict(valid_losses1, average_eval_dict1)
-                append_in_dict(valid_losses2, average_eval_dict2)
-                append_in_dict(valid_losses3, average_eval_dict3)
+                    append_in_dict(valid_losses3, average_eval_dict3)
+                
                 if weight_follow is not None:
                     append_in_dict(weights, weight_follow(learner.model))
 
@@ -267,83 +277,147 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
     return train_losses, valid_losses1, valid_losses2, valid_losses3, weights
 
 
-def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, eval_losses, device, save_dir, save_name, eval_freq, print_freq, logger, retrain=True):
+def load_learner(model, normalization, criterion, lr, eval_losses, device):
+    """loads correct model learner"""
+    model_name = model.name
+    if (model_name in ["persistence", "repeat", "lookback", "expected"]) and ((normalization is None) or (("mIN" not in normalization) and ("revin" not in normalization))):
+        mode, do_train = "pytorch", False
+    elif model_name == "sklinear":
+        mode, do_train = "scikit-learn", True
+    elif model_name == "chronos":
+        mode, do_train = "pretrained", False
+    else:
+        mode, do_train = "pytorch", True
+    learner = Learner(model, criterion, lr, eval_losses, device=device, mode=mode, do_train=do_train)
+    return learner
+
+
+def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, eval_losses, device, save_dir, save_name, eval_freq, print_freq, logger):
     """launches training of model"""
     model_name = model.name
     criterion_name = criterion.name
+    
+    learner = load_learner(model, normalization, criterion, lr, eval_losses, device)
+
     #non trainable
     if (model_name in ["persistence", "repeat", "lookback", "expected"]) and ((normalization is None) or (("mIN" not in normalization) and ("revin" not in normalization))):
-        learner = Learner(model, criterion, lr, eval_losses, device=device, do_train=False)
         logger.info("No training needed")
     
     #scikit learn .fit
     elif model_name == "sklinear":
-        learner = Learner(model, criterion, lr, eval_losses, device=device, pytorch=False)
-        if retrain:
-            logger.info("Starting scikit-learn fitting...")
-            learner.fit(loaders_dict["train"])
-            logger.info("End of training")
-        else:
-            logger.info("No training needed")
+        logger.info("Starting scikit-learn fitting...")
+        learner.fit(loaders_dict["train"])
+        logger.info("End of training")
     
     #pytorch training
     else:
-        learner = Learner(model, criterion, lr, eval_losses, device=device)
-        if retrain:
-            logger.info(f"Starting training pytorch with lr={lr}")
-            if normalization is not None and (("revin" in normalization) or ("mIN" in normalization)):
-                weight_follow = lambda model: {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
-            else:
-                weight_follow = None
-            train_losses, valid_losses1, valid_losses2, valid_losses3, followed_weights = train_model(learner, loaders_dict, epochs=epochs, logger=logger, eval_runs=1, eval_freq=eval_freq, print_freq=print_freq, weight_follow=weight_follow)
-            torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")
-            torch.save(train_losses, save_dir + f"train_losses.pt")
-            torch.save(valid_losses1, save_dir + f"valid_losses1.pt")
-            torch.save(valid_losses2, save_dir + f"valid_losses2.pt")
-            torch.save(valid_losses3, save_dir + f"valid_losses3.pt")
-            torch.save(followed_weights, save_dir + f"followed_weights.pt")
-            #plots
-            for loss_name in eval_losses:
-                valid_dict = {"valid1": valid_losses1[loss_name], "valid2": valid_losses2[loss_name], "valid3": valid_losses3[loss_name]}
-                if loss_name == criterion_name or (loss_name=="NMSE" and "NMSE" in criterion_name):
-                    plot_losses(train_losses, valid_dict, save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}", eval_freq=eval_freq)
-                else:
-                    plot_multi_losses(valid_dict,  save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}", eval_freq=eval_freq)
-            for weight_name in followed_weights:
-                plot_serie(followed_weights[weight_name], save_dir + "plots/", f"{weight_name}.pdf", title=f"{weight_name} during training")
-            logger.info("End of training")        
+        logger.info(f"Starting training pytorch with lr={lr}")
+        if normalization is not None and (("revin" in normalization) or ("mIN" in normalization and "cmIN" not in normalization)):
+            weight_follow = lambda model: {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
         else:
-            logger.info("No training needed")
+            weight_follow = None
+        train_losses, valid_losses1, valid_losses2, valid_losses3, followed_weights = train_model(learner, loaders_dict, epochs=epochs, logger=logger, eval_runs=1, eval_freq=eval_freq, print_freq=print_freq, weight_follow=weight_follow)
+        torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")
+        torch.save(train_losses, save_dir + f"train_losses.pt")
+        torch.save(valid_losses1, save_dir + f"valid_losses1.pt")
+        torch.save(valid_losses2, save_dir + f"valid_losses2.pt")
+        torch.save(valid_losses3, save_dir + f"valid_losses3.pt")
+        torch.save(followed_weights, save_dir + f"followed_weights.pt")
+        
+        #plots
+        for loss_name in eval_losses:
+            valid_dict = {"valid1": valid_losses1[loss_name]}
+            if valid_losses2.get(loss_name) is not None:
+                valid_dict["valid2"] = valid_losses2[loss_name]
+            if valid_losses3.get(loss_name) is not None:
+                valid_dict["valid3"] = valid_losses3[loss_name]
+            if loss_name == criterion_name or (loss_name=="NMSE" and "NMSE" in criterion_name):
+                plot_losses(train_losses, valid_dict, save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}", eval_freq=eval_freq)
+            else:
+                plot_multi_losses(valid_dict,  save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}", eval_freq=eval_freq)
+        for weight_name in followed_weights:
+            plot_serie(followed_weights[weight_name], save_dir + "plots/", f"{weight_name}.pdf", title=f"{weight_name} during training")
+        logger.info("End of training")        
+    
+    #weights
+    plot_weights(model, save_dir + "plots/", save_name)
+    if (normalization is not None) and (("revin" in normalization) or ("mIN" in normalization and "cmIN" not in normalization)):
+        params = {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
+        logger.info(f"Final modulations: {params}")
+    elif (normalization is not None and "cmIN" in normalization):
+        params = {f"beta_{k}": value.data.detach().cpu().numpy()[0][0][0] for k,value in enumerate(model.betas)}
+        logger.info(f"Final modulations: {params}")
+    
     return learner
 
 
-def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complete_evaluation, save=False):
-    test_losses1 = learner.eval(loaders_dict["test1"], return_all=True) #(steps, dim, horizon)
-    test_losses2 = learner.eval(loaders_dict["test2"], return_all=True) #(steps, dim, horizon)
-    if save:
-        torch.save(test_losses1, save_dir + "test_losses1.pt")
-        torch.save(test_losses2, save_dir + "test_losses2.pt")
+def launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, complete_evaluation, save=False, results_dir=None, mode="Test", denormalize=False, runs=1):
+    """evaluating model script"""
+    if results_dir is None:
+        results_dir = save_dir
+    
+    losses1, losses2, losses3 = None, None, None
+    if mode == "Valid":
+        sub_ = "valid"
+        losses1 = learner.eval(loaders_dict["valid1"], return_all=True, runs=runs) #(steps, dim, horizon)
+        if save:
+            torch.save(losses1, save_dir + "valid_losses1.pt")
+        if loaders_dict.get("valid2") is not None:
+            losses2 = learner.eval(loaders_dict["valid2"], return_all=True, runs=runs)
+            if save:
+                torch.save(losses2, save_dir + "valid_losses2.pt")
+        if loaders_dict.get("valid3") is not None:
+            losses3 = learner.eval(loaders_dict["valid3"], return_all=True, runs=runs)
+            if save:
+                torch.save(losses3, save_dir + "valid_losses3.pt")
+    elif mode == "Test":
+        sub_ = "test"
+        losses1 = learner.eval(loaders_dict["test1"], return_all=True, runs=runs)
+        if save:
+            torch.save(losses1, save_dir + "test_losses1.pt")
+        if loaders_dict.get("test2") is not None:
+            losses2 = learner.eval(loaders_dict["test2"], return_all=True, runs=runs) 
+            if save:
+                torch.save(losses2, save_dir + "test_losses2.pt")
+    else:
+        raise ValueError("Unrecognized eval mode")
+  
+    for loss_name in eval_losses:
+        if losses1 is not None:
+            mean = losses1[loss_name].mean()
+            if denormalize:
+                mean *= stats_dict["train"]["std"]**2
+            save_results(mean, results_dir, f"{sub_}1_mean_results.json", save_name, f"{mode} {loss_name}")
+            if complete_evaluation:
+                std = losses1[loss_name].std()
+                save_results(std, save_dir, f"{sub_}1_std_results.json", save_name, f"{mode} {loss_name}")
+                plot_errors(losses1[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"{sub_}1_{loss_name}.pdf", f"{mode} 1 {loss_name} of {save_name} : {mean}")
+                plot_horizon_errors(losses1[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test1_horizon_{loss_name}.pdf", f"{mode} {loss_name} of {save_name} : {mean}")
+        if losses2 is not None:
+            mean = losses2[loss_name].mean()
+            if denormalize:
+                mean *= stats_dict["train"]["std"]**2
+            save_results(mean, results_dir, f"{sub_}2_mean_results.json", save_name, f"{mode} {loss_name}")
+            if complete_evaluation:
+                std = losses2[loss_name].std()
+                save_results(std, save_dir, f"{sub_}2_std_results.json", save_name, f"{mode} {loss_name}")
+                plot_errors(losses2[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"{sub_}2_{loss_name}.pdf", f"{mode} 1 {loss_name} of {save_name} : {mean}")
+                plot_horizon_errors(losses2[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"{sub_}2_horizon_{loss_name}.pdf", f"{mode} {loss_name} of {save_name} : {mean}")
+        if losses3 is not None:
+            mean = losses3[loss_name].mean() 
+            if denormalize:
+                mean *= stats_dict["train"]["std"]**2
+            save_results(mean, results_dir, f"{sub_}3_mean_results.json", save_name, f"{mode} {loss_name}")
+            if complete_evaluation:
+                std = losses3[loss_name].std()
+                save_results(std, save_dir, f"{sub_}3_std_results.json", save_name, f"{mode} {loss_name}")
+                plot_errors(losses3[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"{sub_}3_{loss_name}.pdf", f"{mode} 1 {loss_name} of {save_name} : {mean}")
+                plot_horizon_errors(losses3[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"{sub_}3_horizon_{loss_name}.pdf", f"{mode} 1 {loss_name} of {save_name} : {mean}")
 
-    for loss_name in eval_losses:
-        mean = test_losses1[loss_name].mean() 
-        #std = test_losses1[loss_name].std()
-        save_results(mean, save_dir, "test1_mean_results.json", save_name, f"Test {loss_name}")
-        # save_results(std, save_dir, "test1_std_results.json", save_name, f"Test {loss_name}")
-        if complete_evaluation:
-            # plot_errors(test_losses1[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"test1_{loss_name}.pdf", f"Test 1 {loss_name} of {save_name} : {mean}")
-            plot_horizon_errors(test_losses1[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test1_horizon_{loss_name}.pdf", f"Test 1 {loss_name} of {save_name} : {mean}")
-    for loss_name in eval_losses:
-        mean = test_losses2[loss_name].mean()
-        # std = test_losses2[loss_name].std()
-        save_results(mean, save_dir, "test2_mean_results.json", save_name, f"Test {loss_name}")
-        # save_results(std, save_dir, "test2_std_results.json", save_name, f"Test {loss_name}")
-        if complete_evaluation:
-            # plot_errors(test_losses2[loss_name].sum(axis=1).mean(axis=1), save_dir + "plots/", f"test2_{loss_name}.pdf", f"Test 2 {loss_name} of {save_name} : {mean}")
-            plot_horizon_errors(test_losses2[loss_name].sum(axis=1).mean(axis=0), save_dir + "plots/", f"test2_horizon_{loss_name}.pdf", f"Test 2 {loss_name} of {save_name} : {mean}")
 
 def launch_example(data_path, model, lags, horizon, device, save_dir, save_name):
     """runs model on example"""
-    if model.norm_name not in ["crevin", "cmIN", "cflexrevin"]:#TODO gerer ce cas
+    if "crev" not in model.norm_name and "cm" not in model.norm_name and "softm" not in model.norm_name:#TODO gerer ce cas
         ex_dir = data_path + "examples/" + f"{lags}_{horizon}/"
         if not os.path.exists(ex_dir):
             set_random_data(data_path, lags, horizon, name="rand")
@@ -354,4 +428,4 @@ def launch_example(data_path, model, lags, horizon, device, save_dir, save_name)
             if c is not None:
                 c = c.unsqueeze(0).to(device)
             pred = model(x,c)
-            plot_pred(x[0,0].cpu().detach().numpy(), y[0,0].cpu().detach().numpy(), pred[0,0].cpu().detach().numpy(), save_dir + "examples/", f"{data_name}_predictions.pdf", f"Example {data_name} prediction for {save_name}")
+            plot_pred(x[0,0].cpu().detach().tolist(), y[0,0].cpu().detach().tolist(), pred[0,0].cpu().detach().tolist(), save_dir + "examples/", f"{data_name}_predictions.pdf", f"Example {data_name} prediction for {save_name}")

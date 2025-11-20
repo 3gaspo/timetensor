@@ -1,5 +1,5 @@
-dataset: saturation
-path: ../datasets/saturation/
+dataset: Etth1
+path: ../datasets/Etth1/
 context_cols:
 normalize: False
 
@@ -8,9 +8,9 @@ clustering:
   n_clusters:
 
 splits:
-  indiv_split:
+  indiv_split: 0.8
   date_splits: 0.6;0.2;0.2
-  idx_mode: date
+  idx_mode: indiv
   context_by_individuals: True
   reshuffle: True
   remove_train_cte: True
@@ -19,5 +19,5 @@ splits:
 
 subsets:
   mode: dates
-  sizes:
+  sizes: 1;1;1;1;1;1
   cluster:

@@ -1,4 +1,0 @@
-name: crevin
-configs:
-  latent: False
-  n_clusters: 2

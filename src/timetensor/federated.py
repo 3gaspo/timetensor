@@ -24,11 +24,8 @@ class Client:
 
     def get_size(self):
         """returns dataset size (scalar)"""
-        shape = self.dataloaders["train"].dataset.shape
-        if len(shape)==2: #context
-             return shape[0][0]*shape[0][2]  #users * dates (values)
-        else:
-            return shape[0]*shape[2] #users * dates
+        shape = self.dataloaders["train"].dataset.shape[0]
+        return shape[0]*shape[2] #users * dates
 
     def get_weights(self):
         """returns held model weights"""

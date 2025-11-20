@@ -1,5 +1,5 @@
-dataset: traffic
-path: ../datasets/traffic/
+dataset: exchange_rate
+path: ../datasets/exchange_rate/
 context_cols:
 normalize: False
 

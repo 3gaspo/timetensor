@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import random
 import pandas as pd
 import json
 from tabulate import tabulate
@@ -12,10 +11,12 @@ import seaborn as sns
 
 from .dataset import fetch_example_data
 from .analysis import *
+from .utils import text_list, unroll_windows, symlog
 
-def plot_serie(x, path="", name="series.pdf", title="Time series", axis=True):
-    """plots example data"""
-    plt.clf()
+## series plots
+
+def plot_serie(x, path="", name="series.pdf", title="Time series", axis=True, show=False):
+    """plots example serie"""
     fig = plt.figure(figsize=(20,5))
     plt.plot(range(len(x)), x)
     if not axis:
@@ -23,16 +24,18 @@ def plot_serie(x, path="", name="series.pdf", title="Time series", axis=True):
       plt.title(None)
     plt.title(title)
     fig.tight_layout()
-    plt.savefig(path + name)
+    if show:
+        plt.show()
+    else:
+        plt.savefig(path+name)
     plt.close()
 
-def plot_example(x, y, path="", name="example.pdf", title="Example", axis=True):
-    """plots example data"""
-    plt.clf()
+def plot_example(x, y, path="", name="example.pdf", title="Example", axis=True, show=False):
+    """plots example input output"""
     lag = len(x)
     horizon = len(y)
     fig = plt.figure(figsize=(20,5))
-    plt.plot(range(lag), x, label="Lookback")
+    plt.plot(range(lag+1), x+[y[0]], label="Lookback")
     plt.plot(range(lag, lag+horizon), y, label="Horizon")
     plt.axvline(x=lag, color='black', linestyle='--')
     plt.legend(bbox_to_anchor=(0.5, -0.15), ncol=3, loc='center', fontsize=14)
@@ -41,33 +44,66 @@ def plot_example(x, y, path="", name="example.pdf", title="Example", axis=True):
       plt.title(None)
     plt.title(title)
     fig.tight_layout()
-    plt.savefig(path + name)
+    if show:
+        plt.show()
+    else:
+        plt.savefig(path+name)
     plt.close()
 
 def plot_named_example(path, name):
     x, c, y, i, d  = fetch_example_data(path, name)
-    plot_example(x[0], y[0], path + f"/{name}/", f"example.pdf", "Example")
+    plot_example(x[0].cpu().detach().tolist(), y[0].cpu().detach().tolist(), path + f"/{name}/", f"example.pdf", "Example")
 
 
-# def valid_for_kde(sub, keyx, keyy):
-#     return (
-#         len(sub) >= 3 and
-#         sub[keyy].nunique() >= 2 and sub[keyx].nunique() >= 2 and
-#         sub[keyy].std() > 0 and sub[keyx].std() > 0
-#     )
-def valid_for_kde(sub, keyx, keyy):
-    a = sub[keyy].to_numpy()
-    b = sub[keyx].to_numpy()
-    na = np.sum(~np.isnan(a))
-    nb = np.sum(~np.isnan(b))
-    if na < 2 or nb < 2:
-        return False
-    if np.nanmin(a) == np.nanmax(a) or np.nanmin(b) == np.nanmax(b):
-        return False
-    return len(sub) >= 3
+def plot_pred(x, y, pred, path="", name="prediction.pdf", title="Predictions", axis=True, show=False):
+    """plots example prediction"""
+    lag = len(x)
+    horizon = len(y)
+    fig = plt.figure(figsize=(20,5))
+    plt.plot(range(lag+1), x+[pred[0]], label="Lookback")
+    plt.plot(range(lag, lag+horizon), pred, label="Prediction")
+    plt.plot(range(lag, lag+horizon), y, label="Horizon")
+    plt.axvline(x=lag, color='black', linestyle='--')
+    plt.legend(bbox_to_anchor=(0.5, -0.15), ncol=3, loc='center', fontsize=14)
+    if not axis:
+      plt.axis('off')
+      plt.title(None)
+    plt.title(title)
+    fig.tight_layout()
+    if show:
+        plt.show()
+    else:
+        plt.savefig(path+name)
+    plt.close()
 
-def plot_stats(data, path="", name="stats.pdf", per_user=True, lookback=336, samples=1000, title=None, remove_cte=True, log=False, show=False):
-    """plots means and stds. data must be pandas dataframe or dict of df"""
+
+def plot_preds(x, y, preds, path="", name="prediction.pdf", title="Predictions", axis=True, show=False):
+    """plots multiple example predictions"""
+    lag = len(x)
+    horizon = len(y)
+    fig = plt.figure(figsize=(20,5))
+    plt.plot(range(lag+1), x+[y[0]], label="Lookback")
+    for key, pred in preds.items():
+        plt.plot(range(lag, lag+horizon), pred, label=f"{key}")
+    plt.plot(range(lag, lag+horizon), y, "--", label="Horizon")
+    plt.axvline(x=lag, color='black', linestyle='--')
+    plt.legend(bbox_to_anchor=(0.5, -0.15), ncol=3, loc='center', fontsize=14)
+    if not axis:
+      plt.axis('off')
+      plt.title(None)
+    plt.title(title)
+    fig.tight_layout()
+    if show:
+        plt.show()
+    else:
+        plt.savefig(path+name)
+    plt.close()
+
+
+## stats plots
+
+def plot_stats(data, path="", name="stats.pdf", per_user=True, lookback=336, horizon= 48, samples=2000, title=None, remove_cte=True, log=False, show=False):
+    """plots means and std scatter plot. data must be pandas dataframe or dict of df"""
     if type(data) != dict:
         data = {"data":data}
 
@@ -76,7 +112,7 @@ def plot_stats(data, path="", name="stats.pdf", per_user=True, lookback=336, sam
         if per_user:
             clean_df = df.copy()
             if remove_cte:
-                cte_mask, _ = identify_cte(df, lookback)
+                cte_mask, _ = identify_cte(df.iloc[lookback:-horizon], lookback)
                 clean_df[cte_mask] = pd.NA
             means = clean_df.mean(axis=0)
             stds = clean_df.std(axis=0)
@@ -94,11 +130,13 @@ def plot_stats(data, path="", name="stats.pdf", per_user=True, lookback=336, sam
             if remove_cte:
                 keep_idx = np.where(stds>0)[0]
                 means, stds = means.iloc[keep_idx], stds.iloc[keep_idx]
-        keys += [key + f" (mean: {means.mean():.2f} | stds: {stds.mean():.2f}" for _ in range(len(means))]
+        keys += [key + f" (mean: {means.mean():.2f} | stds: {stds.mean():.2f})" for _ in range(len(means))]
         if log:
-            means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
-            stds_list += np.log(np.where(stds>0, stds, 1e-8)).tolist()
-            xlbl, ylbl = "log(mean)", "log(std)"
+            # means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
+            # stds_list += np.log(np.where(stds>0, stds, 1e-8)).tolist()
+            means_list += symlog(means).tolist()
+            stds_list += symlog(stds).tolist()
+            xlbl, ylbl = "symlog(mean)", "symlog(std)"
         else:
             means_list += means.tolist()
             stds_list += stds.tolist()
@@ -109,8 +147,7 @@ def plot_stats(data, path="", name="stats.pdf", per_user=True, lookback=336, sam
         xlbl: means_list,
         ylbl: stds_list})
 
-    sns.set_theme(style="white")
-
+    plt.figure(figsize=(10, 7))
     g = sns.jointplot(
         data=stats_df,
         x=xlbl,
@@ -121,30 +158,29 @@ def plot_stats(data, path="", name="stats.pdf", per_user=True, lookback=336, sam
         marginal_kws=dict(common_norm=False, fill=True, alpha=0.5)
     )
 
-    #g.plot_joint(sns.kdeplot, hue='key', fill=False, alpha=0.3)
-    ax = g.ax_joint
-    hue_order = list(dict.fromkeys(stats_df["key"]))  # preserves first-seen order
-    palette = sns.color_palette("Set1", n_colors=len(hue_order))
-    color_for = dict(zip(hue_order, palette))
-    for key, sub in stats_df.groupby("key"):
-        if not valid_for_kde(sub, xlbl, ylbl):
-            continue
-        try:
-            sns.kdeplot(
-                data=sub,
-                x="beta", y="alpha",
-                ax=ax,
-                color=color_for[key],   # match scatter color
-                fill=False, alpha=0.3,
-                levels=10,              # strictly increasing
-                thresh=1e-6,
-                bw_adjust=1.2,
-                warn_singular=False,
-                common_norm=False,
-                legend=False,           # avoid legend duplication
-            )
-        except ValueError: # If a group still blows up, just skip its KDE
-            pass
+    # ax = g.ax_joint
+    # hue_order = list(dict.fromkeys(stats_df["key"]))  # preserves first-seen order
+    # palette = sns.color_palette("Set1", n_colors=len(hue_order))
+    # color_for = dict(zip(hue_order, palette))
+    # for key, sub in stats_df.groupby("key"):
+    #     if not valid_for_kde(sub, xlbl, ylbl):
+    #         continue
+    #     try:
+    #         sns.kdeplot(
+    #             data=sub,
+    #             x="beta", y="alpha",
+    #             ax=ax,
+    #             color=color_for[key],   # match scatter color
+    #             fill=False, alpha=0.3,
+    #             levels=10,              # strictly increasing
+    #             thresh=1e-6,
+    #             bw_adjust=1.2,
+    #             warn_singular=False,
+    #             common_norm=False,
+    #             legend=False,           # avoid legend duplication
+    #         )
+    #     except ValueError: # If a group still blows up, just skip its KDE
+    #         pass
 
     if title is None:
         plt.suptitle("Statistics distribution", y=1.02)
@@ -158,7 +194,8 @@ def plot_stats(data, path="", name="stats.pdf", per_user=True, lookback=336, sam
     plt.close()
 
 
-def plot_means(data, path="", name="stats.pdf", per_user=True, lookback=336, samples=1000, title=None, remove_cte=True, log=False, show=False):
+def plot_means(data, path="", name="stats.pdf", per_user=True, lookback=336, horizon=48, samples=2000, title=None, remove_cte=True, log=False, show=False):
+    """plots means histogram. data must be pandas dataframe or dict of df"""
 
     if type(data) != dict:
         data = {"data":data}
@@ -168,7 +205,7 @@ def plot_means(data, path="", name="stats.pdf", per_user=True, lookback=336, sam
         if per_user:
             clean_df = df.copy()
             if remove_cte:
-                cte_mask, _ = identify_cte(df, lookback)
+                cte_mask, _ = identify_cte(df.iloc[lookback:-horizon], lookback)
                 clean_df[cte_mask] = pd.NA
             means = clean_df.mean(axis=0)
         else:
@@ -182,17 +219,22 @@ def plot_means(data, path="", name="stats.pdf", per_user=True, lookback=336, sam
                 keep_idx = np.where(stds>0)[0]
                 means = means.iloc[keep_idx]
 
-        keys += [key + f" (mean: {means.mean():.2f}" for _ in range(len(means))]
+        keys += [key + f" (mean: {means.mean():.2f})" for _ in range(len(means))]
         if log:
-            means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
+            # xlbl = "log(means)"
+            # means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
+            means_list += symlog(means).tolist()
+            xlbl = "symlog(mean)"
         else:
+            xlbl = "means"
             means_list += means.tolist()
 
     means_df = pd.DataFrame({
         'key': keys,
-        'log(mean)': means_list,})
+         xlbl: means_list,})
     
-    sns.kdeplot(means_df, x="log(mean)", hue="key", fill=True)#, log_scale=False), #label=f"{key} (avg:{means.mean():.2f})")
+    plt.figure(figsize=(10, 7))
+    sns.kdeplot(means_df, x=xlbl, hue="key", fill=True, common_norm=False)#, log_scale=False), #label=f"{key} (avg:{means.mean():.2f})")
 
     if title is None:
         plt.title(f"Means distribution")
@@ -208,25 +250,74 @@ def plot_means(data, path="", name="stats.pdf", per_user=True, lookback=336, sam
     plt.close()
 
 
-def plot_box(data, users, dates):
-    plt.imshow(data.values.T[:users, :dates])
+
+def plot_points(loaders_dicts, path="", name="stats.pdf", samples=2000, title=None, log=False, show=False, normal=False, dim=0):
+    """plots means histogram. data must be pandas dataframe or dict of df"""
+
+    keys, values_list = [], []
+    for key, loader in loaders_dicts.items():
+
+        X, Y, C = unroll_windows(loader, cap=samples, shuffle=False, normal=normal, do_context=True)
+        values = X[:, dim, :].view(-1).detach().cpu()
+
+        keys += [key + f" (mean: {values.mean():.2f})" for _ in range(len(values))]
+        if log:
+            # xlbl = "log(values)"
+            # values_list += np.log(np.where(values>0, values, 1e-8)).tolist()
+            values_list += symlog(values).tolist()
+            xlbl = "symlog(values)"
+        else:
+            xlbl = "values"
+            values_list += values.tolist()
+
+    values_df = pd.DataFrame({
+        'key': keys,
+         xlbl: values_list,})
+    
+    plt.figure(figsize=(10, 7))
+    sns.kdeplot(values_df, x=xlbl, hue="key", fill=True, common_norm=False)
+
+    if title is None:
+        plt.title(f"Means distribution")
+    else:
+        plt.title(title)
+    plt.xlabel("Values")
+    plt.ylabel("Density")
+    plt.tight_layout()
+    if show:
+        plt.show()
+    else:
+        plt.savefig(path+name)
+    plt.close()
 
 
 
-def plot_losses(train_losses, valid_losses_dict=None, path="", name="losses.pdf", title="Losses", logscale=True, eval_freq=10):
-    """plots losses during training"""
-    plt.clf()
+## 2D plots
+
+
+def plot_weights_(weights, path, name="weights.pdf", title='Model weights'):
+    """plots weights of a model"""
+    plt.figure()
+    plt.imshow(weights, aspect='auto', cmap='viridis')
+    plt.colorbar(label='Weight value')
+    plt.xlabel('Inputs (lookback)')
+    plt.ylabel('Outputs (horizon)')
+    plt.title(title)
+    plt.savefig(path + name)
+    plt.close()
+
+
+## losses plots
+
+def plot_losses(train_losses, valid_losses_dict=None, path="", name="losses.pdf", title="Losses", logscale=True, eval_freq=10, show=False):
+    """plots training loss (and valids) during training"""
     fig = plt.figure(figsize=(10,5))
     if valid_losses_dict is not None:
         plt.plot(range(1, len(train_losses)+1), train_losses, label="train")
         for key, values in valid_losses_dict.items():
             T = [1]
-            k = 1
             if len(values)>1:
-                while len(T) < len(values)-1:
-                    T.append(eval_freq * k)
-                    k+=1
-                T.append(len(train_losses))
+                T += [k*eval_freq for k in range(1, len(values)-1)] + [len(train_losses)]
             plt.plot(T, values, label=key)
         plt.legend()
     else:
@@ -237,16 +328,17 @@ def plot_losses(train_losses, valid_losses_dict=None, path="", name="losses.pdf"
     plt.ylabel("Loss")
     plt.title(title)
     fig.tight_layout()
-    plt.savefig(path + name)
+    if show:
+        plt.show()
+    else:
+        plt.savefig(path+name)
     plt.close()
 
-def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", logscale=True, x_every=None, eval_freq=1):
-    """plots losses during training"""
-    plt.clf()
+def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", logscale=True, x_every=None, eval_freq=1, show=False):
+    """plots multiple losses during training"""
     fig = plt.figure(figsize=(10,5))
     for expe_name, losses in losses_dict.items():
         T = [1] + [k*eval_freq for k in range(1,len(losses))]
-        #plt.plot(range(1, len(losses)+1), losses, label=f"{expe_name}")
         plt.plot(T, losses, label=f"{expe_name}")
     if x_every is not None:
         for k in range(1, (len(losses)+1)//x_every):
@@ -258,274 +350,46 @@ def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", l
     plt.title(title)
     plt.legend()
     fig.tight_layout()
-    plt.savefig(path + name)
+    if show:
+        plt.show()
+    else:
+        plt.savefig(path+name)
     plt.close()
 
-
-def plot_errors(losses, path="", name="errors.pdf", title="Loss distribution"):
+def plot_errors(losses, path="", name="errors.pdf", title="Loss distribution", show=False):
     """plots histogram of errors"""
-    plt.clf()
     fig = plt.figure(figsize=(10,5))
-    plt.hist(losses, bins=100)
-    plt.yscale("log")
+    # plt.hist(losses, bins=100, density=True)
+    sns.kdeplot(losses, log_scale=True)
+    # plt.xscale("log")
     plt.title(title)
     plt.xlabel("Losses")
     plt.ylabel("Frequency")
-    plt.savefig(path + name)
+    if show:
+        plt.show()
+    else:
+        plt.savefig(path+name)
     plt.close()
 
-
-def plot_horizon_errors(losses, path="", name="horizon.pdf", title="Mean errors by horizon"):
+def plot_horizon_errors(losses, path="", name="horizon.pdf", title="Mean errors by horizon", show=False):
     """plots errors according to horizon"""
-    plt.clf()
     fig = plt.figure(figsize=(15,5))
     plt.bar(range(len(losses)), losses)
     plt.title(title)
     plt.xlabel("Horizon")
     plt.ylabel("Mean error")
-    plt.savefig(path + name)
-    plt.close()
-
-
-def plot_pred(x, y, pred, path="", name="prediction.pdf", title="Predictions", axis=True):
-    """plots example prediction"""
-    plt.clf()
-    lag = len(x)
-    horizon = len(y)
-    fig = plt.figure(figsize=(20,5))
-    plt.plot(range(lag), x, label="Lookback")
-    plt.plot(range(lag, lag+horizon), pred, label="Prediction")
-    plt.plot(range(lag, lag+horizon), y, label="Horizon")
-    plt.axvline(x=lag, color='black', linestyle='--')
-    plt.legend(bbox_to_anchor=(0.5, -0.15), ncol=3, loc='center', fontsize=14)
-    if not axis:
-      plt.axis('off')
-      plt.title(None)
-    plt.title(title)
-    fig.tight_layout()
-    plt.savefig(path + name)
-    plt.close()
-
-
-
-def pd_to_latex(path):
-    """returns latex code to create table from dataframe in path"""
-    df = pd.read_csv(path)
-    latex_output = df.to_latex(index=False, float_format="%.4f")
-    print(latex_output)
-
-
-def get_errors_df(dir_name, file_name, multipliers=None, names=None, save=True):
-    """formats errors json at path"""
-    with open(dir_name+file_name) as file:
-        data = json.load(file)
-    df = pd.DataFrame(data)
-    if names=="None":
-        names=None
-    if names is not None:
-        if type(names)==str:
-            names=names.split(";")
-        df = df[names]
-    if multipliers is not None:
-        if type(multipliers) == str:
-            multipliers = multipliers.split(" ")
-            multipliers = [int(w) for w in multipliers]
-        new_index = list(df.index)
-        for k in range(min(len(multipliers), df.shape[0])):
-            if multipliers[k] != 0:
-                df.iloc[k] = df.iloc[k] * 10**multipliers[k]
-                new_index[k] = new_index[k] + f" * 1e{multipliers[k]}"
-        df.index = new_index
-    if save:
-        df.to_csv(dir_name + 'errors.csv')
-    return df
-
-
-
-
-def get_multiple_errors_df(dir_name, file_name, n_paths, multipliers=None, names=None, baseline=None, save=False):
-    """formats errors json from multipled seeds in dir_name"""
-    paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
-    dfs = []
-    for path in paths:
-        with open(path) as file:
-            data = json.load(file)
-        df = pd.DataFrame(data)
-        if names=="None":
-            names=None
-        if names is not None:
-            if type(names)==str:
-                names=names.split(";")
-            df = df[names]
-
-        if baseline is not None and baseline in df.columns:
-            df = df.subtract(df[baseline], axis=0)
-        dfs.append(df)
-
-    df_mean = pd.concat(dfs).groupby(level=0).mean()
-    df_std = pd.concat(dfs).groupby(level=0).std()
-
-    if multipliers is not None:
-        if type(multipliers) == str:
-            multipliers = multipliers.split(" ")
-            multipliers = [int(w) for w in multipliers]
-        new_index = list(df_mean.index)
-        for k in range(min(len(multipliers), df_mean.shape[0])):
-            if multipliers[k] != 0:
-                df_mean.iloc[k] = df_mean.iloc[k] * 10**multipliers[k]
-                df_std.iloc[k] = df_std.iloc[k] * 10**multipliers[k]
-                new_index[k] = new_index[k] + f" * 1e{multipliers[k]}"
-        df_mean.index = new_index
-        df_std.index = new_index
-
-    if save:
-        df_mean.to_csv(dir_name + 'mean_errors.csv')
-        df_std.to_csv(dir_name + 'std_errors.csv')
-    return df_mean, df_std
-
-
-def get_expe_results(dir_name, file_name, multipliers=None, names=None, print_table=True, save_path=None, save_name="errors.pdf"):
-    df = get_errors_df(dir_name, file_name, multipliers, names, save=True)
-    if print_table:
-        table = tabulate(df, headers='keys', tablefmt='grid', showindex=True, floatfmt=".4f")
-        print(f"==Table of {dir_name}==")
-        print(table)
-
-    plt.figure(figsize=(10,5))
-    plt.grid()
-    plt.scatter(list(df.columns), df.iloc[0].values, s=100)
-    plt.xticks(rotation = 45)
-    plt.title("Experiment results")
-    plt.tight_layout()
-
-    if save_path is None:
-        save_path = dir_name+"plots/"
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-
-    plt.savefig(save_path + save_name)
-    plt.close()
-
-def get_multiple_expe_results(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True, baseline=None, print_table=True, show_row=0, save_path=None,save_name="errors.df"):
-    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline, save=True)
-
-    if show_std:
-        df_formatted = df_mean.copy()
-        for col in df_mean.columns:
-            df_formatted[col] = df_mean[col].map("{:.4f}".format) + " ± " + df_std[col].map("{:.4f}".format)
+    if show:
+        plt.show()
     else:
-        df_formatted = df_mean.applymap("{:.4f}".format)
-
-    if print_table:
-        table = tabulate(df_formatted, headers='keys', tablefmt='grid', showindex=True)
-        print(f"==Table of {dir_name}==")
-        print(table)
-
-    plt.figure(figsize=(10,5))
-    plt.grid()
-    plt.scatter(list(df_mean.columns), df_mean.iloc[show_row].values, s=100)
-    plt.xticks(rotation = 45)
-    plt.title("Experiment results")
-    plt.tight_layout()
-
-    if save_path is None:
-        save_path = dir_name+"plots/"
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-
-    plt.savefig(save_path + save_name)
+        plt.savefig(path+name)
     plt.close()
 
 
-def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", save_path=None, save_name="boxplot.pdf", names=None, baseline=None):
-    """print table from dataframe in path"""
-    paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
-    
-    box_df = []
-    for k, path in enumerate(paths):
-        with open(path) as file:
-            data = json.load(file)
-        df = pd.DataFrame(data)
-        if names=="None":
-            names=None            
-        if names is not None:
-            if type(names)==str:
-                names=names.split(";")
-            df = df[names]
-        if baseline is not None:
-            assert (baseline in df.columns)
-            df = df.subtract(df[baseline], axis=0)
-        df = df.loc[col]
-        for algo, value in df.items():
-            box_df.append({"Algorithm": algo, f"{col}": value, "seed":k})
 
-    #df_values = pd.concat(dfs, axis=1)
-    #df_long = pd.concat(dfs, axis=1).reset_index().melt(id_vars='index', var_name='Method', value_name=col)
-    box_df = pd.DataFrame(box_df)
-    
-    plt.figure(figsize=(10, 6))
-    #plt.boxplot(df_values.values.T, labels=df_values.index)
-    sns.boxplot(data=box_df, x='Algorithm', y=col)#, hue="seed")
-    plt.title(f"Experiment results")
-    plt.xlabel("Experiment")
-    plt.ylabel(f"{col}")
-    plt.xticks(rotation=45)
-    plt.grid(True)
-    plt.tight_layout()
-
-    if save_path is None:
-        save_path = dir_name+"plots/"
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-
-    plt.savefig(save_path + save_name)
-    plt.close()
-
-
-def plot_expe(losses_path, eval_freq=10, names=None, save_path=None):
-    """plots losses for list of experiments in path"""
-    if type(eval_freq)==str:
-        eval_freq=int(eval_freq)
-    if names=="None":
-        names=None
-    if names is not None:
-        if type(names)==str:
-            names=names.split(";")
-    if save_path is None:
-        save_path = losses_path+"plots/"
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-
-    expe_names = [name for name in os.listdir(losses_path) if (names is None and os.path.exists(losses_path + f"{name}/" + "valid_losses1.pt")) or (names is not None and name in names)]
-
-    if len(expe_names) >0:
-        losses_dict1 = {}
-        losses_dict2 = {}
-        losses_dict3 = {}
-
-        for expe_name in expe_names:
-            valid_losses1 = torch.load(losses_path + expe_name + "/" + "valid_losses1.pt", weights_only=False)
-            valid_losses2 = torch.load(losses_path + expe_name + "/" + "valid_losses2.pt", weights_only=False)
-            valid_losses3 = torch.load(losses_path + expe_name + "/" + "valid_losses3.pt", weights_only=False)
-
-            for loss_name in valid_losses1:
-                if loss_name not in losses_dict1:
-                    losses_dict1[loss_name] = {}
-                    losses_dict2[loss_name] = {}
-                    losses_dict3[loss_name] = {}
-                losses_dict1[loss_name][expe_name] = valid_losses1[loss_name]
-                losses_dict2[loss_name][expe_name] = valid_losses2[loss_name]
-                losses_dict3[loss_name][expe_name] = valid_losses3[loss_name]
-
-        for loss_name in valid_losses1:
-            plot_multi_losses(losses_dict1[loss_name], save_path, f"{loss_name}_valid1.pdf", f"Valid {loss_name}", eval_freq=eval_freq)
-            plot_multi_losses(losses_dict2[loss_name], save_path, f"{loss_name}_valid2.pdf", f"Valid2 {loss_name}", eval_freq=eval_freq)
-            plot_multi_losses(losses_dict3[loss_name], save_path, f"{loss_name}_valid3.pdf", f"Valid3 {loss_name}", eval_freq=eval_freq)
-
-
+## widgets
 
 def visu_widget(data, lookback, horizon, eps=1e-8):
-
+    """visual widget for notebooks"""
     alphas, betas = get_gammas(data, lookback, horizon, eps)
     dataframes = {'original': data, 'alpha': alphas, 'beta': betas}
     dataframe_names = list(dataframes.keys())
@@ -573,7 +437,195 @@ def visu_widget(data, lookback, horizon, eps=1e-8):
     update_plot(dataframe_dropdown.value, column_dropdown.value)
 
 
+def pd_to_latex(df, save_path, save_name="results_table.tex"):
+    """returns latex code to create table from dataframe in path"""
+    colfmt = "l" + "c" * len(df.columns)
+    latex_str = df.to_latex(
+        index=True, escape=False, bold_rows=False,
+        column_format=colfmt, na_rep="--", caption=None, label=None, buf=None,
+        longtable=False, multirow=False, multicolumn=True, multicolumn_format='c',
+        header=True)
+    with open(save_path + save_name, "w", encoding="utf-8") as f:
+        f.write(latex_str)
+
+
+## results
+
+def get_errors_df(dir_name, file_name, multipliers=None, names=None, save=False):
+    """formats errors json at path"""
+    with open(dir_name+file_name) as file:
+        data = json.load(file)
+    df = pd.DataFrame(data)
+    if names=="None":
+        names=None
+    if names is not None:
+        if type(names)==str:
+            names=names.split(";")
+        df = df[names]
+    if multipliers is not None:
+        if type(multipliers) == str:
+            multipliers = multipliers.split(" ")
+            multipliers = [int(w) for w in multipliers]
+        new_index = list(df.index)
+        for k in range(min(len(multipliers), df.shape[0])):
+            if multipliers[k] != 0:
+                df.iloc[k] = df.iloc[k] * 10**multipliers[k]
+                new_index[k] = new_index[k] + f" * 1e{multipliers[k]}"
+        df.index = new_index
+    if save:
+        df.to_csv(dir_name + 'errors.csv')
+    return df
+
+def get_expe_results(dir_name, file_name, multipliers=None, names=None, print_table=True, save_path=None, save_name="errors.pdf"):
+    """prints table of errors for one seed"""
+    df = get_errors_df(dir_name, file_name, multipliers, names)
+    if print_table:
+        table = tabulate(df, headers='keys', tablefmt='grid', showindex=True, floatfmt=".4f")
+        print(f"==Table of {dir_name}==")
+        print(table)
+
+    plt.figure(figsize=(10,5))
+    plt.grid()
+    plt.scatter(list(df.columns), df.iloc[0].values, s=100)
+    plt.xticks(rotation = 45)
+    plt.title("Experiment results")
+    plt.tight_layout()
+
+    if save_path is None:
+        save_path = dir_name+"plots/"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    plt.savefig(save_path + save_name)
+    plt.close()
+
+
+def get_multiple_errors_df(dir_name, file_name, n_paths, multipliers=None, names=None, baseline=None, save=False, percents=False):
+    """formats errors json from multipled seeds in dir_name"""
+    paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
+    dfs = []
+    for path in paths:
+        with open(path) as file:
+            data = json.load(file)
+        df = pd.DataFrame(data)
+        if names=="None":
+            names=None
+        if names is not None:
+            if type(names)==str:
+                names=names.split(";")
+            df = df[names]
+
+        if baseline is not None and baseline in df.columns:
+            baseline_vals = df[baseline].copy()
+            df = df.subtract(baseline_vals, axis=0)
+            if percents:
+                df = 100 * df.divide(baseline_vals, axis=0)
+        dfs.append(df)
+
+    df_mean = pd.concat(dfs).groupby(level=0).mean()
+    df_std = pd.concat(dfs).groupby(level=0).std()
+
+    if multipliers is not None:
+        if type(multipliers) == str:
+            multipliers = multipliers.split(" ")
+            multipliers = [int(w) for w in multipliers]
+        new_index = list(df_mean.index)
+        for k in range(min(len(multipliers), df_mean.shape[0])):
+            if multipliers[k] != 0:
+                df_mean.iloc[k] = df_mean.iloc[k] * 10**multipliers[k]
+                df_std.iloc[k] = df_std.iloc[k] * 10**multipliers[k]
+                new_index[k] = new_index[k] + f" * 1e{multipliers[k]}"
+        df_mean.index = new_index
+        df_std.index = new_index
+
+    if save:
+        df_mean.to_csv(dir_name + 'mean_errors.csv')
+        df_std.to_csv(dir_name + 'std_errors.csv')
+    return df_mean, df_std
+
+def get_multiple_expe_results(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True, baseline=None, print_table=True, show_row=0, save_path=None, save_name="errors.df", save_latex=True):
+    """prints results of multiple experiments"""
+    df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline)
+
+    if show_std:
+        df_formatted = df_mean.copy()
+        for col in df_mean.columns:
+            df_formatted[col] = df_mean[col].map("{:.4f}".format) + " ± " + df_std[col].map("{:.4f}".format)
+    else:
+        df_formatted = df_mean.applymap("{:.4f}".format)
+
+    if save_path is None:
+        save_path = dir_name + "plots/"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    if save_latex:
+        df_latex = df_mean.copy()
+        for col in df_mean.columns:
+            df_latex[col] = df_mean[col].map("{:.2f}".format)
+        df_latex.columns = df_latex.columns.str.replace("_", "\\_", regex=False)
+        pd_to_latex(df_latex, save_path, save_name=f"{save_name[:-3]}.tex")
+
+    if print_table:
+        table = tabulate(df_formatted, headers='keys', tablefmt='grid', showindex=True)
+        print(f"==Table of {dir_name}==")
+        print(table)
+
+    plt.figure(figsize=(10,5))
+    plt.grid()
+    plt.scatter(list(df_mean.columns), df_mean.iloc[show_row].values, s=100)
+    plt.xticks(rotation = 45)
+    plt.title("Experiment results")
+    plt.tight_layout()
+    plt.savefig(save_path + save_name)
+    plt.close()
+
+
+def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", save_path=None, save_name="boxplot.pdf", names=None, baseline=None):
+    """print table from dataframe in path"""
+    paths = [dir_name + f"seed_{k}/" + file_name for k in range(1,n_paths+1)]
+    
+    box_df = []
+    for k, path in enumerate(paths):
+        with open(path) as file:
+            data = json.load(file)
+        df = pd.DataFrame(data)
+        if names=="None":
+            names=None            
+        if names is not None:
+            if type(names)==str:
+                names=names.split(";")
+            df = df[names]
+        if baseline is not None:
+            assert (baseline in df.columns)
+            df = df.subtract(df[baseline], axis=0)
+        df = df.loc[col]
+        for algo, value in df.items():
+            box_df.append({"Algorithm": algo, f"{col}": value, "seed":k})
+
+    box_df = pd.DataFrame(box_df)
+    
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(data=box_df, x='Algorithm', y=col)#, hue="seed")
+    plt.title(f"Experiment results")
+    plt.xlabel("Experiment")
+    plt.ylabel(f"{col}")
+    plt.xticks(rotation=45)
+    plt.grid(True)
+    plt.tight_layout()
+
+    if save_path is None:
+        save_path = dir_name+"plots/"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    plt.savefig(save_path + save_name)
+    plt.close()
+
+
+
+## scripts
+
 def plot_clustering(raw_df, feature_df, n_clusters, lags, horizon, clustering_name, plot_dir, do_heterogeneity=True, remove_cte=True):
+    """clustering analysis script"""
     if do_heterogeneity:
         plot_heterogeneity(feature_df, path=plot_dir, name="heterogeneity.pdf")
     Z, distances_matrix = init_clusters(feature_df)
@@ -589,28 +641,202 @@ def plot_clustering(raw_df, feature_df, n_clusters, lags, horizon, clustering_na
     plot_gamma(df_dict, plot_dir, "gammas.pdf", per_user=True, lookback=lags, horizon=horizon, remove_cte=remove_cte, log=False)
     return cluster_indices
 
-def plot_weights_(weights, path, name="weights.pdf", title='Model weights'):
-    plt.figure()
-    plt.imshow(weights, aspect='auto', cmap='viridis')
-    plt.colorbar(label='Weight value')
-    plt.xlabel('Inputs (lookback)')
-    plt.ylabel('Outputs (horizon)')
-    plt.title(title)
-    plt.savefig(path + name)
-    plt.close()
 
-def plot_weights(model, learner, save_dir, save_name):
+def plot_weights(model, save_dir, save_name):
+    """plotting weights scripts"""
     model_name = model.name
     if model_name in ["linear", "sklinear"]:
         if model_name == "sklinear":
-            weights = learner.get_weights()
+            weights = model.reg.coef_
         else:
             weights = model.fc.weight.detach().cpu().numpy()
         plot_weights_(weights, save_dir + "plots/", title=f'{save_name} weights')
         
-    if model_name == "DLinear":
-        linear_weights = model.model.Linear_Seasonal[0].weight.detach().cpu().numpy()
-        season_weights = model.model.Linear_Trend[0].weight.detach().cpu().numpy()
+    elif model_name == "DLinear":
+        linear_weights = model.Linear_Seasonal[0].weight.detach().cpu().numpy()
+        season_weights = model.Linear_Trend[0].weight.detach().cpu().numpy()
         plot_weights_(linear_weights, save_dir + "plots/", name="season_weights.pdf", title=f'{save_name} seasonal weights')
         plot_weights_(season_weights, save_dir + "plots/", name="trend_weights.pdf", title=f'{save_name} trend weights')
     
+    if model.does_residual:
+        residual_weights = model.fc.weight.detach().cpu().numpy()
+        
+        horizon, dim = model.horizon, model.dim
+        mask = np.zeros((horizon*dim, (2+horizon)*dim))
+        for d in range(dim):
+            for h in range(horizon):
+                mask[d * horizon + h, d * (2 + horizon) + 2 + h] = 1.0 # skip mu,std
+        plot_weights_(residual_weights - mask, save_dir, name="residual_weights.pdf", title=f'{save_name} residual weights')
+        #TODO (trouver layer residual dans model)
+
+def plot_expe(losses_path, eval_freq=10, names=None, save_path=None, lr=None, bs=None, epochs=None):
+    """plots losses for list of experiments in path"""
+    if type(eval_freq)==str:
+        eval_freq=int(eval_freq)
+    if names=="None":
+        names=None
+    if names is not None:
+        if type(names)==str:
+            names=names.split(";")
+    if save_path is None:
+        save_path = losses_path+"plots/"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    expe_names = [name for name in os.listdir(losses_path) if (names is None and os.path.exists(losses_path + f"{name}/" + "valid_losses1.pt")) or (names is not None and name in names)]
+
+    title_sfx = ""
+    if lr is not None:
+        title_sfx += f",lr={lr}"
+    if bs is not None:
+        title_sfx += f",bs={bs}"
+    if epochs is not None:
+        title_sfx += f",e={epochs}"
+
+    if len(expe_names) >0:
+        losses_dict1 = {}
+        losses_dict2 = {}
+        losses_dict3 = {}
+
+        for expe_name in expe_names:
+            valid_losses1 = torch.load(losses_path + expe_name + "/" + "valid_losses1.pt", weights_only=False)
+            valid_losses2 = torch.load(losses_path + expe_name + "/" + "valid_losses2.pt", weights_only=False)
+            valid_losses3 = torch.load(losses_path + expe_name + "/" + "valid_losses3.pt", weights_only=False)
+
+            for loss_name in valid_losses1:
+                if loss_name not in losses_dict1:
+                    losses_dict1[loss_name] = {}
+                    losses_dict2[loss_name] = {}
+                    losses_dict3[loss_name] = {}
+                losses_dict1[loss_name][expe_name] = valid_losses1[loss_name]
+                losses_dict2[loss_name][expe_name] = valid_losses2[loss_name]
+                losses_dict3[loss_name][expe_name] = valid_losses3[loss_name]
+
+        for loss_name in valid_losses1:
+            plot_multi_losses(losses_dict1[loss_name], save_path, f"{loss_name}_valid1.pdf", f"Valid {loss_name}" + title_sfx, eval_freq=eval_freq)
+            plot_multi_losses(losses_dict2[loss_name], save_path, f"{loss_name}_valid2.pdf", f"Valid2 {loss_name}" + title_sfx, eval_freq=eval_freq)
+            plot_multi_losses(losses_dict3[loss_name], save_path, f"{loss_name}_valid3.pdf", f"Valid3 {loss_name}"+ title_sfx, eval_freq=eval_freq)
+
+
+
+## Latex
+
+def latex_formated_number(value, decimals=3, color=False, row=None, std=None):
+    """return formated string value"""
+    if value is None:
+        return "--"
+
+    if std is not None:
+        fmt = f"{{:.{decimals}f}}" + " ± " + f"{std:.2f}"
+    else:
+        fmt = f"{{:.{decimals}f}}"
+    s = fmt.format(value)
+
+    if row is not None:
+        m = min(row)
+        if value == m:
+            s = r"\textbf{" + s + "}"
+    if color:
+        if value > 0:
+            return r"{\color{red}" + s + "}"
+        elif value < 0:
+            return r"{\color{green}" + s + "}"
+    return s
+
+def build_results_table_latex(
+    save_dir, datasets, settings, show_row=0, models="RevIN", file_name="test1_mean_results.json", n_paths=1, multipliers=None, baseline=None, title="1e5 * MSE", save_name="test1_mean_results.tex", color=False, decimals=2, show_std=False, n_settings=4):
+    """
+    Returns a LaTeX tabular string
+    Directory layout assumed: {save_dir}/{dataset}/lags{L}_horizon{H}/
+    """
+    datasets = text_list(datasets)
+    settings = text_list(settings) #of size datasets * (settings per dataset)
+    norm_settings = []
+    for s in settings:
+        _s = s.split("-")
+        L, H = int(_s[0]), int(_s[1])
+        norm_settings.append((L, H))
+
+    n_paths = text_list(n_paths)
+    n_paths = [int(text) for text in n_paths]
+    if len(n_paths) == 1 and len(settings)>1:
+        n_paths = [n_paths[0] for _ in range(len(settings))]
+    models = text_list(models)
+
+    # Collect values
+    values = {}
+    values_percent = {}
+    values_std = {}
+    multipliers = multipliers.split(";")
+    for i, (L, H) in enumerate(norm_settings):
+        for model in models:
+            ds = datasets[i // n_settings]
+            dir_name = save_dir + f"{ds}/lags{L}_horizon{H}/"
+            df, df_std = get_multiple_errors_df(
+                    dir_name=dir_name,
+                    file_name=file_name,
+                    n_paths=n_paths[i],
+                    multipliers=multipliers[i],
+                    baseline=None
+                )
+
+            key = f"{ds}_{L}_{H}"
+            if key not in values:
+                values[key] = []
+                values_percent[key] = []
+                values_std[key] = []
+            try:
+                values[key].append(df.iloc[show_row][model])
+            except:
+                raise ValueError(f"{i} {ds} {L} {H} {df.iloc[show_row]}")
+            if show_std:
+                values_std[key].append(df_std.iloc[show_row][model])
+            if baseline is not None:
+                df, _ = get_multiple_errors_df(
+                        dir_name=dir_name,
+                        file_name=file_name,
+                        n_paths=n_paths[i],
+                        multipliers=None,
+                        baseline=baseline,
+                        percents=True
+                    )
+                values_percent[key].append(df.iloc[show_row][model])
+    
+    lines = []
+    colspec = "l" + "c" + "c" * len(models)
+    lines.append(f"\\begin{{tabular}}{{{colspec}}}")
+    lines.append("\\toprule")
+    # lines.append(title + " & " + " & ".join(pretty_headers) + r" \\")
+    lines.append(title + " & " + "L-H" + " & " + " & ".join([model.replace("_", r"\_") for model in models]) + r" \\")
+    lines.append("\\midrule")
+
+    # for ds in datasets:
+    for i, (L, H) in enumerate(norm_settings):
+        ds = datasets[i // n_settings]
+        key = f"{ds}_{L}_{H}"
+        ds_latex = ds.replace("_", r"\_").capitalize()
+        if show_std:
+            std = values_std[key][i]
+        else:
+            std = None
+        cells = [latex_formated_number(v, decimals=decimals, color=color, row=values[key], std=std) for i, v in enumerate(values[key])]
+        if i % n_settings == 0: #TODO: below instead of len(datasets), should be len(settings per dataset) but it depends on the dataset...
+            lines.append("\\multirow{" + str(n_settings) + "}{*}{" + ds_latex + "}" + " & " + f"{L}-{H}" + " & " + " & ".join(cells) + r" \\")
+        else:
+            lines.append(" & " + f"{L}-{H}" + " & " + " & ".join(cells) + r" \\")
+        if i % n_settings == n_settings - 1:
+            lines.append("\\midrule")
+
+    if baseline is not None:
+        lines.append("\\midrule")
+        values_percent = pd.DataFrame.from_dict(values_percent, orient="index")
+        values_percent.columns = models
+        means = values_percent.mean(axis=0).values
+        lines.append("Improvements" + " & " + " & " + " & ".join([str(round(mean,2)) + r" \% " for mean in means]) + r" \\")
+
+    lines.append("\\bottomrule")
+    lines.append("\\end{tabular}")
+    latex = "\n".join(lines)
+    
+    with open(save_dir + save_name, "w", encoding="utf-8") as f:
+        f.write(latex)

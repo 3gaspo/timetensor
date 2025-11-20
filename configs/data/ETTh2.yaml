@@ -1,11 +1,11 @@
-dataset: traffic
-path: ../datasets/traffic/
+dataset: Etth2
+path: ../datasets/Etth2/
 context_cols:
 normalize: False
 
 clustering:
   clusters:
-  n_clusters: 3
+  n_clusters:
 
 splits:
   indiv_split: 0.8

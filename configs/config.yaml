@@ -1,18 +1,24 @@
 training:
   init:
   freeze_core: False
-  retrain: True
-  loss: MSE
-  bs: 28
-  lr: 0.0001
-  epochs: 10
-  eval_freq: 10
-  print_freq: 10
+  loss: NMSE
+  bs: 256
+  lr: 0.00001
+  epochs: 1000
+  eval_freq: 100
+  print_freq: 100
+  valid_eval: False
+  test_eval: True
+  random_eval: False
+  eval_runs: 1
+  complete_evaluation: False
 
 task:
-  lags: 336
-  horizon: 48
+  lags: 168
+  horizon: 24
   splits:
+
+fl:
   rounds: 10
   sampled_clients: 1
   fedmin: False
@@ -23,14 +29,16 @@ load:
   replot: False
   heterogeneity: False
   clusters: False
-  logs: True
+  logs: False
+  shapes: False
+  windows: False
+  distances: False
 
 misc:
   seed: 1
   output_dir: ../outputs/new/
   save_name:
   verbose: 1
-  complete_evaluation: False
 
 defaults:
   - _self_
