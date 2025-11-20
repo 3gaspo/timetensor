@@ -55,6 +55,10 @@ def run(cfg):
     do_windows = cfg.load.windows
     do_distances = cfg.load.distances
 
+    do_shapes = False
+    do_windows = False
+    do_distances = False
+
     if verbose:
         logger.info("Fetched configs")
         logger.info(f"Loading {dataset_name}")

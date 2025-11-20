@@ -116,7 +116,7 @@ def get_cluster_distances(df, cluster_indices, centroids):
           cluster_distances.append(cosine(df.iloc[:,cluster_1_indices[j]].values, df.iloc[:,cluster_1_indices[k]].values))
       intra_distances[i] = np.mean(cluster_distances)
     else:
-      intra_distances[i] = 0
+      intra_distances[i] = np.nan
 
     #inter
     if len(cluster_indices)>1:
@@ -130,9 +130,9 @@ def get_cluster_heterogeneity(df, cluster_indices, centroids):
     intra_distances, inter_distances = get_cluster_distances(df, cluster_indices, centroids)
     intra_distances, inter_distances = list(intra_distances.values()), list(inter_distances.values())
     if len(inter_distances)>0:
-        return np.mean(intra_distances) / (np.mean(inter_distances) + 1)
+        return np.nanmean(intra_distances) / (np.mean(inter_distances) + 1)
     else:
-        return np.mean(intra_distances)
+        return np.nanmean(intra_distances)
 
 def plot_centroids(centroids, show=False, path="", name="centroids.pdf"):
     plt.figure(figsize=(10, 6))
@@ -152,7 +152,7 @@ def plot_heterogeneity(df, show=False, path="", name="heterogeneity.pdf"):
     heterogeneities = []
     N_clusters = [1, 2, 3, 4, 5, 10, 20, df.shape[1]//10, df.shape[1]//5, df.shape[1]//2, df.shape[1]]
     N_clusters = np.sort(N_clusters)
-    Z, distances_matrix = init_clusters(df)
+    Z = init_clusters(df)
     for n_clusters in tqdm(N_clusters):
         labels, cluster_indices = get_clusters(Z, n_clusters)
         centroids = get_centroids(df, cluster_indices)
