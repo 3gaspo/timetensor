@@ -4,6 +4,7 @@ import numpy as np
 
 from .sota.patchtst.patch_tst import PatchTST
 from .sota.dlinear import DLinear
+from .sota.chronos2.chronos import Chronos
 from .utils import get_normal_stats
 from sklearn.linear_model import LinearRegression
 
@@ -148,27 +149,27 @@ class Linear(nn.Module):
         output = output.view(batch_size, self.dim, self.horizon) # (B, dim, horizon)
         return output
 
-class Weekly(nn.Module):
-    """Linear layer over subset indexes of lookback windows"""
-    def __init__(self, lags, dim, horizon):
-        super().__init__()
-        self.name = "weekly"
-        self.dim, self.horizon  = dim, horizon
-        indexes=list(range(horizon))
-        idx = 7*24
-        while idx+horizon<=lags:
-            indexes += [idx + k for k in range(horizon)]
-            idx += 7*24
-        indexes += list(range(lags-1, lags-horizon-1, -1))
-        self.indexes = np.unique(indexes)
-        self.fc = nn.Linear(len(indexes) * dim, horizon * dim)
-    def forward(self, x, context=None): # (B, dim, lag)
-        batch_size = x.shape[0]
-        subx = x[:, :, self.indexes]
-        inpt = subx.view(batch_size, self.indexes * self.dim) # (B, lag*dim)
-        output = self.fc(inpt) # (B, horizon*dim)
-        output = output.view(batch_size, self.dim, self.horizon) # (B, dim, horizon)
-        return output
+# class Weekly(nn.Module):
+#     """Linear layer over subset indexes of lookback windows"""
+#     def __init__(self, lags, dim, horizon):
+#         super().__init__()
+#         self.name = "weekly"
+#         self.dim, self.horizon  = dim, horizon
+#         indexes=list(range(horizon))
+#         idx = 7*24
+#         while idx+horizon<=lags:
+#             indexes += [idx + k for k in range(horizon)]
+#             idx += 7*24
+#         indexes += list(range(lags-1, lags-horizon-1, -1))
+#         self.indexes = np.unique(indexes)
+#         self.fc = nn.Linear(len(indexes) * dim, horizon * dim)
+#     def forward(self, x, context=None): # (B, dim, lag)
+#         batch_size = x.shape[0]
+#         subx = x[:, :, self.indexes]
+#         inpt = subx.view(batch_size, self.indexes * self.dim) # (B, lag*dim)
+#         output = self.fc(inpt) # (B, horizon*dim)
+#         output = output.view(batch_size, self.dim, self.horizon) # (B, dim, horizon)
+#         return output
 
 class Sklinear():
     """Scikit learn closed-form linear regression"""
@@ -248,7 +249,7 @@ class StandardNorm(DefaultNorm):
         self.norm_name = "standard"
         self.mean, self.std = mean, std
         self.eps = eps
-        assert std >= 0
+        assert torch.all(self.std >= 0)
     def norm(self, x):
         x = (x - self.mean) / (self.std+self.eps) # (B, dim, lags)
         return x
@@ -262,7 +263,7 @@ class MinMax(DefaultNorm):
         super().__init__(model, latent)
         self.norm_name = "minmax"
         self.min, self.max = min, max
-        assert min != max
+        assert torch.all((self.max - self.min) >= 0)
     def norm(self, x):
         x = (x - self.min) / (self.max - self.min) # (B, dim, lags)
         return x
@@ -468,6 +469,7 @@ class cmIN(DefaultNorm):
     def get_modulations(self, cluster):
         alpha, beta, gamma, omega = [], [], [], []
         for k in cluster:
+            idx = int(k.item())
             if k >= self.n_clusters:
                 alpha.append(getattr(self, f"alpha_out"))
                 beta.append(getattr(self, f"beta_out"))
@@ -475,15 +477,15 @@ class cmIN(DefaultNorm):
                 omega.append(getattr(self, f"omega_out"))
             else:
                 if self.fixed_alpha:
-                    alpha.append(getattr(self, f"alpha_{int(k)}"))
+                    alpha.append(getattr(self, f"alpha_{idx}"))
                 else:
-                    alpha.append(self.alphas[int(k)])
+                    alpha.append(self.alphas[idx])
                 if self.fixed_beta:
-                    beta.append(getattr(self, f"beta_{int(k)}"))
+                    beta.append(getattr(self, f"beta_{idx}"))
                 else:
-                    beta.append(self.betas[int(k)])
-                gamma.append(self.gammas[int(k)])
-                omega.append(self.omegas[int(k)])
+                    beta.append(self.betas[idx])
+                gamma.append(self.gammas[idx])
+                omega.append(self.omegas[idx])
         alpha, beta, gamma, omega = torch.cat(alpha), torch.cat(beta), torch.cat(gamma), torch.cat(omega)
         return alpha, beta, gamma, omega
 
@@ -529,8 +531,8 @@ def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=Fa
         model = Expected(horizon)
     elif model_name == "linear":
         model = Linear(lags, dim, horizon)
-    elif model_name == "weekly":
-        model = Weekly(kwargs.get("indexes"), dim, horizon)
+    # elif model_name == "weekly":
+    #     model = Weekly(kwargs.get("indexes"), dim, horizon)
     elif model_name == "DLinear":
         model = DLinear(lags, dim, horizon, kwargs.get("kernel_size",25))
         model.name = "DLinear"
@@ -539,12 +541,15 @@ def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=Fa
     elif model_name == "PatchTST":
         model = PatchTST(lags, horizon)
         model.name = "PatchTST"
+    elif model_name == "chronos":
+        model = Chronos(horizon)
+        model.name = "chronos"
     else:
         raise ValueError(f"Model name not recognized : {model_name}")
     
     #normalization
     get_training = ((norm_name is not None) and (("mIN" in norm_name) or ("revin" in norm_name))) or (model_name not in ["persistence", "repeat", "lookback", "expected"])
-    if get_training and (norm_name is not None) and ("sk" not in model_name): #and norm_name != "None" 
+    if get_training and (norm_name is not None) and ("sk" not in model_name):
         if norm_name == "standard":
             model = StandardNorm(model, **kwargs)
         elif norm_name == "instance":
@@ -581,15 +586,18 @@ def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=Fa
             weights = torch.load(init_path)
         model.load_state_dict(weights)
     if freeze_core and ("sk" not in model_name):
-        for param in model.parameters():
-            if "alpha" not in param and "beta" not in param:
+        for name, param in model.named_parameters():
+            if "alpha" not in name and "beta" not in name:
                 param.requires_grad = False
 
     return model
 
 
-def format_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger):
+def format_min_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger):
     """utils methods to format model kwargs"""
+    if (norm_name is not None and "cmIN" in norm_name) and kwargs.get("n_clusters") is None and not (kwargs.get("init_alpha") or kwargs.get("init_beta")):
+        kwargs["n_clusters"] = len(nodes_stats_dict)
+
     if kwargs.get("init_alpha") is True:
         if "cmIN" in norm_name:
             kwargs["init_alpha"] = [nodes_stats_dict[node]["train"]["alpha"] for node in nodes_stats_dict]
@@ -602,9 +610,7 @@ def format_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger):
         if "cmIN" in norm_name:
             kwargs["init_beta"] = [nodes_stats_dict[node]["train"]["beta"] for node in nodes_stats_dict]
             if len(kwargs["init_beta"])<10:
-                logger.info(f"Loaded init_alphas: {kwargs['init_beta']}")
+                logger.info(f"Loaded init_betas: {kwargs['init_beta']}")
         else:
             kwargs["init_beta"] = stats_dict["train"]["beta"]
-            logger.info(f"Loaded init_alphas: {kwargs['init_alpha']}")
-    if (norm_name is not None and "cmIN" in norm_name) and kwargs.get("n_clusters") is None and (kwargs.get("init_alpha") is False or kwargs.get("init_alpha")):
-            kwargs["n_clusters"] = len(nodes_stats_dict)
+            logger.info(f"Loaded init_betas: {kwargs['init_beta']}")

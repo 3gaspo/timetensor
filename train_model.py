@@ -3,7 +3,7 @@ import logging
 import torch
 
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_stats
-from src.timetensor.models import load_model, format_kwargs
+from src.timetensor.models import load_model, format_min_kwargs
 from src.timetensor.pipeline import get_losses
 from src.timetensor.utils import get_dirs, set_seed
 
@@ -24,7 +24,7 @@ def run(cfg):
     lags, horizon = int(cfg.task.lags), int(cfg.task.horizon)
 
     criterion_name = cfg.training.loss
-    criterion, eval_losses = get_losses(criterion_name, complete_evaluation=cfg.misc.complete_evaluation)
+    criterion, eval_losses = get_losses(criterion_name, complete_evaluation=cfg.training.complete_evaluation)
 
     model_name, norm_name = cfg.model.name, cfg.normalization.name
     if norm_name == "None":
@@ -54,7 +54,8 @@ def run(cfg):
         logger.info(batch_str)
 
     #model
-    format_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger)
+    if norm_name is not None and "mIN" in norm_name:
+        format_min_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger)
     model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.training.freeze_core, cfg.model.constants, cfg.model.residuals, **kwargs)
     
     #training
@@ -62,13 +63,10 @@ def run(cfg):
     learner = launch_training(model, norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict, eval_losses, device, save_dir, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger)
     logger.info("--Eval--")
     if cfg.training.valid_eval:
-        launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.misc.complete_evaluation, results_dir=output_dir, mode="Valid", denormalize=cfg.data.normalize)
+        launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="Valid", denormalize=cfg.data.normalize)
     if cfg.training.test_eval:
-        launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.misc.complete_evaluation, results_dir=output_dir, mode="Test", denormalize=cfg.data.normalize)
+        launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="Test", denormalize=cfg.data.normalize)
         launch_example(data_path, model, lags, horizon, device, save_dir, save_name)
-
-
-
 
     logger.info('End of script\n')
 

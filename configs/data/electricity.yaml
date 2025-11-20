@@ -5,7 +5,7 @@ normalize: False
 
 clustering:
   clusters:
-  n_clusters: 2
+  n_clusters: 3
 
 splits:
   indiv_split: 0.8

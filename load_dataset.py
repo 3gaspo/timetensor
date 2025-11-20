@@ -28,6 +28,7 @@ def run(cfg):
 
     split_kwargs = cfg.data.splits
     clusters, n_clusters = cfg.data.clustering.clusters, cfg.data.clustering.n_clusters
+    remove_cte = split_kwargs.remove_train_cte
 
     #dirs
     for suffix in ["plots/", "examples/"]:
@@ -40,6 +41,8 @@ def run(cfg):
         for suffix in ["fourier_clusters/", "gamma_clusters/"]:
             if not os.path.exists(data_path+suffix):
                 os.makedirs(data_path+suffix)
+    if cfg.load.clusters:        
+        for suffix in ["fourier_clusters/", "gamma_clusters/"]:
             if not os.path.exists(data_path+"plots/" + suffix):
                 os.makedirs(data_path+"plots/" + suffix)
 
@@ -48,6 +51,9 @@ def run(cfg):
     replot = cfg.load.replot
     do_heterogeneity = cfg.load.heterogeneity
     recluster = cfg.load.clusters
+    do_shapes = cfg.load.shapes
+    do_windows = cfg.load.windows
+    do_distances = cfg.load.distances
 
     do_shapes = False
     do_windows = False
@@ -80,11 +86,11 @@ def run(cfg):
         if verbose:
             logger.info("Set new example")
 
-
+    df, _, _ = fetch_csv(data_path, dataset_name, context_cols, split_kwargs["drop_users"])
+    dates, individuals = df.shape
+    
     #constant windows
     if do_windows:
-        df, _, _ = fetch_csv(data_path, dataset_name, context_cols, split_kwargs["drop_users"])
-        dates, individuals = df.shape
         _, counts = identify_cte(df, lags)
         if len(counts)>0:
             logger.info(f"Found {len(counts)} constant windows!")
@@ -118,9 +124,9 @@ def run(cfg):
 
 
     #plots
+    main_plot_dir = data_path + "plots/"
     if replot:
-        main_plot_dir = data_path + "plots/"
-        remove_cte, logs = split_kwargs.remove_train_cte, cfg.load.logs
+        logs = cfg.load.logs
         df_dict = {key: loader.dataset.get_df() for key, loader in point_loaders_dict.items()}
         samples = 1000
 
@@ -151,7 +157,7 @@ def run(cfg):
         plot_betas(filter_dict(df_dict, keys=["train", "valid1"]), plot_dir, "input_deltas_indiv.pdf", per_user=False, samples=samples, lookback=lags, horizon=horizon, title=f"{dataset_name} input deltas", log=logs)
 
 
-    if recluster and individuals>3:
+    if recluster and individuals>10:
         #fourier clustering
         plot_dir = main_plot_dir + "fourier_clusters/"
         logger.info("==Fourier clustering==")

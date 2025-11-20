@@ -10,7 +10,7 @@ from .utils import filter_df, unroll_windows, symlog
 
 ##Clustering
 import scipy.cluster.hierarchy as shc
-from scipy.spatial.distance import squareform
+from scipy.spatial.distance import squareform, pdist
 from scipy.spatial.distance import cosine
 from scipy.cluster.hierarchy import fcluster
 
@@ -27,6 +27,11 @@ def fourier(df, eps=1e-8):
 #     for j in range(i + 1, num_individuals):
 #       distances[i, j] = distances[j, i] = cosine(df.iloc[:,i].values, df.iloc[:,j].values)
 #   return distances
+
+def calculate_distances(df, metric='cosine'):
+    """computes distance matrix of users"""
+    D = pdist(df.T.values, metric=metric)  # condensed vector
+    return D
 
 def find_pairs(distances_matrix):
   """returns closest and furthest users"""
@@ -46,10 +51,11 @@ def plot_distances(distances_matrix, show=False, path="", name="distances.pdf"):
     plt.close()
 
 def init_clusters(df):
-#   distances_matrix = calculate_distances(df)
+    distances = calculate_distances(df)
 #   Z = shc.linkage(squareform(distances_matrix), method='ward')
-  Z = shc.linkage(df.T.values, method='ward', metric='euclidean') #propal GPT
-  return Z
+#   Z = shc.linkage(df.T.values, method='ward', metric='euclidean') #propal GPT
+    Z = shc.linkage(distances, method='average') #propal GPT
+    return Z, squareform(distances)
 
 def plot_dendogram(Z, show=False, path="", name="dendogram.pdf"):
     plt.figure(figsize=(10, 7))
@@ -113,9 +119,11 @@ def get_cluster_distances(df, cluster_indices, centroids):
       intra_distances[i] = np.nan
 
     #inter
-    for j in range(i + 1, len(cluster_indices)):
-      inter_distances[(i, j)] = cosine(centroids[i].values, centroids[j].values)
-
+    if len(cluster_indices)>1:
+        for j in range(i + 1, len(cluster_indices)):
+            inter_distances[(i, j)] = cosine(centroids[i].values, centroids[j].values)
+    else:
+        inter_distances = {0:0}
   return intra_distances, inter_distances
 
 def get_cluster_heterogeneity(df, cluster_indices, centroids):

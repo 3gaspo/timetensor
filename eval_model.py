@@ -5,11 +5,17 @@ import torch
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_stats
 from src.timetensor.models import load_model, format_kwargs
 from src.timetensor.pipeline import get_losses, load_learner
-from src.timetensor.visu import plot_weights
+from src.timetensor.visu import plot_weights, plot_errors
 from src.timetensor.utils import get_dirs, set_seed
 
-from src.timetensor.pipeline import launch_training, launch_eval, launch_example
+from tqdm import tqdm
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
+from src.timetensor.pipeline import launch_eval, launch_example
+from src.timetensor.utils import symlog
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -25,7 +31,7 @@ def run(cfg):
     lags, horizon = int(cfg.task.lags), int(cfg.task.horizon)
 
     criterion_name = cfg.training.loss
-    criterion, eval_losses = get_losses(criterion_name, complete_evaluation=cfg.misc.complete_evaluation)
+    criterion, eval_losses = get_losses(criterion_name, complete_evaluation=cfg.training.complete_evaluation)
 
     model_name, norm_name = cfg.model.name, cfg.normalization.name
     if norm_name == "None":
@@ -45,7 +51,9 @@ def run(cfg):
     set_seed(seed)
 
     #data
-    loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon, clusters=cfg.data.clustering.clusters, seed=seed)
+    loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(
+        data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
+        clusters=cfg.data.clustering.clusters, seed=seed, random_eval=cfg.training.random_eval, do_nodes=False)
     if cfg.data.normalize:
         apply_stats(loaders_dict, stats_dict)
     shape, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
@@ -57,13 +65,10 @@ def run(cfg):
     #model
     format_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger)
     model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.training.freeze_core, cfg.model.constants, cfg.model.residuals, **kwargs)
-    
-    #training
-    logger.info("--Training--")
     learner = load_learner(model, norm_name, criterion, cfg.training.lr, eval_losses, device)
 
-    logger.info("--Eval--")
-    launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.misc.complete_evaluation, results_dir=output_dir, mode="Test", denormalize=cfg.data.normalize)
+    logger.info("--Model eval--")
+    launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="Test", denormalize=cfg.data.normalize, runs=cfg.training.eval_runs)
     launch_example(data_path, model, lags, horizon, device, save_dir, save_name)
 
     #weights
@@ -75,6 +80,39 @@ def run(cfg):
         params = {f"beta_{k}": value.data.detach().cpu().numpy()[0][0][0] for k,value in enumerate(model.betas)}
         logger.info(f"Final modulations: {params}")
 
+    #per user errors
+    logger.info("--Per user eval--")
+    per_user_losses = []
+    stds_per_user_losses = []
+    for indiv in tqdm(range(loaders_dict["test1"].dataset.shape[0][0])):
+        loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(
+            data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon, seed=seed,
+            random_eval=cfg.training.random_eval, do_nodes=False, fetch_cluster=indiv)
+        if cfg.data.normalize:
+            apply_stats(loaders_dict, stats_dict)
+        losses1 = learner.eval(loaders_dict["test1"], return_all=True, runs=cfg.training.eval_runs//20)
+        mean = symlog(losses1["NMSE"].mean())
+        std = symlog(losses1["NMSE"].std())
+        per_user_losses.append(mean.item())
+        stds_per_user_losses.append(std.item())
+    stats_df = pd.DataFrame({
+        "log(mean_error)": per_user_losses,
+        "log(std_error)": stds_per_user_losses})
+    plt.figure(figsize=(10, 7))
+    g = sns.jointplot(
+        data=stats_df,
+        x="log(mean_error)",
+        y="log(std_error)",
+        kind='scatter',
+        palette='Set1',
+    )
+    plt.suptitle(f"Errors of {save_name}")
+    plt.tight_layout()
+    plt.savefig(save_dir+ "plots/" + "errors.pdf")
+    plt.close()
+
+    exotics = np.where(np.array(per_user_losses)>1)
+    logger.info(exotics)
     logger.info('End of script\n')
 
 if __name__ == "__main__":

@@ -52,7 +52,7 @@ def plot_example(x, y, path="", name="example.pdf", title="Example", axis=True, 
 
 def plot_named_example(path, name):
     x, c, y, i, d  = fetch_example_data(path, name)
-    plot_example(x[0], y[0], path + f"/{name}/", f"example.pdf", "Example")
+    plot_example(x[0].cpu().detach().tolist(), y[0].cpu().detach().tolist(), path + f"/{name}/", f"example.pdf", "Example")
 
 
 def plot_pred(x, y, pred, path="", name="prediction.pdf", title="Predictions", axis=True, show=False):
@@ -359,8 +359,9 @@ def plot_multi_losses(losses_dict, path="", name="losses.pdf", title="Losses", l
 def plot_errors(losses, path="", name="errors.pdf", title="Loss distribution", show=False):
     """plots histogram of errors"""
     fig = plt.figure(figsize=(10,5))
-    plt.hist(losses, bins=100)
-    plt.yscale("log")
+    # plt.hist(losses, bins=100, density=True)
+    sns.kdeplot(losses, log_scale=True)
+    # plt.xscale("log")
     plt.title(title)
     plt.xlabel("Losses")
     plt.ylabel("Frequency")
