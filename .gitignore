@@ -9,5 +9,6 @@ saved/
 scripts/
 model.safetensors
 
-config/*
-!config/electricity.yaml
+configs/data/*
+!configs/data/electricity.yaml
+
