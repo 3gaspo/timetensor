@@ -12,3 +12,10 @@ model.safetensors
 configs/data/*
 !configs/data/electricity.yaml
 
+configs/model/*
+!configs/model/PatchTST.yaml
+!configs/model/DLinear.yaml
+
+configs/normalization/*
+!configs/normalization/cmIN.yaml
+!configs/normalization/instance.yaml
