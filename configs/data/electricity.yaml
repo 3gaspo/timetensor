@@ -10,7 +10,7 @@ clustering:
 splits:
   indiv_split: 0.8
   date_splits: 0.6;0.2;0.2
-  idx_mode: indiv
+  idx_mode: individuals
   context_by_individuals: True
   reshuffle: True
   remove_train_cte: True

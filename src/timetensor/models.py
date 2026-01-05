@@ -516,7 +516,7 @@ class cmIN(DefaultNorm):
 
 ######
 
-def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=False, constants=True, residuals=False, stats_dict=None, nodes_stats_dict=None, cpu=False, logger=None, **kwargs):
+def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=False, constants=True, residuals=False, stats_dict=None, nodes_stats_dict=None, cpu=False, logger=None, verbose=1, **kwargs):
     """loads models from str model name"""
     lags, dim, horizon = shape[0], shape[1], shape[2]
     
@@ -549,7 +549,8 @@ def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=Fa
         model.name = "chronos"
     else:
         raise ValueError(f"Model name not recognized : {model_name}")
-    logger.info(f"Loaded {model.name}")
+    if verbose:
+        logger.info(f"Loaded {model.name}")
 
     #normalization
     get_training = ((norm_name is not None) and (("mIN" in norm_name) or ("revin" in norm_name))) or (model_name not in ["persistence", "repeat", "lookback", "expected"])
@@ -573,27 +574,31 @@ def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=Fa
 
     #constants
     if constants and ("sk" not in model_name):
-        logger.info(f"Added constant wrapper to model")
+        if verbose:
+            logger.info(f"Added constant wrapper to model")
         model = ConstantModel(model, horizon)
     else:
         model.does_constant = False
     #residuals
     if residuals and ("sk" not in model_name):
-        logger.info(f"Added residuals to model")
+        if verbose:
+            logger.info(f"Added residuals to model")
         model = ResidualModel(model, dim, horizon)
     else:
         model.does_residual = False
         
     #init
     if init_path is not None and ("sk" not in model_name):
-        logger.info(f"Loaded model at {init_path}")
+        if verbose:
+            logger.info(f"Loaded model at {init_path}")
         if cpu:
             weights = torch.load(init_path, map_location=torch.device('cpu'))
         else:
             weights = torch.load(init_path)
         model.load_state_dict(weights)
     if freeze_core and ("sk" not in model_name):
-        logger.info(f"Froze core model")
+        if verbose:
+            logger.info(f"Froze core model")
         for name, param in model.named_parameters():
             if "alpha" not in name and "beta" not in name:
                 param.requires_grad = False
@@ -612,7 +617,10 @@ def format_min_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger):
             if len(kwargs["init_alpha"])<10:
                 logger.info(f"Loaded init_alphas: {kwargs['init_alpha']}")
         else:
-            kwargs["init_alpha"] = stats_dict["train"]["alpha"]
+            if stats_dict is not None:
+                kwargs["init_alpha"] = stats_dict["train"]["alpha"]
+            else:
+                kwargs["init_alpha"] = None
             logger.info(f"Loaded init_alphas: {kwargs['init_alpha']}")
     if kwargs.get("init_beta") is True:
         if "cmIN" in norm_name:
@@ -620,5 +628,8 @@ def format_min_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger):
             if len(kwargs["init_beta"])<10:
                 logger.info(f"Loaded init_betas: {kwargs['init_beta']}")
         else:
-            kwargs["init_beta"] = stats_dict["train"]["beta"]
+            if stats_dict is not None:
+                kwargs["init_beta"] = stats_dict["train"]["beta"]
+            else:
+                kwargs["init_beta"] = None
             logger.info(f"Loaded init_betas: {kwargs['init_beta']}")

@@ -55,22 +55,20 @@ def run(cfg):
     do_windows = cfg.load.windows
     do_distances = cfg.load.distances
 
-    do_shapes = False
-    do_windows = False
-    do_distances = False
+    do_shapes = True
+    do_windows = True
+    do_distances = True
 
     if verbose:
         logger.info("Fetched configs")
         logger.info(f"Loading {dataset_name}")
+    
     #build pytorch dataset
     if rebuild:
         t1 = perf_counter()
         if "synthetic" in dataset_name:
             from src.timetensor.synthetic import build_dataset
             build_dataset(data_path, n1=cfg.data.n1, n2=cfg.data.n2, r1=cfg.data.r1, r2=cfg.data.r2, seed=seed)
-        if "saturation" in dataset_name:
-            from src.timetensor.saturation import build_dataset
-            build_dataset(data_path, seed=seed)
         else:
             from src.timetensor.dataset import build_dataset
             build_dataset(data_path, dataset_name, context_cols, drop_users=split_kwargs.drop_users)
@@ -86,9 +84,16 @@ def run(cfg):
         if verbose:
             logger.info("Set new example")
 
+    #data
     df, _, _ = fetch_csv(data_path, dataset_name, context_cols, split_kwargs["drop_users"])
     dates, individuals = df.shape
-    
+    split_kwargs_ = copy.deepcopy(split_kwargs)
+    split_kwargs_["idx_mode"]='random'
+    batch_size_ = 1
+    point_loaders_dict, stats_dict, nodes_data_dict = fetch_training_data(data_path,
+            split_kwargs_, cfg.data.subsets, batch_size_, lags, horizon,
+            clusters=clusters, seed=seed, random_eval=True)
+
     #constant windows
     if do_windows:
         _, counts = identify_cte(df, lags)
@@ -97,10 +102,11 @@ def run(cfg):
             if len(counts)<=10:
                 logger.info(counts)
 
-            
     #splits
     if do_shapes:
-        loaders_dict, stats_dict, nodes_data_dict = fetch_training_data(data_path, split_kwargs, cfg.data.subsets, cfg.training.bs, lags, horizon, clusters=clusters, seed=seed)
+        loaders_dict, stats_dict, nodes_data_dict = fetch_training_data(data_path, 
+            split_kwargs, cfg.data.subsets, cfg.training.bs, lags, horizon,
+            clusters=clusters, seed=seed)
         _, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
         if verbose:
             logger.info("Fetched dataloaders")
@@ -111,16 +117,13 @@ def run(cfg):
             logger.info(f"{key} stats:\n{stats_str}")
 
     #distances
-    split_kwargs_ = copy.deepcopy(split_kwargs)
-    split_kwargs_["idx_mode"]='random'
-    batch_size_ = 1
-    point_loaders_dict, stats_dict, nodes_data_dict = fetch_training_data(data_path, split_kwargs_, cfg.data.subsets, batch_size_, lags, horizon, clusters=clusters, seed=seed)
     if do_distances:
         d_space, d_temps, d_modulations = get_spatial_distance(df), get_temporal_distance(df, int(len(df) * 0.6), int(len(df) * 0.8)), get_modulation_distance(df, lags=lags, horizon=horizon)
-        logger.info(f"Spatial distance: {d_space:.3f}, Temporal distance: {d_temps:.3f}, Modulations distance: {d_modulations:.3f}")
-    temp_df, spatial_df = analyze_discrepency(point_loaders_dict, split_kwargs, stats_dict, samples=3000, seed=seed)
-    logger.info(temp_df.applymap('{:,.2f}'.format))
-    logger.info(spatial_df.applymap('{:,.2f}'.format))
+        logger.info(f"Spatial distance: {d_space:.4f}, Temporal distance: {d_temps:.4f}, Modulations distance: {d_modulations:.4f}")
+        
+        temp_df, spatial_df = analyze_discrepency(point_loaders_dict, split_kwargs, stats_dict, samples=3000, seed=seed)
+        logger.info(temp_df.applymap('{:,.2f}'.format))
+        logger.info(spatial_df.applymap('{:,.2f}'.format))
 
 
     #plots

@@ -243,6 +243,8 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
     valid_loader1 = loaders_dict.get("valid1")
     valid_loader2 = loaders_dict.get("valid2")
     valid_loader3 = loaders_dict.get("valid3")
+    if not ((valid_loader1 is not None) or (valid_loader2 is not None) or (valid_loader3 is not None)):
+        do_eval = False
     steps_per_epoch = len(train_loader)
     total_steps = epochs * steps_per_epoch
 
@@ -254,10 +256,7 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
             print(f"Using device: {learner.device}")
             print(f"Training {epochs} epochs of {steps_per_epoch} batches ({total_steps} steps): , eval_freq: {eval_freq}, print_freq: {print_freq}")
 
-    train_losses = []
-    valid_losses1 = {}
-    valid_losses2 = {}
-    valid_losses3 = {}
+    train_losses, valid_losses1, valid_losses2, valid_losses3 = [], {}, {}, {}
     weights = {}
     t1 = perf_counter()
 
@@ -318,31 +317,37 @@ def load_learner(model, normalization, criterion, lr, eval_losses, device):
     return learner
 
 
-def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, eval_losses, device, save_dir, save_name, eval_freq, print_freq, logger):
+def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, eval_losses, device, save_dir, save_name, eval_freq, print_freq, logger, verbose=1):
     """launches training of model"""
     model_name = model.name
     criterion_name = criterion.name
-    
+    if not os.path.exists(save_dir + "plots/"):
+        os.makedirs(save_dir + "plots/")
+
     learner = load_learner(model, normalization, criterion, lr, eval_losses, device)
 
     #non trainable
     if (model_name in ["persistence", "repeat", "lookback", "expected"]) and ((normalization is None) or (("mIN" not in normalization) and ("revin" not in normalization))):
-        logger.info("No training needed")
+        if verbose:
+            logger.info("No training needed")
     
     #scikit learn .fit
     elif model_name == "sklinear":
-        logger.info("Starting scikit-learn fitting...")
+        if verbose:
+            logger.info("Starting scikit-learn fitting...")
         learner.fit(loaders_dict["train"])
-        logger.info("End of training")
+        if verbose:
+            logger.info("End of training")
     
     #pytorch training
     else:
-        logger.info(f"Starting training pytorch with lr={lr}")
+        if verbose:
+            logger.info(f"Starting training pytorch with lr={lr}")
         if normalization is not None and (("revin" in normalization) or ("mIN" in normalization and "cmIN" not in normalization)):
             weight_follow = lambda model: {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
         else:
             weight_follow = None
-        train_losses, valid_losses1, valid_losses2, valid_losses3, followed_weights = train_model(learner, loaders_dict, epochs=epochs, logger=logger, eval_runs=1, eval_freq=eval_freq, print_freq=print_freq, weight_follow=weight_follow)
+        train_losses, valid_losses1, valid_losses2, valid_losses3, followed_weights = train_model(learner, loaders_dict, epochs=epochs, logger=logger, eval_runs=1, eval_freq=eval_freq, print_freq=print_freq, weight_follow=weight_follow, verbose=verbose)
         torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")
         torch.save(train_losses, save_dir + f"train_losses.pt")
         torch.save(valid_losses1, save_dir + f"valid_losses1.pt")
@@ -352,7 +357,9 @@ def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, e
         
         #plots
         for loss_name in eval_losses:
-            valid_dict = {"valid1": valid_losses1[loss_name]}
+            valid_dict = {}
+            if valid_losses1.get(loss_name) is not None:
+                valid_dict["valid1"] = valid_losses1[loss_name]
             if valid_losses2.get(loss_name) is not None:
                 valid_dict["valid2"] = valid_losses2[loss_name]
             if valid_losses3.get(loss_name) is not None:
@@ -360,19 +367,22 @@ def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, e
             if loss_name == criterion_name or (loss_name=="NMSE" and "NMSE" in criterion_name):
                 plot_losses(train_losses, valid_dict, save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}", eval_freq=eval_freq)
             else:
-                plot_multi_losses(valid_dict,  save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}", eval_freq=eval_freq)
+                if valid_dict != {}:
+                    plot_multi_losses(valid_dict,  save_dir + "plots/", f"{loss_name}_plot.pdf", f"Training {loss_name} of {save_name}", eval_freq=eval_freq)
         for weight_name in followed_weights:
             plot_serie(followed_weights[weight_name], save_dir + "plots/", f"{weight_name}.pdf", title=f"{weight_name} during training")
-        logger.info("End of training")        
+        if verbose:
+            logger.info("End of training")        
     
     #weights
     plot_weights(model, save_dir + "plots/", save_name)
-    if (normalization is not None) and (("revin" in normalization) or ("mIN" in normalization and "cmIN" not in normalization)):
-        params = {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
-        logger.info(f"Final modulations: {params}")
-    elif (normalization is not None and "cmIN" in normalization):
-        params = {f"beta_{k}": value.data.detach().cpu().numpy()[0][0][0] for k,value in enumerate(model.betas)}
-        logger.info(f"Final modulations: {params}")
+    if verbose:
+        if (normalization is not None) and (("revin" in normalization) or ("mIN" in normalization and "cmIN" not in normalization)):
+            params = {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
+            logger.info(f"Final modulations: {params}")
+        elif (normalization is not None and "cmIN" in normalization):
+            params = {f"beta_{k}": value.data.detach().cpu().numpy()[0][0][0] for k,value in enumerate(model.betas)}
+            logger.info(f"Final modulations: {params}")
     
     return learner
 
@@ -381,7 +391,9 @@ def launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_n
     """evaluating model script"""
     if results_dir is None:
         results_dir = save_dir
-    
+    if not os.path.exists(save_dir + "plots/"):
+        os.makedirs(save_dir + "plots/")
+
     losses1, losses2, losses3 = None, None, None
     if mode == "Valid":
         sub_ = "valid"

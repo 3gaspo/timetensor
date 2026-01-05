@@ -1,4 +1,0 @@
-name: lookback
-constants: False
-configs:
-  lookback_idx: 0

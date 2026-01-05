@@ -5,13 +5,11 @@ import json
 from tabulate import tabulate
 import os
 import torch
-import ipywidgets as widgets
-from IPython.display import display
 import seaborn as sns
 
 from .dataset import fetch_example_data
-from .analysis import *
-from .utils import text_list, unroll_windows, symlog
+# from .analysis import *
+from .utils import text_list
 
 ## series plots
 
@@ -100,200 +98,7 @@ def plot_preds(x, y, preds, path="", name="prediction.pdf", title="Predictions",
     plt.close()
 
 
-## stats plots
-
-def plot_stats(data, path="", name="stats.pdf", per_user=True, lookback=336, horizon= 48, samples=2000, title=None, remove_cte=True, log=False, show=False):
-    """plots means and std scatter plot. data must be pandas dataframe or dict of df"""
-    if type(data) != dict:
-        data = {"data":data}
-
-    keys, means_list, stds_list = [], [], []
-    for key, df in data.items():
-        if per_user:
-            clean_df = df.copy()
-            if remove_cte:
-                cte_mask, _ = identify_cte(df.iloc[lookback:-horizon], lookback)
-                clean_df[cte_mask] = pd.NA
-            means = clean_df.mean(axis=0)
-            stds = clean_df.std(axis=0)
-            if remove_cte and np.any(stds==0):
-                print(f"Users with only constant windows on {key} : {np.where(stds==0)[0]}")
-                means = means[stds!=0]
-                stds = stds[stds!=0]
-        else:
-            means = df.rolling(window=lookback).mean()[lookback:].stack()
-            stds = df.rolling(window=lookback).std()[lookback:].stack()
-            if samples < len(means):
-                sampled_idx = np.random.choice(len(means), size=samples, replace=False)
-                means = means.iloc[sampled_idx]
-                stds = stds.iloc[sampled_idx]
-            if remove_cte:
-                keep_idx = np.where(stds>0)[0]
-                means, stds = means.iloc[keep_idx], stds.iloc[keep_idx]
-        keys += [key + f" (mean: {means.mean():.2f} | stds: {stds.mean():.2f})" for _ in range(len(means))]
-        if log:
-            # means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
-            # stds_list += np.log(np.where(stds>0, stds, 1e-8)).tolist()
-            means_list += symlog(means).tolist()
-            stds_list += symlog(stds).tolist()
-            xlbl, ylbl = "symlog(mean)", "symlog(std)"
-        else:
-            means_list += means.tolist()
-            stds_list += stds.tolist()
-            xlbl, ylbl = "mean", "std"
-
-    stats_df = pd.DataFrame({
-        'key': keys,
-        xlbl: means_list,
-        ylbl: stds_list})
-
-    plt.figure(figsize=(10, 7))
-    g = sns.jointplot(
-        data=stats_df,
-        x=xlbl,
-        y=ylbl,
-        hue='key',
-        kind='scatter',
-        palette='Set1',
-        marginal_kws=dict(common_norm=False, fill=True, alpha=0.5)
-    )
-
-    # ax = g.ax_joint
-    # hue_order = list(dict.fromkeys(stats_df["key"]))  # preserves first-seen order
-    # palette = sns.color_palette("Set1", n_colors=len(hue_order))
-    # color_for = dict(zip(hue_order, palette))
-    # for key, sub in stats_df.groupby("key"):
-    #     if not valid_for_kde(sub, xlbl, ylbl):
-    #         continue
-    #     try:
-    #         sns.kdeplot(
-    #             data=sub,
-    #             x="beta", y="alpha",
-    #             ax=ax,
-    #             color=color_for[key],   # match scatter color
-    #             fill=False, alpha=0.3,
-    #             levels=10,              # strictly increasing
-    #             thresh=1e-6,
-    #             bw_adjust=1.2,
-    #             warn_singular=False,
-    #             common_norm=False,
-    #             legend=False,           # avoid legend duplication
-    #         )
-    #     except ValueError: # If a group still blows up, just skip its KDE
-    #         pass
-
-    if title is None:
-        plt.suptitle("Statistics distribution", y=1.02)
-    else:
-        plt.suptitle(title)
-    plt.tight_layout()
-    if show:
-        plt.show()
-    else:
-        plt.savefig(path+name)
-    plt.close()
-
-
-def plot_means(data, path="", name="stats.pdf", per_user=True, lookback=336, horizon=48, samples=2000, title=None, remove_cte=True, log=False, show=False):
-    """plots means histogram. data must be pandas dataframe or dict of df"""
-
-    if type(data) != dict:
-        data = {"data":data}
-
-    keys, means_list = [], []
-    for key, df in data.items():
-        if per_user:
-            clean_df = df.copy()
-            if remove_cte:
-                cte_mask, _ = identify_cte(df.iloc[lookback:-horizon], lookback)
-                clean_df[cte_mask] = pd.NA
-            means = clean_df.mean(axis=0)
-        else:
-            means = df.rolling(window=lookback).mean()[lookback:].stack()#.sample(samples)
-            stds = df.rolling(window=lookback).std()[lookback:].stack()#.sample(samples)
-            if samples<len(means):
-                sampled_idx = np.random.choice(len(means), size=samples, replace=False)
-                means = means.iloc[sampled_idx]
-                stds = stds.iloc[sampled_idx]
-            if remove_cte:
-                keep_idx = np.where(stds>0)[0]
-                means = means.iloc[keep_idx]
-
-        keys += [key + f" (mean: {means.mean():.2f})" for _ in range(len(means))]
-        if log:
-            # xlbl = "log(means)"
-            # means_list += np.log(np.where(means>0, means, 1e-8)).tolist()
-            means_list += symlog(means).tolist()
-            xlbl = "symlog(mean)"
-        else:
-            xlbl = "means"
-            means_list += means.tolist()
-
-    means_df = pd.DataFrame({
-        'key': keys,
-         xlbl: means_list,})
-    
-    plt.figure(figsize=(10, 7))
-    sns.kdeplot(means_df, x=xlbl, hue="key", fill=True, common_norm=False)#, log_scale=False), #label=f"{key} (avg:{means.mean():.2f})")
-
-    if title is None:
-        plt.title(f"Means distribution")
-    else:
-        plt.title(title)
-    plt.xlabel("Values")
-    plt.ylabel("Density")
-    plt.tight_layout()
-    if show:
-        plt.show()
-    else:
-        plt.savefig(path+name)
-    plt.close()
-
-
-
-def plot_points(loaders_dicts, path="", name="stats.pdf", samples=2000, title=None, log=False, show=False, normal=False, dim=0):
-    """plots means histogram. data must be pandas dataframe or dict of df"""
-
-    keys, values_list = [], []
-    for key, loader in loaders_dicts.items():
-
-        X, Y, C = unroll_windows(loader, cap=samples, shuffle=False, normal=normal, do_context=True)
-        values = X[:, dim, :].view(-1).detach().cpu()
-
-        keys += [key + f" (mean: {values.mean():.2f})" for _ in range(len(values))]
-        if log:
-            # xlbl = "log(values)"
-            # values_list += np.log(np.where(values>0, values, 1e-8)).tolist()
-            values_list += symlog(values).tolist()
-            xlbl = "symlog(values)"
-        else:
-            xlbl = "values"
-            values_list += values.tolist()
-
-    values_df = pd.DataFrame({
-        'key': keys,
-         xlbl: values_list,})
-    
-    plt.figure(figsize=(10, 7))
-    sns.kdeplot(values_df, x=xlbl, hue="key", fill=True, common_norm=False)
-
-    if title is None:
-        plt.title(f"Means distribution")
-    else:
-        plt.title(title)
-    plt.xlabel("Values")
-    plt.ylabel("Density")
-    plt.tight_layout()
-    if show:
-        plt.show()
-    else:
-        plt.savefig(path+name)
-    plt.close()
-
-
-
 ## 2D plots
-
 
 def plot_weights_(weights, path, name="weights.pdf", title='Model weights'):
     """plots weights of a model"""
@@ -384,69 +189,6 @@ def plot_horizon_errors(losses, path="", name="horizon.pdf", title="Mean errors 
         plt.savefig(path+name)
     plt.close()
 
-
-
-## widgets
-
-def visu_widget(data, lookback, horizon, eps=1e-8):
-    """visual widget for notebooks"""
-    alphas, betas = get_gammas(data, lookback, horizon, eps)
-    dataframes = {'original': data, 'alpha': alphas, 'beta': betas}
-    dataframe_names = list(dataframes.keys())
-    column_names = list(data.columns)
-
-    dataframe_dropdown = widgets.Dropdown(
-        options=dataframe_names,
-        value=dataframe_names[0],
-        description='Select DataFrame:'
-    )
-    column_dropdown = widgets.Dropdown(
-        options=column_names,
-        value=column_names[0],
-        description='Select Column:'
-    )
-
-    next_button = widgets.Button(description="Next Column")
-    output = widgets.Output()
-
-    def update_plot(dataframe_name, column_name):
-        with output:
-            output.clear_output(wait=True)
-            df = dataframes[dataframe_name]
-            plt.figure(figsize=(12, 6))
-            plt.plot(df[column_name])
-            plt.title(f'{dataframe_name} time Series for user {column_name}')
-            plt.xlabel('Index')
-            plt.ylabel('Value')
-            plt.grid(True)
-            plt.show()
-
-    def on_dropdown_change(change):
-        update_plot(dataframe_dropdown.value, column_dropdown.value)
-
-    def on_next_button_click(b):
-        current_column_index = column_names.index(column_dropdown.value)
-        next_column_index = (current_column_index + 1) % len(column_names)
-        column_dropdown.value = column_names[next_column_index]
-
-    dataframe_dropdown.observe(on_dropdown_change, names='value')
-    column_dropdown.observe(on_dropdown_change, names='value')
-    next_button.on_click(on_next_button_click)
-
-    display(dataframe_dropdown, column_dropdown, next_button, output)
-    update_plot(dataframe_dropdown.value, column_dropdown.value)
-
-
-def pd_to_latex(df, save_path, save_name="results_table.tex"):
-    """returns latex code to create table from dataframe in path"""
-    colfmt = "l" + "c" * len(df.columns)
-    latex_str = df.to_latex(
-        index=True, escape=False, bold_rows=False,
-        column_format=colfmt, na_rep="--", caption=None, label=None, buf=None,
-        longtable=False, multirow=False, multicolumn=True, multicolumn_format='c',
-        header=True)
-    with open(save_path + save_name, "w", encoding="utf-8") as f:
-        f.write(latex_str)
 
 
 ## results
@@ -542,7 +284,7 @@ def get_multiple_errors_df(dir_name, file_name, n_paths, multipliers=None, names
         df_std.to_csv(dir_name + 'std_errors.csv')
     return df_mean, df_std
 
-def get_multiple_expe_results(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True, baseline=None, print_table=True, show_row=0, save_path=None, save_name="errors.df", save_latex=True):
+def get_multiple_expe_results(dir_name, file_name, n_paths, multipliers=None, names=None, show_std=True, baseline=None, print_table=True, show_row=0, save_path=None, save_name="errors.df"):
     """prints results of multiple experiments"""
     df_mean, df_std = get_multiple_errors_df(dir_name, file_name, n_paths, multipliers, names, baseline)
 
@@ -558,12 +300,12 @@ def get_multiple_expe_results(dir_name, file_name, n_paths, multipliers=None, na
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
-    if save_latex:
-        df_latex = df_mean.copy()
-        for col in df_mean.columns:
-            df_latex[col] = df_mean[col].map("{:.2f}".format)
-        df_latex.columns = df_latex.columns.str.replace("_", "\\_", regex=False)
-        pd_to_latex(df_latex, save_path, save_name=f"{save_name[:-3]}.tex")
+    # if save_latex:
+    #     df_latex = df_mean.copy()
+    #     for col in df_mean.columns:
+    #         df_latex[col] = df_mean[col].map("{:.2f}".format)
+    #     df_latex.columns = df_latex.columns.str.replace("_", "\\_", regex=False)
+    #     pd_to_latex(df_latex, save_path, save_name=f"{save_name[:-3]}.tex")
 
     if print_table:
         table = tabulate(df_formatted, headers='keys', tablefmt='grid', showindex=True)
@@ -623,24 +365,6 @@ def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", save_path=None, s
 
 
 ## scripts
-
-def plot_clustering(raw_df, feature_df, n_clusters, lags, horizon, clustering_name, plot_dir, do_heterogeneity=True, remove_cte=True):
-    """clustering analysis script"""
-    if do_heterogeneity:
-        plot_heterogeneity(feature_df, path=plot_dir, name="heterogeneity.pdf")
-    Z, distances_matrix = init_clusters(feature_df)
-    labels, cluster_indices = get_clusters(Z, n_clusters)
-    plot_dendogram(Z, path=plot_dir, name="dendogram.pdf")
-    plot_distances(distances_matrix, path=plot_dir, name="distances.pdf")
-    centroids = get_centroids(feature_df, cluster_indices)
-    plot_centroids(centroids, path=plot_dir, name="centroids.pdf")
-    centroids = get_centroids(raw_df, cluster_indices)
-    plot_centroids(centroids, path=plot_dir, name="raw_centroids.pdf")
-    df_dict = get_cluster_dicts(raw_df, cluster_indices)
-    plot_stats(df_dict, plot_dir, name="stats.pdf", per_user=True, lookback=lags, title=f"{clustering_name} input statistics", remove_cte=remove_cte, log=True)
-    plot_gamma(df_dict, plot_dir, "gammas.pdf", per_user=True, lookback=lags, horizon=horizon, remove_cte=remove_cte, log=False)
-    return cluster_indices
-
 
 def plot_weights(model, save_dir, save_name):
     """plotting weights scripts"""
@@ -720,6 +444,17 @@ def plot_expe(losses_path, eval_freq=10, names=None, save_path=None, lr=None, bs
 
 
 ## Latex
+
+# def pd_to_latex(df, save_path, save_name="results_table.tex"):
+#     """returns latex code to create table from dataframe in path"""
+#     colfmt = "l" + "c" * len(df.columns)
+#     latex_str = df.to_latex(
+#         index=True, escape=False, bold_rows=False,
+#         column_format=colfmt, na_rep="--", caption=None, label=None, buf=None,
+#         longtable=False, multirow=False, multicolumn=True, multicolumn_format='c',
+#         header=True)
+#     with open(save_path + save_name, "w", encoding="utf-8") as f:
+#         f.write(latex_str)
 
 def latex_formated_number(value, decimals=3, color=False, row=None, std=None):
     """return formated string value"""

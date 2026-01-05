@@ -5,7 +5,7 @@ import torch
 import copy
 import shutil
 
-from .utils import append_in_dict
+from timetensor.utils import append_in_dict
 
 class Client:
     """node in a federated setting"""

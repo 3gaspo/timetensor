@@ -1,6 +1,6 @@
 import numpy as np
 from .federated import DefaultGlobalServer, DefaultLocalServer, DefaultScheme
-from .utils import append_in_dict
+from timetensor.utils import append_in_dict
 
 class LocalFedAvg(DefaultLocalServer):
     def __init__(self, client, learner):

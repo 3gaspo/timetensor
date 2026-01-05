@@ -3,7 +3,7 @@ import logging
 import torch
 
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_stats
-from src.timetensor.models import load_model, format_min_kwargs
+from src.timetensor.models import load_model
 from src.timetensor.pipeline import get_losses
 from src.timetensor.utils import get_dirs, set_seed
 
@@ -44,7 +44,9 @@ def run(cfg):
     set_seed(seed)
 
     #data
-    loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon, clusters=cfg.data.clustering.clusters, seed=seed)
+    loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(
+        data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
+        clusters=cfg.data.clustering.clusters, seed=seed, random_eval=cfg.training.random_eval, do_nodes=False)
     if cfg.data.normalize:
         apply_stats(loaders_dict, stats_dict)
     shape, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
@@ -61,9 +63,9 @@ def run(cfg):
     learner = launch_training(model, norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict, eval_losses, device, save_dir, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger)
     logger.info("--Eval--")
     if cfg.training.valid_eval:
-        launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="Valid", denormalize=cfg.data.normalize)
+        launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="Valid", denormalize=cfg.data.normalize, runs=cfg.training.eval_runs)
     if cfg.training.test_eval:
-        launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="Test", denormalize=cfg.data.normalize)
+        launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="Test", denormalize=cfg.data.normalize, runs=cfg.training.eval_runs)
         launch_example(data_path, model, lags, horizon, device, save_dir, save_name)
 
     logger.info('End of script\n')
