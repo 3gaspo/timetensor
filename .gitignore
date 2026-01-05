@@ -8,3 +8,7 @@ hydra_dir.txt
 saved/
 scripts/
 model.safetensors
+
+configs/data/*
+!configs/data/electricity.yaml
+

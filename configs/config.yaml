@@ -16,12 +16,12 @@ training:
 task:
   lags: 168
   horizon: 24
-  splits:
 
 fl:
   rounds: 10
   sampled_clients: 1
   fedmin: False
+  splits:
   
 load:
   rebuild: False

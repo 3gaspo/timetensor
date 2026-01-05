@@ -13,7 +13,7 @@ from .analysis import get_dataset_stats
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
-    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, idx_mode="indiv", context_by_individuals=True, return_all_individuals=True, remove_cte=False, stats=None, weight=1):   
+    def __init__(self, values, datetimes=None, context=None, lags=336, horizon=24, idx_mode="individuals", context_by_individuals=True, return_all_individuals=True, remove_cte=False, stats=None, weight=1):   
         """
         values (N_individuals, dim_values, dates):  past target values 
         datetimes (dates): list of dates in datetime Y-m-d H:M:S format
@@ -40,8 +40,8 @@ class TimeSeriesDataset(Dataset):
         self.individuals, self.dim_values, self.dates = self.values.shape
         if self.context is not None:
             self.contexts, self.dim_context, _dates = self.context.shape
-            assert _dates == self.dates, "not the same dates in values and context"        
-        assert self.dates > self.lags + self.horizon, "not enough dates for this lag and horizon"
+            assert _dates == self.dates, "not the same dates in values and context"
+        assert self.dates > self.lags + self.horizon, f"not enough dates for this lag and horizon: {self.dates} with {self.lags}-{self.horizon}"
         if datetimes is None:
             self.datetimes = np.array(range(0, self.dates))
         else:
@@ -55,9 +55,9 @@ class TimeSeriesDataset(Dataset):
             self.values = normalize(self.values, self.stats["mean"], self.stats["std"])
 
         self.weight = weight #modulus for get item
-        if self.idx_mode == "date":
+        if self.idx_mode == "dates":
             self.true_len = self.dates - (self.lags + self.horizon)
-        elif self.idx_mode == "indiv":
+        elif self.idx_mode == "individuals":
             self.true_len = self.individuals
         elif self.idx_mode == "all":
             self.true_len = self.individuals * (self.dates - (self.lags + self.horizon))
@@ -86,9 +86,10 @@ class TimeSeriesDataset(Dataset):
         idx = raw_idx % self.true_len
         
         remove_cte_counter = 0
-        if self.idx_mode == "date":
+        if self.idx_mode == "dates":
+            indiv, date = None, idx
             if self.return_all_individuals: #1 batch = all individuals, batch of dates
-                values = self.values[:, :, idx : idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
+                values = self.values[:, :, date : date + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
                 if self.remove_cte:
                     std = values[:, :, :self.lags].std(dim=-1).detach() # (individuals, dim_values, 1)
                     mask = (std > 0).any(dim=1)
@@ -96,53 +97,52 @@ class TimeSeriesDataset(Dataset):
                     while values.numel() == 0:
                         if remove_cte_counter > 100:
                             raise ValueError("Overflow constant windows")
-                        idx = np.random.randint(self.dates - (self.lags + self.horizon))
-                        values = self.values[:, :, idx : idx + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
+                        date = np.random.randint(self.dates - (self.lags + self.horizon))
+                        values = self.values[:, :, date : date + self.lags + self.horizon] # (individuals, dim_values, lags+horizon)
                         std = values[:, :, :self.lags].std(dim=-1).detach() # (individuals, dim_values, 1)
                         mask = (std > 0).any(dim=1)
                         values = values[mask]
                         remove_cte_counter += 1
                         
                 if self.context is not None:
-                    context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
+                    context = self.context[:, :, date : date + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
                     if self.remove_cte:
                         context = context[mask]
-
             else: #1 batch = 1 individual, batch of dates
                 indiv = np.random.randint(self.individuals)
-                values = self.values[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
+                values = self.values[indiv, :, date : date + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
                 if self.remove_cte: #skip constant windows
                     while is_cte(values[:, :, :self.lags]):
                         if remove_cte_counter > 100:
                             raise ValueError("Overflow constant windows")
                         indiv = np.random.randint(self.individuals) 
-                        values = self.values[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0)
+                        values = self.values[indiv, :, date : date + self.lags + self.horizon].unsqueeze(0)
                         remove_cte_counter += 1
                 if self.context is not None:
                     if self.context_by_individuals:
-                        context = self.context[indiv, :, idx : idx + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
+                        context = self.context[indiv, :, date : date + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
                     else:
-                        context = self.context[:, :, idx : idx + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
-
-        elif self.idx_mode == "indiv": #1 batch = batch of individuals, random date
-            if self.remove_cte and is_cte(self.values[idx, :, :]): #indiv is fully constant
-                t = 0
-                values = self.values[idx, :, t:self.lags+self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
+                        context = self.context[:, :, date : date + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
+        elif self.idx_mode == "individuals": #1 batch = batch of individuals, random date
+            indiv = idx 
+            if self.remove_cte and is_cte(self.values[indiv, :, :]): #indiv is fully constant
+                date = 0
+                values = self.values[indiv, :, date:self.lags+self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
             else:
-                t = np.random.randint(self.dates - self.lags - self.horizon)
-                values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
+                date = np.random.randint(self.dates - self.lags - self.horizon)
+                values = self.values[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0) # (1, dim_values, lags+horizon)
                 if self.remove_cte: #skip constant windows
                     while is_cte(values[:, :, :self.lags]):
                         if remove_cte_counter > 100:
                             raise ValueError("Overflow constant windows")
-                        t = np.random.randint(self.dates - self.lags - self.horizon)
-                        values = self.values[idx, :, t: t + self.lags + self.horizon].unsqueeze(0)
+                        date = np.random.randint(self.dates - self.lags - self.horizon)
+                        values = self.values[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0)
                         remove_cte_counter += 1
             if self.context is not None:
                 if self.context_by_individuals:
-                    context = self.context[idx, :, t: t + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
+                    context = self.context[indiv, :, date: date + self.lags + self.horizon].unsqueeze(0) # (1, dim_context, lags+horizon)
                 else:
-                    context = self.context[:, :, t: t + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
+                    context = self.context[:, :, date: date + self.lags + self.horizon] # (contexts, dim_context, lags+horizon)
 
         elif self.idx_mode == "all":
             date, indiv = idx // self.individuals, idx % self.individuals
@@ -185,13 +185,13 @@ class TimeSeriesDataset(Dataset):
         inputs = values[:, :, :self.lags] # (individuals, dim, lags)
         target = values[:, :, self.lags:] # (individuals, dim, horizon)
         if self.context is not None:
-            return inputs, context, target
+            return inputs, context, target, indiv, date
         else:
-            return inputs, target
+            return inputs, None, target, indiv, date
 
 
 class TimeSeriesSubset(Dataset):
-    def __init__(self, dataset, indices, subset_mode="date"):
+    def __init__(self, dataset, indices, subset_mode="dates"):
         self.indices = indices
         self.mode = subset_mode
         self.lags, self.horizon = dataset.lags, dataset.horizon 
@@ -233,12 +233,12 @@ class TimeSeriesSubset(Dataset):
                 self.contexts = self.dataset.contexts
 
     def __len__(self):
-        if self.dataset.idx_mode == "date":
+        if self.dataset.idx_mode == "dates":
             if self.mode == "individuals":
                 return len(self.dataset)
             elif self.mode == "dates":
                 return len(self.indices) - (self.lags + self.horizon)
-        elif self.dataset.idx_mode == "indiv":
+        elif self.dataset.idx_mode == "individuals":
             if self.mode == "individuals":
                 return len(self.indices)
             elif self.mode == "dates":
@@ -259,9 +259,9 @@ class TimeSeriesSubset(Dataset):
                 date = self.indices[date]
             elif self.mode == "individuals":
                 indiv = self.indices[indiv]
-            idx = indiv * date
+            idx = date * self.individuals + indiv
             return self.dataset[idx]
-        if (self.mode=="dates" and self.dataset.idx_mode=="date") or (self.mode=="individuals" and not self.dataset.idx_mode=="date"):
+        if (self.mode=="dates" and self.dataset.idx_mode=="dates") or (self.mode=="individuals" and not self.dataset.idx_mode=="dates"):
             return self.dataset[self.indices[idx]]
         else:
             return self.dataset[idx]
@@ -276,12 +276,12 @@ class TimeSeriesSubset(Dataset):
     @property
     def values(self):
         if self.mode=="dates":
-            if self.dataset.idx_mode=="date" or self.dataset.idx_mode=="all":
+            if self.dataset.idx_mode=="dates" or self.dataset.idx_mode=="all":
                 return self.dataset.values[:, :, self.indices]
             else:
                 return self.dataset.values
         elif self.mode=="individuals":
-            if self.dataset.idx_mode=="indiv" or self.dataset.idx_mode=="all":
+            if self.dataset.idx_mode=="individuals" or self.dataset.idx_mode=="all":
                 return self.dataset.values[self.indices, :, :]
             else:
                 return self.dataset.values
@@ -314,13 +314,13 @@ def fetch_csv(data_path, data_name, context_cols=None, drop=None):
     else:
         context_df = df[context_cols]
         values_df = df.drop(columns=context_cols)
-    values_df.columns = range(values_df.shape[1])
+    values_df.columns = [f"user_{k}" for k in range(values_df.shape[1])] #range(values_df.shape[1]) 
     datetimes = list(df.index)
     if drop:
         drop = drop.split(";")
         drop = [int(idx) for idx in drop]
         values_df = values_df.drop(columns=drop)
-        values_df.columns = range(values_df.shape[1])
+        values_df.columns = [f"user_{k}" for k in range(values_df.shape[1])]
     return values_df, context_df, datetimes
 
 
@@ -388,21 +388,17 @@ def load_example(path="datasets/", prefix=""):
     return inpt, context, target, indiv, date
 
 
-#TODO relire avec subset dataset
 def get_subset_indices(dataset, ratio, subset_mode=None):
     """returns subset of random indices for dataset"""
-    if (subset_mode is None and dataset.by_date) or subset_mode=="dates": #sample dates
+    if (subset_mode is None and dataset.idx_mode=="dates") or subset_mode=="dates": #sample dates
         old_len = dataset.dates - dataset.lags - dataset.horizon
         new_len = int(old_len * ratio)
         assert new_len > dataset.lags + dataset.horizon, f"Not enough dates: {old_len} -> {new_len}"
         indices = np.random.choice(old_len, size=new_len, replace=False).tolist()
-    elif (subset_mode is None and not dataset.by_date) or subset_mode=="individuals": #sample individuals
+    elif (subset_mode is None and dataset.idx_mode=="individuals") or subset_mode=="individuals": #sample individuals
         new_len = int(dataset.individuals * ratio)
         assert new_len > 0, "Not enough individuals"
         indices = np.random.choice(dataset.individuals, size=new_len, replace=False).tolist()
-    elif subset_mode == "dim":
-        assert type(ratio) == list and type(list[0])==int
-        return ratio
     else:
         raise ValueError("Unrecognized mode: ", subset_mode)
     return indices
@@ -486,7 +482,7 @@ def split_4_way(values, context, datetimes, indiv_split, date_split, context_by_
             context4 = context[: , :, dates_idx2]
     else:
         context1, context2, context3, context4 = None, None, None, None
-    return {"train":(values1, context1, dates1), "valid1":(values2, context2, dates2), "valid2":(values3, context3, dates1), "test": (values4, context4, dates2)}
+    return {"train":(values1, context1, dates1), "test1":(values2, context2, dates2), "test0":(values3, context3, dates1), "test2": (values4, context4, dates2)}
 
 def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals=True, save_path=False, reshuffle=True):
     """returns dict of train/valid/test of provided values,context,datetimes
@@ -577,10 +573,12 @@ def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None
     if type(date_splits) == str:
         date_splits = date_splits.split(";")
         date_splits = [float(txt) for txt in date_splits]
+    if type(indiv_split) == str:
+        indiv_split = float(indiv_split)
     if date_splits is None or (type(date_splits)==list and date_splits[0]==1) or date_splits==1:
         type_split = 1
     elif len(date_splits) == 1:
-        if indiv_split is None or values.shape[0]==1:
+        if indiv_split is None or indiv_split ==  1 or values.shape[0]==1:
             type_split = 2
         else:
             type_split = 4
@@ -663,11 +661,7 @@ def collate_fn(data, remove_cte=False):
     """
        data: is a list of tuples with (input, (context), target)
     """
-    if len(data[0]) == 3:
-        inputs, contexts, targets = zip(*data)
-    else:
-        inputs, targets = zip(*data)
-        contexts = None
+    inputs, contexts, targets, indivs, dates = zip(*data)
 
     inputs = torch.cat(inputs, dim=0)   # shape: (bs*individuals, dim, lookback)
 
@@ -682,7 +676,7 @@ def collate_fn(data, remove_cte=False):
         if contexts is not None:
             contexts = contexts[non_constant_mask]
 
-    return inputs, contexts, targets
+    return inputs, contexts, targets, dates, indivs
     
 def aggregate_loaders_dict(loaders_dicts, lags, horizon, splits, batch_size):
     """aggregates loaders of different individuals. Expects same dates."""
@@ -732,7 +726,7 @@ def aggregate_loaders_dict(loaders_dicts, lags, horizon, splits, batch_size):
 def get_sizes(loaders_dict, str_info=False):
     """get data size from loaders"""
     loader = next(iter(loaders_dict.values()))
-    X, c, y = next(iter(loader)) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
+    X, c, y, indiv, date = next(iter(loader)) # (indiv, dim, lags),  #(nc, dim, horizon),  #(indiv, dim, horizon)
     shape = [X.shape[2], X.shape[1], y.shape[2]] #lags, dim, horizon
     if not str_info:
         return shape

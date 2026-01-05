@@ -33,39 +33,39 @@ def get_dirs(output_dir, save_name, model_name, norm_name=None, criterion_name=N
         os.makedirs(save_dir + "plots/")
     return save_name, save_dir
 
-def unroll_windows(dataloader, cap=None, shuffle=False, normal=False, alpha=1, beta=0, mean=None, std=None, do_context=False, seed=None):
+def unroll_windows(dataloader, cap=None, normal=False, alpha=1, beta=0, mean=None, std=None, do_context=False, seed=None):
     """unrolls (x,y) examples of dataloaders (typically individuals*dates examples)"""
-    ###TODO: remove std=0 windows for sklearn fitting/ Already in dataloader no?
     X = []
     Y = []
     C = []
     i = 0
     if seed is not None:
         set_seed(seed)
-    for x, c, y in dataloader:
-        i+=x.shape[0]
-        if normal:
-            if mean is None and std is None:
-                mean, std = get_normal_stats(x)
-            nx = normalize(x, mean, std)
-            ny = normalize(y, mean, std)
-            nx = alpha*nx + beta
-            ny = alpha*ny + beta
-            X.append(nx)
-            Y.append(ny)
-        else:
-            X.append(x)
-            Y.append(y)
-        C.append(c)
 
-        if cap is not None and i+x.shape[0] > cap and not shuffle:
-            break
+    carry_on = True
+    while carry_on:
+        for x, c, y, indiv, date in dataloader:
+            i+=x.shape[0]
+            if normal:
+                if mean is None and std is None:
+                    mean, std = get_normal_stats(x)
+                nx = normalize(x, mean, std)
+                ny = normalize(y, mean, std)
+                nx = alpha*nx + beta
+                ny = alpha*ny + beta
+                X.append(nx)
+                Y.append(ny)
+            else:
+                X.append(x)
+                Y.append(y)
+            C.append(c)
 
-    if shuffle:
-        idx = np.random.permutation(len(X))
-        X, Y, C = [X[i] for i in idx], [Y[i] for i in idx], [C[i] for i in idx]
-        if cap:
-            X, Y, C = X[:cap], Y[:cap], C[:cap]
+            if cap is not None and i+x.shape[0] > cap:
+                carry_on = True
+                break
+        if cap is None or i>= cap:
+            carry_on = False
+
     if do_context:
         return torch.concat(X), torch.concat(Y), torch.concat(C)
 
@@ -147,6 +147,8 @@ def text_list(L):
         return [L]
     
 def set_seed(seed):
+    if seed == "None":
+        seed =  None
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     np.random.seed(seed)

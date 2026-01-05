@@ -5,7 +5,7 @@ import torch
 import copy
 import shutil
 
-from .utils import append_in_dict
+from timetensor.utils import append_in_dict
 
 class Client:
     """node in a federated setting"""
@@ -150,7 +150,7 @@ class DefaultLocalServer():
     def compute_epoch(self):
         """computes one training epoch"""
         loader = self.client.dataloaders["train"]
-        for X_batch, context_batch, y_batch in loader:
+        for X_batch, context_batch, y_batch, indiv, date in loader:
             #update learner model with 1 step
             loss = self.learner.compute_step(X_batch, context_batch, y_batch)
         return self.validate()
