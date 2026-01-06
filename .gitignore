@@ -5,8 +5,6 @@ __pycache__/
 *.pt
 *.egg-info
 hydra_dir.txt
-saved/
-scripts/
 model.safetensors
 
 configs/data/*
@@ -19,3 +17,6 @@ configs/model/*
 configs/normalization/*
 !configs/normalization/cmIN.yaml
 !configs/normalization/instance.yaml
+
+script_outputs/
+temp_scripts/

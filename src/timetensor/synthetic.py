@@ -72,7 +72,7 @@ class bipartite_population:
         T = np.linspace(0, dates, dates)
         data = np.array([user.get_data(T) for user in self.users["cluster1"]] + [user.get_data(T) for user in self.users["cluster2"]])
         df = pd.DataFrame(data.T)
-        df.columns = range(df.shape[1])
+        df.columns = [f"user_{k}" for k in range(df.shape[1])]
         return df
 
 

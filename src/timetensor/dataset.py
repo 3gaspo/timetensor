@@ -318,7 +318,7 @@ def fetch_csv(data_path, data_name, context_cols=None, drop=None):
     datetimes = list(df.index)
     if drop:
         drop = drop.split(";")
-        drop = [int(idx) for idx in drop]
+        drop = [f"user_{int(idx)}" for idx in drop]
         values_df = values_df.drop(columns=drop)
         values_df.columns = [f"user_{k}" for k in range(values_df.shape[1])]
     return values_df, context_df, datetimes
@@ -741,7 +741,7 @@ def get_sizes(loaders_dict, str_info=False):
         return shape, shape_str, batch_str
 
 
-def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, clusters=None, aggregate=True, seed=None, save=False, shuffle_eval=False, fetch_cluster=None, random_eval=False, do_nodes=True):
+def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, aggregate=True, seed=None, save=False, shuffle_eval=False, fetch_cluster=None, random_eval=False, do_nodes=True):
     """returns loaders dict and stats dicts"""
     
     set_seed(seed)
@@ -751,13 +751,13 @@ def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, c
         save_path = data_path
     else:
         save_path = None
-    if clusters is not None:
-        cluster_path = data_path + clusters + "/"
+    if splits["clusters"] is not None:
+        cluster_path = data_path + splits["clusters"] + "/"
         if save:
-            save_path += clusters + "/" 
+            save_path += splits["clusters"] + "/" 
 
     nodes_stats_dict = {}
-    if (clusters is not None) and (subsets["cluster"] is None): #clustered splits
+    if (splits["clusters"] is not None) and (subsets["cluster"] is None): #clustered splits
         cluster_names = [name for name in os.listdir(cluster_path) if name[-3:]==".pt"]
         loaders_dicts = []
         for k, cluster_name in enumerate(cluster_names):

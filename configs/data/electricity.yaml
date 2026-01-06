@@ -3,10 +3,6 @@ path: ../datasets/electricity/
 context_cols:
 normalize: False
 
-clustering:
-  clusters:
-  n_clusters: 3
-
 splits:
   indiv_split: 0.8
   date_splits: 0.6;0.2;0.2
@@ -16,6 +12,7 @@ splits:
   remove_train_cte: True
   remove_eval_cte: True
   drop_users: 57;106;127;182;298
+  clusters:
 
 subsets:
   mode: dates

@@ -26,13 +26,7 @@ fl:
 load:
   rebuild: False
   example: False
-  replot: False
-  heterogeneity: False
-  clusters: False
-  logs: False
   shapes: False
-  windows: False
-  distances: False
 
 misc:
   seed: 1
