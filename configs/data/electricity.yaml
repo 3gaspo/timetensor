@@ -8,6 +8,7 @@ splits:
   date_splits: 0.6;0.2;0.2
   idx_mode: individuals
   context_by_individuals: True
+  return_all_individuals: False
   reshuffle: True
   remove_train_cte: True
   remove_eval_cte: True
