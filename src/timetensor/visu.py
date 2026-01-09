@@ -50,7 +50,7 @@ def plot_example(x, y, path="", name="example.pdf", title="Example", axis=True, 
 
 def plot_named_example(path, name):
     x, c, y, i, d  = fetch_example_data(path, name)
-    plot_example(x[0].cpu().detach().tolist(), y[0].cpu().detach().tolist(), path + f"/{name}/", f"example.pdf", "Example")
+    plot_example(x[0].cpu().detach().tolist(), y[0].cpu().detach().tolist(), path + f"/{name}/", f"example.pdf", f"Example window (user {i} date {d})")
 
 
 def plot_pred(x, y, pred, path="", name="prediction.pdf", title="Predictions", axis=True, show=False):
@@ -368,7 +368,7 @@ def get_boxplots(dir_name, file_name, n_paths, col="Test MSE", save_path=None, s
 
 def plot_weights(model, save_dir, save_name):
     """plotting weights scripts"""
-    model_name = model.name
+    model_name = model.model_name
     if model_name in ["linear", "sklinear"]:
         if model_name == "sklinear":
             weights = model.reg.coef_
@@ -382,16 +382,6 @@ def plot_weights(model, save_dir, save_name):
         plot_weights_(linear_weights, save_dir + "plots/", name="season_weights.pdf", title=f'{save_name} seasonal weights')
         plot_weights_(season_weights, save_dir + "plots/", name="trend_weights.pdf", title=f'{save_name} trend weights')
     
-    if model.does_residual:
-        residual_weights = model.fc.weight.detach().cpu().numpy()
-        
-        horizon, dim = model.horizon, model.dim
-        mask = np.zeros((horizon*dim, (2+horizon)*dim))
-        for d in range(dim):
-            for h in range(horizon):
-                mask[d * horizon + h, d * (2 + horizon) + 2 + h] = 1.0 # skip mu,std
-        plot_weights_(residual_weights - mask, save_dir, name="residual_weights.pdf", title=f'{save_name} residual weights')
-        #TODO (trouver layer residual dans model)
 
 def plot_expe(losses_path, eval_freq=10, names=None, save_path=None, lr=None, bs=None, epochs=None):
     """plots losses for list of experiments in path"""

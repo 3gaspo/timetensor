@@ -781,7 +781,7 @@ def get_sizes(loaders_dict, str_info=False):
         return shape, shape_str, batch_str
 
 
-def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, aggregate=True, seed=None, save=False, shuffle_eval=False, cluster_ids=None, random_eval=False, do_nodes=True):
+def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, aggregate=True, seed=None, save=False, shuffle_eval=False, cluster_ids=None, random_eval=False, do_nodes=False):
     """returns loaders dict and stats dicts"""
     
     set_seed(seed)

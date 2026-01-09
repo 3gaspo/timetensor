@@ -1,9 +1,9 @@
 training:
   init:
   freeze_core: False
-  loss: NMSE
+  loss: nMSE
   bs: 256
-  lr: 0.00001
+  lr: 1e-5
   epochs: 1000
   eval_freq: 100
   print_freq: 100

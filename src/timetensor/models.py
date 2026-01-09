@@ -15,7 +15,7 @@ class Persistence(nn.Module):
     """Repeats last value"""
     def __init__(self, horizon):
         super().__init__()
-        self.name = "persistence"
+        self.model_name, self.model_type = "persistence", "pytorch"
         self.horizon = horizon
     def forward(self, x):
         past_values = x[:, :, -1:] # (B, dim, 1)
@@ -26,7 +26,7 @@ class Expected(nn.Module):
     """Repeats lookback mean"""
     def __init__(self, horizon):
         super().__init__()
-        self.name = "expected"
+        self.model_name, self.model_type = "expected", "pytorch"
         self.horizon = horizon
     def forward(self, x):
         mean = x.mean(dim=-1, keepdim=True).detach()
@@ -37,7 +37,7 @@ class Repeat(nn.Module):
     """Repeats last segment of horizon size"""
     def __init__(self, horizon):
         super().__init__()
-        self.name = "repeat"
+        self.model_name, self.model_type = "repeat", "pytorch"
         self.horizon = horizon
     def forward(self, x):
         output = x[:, :, -self.horizon:] # (B, dim, horizon)
@@ -47,7 +47,7 @@ class Lookback(nn.Module):
     """Repeats segment of horizon size starting at idx"""
     def __init__(self, horizon, idx):
         super().__init__()
-        self.name = "lookback"
+        self.model_name, self.model_type = "lookback", "pytorch"
         self.horizon = horizon
         self.idx  = idx
     def forward(self, x):
@@ -58,7 +58,7 @@ class Linear(nn.Module):
     """Linear layer over lookback"""
     def __init__(self, lags, dim, horizon):
         super().__init__()
-        self.name = "linear"
+        self.model_name, self.model_type = "linear", "pytorch"
         self.lags, self.dim, self.horizon  = lags, dim, horizon
         self.fc = nn.Linear(lags * dim, horizon * dim)
     def forward(self, x):
@@ -72,7 +72,7 @@ class LinearPeriod(nn.Module):
     """Linear layer over specific period"""
     def __init__(self, lags, dim, horizon, period):
         super().__init__()
-        self.name = "period"
+        self.model_name, self.model_type = "period", "pytorch"
         self.lags, self.dim, self.horizon  = lags, dim, horizon
         self.period = period
 
@@ -90,7 +90,7 @@ class LinearPeriod(nn.Module):
 class Sklinear():
     """Scikit learn closed-form linear regression"""
     def __init__(self, norm_name=False, dim=0, eps=1e-8, **kwargs):
-        self.name = "sklinear"
+        self.model_name, self.model_type = "sklinear", "scikit-learn"
         self.reg = LinearRegression()
         self.norm_name = norm_name
         self.dim = dim
@@ -303,7 +303,7 @@ class ConstantModel(nn.Module):
 ## Loading model
 
 def model_selector(model_name, lags, dim, horizon, **kwargs):
-    model_type, do_context = "pytorch", False
+    do_context = False
     if model_name == "persistence":
         model = Persistence(horizon)
     elif model_name == "repeat":
@@ -318,20 +318,22 @@ def model_selector(model_name, lags, dim, horizon, **kwargs):
          model = LinearPeriod(lags, dim, horizon, kwargs.get("period", horizon))
     elif model_name == "DLinear":
         model = DLinear(lags, dim, horizon, kwargs.get("kernel_size",25))
-        model.name = "DLinear"
+        model.model_name = "DLinear"
+        model.model_type = "pytorch"
     elif model_name == "sklinear":
         model = Sklinear(**kwargs)
-        model_type = "scikit-learn"
     elif model_name == "PatchTST":
         model = PatchTST(lags, horizon)
-        model.name = "PatchTST"
+        model.model_name = "PatchTST"
+        model.model_type = "pytorch"
     elif model_name == "chronos":
         model = Chronos(horizon)
-        model.name = "chronos"
+        model.model_name = "chronos"
+        model.model_type = "pytorch"
         do_context = True
     else:
         raise ValueError(f"Model name not recognized : {model_name}")
-    return model, do_context, model_type
+    return model, do_context
 
 def normalization_selector(model, norm_name, dim, **kwargs):
     if norm_name is None or norm_name == "None":
@@ -360,18 +362,18 @@ def normalization_selector(model, norm_name, dim, **kwargs):
         raise ValueError(f"Normalization not recognized : {norm_name}")
     return model
 
-def load_model(model_name, shape, norm_name=None, init_path=None, cpu=False, do_constants=True, **kwargs):
+def load_model(model_name, shape, norm_name=None, init_path=None, do_constants=True, cpu=False, **kwargs):
     """loads models from str model name"""
     lags, dim, horizon = shape[0], shape[1], shape[2]
     
-    model, do_context, model_type = model_selector(model_name, lags, dim, horizon, **kwargs) #model architecture
-    if model_type == "pytorch": 
+    model, do_context = model_selector(model_name, lags, dim, horizon, **kwargs) #model architecture
+    if model.model_type == "pytorch": 
         model = ContextModel(model, do_context) #allow context in call input
         model = normalization_selector(model, norm_name, dim, **kwargs)
-        model = ConstantModel(model, horizon, kwargs.get(do_constants=False))
+        model = ConstantModel(model, horizon, kwargs.get(do_constants))
 
     #init
-    if init_path is not None and model_type == "pytorch":
+    if init_path is not None and model.model_type == "pytorch":
         if cpu:
             weights = torch.load(init_path, map_location=torch.device('cpu'))
         else:
@@ -658,6 +660,51 @@ class GRevIN(DefaultNorm):
                 raise ValueError(f"Unknown freeze group: {g!r}")
 
         return self
+
+    def get_params(self, c: torch.Tensor | int | None = None, clamp: bool = True):
+        """
+        Return effective parameters (a,b,c,d, alpha,beta,gamma,nu).
+
+        - If c is None: returns shared parameters shaped (1, dim, 1)
+        - If c is an int: returns that cluster's parameters shaped (1, dim, 1)
+        - If c is a tensor: returns per-sample parameters shaped (B, dim, 1)
+
+        Notes:
+        - a,b,c,d are clamped to [0,1] if clamp=True (matches forward-time behavior)
+        - if tie_revin=True, returns tied (c=a, d=b) and effective (alpha,beta) implied by (gamma,nu)
+        """
+        if c is None:
+            cluster = None
+        elif isinstance(c, int):
+            cluster = torch.tensor([c], device=self.gamma.device, dtype=torch.long)
+        else:
+            cluster = self._parse_cluster(c)
+
+        a, b, cc, d, gamma, nu, alpha, beta = self._select_params(cluster)
+
+        if not clamp:
+            # reconstruct unclamped versions for the shared case only
+            if cluster is None:
+                a = self.a.expand(1, -1, -1)
+                b = self.b.expand(1, -1, -1)
+                if self.tie_revin:
+                    cc, d = a, b
+                else:
+                    cc = self.c.expand(1, -1, -1)
+                    d = self.d.expand(1, -1, -1)
+
+        if self.tie_revin:
+            gamma_safe = gamma.clamp_min(self.clamp_gamma_eps)
+            alpha = 1.0 / gamma_safe
+            beta = -nu / gamma_safe
+            cc, d = a, b
+
+        return {
+            "a": a, "b": b, "c": cc, "d": d,
+            "alpha": alpha, "beta": beta,
+            "gamma": gamma, "nu": nu,
+        }
+
 
     # ---------- norm / denorm ----------
 
