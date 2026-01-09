@@ -2,94 +2,14 @@ import torch
 import torch.nn as nn
 import numpy as np
 
+from .utils import get_normal_stats
+
+from sklearn.linear_model import LinearRegression
 from .sota.patchtst.patch_tst import PatchTST
 from .sota.dlinear import DLinear
 from .sota.chronos2.chronos import Chronos
-from .utils import get_normal_stats
-from sklearn.linear_model import LinearRegression
 
-
-## Models
-
-class ConstantModel(nn.Module):
-    """Wrapper for model, repeats value in case of constant window"""
-    def __init__(self, model, horizon):
-        super().__init__()
-        self.model = model
-        self.does_constant = True
-        self.horizon = horizon
-
-    def forward(self, x, c=None): #x : (B, dim, lags)
-        std = x.std(dim=-1) # (B, dim)
-        non_cte_mask = (std > 0).any(dim=1) # (B)
-        last_values = x[:, :, -1].unsqueeze(2) # (B, dim, 1)
-        y = last_values.repeat(1, 1, self.horizon) # (B, dim, horizon)
-        if non_cte_mask.any():
-            x_nc = x[non_cte_mask]
-            if c is not None:
-                c_nc = c[non_cte_mask]
-            else:
-                c_nc = None
-            y_nc = self.model(x_nc, c=c_nc)
-            y[non_cte_mask] = y_nc
-        return y
-    
-    def __getattr__(self, name): # only called if attribute not found normally
-        try:
-            return super().__getattr__(name)
-        except AttributeError:
-            pass
-        if hasattr(self.model, name):
-            return getattr(self.model, name)
-        else:
-            raise AttributeError(f"{type(self).__name__} has no attribute {name!r}")
-
-class ResidualModel(nn.Module):
-    """Wrapper for model, sums linear(mu,std) and residual=model(x)"""
-    def __init__(self, model, dim, horizon):
-        super().__init__()
-        self.model = model
-        self.does_residual = True
-
-        self.dim, self.horizon = dim, horizon
-        self.fc = nn.Linear((2+self.horizon) * self.dim, self.horizon * self.dim)
-        # --- custom init ---
-        with torch.no_grad():
-            # Zero all weights and biases
-            self.fc.weight.zero_()
-            self.fc.bias.zero_()
-            # Identity mapping for latent part
-            # For each (dim, horizon), connect latent -> pred directly
-            for d in range(dim):
-                for h in range(horizon):
-                    out_idx = d * horizon + h
-                    in_idx = d * (2 + horizon) + 2 + h  # skip mu,std
-                    self.fc.weight[out_idx, in_idx] = 1.0
-
-    def forward(self, x, c=None): #x : (B, dim, lags)
-        batch_size = x.shape[0]
-        mu = x.mean(dim=-1, keepdim=True).detach() #(B, dim, 1)
-        std =  x.std(dim=-1, keepdim=True).detach() #(B, dim, 1)
-
-        latent = self.model(x, c) #(B, dim, horizon)
-        # stats = torch.cat((mu,std), dim=-1) # (B, dim, 2)
-        # features = torch.cat((stats,latent), dim=-1) # (B, dim, 2+horizon)
-        features = torch.cat((mu, std, latent), dim=-1)   # (B, dim, 2+horizon)
-        features = features.reshape(batch_size, self.dim * (2 + self.horizon)) 
-        pred = self.fc(features) # (B, dim * horizon)
-        pred = pred.view(batch_size, self.dim, self.horizon) #(B, dim, horizon)
-
-        return pred
-     
-    def __getattr__(self, name): # only called if attribute not found normally
-        try:
-            return super().__getattr__(name)
-        except AttributeError:
-            pass
-        if hasattr(self.model, name):
-            return getattr(self.model, name)
-        else:
-            raise AttributeError(f"{type(self).__name__} has no attribute {name!r}")
+## Baselines
 
 class Persistence(nn.Module):
     """Repeats last value"""
@@ -97,8 +17,7 @@ class Persistence(nn.Module):
         super().__init__()
         self.name = "persistence"
         self.horizon = horizon
-    def forward(self, x, context=None):
-        #past_values = x[:, :, -1].unsqueeze(2) # (B, dim, 1)
+    def forward(self, x):
         past_values = x[:, :, -1:] # (B, dim, 1)
         output = past_values.repeat(1, 1, self.horizon) # (B, dim, horizon)
         return output
@@ -109,7 +28,7 @@ class Expected(nn.Module):
         super().__init__()
         self.name = "expected"
         self.horizon = horizon
-    def forward(self, x, context=None):
+    def forward(self, x):
         mean = x.mean(dim=-1, keepdim=True).detach()
         output = mean.repeat(1, 1, self.horizon) # (B, dim, horizon)
         return output
@@ -120,7 +39,7 @@ class Repeat(nn.Module):
         super().__init__()
         self.name = "repeat"
         self.horizon = horizon
-    def forward(self, x, context=None):
+    def forward(self, x):
         output = x[:, :, -self.horizon:] # (B, dim, horizon)
         return output
     
@@ -131,7 +50,7 @@ class Lookback(nn.Module):
         self.name = "lookback"
         self.horizon = horizon
         self.idx  = idx
-    def forward(self, x, context=None):
+    def forward(self, x):
         output = x[:, :, self.idx:self.idx+self.horizon] # (B, dim, horizon)
         return output
 
@@ -142,34 +61,31 @@ class Linear(nn.Module):
         self.name = "linear"
         self.lags, self.dim, self.horizon  = lags, dim, horizon
         self.fc = nn.Linear(lags * dim, horizon * dim)
-    def forward(self, x, context=None):
+    def forward(self, x):
         batch_size = x.shape[0]
         inpt = x.view(batch_size, self.lags * self.dim) # (B, lag*dim)
         output = self.fc(inpt) # (B, horizon*dim)
         output = output.view(batch_size, self.dim, self.horizon) # (B, dim, horizon)
         return output
 
-# class Weekly(nn.Module):
-#     """Linear layer over subset indexes of lookback windows"""
-#     def __init__(self, lags, dim, horizon):
-#         super().__init__()
-#         self.name = "weekly"
-#         self.dim, self.horizon  = dim, horizon
-#         indexes=list(range(horizon))
-#         idx = 7*24
-#         while idx+horizon<=lags:
-#             indexes += [idx + k for k in range(horizon)]
-#             idx += 7*24
-#         indexes += list(range(lags-1, lags-horizon-1, -1))
-#         self.indexes = np.unique(indexes)
-#         self.fc = nn.Linear(len(indexes) * dim, horizon * dim)
-#     def forward(self, x, context=None): # (B, dim, lag)
-#         batch_size = x.shape[0]
-#         subx = x[:, :, self.indexes]
-#         inpt = subx.view(batch_size, self.indexes * self.dim) # (B, lag*dim)
-#         output = self.fc(inpt) # (B, horizon*dim)
-#         output = output.view(batch_size, self.dim, self.horizon) # (B, dim, horizon)
-#         return output
+class LinearPeriod(nn.Module):
+    """Linear layer over specific period"""
+    def __init__(self, lags, dim, horizon, period):
+        super().__init__()
+        self.name = "period"
+        self.lags, self.dim, self.horizon  = lags, dim, horizon
+        self.period = period
+
+        self.idx = [t for t in range(lags) if (t % period) in range(self.horizon)]
+        self.fc = nn.Linear(len(idx) * dim, horizon * dim)
+
+    def forward(self, x): #(B, dim, lag)
+        batch_size = x.shape[0]
+        subx = x[:, :, self.idx]
+        inpt = subx.view(batch_size, len(self.idx) * self.dim) # (B, idxs*dim)
+        output = self.fc(inpt) # (B, horizon*dim)
+        output = output.view(batch_size, self.dim, self.horizon) # (B, dim, horizon)
+        return output
 
 class Sklinear():
     """Scikit learn closed-form linear regression"""
@@ -179,9 +95,10 @@ class Sklinear():
         self.norm_name = norm_name
         self.dim = dim
         self.eps = eps
+
     def norm(self, X, mean, std):
         if self.norm_name == "instance":
-            X = (X - mean) / (std+self.eps)
+            X = (X - mean) / (std + self.eps)
         elif self.norm_name == "relative":
             mean = torch.abs(mean)
             X = X / (mean + self.eps)
@@ -201,14 +118,13 @@ class Sklinear():
         mean, std = get_normal_stats(Xtrain)
         Xtrain, ytrain = self.norm(Xtrain, mean, std), self.norm(ytrain, mean, std)
         self.reg.fit(Xtrain, ytrain)
-    def __call__(self, X, context=None):
+    def __call__(self, X):
         mean, std = get_normal_stats(X)
         X = self.norm(X, mean, std)
         pred = torch.tensor(self.reg.predict(X.cpu()))
         pred = pred.unsqueeze(dim=1)
         pred = self.denorm(pred, mean.cpu(), std.cpu())
         return pred
-
 
 
 ## Normalizations
@@ -261,9 +177,9 @@ class MinMax(DefaultNorm):
     def __init__(self, model, min, max, latent=False, **kwargs):
         """Normalizes in range [0,1]"""
         super().__init__(model, latent)
-        self.norm_name = "minmax"
+        self.norm_name = "min_max"
         self.min, self.max = min, max
-        assert torch.all((self.max - self.min) >= 0)
+        assert torch.all((self.max - self.min) > 0)
     def norm(self, x):
         x = (x - self.min) / (self.max - self.min) # (B, dim, lags)
         return x
@@ -320,210 +236,74 @@ class RevIN(DefaultNorm):
         output = self.denorm(pred) #(B, dim, horizon)
         return output
     
-class SoftmIN(DefaultNorm):
-    def __init__(self, model, dim, eps=1e-8, start=True, **kwargs):
-        """Flexible RevIn module"""
-        super().__init__(model)
-        self.norm_name = "softmin"
-        self.dim, self.eps = dim, eps
 
-        #flex in
-        if start:
-            self.nu = nn.Parameter(torch.ones(1, dim, 1))  #scale
-            self.eta = nn.Parameter(torch.ones(1, dim, 1))  #shift
+## Models wrappers
+
+class ContextModel(nn.Module):
+    """Wrapper for model to enable optional context in forward"""
+    def __init__(self, model, do_context=False):
+        super().__init__()
+        self.model = model
+        self.do_context = do_context
+
+    def forward(self, x, c=None): #x : (B, dim, lags)
+        if self.do_context and c is not None:
+            return self.model(x, c)
         else:
-            self.nu = nn.Parameter(torch.zeros(1, dim, 1))  #scale
-            self.eta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
-        #input modulations
-        self.gamma = nn.Parameter(torch.ones(1, dim, 1)) #scale
-        self.omega = nn.Parameter(torch.zeros(1, dim, 1)) #shift
-
-        #output modulations
-        self.alpha = nn.Parameter(torch.ones(1, dim, 1))  #scale
-        self.beta = nn.Parameter(torch.zeros(1, dim, 1))  #shift
-
-        #activations
-        self.sig1 = nn.Sigmoid()
-        self.sig2 = nn.Sigmoid()
-
-    def norm(self, x):
-        self.mu, self.std = get_normal_stats(x)
-        self.offset = self.sig1(self.nu)*self.mu
-        self.scale = 1 + self.sig2(self.eta)*( 1/(self.std+self.eps) - 1)
-        x = (x-self.offset) * self.scale # (B, dim, lags)
-        x = x * self.gamma + self.omega
-        return x
-    def denorm(self, y):
-        y = (y - self.omega) / self.gamma 
-        y = y / self.scale + self.offset
-        y = y * self.alpha + self.beta
-        return y
-    def forward(self, x, c=None): #(B, dim, lags)
-        x  = self.norm(x) #(B, dim, lags)
-        pred = self.model(x, c) #(B, dim, horizon)
-        output = self.denorm(pred) #(B, dim, horizon)
-        return output
+            return self.model(x)
+        return
     
-
-class mIN(DefaultNorm):
-    def __init__(self, model, dim, eps=1e-8, init_alpha=True, init_beta=True, fixed_alpha=False, fixed_beta=False, use_gamma=True, inverse_gamma=True, latent=False,**kwargs):
-        """mIN: Modulated Instance Normalization"""
-        super().__init__(model, latent)
-        self.norm_name = "mIN"
-        self.dim, self.eps = dim, eps
-
-        if fixed_alpha:
-            if init_alpha:
-                self.register_buffer("alpha", torch.full((1, self.dim, 1), init_alpha))
-            else:
-                self.register_buffer("alpha", torch.ones(1, self.dim, 1))
+    def __getattr__(self, name): # only called if attribute not found normally
+        try:
+            return super().__getattr__(name)
+        except AttributeError:
+            pass
+        if hasattr(self.model, name):
+            return getattr(self.model, name)
         else:
-            if init_alpha:
-                self.alpha = nn.Parameter(torch.full((1, self.dim, 1), init_alpha))
-            else:
-                self.alpha = nn.Parameter(torch.ones(1, self.dim, 1))  #scale
-        if fixed_beta:
-            if init_beta:
-                self.register_buffer("beta", torch.full((1, self.dim, 1), init_beta))
-            else:
-                self.register_buffer("beta", torch.zeros((1, self.dim, 1)))
-        else:
-            if init_beta:
-                self.beta = nn.Parameter(torch.full((1, self.dim, 1), init_beta))
-            else:
-                self.beta = nn.Parameter(torch.zeros(1, self.dim, 1))  #shift
+            raise AttributeError(f"{type(self).__name__} has no attribute {name!r}")
 
-        self.gamma =  nn.Parameter(torch.ones(1, self.dim, 1))
-        self.omega = nn.Parameter(torch.zeros(1, self.dim, 1))
-        self.use_gamma, self.inverse_gamma = use_gamma, inverse_gamma
-        if self.inverse_gamma:
-            assert self.use_gamma
-    
-    def norm(self, x):
-        self.mu, self.std = get_normal_stats(x)
-        x = (x - self.mu) / (self.std+self.eps)
-        if self.use_gamma:
-            x = self.gamma * x + self.omega
-        return x
-    def denorm(self, y):
-        if self.inverse_gamma:
-            y = (y - self.omega) / self.gamma 
-        y = y * self.alpha + self.beta
-        if self.latent:
-            return y
-        y = y * (self.std+self.eps) + self.mu 
-        return y
-    def forward(self, x, c=None): #(B, dim, lags)
-        x  = self.norm(x) #(B, dim, lags)
-        pred = self.model(x, c) #(B, dim, horizon)
-        output = self.denorm(pred) #(B, dim, horizon)
-        return output
+class ConstantModel(nn.Module):
+    """Wrapper for model, repeats value in case of constant window"""
+    def __init__(self, model, horizon, do_constant=False):
+        super().__init__()
+        self.model = model
+        self.do_constant = do_constant
+        self.horizon = horizon
 
-class cmIN(DefaultNorm):
-    def __init__(self, model, dim, n_clusters=None, eps=1e-8, init_alpha=False, init_beta=False, fixed_alpha=False, fixed_beta=False, use_gamma=False, inverse_gamma=False, latent=False, **kwargs):
-        """clustered mIN"""
-        # super().__init__(model, dim, eps, use_gamma=use_gamma, inverse_gamma=inverse_gamma, latent=latent, **kwargs)
-        super().__init__(model, latent)
-        self.norm_name="cmIN"
-        self.dim, self.eps = dim, eps
-        if n_clusters is None:
-            self.n_clusters = len(init_alpha)
-        else:
-            self.n_clusters = n_clusters
-
-        if init_alpha is not False and init_alpha is not None:
-            self.init_alphas = [float(value) for value in init_alpha]
-        else:
-            self.init_alphas = [1.0 for _ in range(n_clusters)]
-        if init_beta is not False and init_beta is not None:
-            self.init_betas = [float(value) for value in init_beta]
-        else:
-            self.init_betas = [0.0 for _ in range(n_clusters)]
-
-        self.fixed_alpha = fixed_alpha
-        self.register_buffer("alpha_out", torch.ones(1, self.dim, 1))
-        if self.fixed_alpha:
-            for k in range(len(self.init_alphas)):
-                self.register_buffer(f"alpha_{k}", torch.full((1, self.dim, 1), self.init_alphas[k]))
-        else:
-            self.alphas = nn.ParameterList([nn.Parameter(torch.full((1, self.dim, 1), self.init_alphas[k])) for k in range(len(self.init_alphas))])
-        
-        self.fixed_beta = fixed_beta
-        self.register_buffer("beta_out", torch.zeros(1, self.dim, 1))
-        if self.fixed_beta:
-            for k in range(len(self.init_betas)):
-                self.register_buffer(f"beta_{k}", torch.full((1, self.dim, 1), self.init_betas[k]))
-        else:
-            self.betas = nn.ParameterList([nn.Parameter(torch.full((1, self.dim, 1), self.init_betas[k])) for k in range(len(self.init_betas))])
-
-        self.register_buffer("gamma_out", torch.ones(1, self.dim, 1))
-        self.gammas = nn.ParameterList([nn.Parameter(torch.ones(1, self.dim, 1)) for _ in range(n_clusters)])
-        # self.gamma =  nn.Parameter(torch.ones(1, self.dim, 1))
-        self.register_buffer("omega_out", torch.zeros(1, self.dim, 1))
-        self.omegas = nn.ParameterList([nn.Parameter(torch.zeros(1, self.dim, 1)) for _ in range(n_clusters)])
-        # self.omega = nn.Parameter(torch.zeros(1, self.dim, 1))
-        self.use_gamma, self.inverse_gamma = use_gamma, inverse_gamma
-        if self.inverse_gamma:
-            assert self.use_gamma
-
-    def get_modulations(self, cluster):
-        alpha, beta, gamma, omega = [], [], [], []
-        for k in cluster:
-            idx = int(k.item())
-            if k >= self.n_clusters:
-                alpha.append(getattr(self, f"alpha_out"))
-                beta.append(getattr(self, f"beta_out"))
-                gamma.append(getattr(self, f"gamma_out"))
-                omega.append(getattr(self, f"omega_out"))
-            else:
-                if self.fixed_alpha:
-                    alpha.append(getattr(self, f"alpha_{idx}"))
+    def forward(self, x, c=None): #x : (B, dim, lags)
+        if self.do_constant:
+            std = x.std(dim=-1) # (B, dim)
+            non_cte_mask = (std > 0).any(dim=1) # (B)
+            last_values = x[:, :, -1].unsqueeze(2) # (B, dim, 1)
+            y = last_values.repeat(1, 1, self.horizon) # (B, dim, horizon)
+            if non_cte_mask.any():
+                x_nc = x[non_cte_mask]
+                if c is not None:
+                    c_nc = c[non_cte_mask]
                 else:
-                    alpha.append(self.alphas[idx])
-                if self.fixed_beta:
-                    beta.append(getattr(self, f"beta_{idx}"))
-                else:
-                    beta.append(self.betas[idx])
-                gamma.append(self.gammas[idx])
-                omega.append(self.omegas[idx])
-        alpha, beta, gamma, omega = torch.cat(alpha), torch.cat(beta), torch.cat(gamma), torch.cat(omega)
-        return alpha, beta, gamma, omega
-
-    def norm(self, x, cluster):
-        self.mu, self.std = get_normal_stats(x)
-        alpha, beta, gamma, omega = self.get_modulations(cluster)
-        x = (x - self.mu) / (self.std+self.eps)
-        if self.use_gamma:
-            # x = self.gamma * x + self.omega
-            x = gamma * x + omega
-        return x
-    def denorm(self, y, cluster):
-        alpha, beta, gamma, omega = self.get_modulations(cluster)
-        if self.inverse_gamma:
-            # y = (y - self.omega) / self.gamma 
-            y = (y - omega) / gamma 
-        y = y * alpha + beta
-        if self.latent:
-            return y
-        y = y * (self.std+self.eps) + self.mu 
+                    c_nc = None
+                y_nc = self.model(x_nc, c=c_nc)
+                y[non_cte_mask] = y_nc
+        else:
+            y = self.model(x, c)
         return y
-    def forward(self, x, c=None): #(B, dim, lags)
-        assert c is not None
-        x  = self.norm(x, c[:, 0, 0]) #(B, dim, lags)
-        pred = self.model(x, c) #(B, dim, horizon)
-        output = self.denorm(pred, c[:, 0, 0]) #(B, dim, horizon)
-        return output
-
-######
-
-def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=False, constants=True, residuals=False, stats_dict=None, nodes_stats_dict=None, cpu=False, logger=None, verbose=1, **kwargs):
-    """loads models from str model name"""
-    lags, dim, horizon = shape[0], shape[1], shape[2]
     
-    if (norm_name is not None) and ("mIN" in norm_name):
-        format_min_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger)
+    def __getattr__(self, name): # only called if attribute not found normally
+        try:
+            return super().__getattr__(name)
+        except AttributeError:
+            pass
+        if hasattr(self.model, name):
+            return getattr(self.model, name)
+        else:
+            raise AttributeError(f"{type(self).__name__} has no attribute {name!r}")
 
-    #model
+
+## Loading model
+
+def model_selector(model_name, lags, dim, horizon, **kwargs):
+    model_type, do_context = "pytorch", False
     if model_name == "persistence":
         model = Persistence(horizon)
     elif model_name == "repeat":
@@ -534,102 +314,522 @@ def load_model(model_name, shape, norm_name=None, init_path=None, freeze_core=Fa
         model = Expected(horizon)
     elif model_name == "linear":
         model = Linear(lags, dim, horizon)
-    # elif model_name == "weekly":
-    #     model = Weekly(kwargs.get("indexes"), dim, horizon)
+    elif model_name == "period":
+         model = LinearPeriod(lags, dim, horizon, kwargs.get("period", horizon))
     elif model_name == "DLinear":
         model = DLinear(lags, dim, horizon, kwargs.get("kernel_size",25))
         model.name = "DLinear"
     elif model_name == "sklinear":
-        model = Sklinear(norm_name, **kwargs)
+        model = Sklinear(**kwargs)
+        model_type = "scikit-learn"
     elif model_name == "PatchTST":
         model = PatchTST(lags, horizon)
         model.name = "PatchTST"
     elif model_name == "chronos":
         model = Chronos(horizon)
         model.name = "chronos"
+        do_context = True
     else:
         raise ValueError(f"Model name not recognized : {model_name}")
-    if verbose:
-        logger.info(f"Loaded {model.name}")
+    return model, do_context, model_type
 
-    #normalization
-    get_training = ((norm_name is not None) and (("mIN" in norm_name) or ("revin" in norm_name))) or (model_name not in ["persistence", "repeat", "lookback", "expected"])
-    if get_training and (norm_name is not None) and ("sk" not in model_name):
-        if norm_name == "standard":
-            model = StandardNorm(model, **kwargs)
-        elif norm_name == "instance":
-            model = InstanceNorm(model, **kwargs)
-        elif norm_name == "revin":
-            model = RevIN(model, dim, **kwargs)
-        elif norm_name == "softmin":
-            model = SoftmIN(model, dim, **kwargs)
-        elif norm_name == "mIN":
-            model = mIN(model, dim, **kwargs)
-        elif norm_name == "cmIN":
-            model = cmIN(model, dim, **kwargs)
-        else:
-            raise ValueError(f"Normalization not recognized : {norm_name}")
-    elif ("sk" not in model_name):
+def normalization_selector(model, norm_name, dim, **kwargs):
+    if norm_name is None or norm_name == "None":
         model = DefaultNorm(model)
+    elif norm_name == "standard":
+        model = StandardNorm(model, **kwargs)
+    elif norm_name == "instance":
+        model = InstanceNorm(model, **kwargs)
+    elif norm_name == "IN":
+        model = GRevIN.build_in(model, dim)
+        model.norm_name = "instance"
+    elif norm_name == "revin":
+        model = RevIN(model, dim, **kwargs)
+    elif norm_name == "RevIN":
+        model = GRevIN.build_revin(model, dim)
+        model.norm_name = "revin"
+    elif norm_name == "cmIN":
+        model = GRevIN.build_cmin(model, dim)
+        model.norm_name = "cmIN"
+    elif norm_name == "PRevIN":
+        model = GRevIN.build_ersonalized_revin(model, dim)
+        model.norm_name = "revin"
+    elif norm_name == "GRevIN":
+        model = GRevIN(model, dim, **kwargs)
+    else:
+        raise ValueError(f"Normalization not recognized : {norm_name}")
+    return model
 
-    #constants
-    if constants and ("sk" not in model_name):
-        if verbose:
-            logger.info(f"Added constant wrapper to model")
-        model = ConstantModel(model, horizon)
-    else:
-        model.does_constant = False
-    #residuals
-    if residuals and ("sk" not in model_name):
-        if verbose:
-            logger.info(f"Added residuals to model")
-        model = ResidualModel(model, dim, horizon)
-    else:
-        model.does_residual = False
-        
+def load_model(model_name, shape, norm_name=None, init_path=None, cpu=False, do_constants=True, **kwargs):
+    """loads models from str model name"""
+    lags, dim, horizon = shape[0], shape[1], shape[2]
+    
+    model, do_context, model_type = model_selector(model_name, lags, dim, horizon, **kwargs) #model architecture
+    if model_type == "pytorch": 
+        model = ContextModel(model, do_context) #allow context in call input
+        model = normalization_selector(model, norm_name, dim, **kwargs)
+        model = ConstantModel(model, horizon, kwargs.get(do_constants=False))
+
     #init
-    if init_path is not None and ("sk" not in model_name):
-        if verbose:
-            logger.info(f"Loaded model at {init_path}")
+    if init_path is not None and model_type == "pytorch":
         if cpu:
             weights = torch.load(init_path, map_location=torch.device('cpu'))
         else:
             weights = torch.load(init_path)
         model.load_state_dict(weights)
-    if freeze_core and ("sk" not in model_name):
-        if verbose:
-            logger.info(f"Froze core model")
-        for name, param in model.named_parameters():
-            if "alpha" not in name and "beta" not in name:
-                param.requires_grad = False
 
     return model
 
 
-def format_min_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger):
-    """utils methods to format model kwargs"""
-    if (norm_name is not None and "cmIN" in norm_name) and kwargs.get("n_clusters") is None and not (kwargs.get("init_alpha") or kwargs.get("init_beta")):
-        kwargs["n_clusters"] = len(nodes_stats_dict)
+# def format_min_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger):
+#     """utils methods to format model kwargs"""
+#     if (norm_name is not None and "cmIN" in norm_name) and kwargs.get("n_clusters") is None and not (kwargs.get("init_alpha") or kwargs.get("init_beta")):
+#         kwargs["n_clusters"] = len(nodes_stats_dict)
 
-    if kwargs.get("init_alpha") is True:
-        if "cmIN" in norm_name:
-            kwargs["init_alpha"] = [nodes_stats_dict[node]["train"]["alpha"] for node in nodes_stats_dict]
-            if len(kwargs["init_alpha"])<10:
-                logger.info(f"Loaded init_alphas: {kwargs['init_alpha']}")
+#     if kwargs.get("init_alpha") is True:
+#         if "cmIN" in norm_name:
+#             kwargs["init_alpha"] = [nodes_stats_dict[node]["train"]["alpha"] for node in nodes_stats_dict]
+#             if len(kwargs["init_alpha"])<10:
+#                 logger.info(f"Loaded init_alphas: {kwargs['init_alpha']}")
+#         else:
+#             if stats_dict is not None:
+#                 kwargs["init_alpha"] = stats_dict["train"]["alpha"]
+#             else:
+#                 kwargs["init_alpha"] = None
+#             logger.info(f"Loaded init_alphas: {kwargs['init_alpha']}")
+#     if kwargs.get("init_beta") is True:
+#         if "cmIN" in norm_name:
+#             kwargs["init_beta"] = [nodes_stats_dict[node]["train"]["beta"] for node in nodes_stats_dict]
+#             if len(kwargs["init_beta"])<10:
+#                 logger.info(f"Loaded init_betas: {kwargs['init_beta']}")
+#         else:
+#             if stats_dict is not None:
+#                 kwargs["init_beta"] = stats_dict["train"]["beta"]
+#             else:
+#                 kwargs["init_beta"] = None
+#             logger.info(f"Loaded init_betas: {kwargs['init_beta']}")
+
+
+## Experimental
+
+class GRevIN(DefaultNorm):
+    """
+    Generalized RevIN-style normalization with:
+      x~      = h_{a,b}(x) = (x - mu_a) * inv_sigma_b
+      x_mod   = gamma * x~ + nu
+      y_aff   = alpha * f_theta(x_mod) + beta
+      y       = h^{-1}_{c,d}(y_aff) = (1/inv_sigma_d) * y_aff + mu_c
+
+    mu_a = a*mu
+    inv_sigma_b = 1 + b*(1/(std+eps) - 1)
+
+    Changes vs your original:
+    - a,b,c,d are free Parameters and clamped to [0,1] at forward-time (no sigmoid gating).
+    - Freeze utilities for parameter groups (shared + personalized variants).
+    - Classmethods to build classical configurations using only init + freezes.
+    - Inherits DefaultNorm (keeps attribute forwarding to underlying model).
+    """
+
+    def __init__(
+        self,
+        model: nn.Module,
+        dim: int,
+        eps: float = 1e-8,
+        n_clusters: int | None = None,
+        personalize: str = "none",  # "none", "affine", "all"
+        unknown_cluster_id: int | None = None,
+        start_in: bool = True,      # init (a,b,c,d) to 1 (IN) if True else 0 (None)
+        tie_revin: bool = False,    # enforce symmetric RevIN inverse + output modulation invert
+        clamp_gamma_eps: float = 1e-6,
+        latent: str = "none", # "none", "model", "affine"
+    ):
+        super().__init__(model, latent=False)
+        assert personalize in {"none", "affine", "all"}
+        self.norm_name = "grevin"
+        self.dim = dim
+        self.eps = eps
+        self.n_clusters = n_clusters
+        self.personalize = personalize
+        self.unknown_cluster_id = unknown_cluster_id
+        self.tie_revin = tie_revin
+        self.clamp_gamma_eps = clamp_gamma_eps
+
+        def free_gate_param(init_one: bool):
+            return nn.Parameter(torch.full((1, dim, 1), 1.0 if init_one else 0.0))
+
+        # Shared (fallback / default) parameters
+        self.a = free_gate_param(start_in)
+        self.b = free_gate_param(start_in)
+        self.c = None if tie_revin else free_gate_param(start_in)
+        self.d = None if tie_revin else free_gate_param(start_in)
+
+        self.gamma = nn.Parameter(torch.ones(1, dim, 1))
+        self.nu = nn.Parameter(torch.zeros(1, dim, 1))
+
+        self.alpha = nn.Parameter(torch.ones(1, dim, 1))
+        self.beta = nn.Parameter(torch.zeros(1, dim, 1))
+
+        # Optional cluster parameters
+        self._has_clusters = n_clusters is not None and int(n_clusters) > 0
+        if self._has_clusters and personalize != "none":
+            def make_list(init_tensor: torch.Tensor):
+                return nn.ParameterList([nn.Parameter(init_tensor.clone()) for _ in range(int(n_clusters))])
+
+            if personalize in {"affine", "all"}:
+                self.gamma_k = make_list(torch.ones(1, dim, 1))
+                self.nu_k = make_list(torch.zeros(1, dim, 1))
+                self.alpha_k = make_list(torch.ones(1, dim, 1))
+                self.beta_k = make_list(torch.zeros(1, dim, 1))
+
+            if personalize == "all":
+                self.a_k = make_list(self.a.data)
+                self.b_k = make_list(self.b.data)
+                if not tie_revin:
+                    self.c_k = make_list(self.c.data)
+                    self.d_k = make_list(self.d.data)
+
+        # forward-time cache (per batch)
+        self.mu = None
+        self.std = None
+
+    # ---------- helpers ----------
+
+    def _parse_cluster(self, c):
+        if c is None:
+            return None
+        if isinstance(c, torch.Tensor):
+            if c.ndim == 1:
+                return c
+            if c.ndim == 2:
+                return c[:, 0]
+            return c[:, 0, 0]
+        return None
+
+    def _is_unknown(self, k: int):
+        if self.unknown_cluster_id is not None and k == int(self.unknown_cluster_id):
+            return True
+        if self.n_clusters is None:
+            return True
+        return k < 0 or k >= int(self.n_clusters)
+
+    def _clamp01(self, t: torch.Tensor):
+        return t.clamp(0.0, 1.0)
+
+    def _select_params(self, cluster: torch.Tensor | None):
+        # returns tensors shaped (B, C, 1)
+        B = 1 if cluster is None else int(cluster.shape[0])
+        device = self.gamma.device
+
+        def expand_shared(t: torch.Tensor):
+            return t.expand(B, -1, -1)
+
+        # shared
+        a = expand_shared(self._clamp01(self.a))
+        b = expand_shared(self._clamp01(self.b))
+        if self.tie_revin:
+            c = a
+            d = b
         else:
-            if stats_dict is not None:
-                kwargs["init_alpha"] = stats_dict["train"]["alpha"]
+            c = expand_shared(self._clamp01(self.c))
+            d = expand_shared(self._clamp01(self.d))
+
+        gamma = expand_shared(self.gamma)
+        nu = expand_shared(self.nu)
+        alpha = expand_shared(self.alpha)
+        beta = expand_shared(self.beta)
+
+        if not (self._has_clusters and self.personalize != "none" and cluster is not None):
+            return a, b, c, d, gamma, nu, alpha, beta
+
+        a_out, b_out, c_out, d_out = [], [], [], []
+        gamma_out, nu_out, alpha_out, beta_out = [], [], [], []
+
+        for ki in cluster.tolist():
+            k = int(ki)
+
+            if self._is_unknown(k):
+                a_out.append(a[:1])
+                b_out.append(b[:1])
+                c_out.append(c[:1])
+                d_out.append(d[:1])
+                gamma_out.append(gamma[:1])
+                nu_out.append(nu[:1])
+                alpha_out.append(alpha[:1])
+                beta_out.append(beta[:1])
+                continue
+
+            # affine personalization
+            if self.personalize in {"affine", "all"}:
+                gamma_out.append(self.gamma_k[k])
+                nu_out.append(self.nu_k[k])
+                alpha_out.append(self.alpha_k[k])
+                beta_out.append(self.beta_k[k])
             else:
-                kwargs["init_alpha"] = None
-            logger.info(f"Loaded init_alphas: {kwargs['init_alpha']}")
-    if kwargs.get("init_beta") is True:
-        if "cmIN" in norm_name:
-            kwargs["init_beta"] = [nodes_stats_dict[node]["train"]["beta"] for node in nodes_stats_dict]
-            if len(kwargs["init_beta"])<10:
-                logger.info(f"Loaded init_betas: {kwargs['init_beta']}")
+                gamma_out.append(gamma[:1])
+                nu_out.append(nu[:1])
+                alpha_out.append(alpha[:1])
+                beta_out.append(beta[:1])
+
+            # full personalization
+            if self.personalize == "all":
+                a_out.append(self._clamp01(self.a_k[k]))
+                b_out.append(self._clamp01(self.b_k[k]))
+                if self.tie_revin:
+                    c_out.append(self._clamp01(self.a_k[k]))
+                    d_out.append(self._clamp01(self.b_k[k]))
+                else:
+                    c_out.append(self._clamp01(self.c_k[k]))
+                    d_out.append(self._clamp01(self.d_k[k]))
+            else:
+                a_out.append(a[:1])
+                b_out.append(b[:1])
+                c_out.append(c[:1])
+                d_out.append(d[:1])
+
+        a = torch.cat(a_out, dim=0).to(device)
+        b = torch.cat(b_out, dim=0).to(device)
+        c = torch.cat(c_out, dim=0).to(device)
+        d = torch.cat(d_out, dim=0).to(device)
+        gamma = torch.cat(gamma_out, dim=0).to(device)
+        nu = torch.cat(nu_out, dim=0).to(device)
+        alpha = torch.cat(alpha_out, dim=0).to(device)
+        beta = torch.cat(beta_out, dim=0).to(device)
+
+        return a, b, c, d, gamma, nu, alpha, beta
+
+    # ---------- freeze API ----------
+
+    def freeze(self, groups: str | list[str], freeze: bool = True):
+        """
+        groups can be a string or list of strings in:
+          "ab", "cd", "gamma_nu", "alpha_beta"
+        This freezes BOTH shared and personalized variants (if present).
+        """
+        if isinstance(groups, str):
+            groups = [groups]
+
+        def set_req_grad(p, rg: bool):
+            if p is None:
+                return
+            if isinstance(p, nn.Parameter):
+                p.requires_grad_(rg)
+            elif isinstance(p, (nn.ParameterList, list, tuple)):
+                for pp in p:
+                    if pp is not None:
+                        pp.requires_grad_(rg)
+
+        rg = not freeze
+
+        for g in groups:
+            if g == "ab":
+                set_req_grad(self.a, rg)
+                set_req_grad(self.b, rg)
+                if hasattr(self, "a_k"):
+                    set_req_grad(self.a_k, rg)
+                if hasattr(self, "b_k"):
+                    set_req_grad(self.b_k, rg)
+
+            elif g == "cd":
+                if not self.tie_revin:
+                    set_req_grad(self.c, rg)
+                    set_req_grad(self.d, rg)
+                    if hasattr(self, "c_k"):
+                        set_req_grad(self.c_k, rg)
+                    if hasattr(self, "d_k"):
+                        set_req_grad(self.d_k, rg)
+
+            elif g == "gamma_nu":
+                set_req_grad(self.gamma, rg)
+                set_req_grad(self.nu, rg)
+                if hasattr(self, "gamma_k"):
+                    set_req_grad(self.gamma_k, rg)
+                if hasattr(self, "nu_k"):
+                    set_req_grad(self.nu_k, rg)
+
+            elif g == "alpha_beta":
+                set_req_grad(self.alpha, rg)
+                set_req_grad(self.beta, rg)
+                if hasattr(self, "alpha_k"):
+                    set_req_grad(self.alpha_k, rg)
+                if hasattr(self, "beta_k"):
+                    set_req_grad(self.beta_k, rg)
+
+            else:
+                raise ValueError(f"Unknown freeze group: {g!r}")
+
+        return self
+
+    # ---------- norm / denorm ----------
+
+    def norm(self, x: torch.Tensor, cluster: torch.Tensor | None = None):
+        # x: (B, C, T)
+        mu, std = get_normal_stats(x)
+        self.mu, self.std = mu, std
+
+        a, b, _, _, gamma, nu, _, _ = self._select_params(cluster)
+        mu_a = a * mu
+        inv_sigma_b = 1.0 + b * (1.0 / (std + self.eps) - 1.0)
+        x_hat = (x - mu_a) * inv_sigma_b
+        x_mod = gamma * x_hat + nu
+        return x_mod
+
+    def denorm(self, y: torch.Tensor, cluster: torch.Tensor | None = None, latent=False):
+        assert self.mu is not None and self.std is not None, "Call norm() before denorm()."
+        mu, std = self.mu, self.std
+
+        a, b, c, d, gamma, nu, alpha, beta = self._select_params(cluster)
+
+        if self.tie_revin:
+            gamma_safe = gamma.clamp_min(self.clamp_gamma_eps)
+            alpha = 1.0 / gamma_safe
+            beta = -nu / gamma_safe
+            c, d = a, b
+
+        y_aff = alpha * y + beta
+        if latent:
+            return y_aff
+        
+        mu_c = c * mu
+        inv_sigma_d = 1.0 + d * (1.0 / (std + self.eps) - 1.0)
+        y_out = y_aff / inv_sigma_d + mu_c
+        return y_out
+
+    def forward(self, x: torch.Tensor, c=None):
+        cluster = self._parse_cluster(c)
+        x_mod = self.norm(x, cluster)
+        pred = self.model(x_mod, c)
+        if self.latent == "model":
+            return pred
+        elif self.latent == "affine":
+            return self.denorm(pred, cluster, latent=True)
         else:
-            if stats_dict is not None:
-                kwargs["init_beta"] = stats_dict["train"]["beta"]
-            else:
-                kwargs["init_beta"] = None
-            logger.info(f"Loaded init_betas: {kwargs['init_beta']}")
+            return self.denorm(pred, cluster)
+
+    # ---------- presets (only init + freezes) ----------
+
+    @classmethod
+    def build_in(
+        cls,
+        model: nn.Module,
+        dim: int,
+        eps: float = 1e-8,
+        latent: bool = False,
+        **kwargs,
+    ):
+        """
+        Classical Instance Normalization (IN):
+        - a=b=c=d=1  (pure normalization + exact inverse)
+        - gamma=1, nu=0
+        - alpha=1, beta=0
+        - everything frozen
+        """
+        m = cls(
+            model=model,
+            dim=dim,
+            eps=eps,
+            tie_revin=False,
+            start_in=True,
+            personalize="none",
+            latent=latent,
+            **kwargs,
+        )
+        m.freeze(["ab", "cd", "gamma_nu", "alpha_beta"], freeze=True)
+        return m
+
+
+    @classmethod
+    def build_revin(
+        cls, 
+        model: nn.Module, 
+        dim: int, 
+        eps: float = 1e-8, 
+        latent: bool = False, 
+        **kwargs
+    ):
+        """
+        Classical RevIN:
+          - tie_revin=True
+          - init a=b=c=d=1 (pure IN), gamma=1, nu=0
+          - freeze everything except gamma,nu
+        """
+        m = cls(
+            model=model,
+            dim=dim,
+            eps=eps,
+            tie_revin=True,
+            start_in=True,
+            personalize="none",
+            latent=latent,
+            **kwargs,
+        )
+        m.freeze(["ab", "cd", "alpha_beta"], freeze=True)
+        m.freeze(["gamma_nu"], freeze=False)
+        return m
+
+    @classmethod
+    def build_personalized_revin(
+        cls,
+        model: nn.Module,
+        dim: int,
+        n_clusters: int,
+        eps: float = 1e-8,
+        unknown_cluster_id: int | None = None,
+        latent: bool = False,
+        **kwargs,
+    ):
+        """
+        Personalized RevIN:
+          - tie_revin=True
+          - init a=b=c=d=1
+          - personalize affine (gamma,nu per cluster; alpha/beta exist but are tied away at runtime)
+          - freeze everything except gamma/nu (shared + per-cluster)
+        """
+        m = cls(
+            model=model,
+            dim=dim,
+            eps=eps,
+            n_clusters=n_clusters,
+            personalize="affine",
+            unknown_cluster_id=unknown_cluster_id,
+            tie_revin=True,
+            start_in=True,
+            latent=latent,
+            **kwargs,
+        )
+        m.freeze(["ab", "cd", "alpha_beta"], freeze=True)
+        m.freeze(["gamma_nu"], freeze=False)
+        return m
+
+    @classmethod
+    def build_cmin(
+        cls,
+        model: nn.Module,
+        dim: int,
+        n_clusters: int | None = None,
+        eps: float = 1e-8,
+        unknown_cluster_id: int | None = None,
+        latent: bool = False,
+        **kwargs,
+    ):
+        """
+        "cmIN" style (as requested): freeze everything except (alpha,beta).
+        Default init is pure IN: a=b=c=d=1 and gamma=1,nu=0.
+        If n_clusters is provided, alpha/beta personalization is enabled via personalize="affine",
+        but gamma/nu are frozen (shared + per-cluster).
+        """
+        personalize = "affine" if (n_clusters is not None and int(n_clusters) > 0) else "none"
+        m = cls(
+            model=model,
+            dim=dim,
+            eps=eps,
+            n_clusters=n_clusters,
+            personalize=personalize,
+            unknown_cluster_id=unknown_cluster_id,
+            tie_revin=False,
+            start_in=True,
+            latent=latent,
+            **kwargs,
+        )
+        m.freeze(["ab", "cd", "gamma_nu"], freeze=True)
+        m.freeze(["alpha_beta"], freeze=False)
+        return m

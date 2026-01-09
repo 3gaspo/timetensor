@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.optim as optim
 from time import perf_counter
 import os
-from tqdm import tqdm
 
 from .utils import get_normal_stats, append_in_dict, unroll_windows, normalize, save_results
 from .visu import plot_losses, plot_multi_losses, plot_serie, plot_named_example, plot_horizon_errors, plot_pred, plot_horizon_errors, plot_weights, plot_errors
