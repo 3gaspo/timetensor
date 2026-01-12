@@ -588,7 +588,9 @@ def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None
         if set_cluster_context is not None:
             context = torch.tensor([set_cluster_context for _ in range(len(indices))]).unsqueeze(dim=1).unsqueeze(dim=1).repeat(1, values.shape[1], values.shape[2])
 
-    if type(date_splits) == str:
+    if type(date_splits) == float:
+        date_splits = [date_splits]
+    elif type(date_splits) == str:
         date_splits = date_splits.split(";")
         date_splits = [float(txt) for txt in date_splits]
     if type(indiv_split) == str:
@@ -781,6 +783,17 @@ def get_sizes(loaders_dict, str_info=False):
         return shape, shape_str, batch_str
 
 
+def format_individual_splits(splits, subsets):
+    """formats provided splits and subsets args for 1 indiv's split"""
+    splits_ = copy.deepcopy(splits)
+    splits_["indiv_split"] = None
+    subsets_ = copy.deepcopy(subsets)
+    if len(subsets_["sizes"].split(";")) > 3:
+        subsets_sizes_ = subsets_["sizes"].split(";")
+        subsets_["sizes"] = ";".join([subsets_sizes_[0], subsets_sizes_[1], subsets_sizes_[4]])
+    return splits_, subsets_
+
+
 def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, aggregate=True, seed=None, save=False, shuffle_eval=False, cluster_ids=None, random_eval=False, do_nodes=False):
     """returns loaders dict and stats dicts"""
     
@@ -865,12 +878,13 @@ def fetch_training_data(data_path, splits, subsets, batch_size, lags, horizon, a
             n_users = list(df_dict.values())[0].shape[-1]
             
             #format splits for individual users
-            splits_ = copy.deepcopy(splits)
-            splits_["indiv_split"] = None
-            subsets_ = copy.deepcopy(subsets)
-            if len(subsets_["sizes"].split(";")) > 3:
-                subsets_sizes_ = subsets_["sizes"].split(";")
-                subsets_["sizes"] = ";".join([subsets_sizes_[0], subsets_sizes_[1], subsets_sizes_[4]])
+            splits_, subsets_ = format_individual_splits(splits, subsets)
+            # splits_ = copy.deepcopy(splits)
+            # splits_["indiv_split"] = None
+            # subsets_ = copy.deepcopy(subsets)
+            # if len(subsets_["sizes"].split(";")) > 3:
+            #     subsets_sizes_ = subsets_["sizes"].split(";")
+            #     subsets_["sizes"] = ";".join([subsets_sizes_[0], subsets_sizes_[1], subsets_sizes_[4]])
             
             for node_id in range(n_users):
                 data_dict_ = get_dataset_splits(splits_, data_path, split_path, cluster_ids=[node_id])

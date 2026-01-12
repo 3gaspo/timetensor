@@ -113,16 +113,16 @@ def average_loss(eval_losses):
     return mean_losses
             
 
-def append_in_dict(dico1, dico2):
-    for key, value in dico2.items():
-        if key not in dico1:
-            dico1[key] = []
-        if type(value) == list:
-            dico1[key] += value
-        elif type(value) == torch.tensor and len(value.shape)==0:
-            dico1[key] += value.item()
-        else:
-            dico1[key].append(value)
+# def append_in_dict(dico1, dico2):
+#     for key, value in dico2.items():
+#         if key not in dico1:
+#             dico1[key] = []
+#         if type(value) == list:
+#             dico1[key] += value
+#         elif type(value) == torch.tensor and len(value.shape)==0:
+#             dico1[key] += value.item()
+#         else:
+#             dico1[key].append(value)
 
 
 def filter_dict(dico, keys):

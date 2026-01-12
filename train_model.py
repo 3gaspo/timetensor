@@ -44,7 +44,7 @@ def run(cfg):
     set_seed(seed)
 
     #data
-    loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(
+    loaders_dict, stats_dict, _ = fetch_training_data(
         data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
         seed=seed, random_eval=cfg.training.random_eval)
     if cfg.data.normalize:
@@ -57,17 +57,22 @@ def run(cfg):
 
     #model
     model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device=="cpu", **kwargs)
+    if verbose:
+        logger.info("Fetched model")
 
     #training
     logger.info("--Training--")
-    learner = launch_training(model, norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict, eval_losses, device, save_dir, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger)
+    learner = launch_training(model,
+        norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict, eval_losses, device,
+        save_dir, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger, save=True)
     
     #eval
     logger.info("--Eval--")
     if cfg.training.valid_eval:
-        launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="Valid", denormalize=cfg.data.normalize, runs=cfg.training.eval_runs)
+        _ = launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="valid", runs=cfg.training.eval_runs)
+
     if cfg.training.test_eval:
-        launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="Test", denormalize=cfg.data.normalize, runs=cfg.training.eval_runs)
+        _ = launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="test", runs=cfg.training.eval_runs)
         launch_example(data_path, model, lags, horizon, device, save_dir, save_name)
 
     logger.info('End of script\n')

@@ -63,7 +63,11 @@ def run(cfg):
 
 
     logger.info("--Model eval--")
-    launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="Test", denormalize=cfg.data.normalize, runs=cfg.training.eval_runs)
+    exotics_dict = launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="test", runs=cfg.training.eval_runs, thresholds={"nMSE":100})
+    for key in exotics_dict:
+        if len(exotics_dict[key]["nMSE"])>0:
+            logger.info(f"Found exotics nMSE in {key}")
+            logger.info(exotics_dict[key]["nMSE"])
     launch_example(data_path, model, lags, horizon, device, save_dir, save_name)
 
     #weights

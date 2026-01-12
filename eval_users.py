@@ -2,7 +2,7 @@ import hydra
 import logging
 import torch
 
-from src.timetensor.dataset import fetch_training_data, get_sizes, apply_stats
+from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm, format_individual_splits
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import get_losses, load_learner
 from src.timetensor.utils import get_dirs, set_seed
@@ -48,62 +48,71 @@ def run(cfg):
     set_seed(seed)
 
     #data
-    loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(
+    loaders_dict, stats_dict, _ = fetch_training_data(
         data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
-        clusters=cfg.data.clustering.clusters, seed=seed, random_eval=cfg.training.random_eval, do_nodes=False)
+        seed=seed, random_eval=cfg.training.random_eval)
     if cfg.data.normalize:
-        apply_stats(loaders_dict, stats_dict)
+        apply_standard_norm(loaders_dict, stats_dict)
+    
     shape, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
     if verbose:
         logger.info("Fetched dataloaders")
-        logger.info(shape_str)
-        logger.info(batch_str)
+
 
     #model
-    model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.training.freeze_core, cfg.model.constants, cfg.model.residuals, stats_dict, nodes_stats_dict, device=="cpu", logger, **kwargs)
-    learner = load_learner(model, norm_name, criterion, cfg.training.lr, eval_losses, device)
+    model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device=="cpu", **kwargs)
+    learner = load_learner(model, criterion, cfg.training.lr, eval_losses, device)
+    if verbose:
+        logger.info("Fetched model and learner")
+
 
     #per user errors
     logger.info("--Per user eval--")
-    suspects = [6, 111, 112, 113, 203]
-    per_user_losses = []
-    stds_per_user_losses = []
-    loss_name = "NMSE"
-    for indiv in range(loaders_dict["test1"].dataset.shape[0][0]):
-        loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(
-            data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon, seed=seed,
-            random_eval=cfg.training.random_eval, fetch_cluster=indiv)
-        if cfg.data.normalize:
-            apply_stats(loaders_dict, stats_dict)
-        losses1, exotics = learner.eval(loaders_dict["test1"], return_mode="all", runs=cfg.training.eval_runs, thresholds={loss_name:10})
-        if indiv in suspects:
-            logger.info(exotics)
-        mean = symlog(losses1[loss_name].mean())
-        std = symlog(losses1[loss_name].std())
-        per_user_losses.append(mean.item())
-        stds_per_user_losses.append(std.item())
-    
-    total_mean = np.mean(per_user_losses)
-    w10_mean = np.mean(np.partition(per_user_losses, int(len(per_user_losses)*0.9))[int(len(per_user_losses)*0.9):])
-    
-    stats_df = pd.DataFrame({
-        "log(mean_error)": per_user_losses,
-        "log(std_error)": stds_per_user_losses})
-    plt.figure(figsize=(10, 7))
-    g = sns.jointplot(
-        data=stats_df,
-        x="log(mean_error)",
-        y="log(std_error)",
-        kind='scatter',
-        palette='Set1',
-    )
-    plt.suptitle(f"Per-user Test 1 {loss_name} of {save_name} (mean:{total_mean:.3f}, W10:{w10_mean:.3f})")
-    plt.tight_layout()
-    plt.savefig(save_dir+ "plots/" + "user_errors.pdf")
-    plt.close()
+    per_user_losses = {key: [] for key in loaders_dict}
+    stds_per_user_losses = {key: [] for key in loaders_dict}
+    total_means = {key: [] for key in loaders_dict}
+    w10_means = {key: [] for key in loaders_dict}
+    # suspects = [6, 111, 112, 113, 203]
+    for key in loaders_dict:
+        for indiv in range(loaders_dict[key].dataset.shape[0][0]):
+            splits_, subsets_ = format_individual_splits(cfg.data.splits, cfg.data.subsets)
+            loaders_dict_, stats_dict_, _ = fetch_training_data(
+                data_path, splits_, subsets_, cfg.training.bs, lags, horizon,
+                seed=seed, random_eval=cfg.training.random_eval, cluster_ids=[indiv])
+            if cfg.data.normalize:
+                apply_standard_norm(loaders_dict_, stats_dict_)
+            
+            losses, _ = learner.eval(loaders_dict_[key], return_mode="all",
+                runs=cfg.training.eval_runs, thresholds={criterion_name:100})
+            # if len(exotics[criterion_name])>0:
+            #     logger.info(f"Found exotics for indiv {indiv} in {key}")
+            #     logger.info(exotics)
+            mean = symlog(losses[criterion_name].mean())
+            std = symlog(losses[criterion_name].std())
+            per_user_losses[key].append(mean.item())
+            stds_per_user_losses[key].append(std.item())
 
-    exotics = np.where(np.array(per_user_losses)>1)
-    logger.info(exotics)
+        total_means[key] = np.mean(per_user_losses[key])
+        w10_means[key] = np.mean(np.partition(per_user_losses[key], int(len(per_user_losses[key])*0.9))[int(len(per_user_losses[key])*0.9):])
+        
+        stats_df = pd.DataFrame({
+            "log(mean_error)": per_user_losses[key],
+            "log(std_error)": stds_per_user_losses[key]})
+        plt.figure(figsize=(10, 7))
+        g = sns.jointplot(
+            data=stats_df,
+            x="log(mean_error)",
+            y="log(std_error)",
+            kind='scatter',
+            palette='Set1',
+        )
+        plt.suptitle(f"Per-user {key} {criterion_name} of {save_name} (mean:{total_means[key]:.3f}, W10:{w10_means[key]:.3f})")
+        plt.tight_layout()
+        plt.savefig(save_dir+ "plots/" + f"{key}_user_errors.pdf")
+        plt.close()
+
+    # exotics = np.where(np.array(per_user_losses)>1)
+    # logger.info(exotics)
 
     logger.info('End of script\n')
 

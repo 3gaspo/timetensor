@@ -2,9 +2,9 @@ import hydra
 import logging
 import torch
 
-from src.timetensor.dataset import fetch_training_data, get_sizes, apply_stats
+from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm, format_individual_splits
 from src.timetensor.models import load_model
-from src.timetensor.pipeline import get_losses, load_learner, launch_training, launch_eval
+from src.timetensor.pipeline import get_losses, load_learner, launch_training
 from src.timetensor.utils import get_dirs, set_seed
 
 import os
@@ -49,64 +49,75 @@ def run(cfg):
     set_seed(seed)
 
     #data
-    loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(
+    loaders_dict, stats_dict, _ = fetch_training_data(
         data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
-        clusters=cfg.data.clustering.clusters, seed=seed, random_eval=cfg.training.random_eval, do_nodes=False)
+        seed=seed, random_eval=cfg.training.random_eval)
     if cfg.data.normalize:
-        apply_stats(loaders_dict, stats_dict)
+        apply_standard_norm(loaders_dict, stats_dict)
     shape, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
     if verbose:
         logger.info("Fetched dataloaders")
         logger.info(shape_str)
         logger.info(batch_str)
 
-    #model
-    model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.training.freeze_core, cfg.model.constants, cfg.model.residuals, stats_dict, nodes_stats_dict, device=="cpu", logger, **kwargs)
-    learner = load_learner(model, norm_name, criterion, cfg.training.lr, eval_losses, device)
+    # #model
+    # model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device=="cpu", **kwargs)
+    # if verbose:
+    #     logger.info("Fetched model and learner")
+    
+    # learner = load_learner(model, norm_name, criterion, cfg.training.lr, eval_losses, device)
 
-    #per user errors
+    #per user training
     logger.info("--Per user training--")
-    loss_name = "NMSE"
-    per_user_losses = []
-    stds_per_user_losses = []
+    per_user_losses = {key: [] for key in loaders_dict}
+    stds_per_user_losses = {key: [] for key in loaders_dict}
+    total_means = {key: [] for key in loaders_dict}
+    w10_means = {key: [] for key in loaders_dict}
+
     for indiv in range(loaders_dict["train"].dataset.shape[0][0]):
         save_dir_ = save_dir + f"user_{indiv}/"
         if not os.path.exists(save_dir_):
             os.makedirs(save_dir_)
-        loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(
-            data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon, seed=seed,
-            random_eval=cfg.training.random_eval, fetch_cluster=indiv)
         
-        model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.training.freeze_core, cfg.model.constants, cfg.model.residuals, stats_dict, nodes_stats_dict, device=="cpu", logger, verbose=0,**kwargs)
-        learner = load_learner(model, norm_name, criterion, cfg.training.lr, eval_losses, device)
+        splits_, subsets_ = format_individual_splits(cfg.data.splits, cfg.data.subsets)
+        loaders_dict_, stats_dict_, _ = fetch_training_data(
+            data_path, splits_, subsets_, cfg.training.bs, lags, horizon,
+            seed=seed, random_eval=cfg.training.random_eval, cluster_ids=[indiv])
         if cfg.data.normalize:
-            apply_stats(loaders_dict, stats_dict)
+            apply_standard_norm(loaders_dict_, stats_dict_)
 
-        learner = launch_training(model, norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict, eval_losses, device, save_dir_, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger, verbose=0)
-        losses1, _ = learner.eval(loaders_dict["test1"], return_mode="all", runs=cfg.training.eval_runs, thresholds={loss_name:10})
-        mean = symlog(losses1[loss_name].mean())
-        std = symlog(losses1[loss_name].std())
-        per_user_losses.append(mean.item())
-        stds_per_user_losses.append(std.item())
-    
-    total_mean = np.mean(per_user_losses)
-    w10_mean = np.mean(np.partition(per_user_losses, int(len(per_user_losses)*0.9))[int(len(per_user_losses)*0.9):])
-    
-    stats_df = pd.DataFrame({
-        "log(mean_error)": per_user_losses,
-        "log(std_error)": stds_per_user_losses})
-    plt.figure(figsize=(10, 7))
-    g = sns.jointplot(
-        data=stats_df,
-        x="log(mean_error)",
-        y="log(std_error)",
-        kind='scatter',
-        palette='Set1',
-    )
-    plt.suptitle(f"Per-user Test 1 {loss_name} of {save_name} (mean:{total_mean:.2f}, W10:{w10_mean:.2f})")
-    plt.tight_layout()
-    plt.savefig(save_dir+ "plots/" + "user_errors.pdf")
-    plt.close()
+        model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device=="cpu", **kwargs)
+        learner = launch_training(model,
+            norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict, eval_losses, device,
+            save_dir_, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger, verbose=0, save=True)
+        
+        for key in loaders_dict:
+            losses, _ = learner.eval(loaders_dict_[key], return_mode="all",
+                runs=cfg.training.eval_runs, thresholds={criterion_name:100})
+            mean = symlog(losses[criterion_name].mean())
+            std = symlog(losses[criterion_name].std())
+            per_user_losses[key].append(mean.item())
+            stds_per_user_losses[key].append(std.item())
+
+    for key in loaders_dict:
+        total_means[key] = np.mean(per_user_losses[key])
+        w10_means[key] = np.mean(np.partition(per_user_losses[key], int(len(per_user_losses[key])*0.9))[int(len(per_user_losses[key])*0.9):])
+        
+        stats_df = pd.DataFrame({
+            "log(mean_error)": per_user_losses[key],
+            "log(std_error)": stds_per_user_losses[key]})
+        plt.figure(figsize=(10, 7))
+        g = sns.jointplot(
+            data=stats_df,
+            x="log(mean_error)",
+            y="log(std_error)",
+            kind='scatter',
+            palette='Set1',
+        )
+        plt.suptitle(f"Per-user {key} {criterion_name} of {save_name} (mean:{total_means[key]:.3f}, W10:{w10_means[key]:.3f})")
+        plt.tight_layout()
+        plt.savefig(save_dir+ "plots/" + f"{key}_user_errors.pdf")
+        plt.close()
 
     logger.info('End of script\n')
 
