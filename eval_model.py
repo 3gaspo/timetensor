@@ -8,12 +8,6 @@ from src.timetensor.pipeline import get_losses, load_learner
 from src.timetensor.visu import plot_weights
 from src.timetensor.utils import get_dirs, set_seed
 
-from tqdm import tqdm
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 from src.timetensor.pipeline import launch_eval, launch_example
 from src.timetensor.utils import symlog
 
@@ -63,7 +57,7 @@ def run(cfg):
 
     #model
     model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device=="cpu", **kwargs)
-    learner = load_learner(model, norm_name, criterion, cfg.training.lr, eval_losses, device)
+    learner = load_learner(model, criterion, cfg.training.lr, eval_losses, device)
     if verbose:
         logger.info("Fetched model and learner")
 

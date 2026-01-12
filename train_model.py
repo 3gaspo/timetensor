@@ -2,7 +2,7 @@ import hydra
 import logging
 import torch
 
-from src.timetensor.dataset import fetch_training_data, get_sizes, apply_stats
+from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import get_losses
 from src.timetensor.utils import get_dirs, set_seed
@@ -46,9 +46,9 @@ def run(cfg):
     #data
     loaders_dict, stats_dict, nodes_stats_dict = fetch_training_data(
         data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
-        clusters=cfg.data.clustering.clusters, seed=seed, random_eval=cfg.training.random_eval, do_nodes=False)
+        seed=seed, random_eval=cfg.training.random_eval)
     if cfg.data.normalize:
-        apply_stats(loaders_dict, stats_dict)
+        apply_standard_norm(loaders_dict, stats_dict)
     shape, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
     if verbose:
         logger.info("Fetched dataloaders")
@@ -56,11 +56,13 @@ def run(cfg):
         logger.info(batch_str)
 
     #model
-    model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.training.freeze_core, cfg.model.constants, cfg.model.residuals, stats_dict, nodes_stats_dict, device=="cpu", logger, **kwargs)
+    model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device=="cpu", **kwargs)
 
     #training
     logger.info("--Training--")
     learner = launch_training(model, norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict, eval_losses, device, save_dir, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger)
+    
+    #eval
     logger.info("--Eval--")
     if cfg.training.valid_eval:
         launch_eval(learner, loaders_dict, stats_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="Valid", denormalize=cfg.data.normalize, runs=cfg.training.eval_runs)

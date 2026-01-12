@@ -232,7 +232,7 @@ class ScikitLearner:
             return losses, exotics
         return losses
 
-def load_learner(model, normalization, criterion, lr, eval_losses, device, optimizer=None, scheduler=None):
+def load_learner(model, criterion, lr, eval_losses, device, optimizer=None, scheduler=None):
     """loads correct model learner"""
     model_name = model.model_name
     if model.model_type == "pytorch":
@@ -243,7 +243,7 @@ def load_learner(model, normalization, criterion, lr, eval_losses, device, optim
         raise ValueError(f"Unknown model type: {model.model_type}")
 
 #TODO debug train_model and launch_training
-def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, verbose=1, do_eval=True, logger=None, eval_runs=1):#, weight_follow=None):
+def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, verbose=1, do_eval=True, logger=None, eval_runs=1, weight_follow=None):
     """trains model in learner on loaders and returns train and valid losses"""
     
     #data
@@ -289,8 +289,8 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
                     average_eval_dict3 = learner.eval(valid_loader3, runs=eval_runs)
                     append_in_dict(valid_losses3, average_eval_dict3)
                 
-                # if weight_follow is not None:
-                #     append_in_dict(weights, weight_follow(learner.model))
+                if weight_follow is not None:
+                    append_in_dict(weights, weight_follow(learner.model))
 
                 if verbose and (step == 1 or step % print_freq == 0 or step == total_steps):
                     if logger is not None:
@@ -309,13 +309,13 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
     return train_losses, valid_losses1, valid_losses2, valid_losses3, weights
 
 
-def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, eval_losses, device, save_dir, save_name, eval_freq, print_freq, logger, verbose=1):
+def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, eval_losses, device, save_dir, save_name, eval_freq, print_freq, logger, optimizer=None, scheduler=None, weight_follow=None, verbose=1):
     """launches training of model"""
     model_name, criterion_name = model.model_name, criterion.name
     if not os.path.exists(save_dir + "plots/"):
         os.makedirs(save_dir + "plots/")
 
-    learner = load_learner(model, normalization, criterion, lr, eval_losses, device)
+    learner = load_learner(model, criterion, lr, eval_losses, device, optimizer, scheduler)
 
     no_training = (model_name in ["persistence", "repeat", "lookback", "expected"]) and ((normalization is None) or normalization in ["None", "standard", "instance", "IN"])
     if no_training:
@@ -334,10 +334,6 @@ def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, e
     else:
         if verbose:
             logger.info(f"Starting training pytorch with lr={lr}")
-        # if normalization is not None and (("revin" in normalization) or ("mIN" in normalization and "cmIN" not in normalization)):
-        #     weight_follow = lambda model: {"beta": model.beta.data.detach().cpu().numpy()[0][0][0], "alpha": model.alpha.data.detach().cpu().numpy()[0][0][0]}
-        # else:
-        #     weight_follow = None
         learner.reset_optimizer()
         train_losses, valid_losses1, valid_losses2, valid_losses3, followed_weights = train_model(learner, loaders_dict, epochs=epochs, logger=logger, eval_runs=1, eval_freq=eval_freq, print_freq=print_freq, verbose=verbose) #,weight_follow=weight_follow,)
         # torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")

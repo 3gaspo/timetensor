@@ -596,12 +596,12 @@ def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None
     if date_splits is None or (type(date_splits)==list and date_splits[0]==1) or date_splits==1:
         type_split = 1
     elif len(date_splits) == 1:
-        if indiv_split is None or indiv_split ==  1 or values.shape[0]==1:
+        if indiv_split is None or (type(indiv_split)==list and date_splits[0]==1) or indiv_split ==  1 or values.shape[0]==1:
             type_split = 2
         else:
             type_split = 4
     elif len(date_splits) >= 2:
-        if indiv_split is None or values.shape[0]==1:
+        if indiv_split is None or (type(indiv_split)==list and date_splits[0]==1) or indiv_split ==  1 or values.shape[0]==1:
             type_split = 3
         else:
             type_split = 6

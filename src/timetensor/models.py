@@ -382,6 +382,7 @@ def load_model(model_name, shape, norm_name=None, init_path=None, do_constants=T
 
     return model
 
+#TODO format kwargs pour grevin, requiert stats_dict et nodes_stats_dict dans load_model
 
 # def format_min_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger):
 #     """utils methods to format model kwargs"""
