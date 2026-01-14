@@ -186,12 +186,12 @@ def get_gamma_df(df, lags, horizon, eps=1e-8):
     return gamma_df
 
 
-def get_dataset_stats(df_dict, lags, horizon, remove_train_cte=True, remove_eval_cte=True, save_path=None):
+def get_dataset_stats(df_dict, lags, horizon, sampling, save_path=None):
     """Computes dataset-wide mean/std and average alpha/beta for each split."""
     gammas_dict = {k: get_gammas(df_dict[k], lags, horizon) for k in df_dict}
     stats_dict = {}
     for key in df_dict:
-        if (key == "train" and remove_train_cte) or (key != "train" and remove_eval_cte):
+        if (key == "train" and sampling["remove_train_cte"]) or (key != "train" and sampling["remove_eval_cte"]):
             mask = cte_mask(df_dict[key], lags)
             clean_df = filter_df(df_dict[key], mask)
             clean_alphas = filter_df(gammas_dict[key][0], mask)

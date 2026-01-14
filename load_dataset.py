@@ -21,8 +21,6 @@ def run(cfg):
     lags, horizon = int(cfg.task.lags), int(cfg.task.horizon)
     seed, verbose = cfg.misc.seed, cfg.misc.verbose
 
-    split_kwargs = cfg.data.splits
-
     #dirs
     if not os.path.exists(data_path+"examples/"):
         os.makedirs(data_path+"examples/")
@@ -44,7 +42,7 @@ def run(cfg):
             build_dataset(data_path, n1=cfg.data.n1, n2=cfg.data.n2, r1=cfg.data.r1, r2=cfg.data.r2, seed=seed)
         else:
             from src.timetensor.dataset import build_dataset
-            build_dataset(data_path, dataset_name, context_cols, drop_users=split_kwargs.drop_users)
+            build_dataset(data_path, dataset_name, context_cols, drop_users=cfg.data.splits.drop_users)
         t2 = perf_counter()
         if verbose:
             logger.info(f"Rebuilt dataset in {(t2-t1)/60:.3f} min")
@@ -59,8 +57,10 @@ def run(cfg):
 
     #splits
     if do_shapes:
-        loaders_dict, stats_dict, nodes_data_dict = fetch_training_data(data_path, 
-            split_kwargs, cfg.data.subsets, cfg.training.bs, lags, horizon, seed=seed)
+        loaders_dict, stats_dict = fetch_training_data(data_path, 
+            cfg.data.splits, cfg.data.sampling, cfg.data.subsets,
+            cfg.training.bs, lags, horizon,
+            seed=seed)
         _, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
         if verbose:
             logger.info("Fetched dataloaders")

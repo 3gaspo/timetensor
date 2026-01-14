@@ -9,5 +9,5 @@ source .venv/bin/activate
 
 for data in electricity #solar traffic synthetic
 do
-    srun python3 load_dataset.py "data=$data" "task.lags=168" "task.horizon=24" "load.rebuild=True" "load.example=True" "load.shapes=True"
+    srun python3 load_dataset.py "data.sampling.use_context=False" "data=$data" "task.lags=168" "task.horizon=24" "load.rebuild=True" "load.example=True" "load.shapes=True"
 done

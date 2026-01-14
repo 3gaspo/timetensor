@@ -2,7 +2,7 @@ import hydra
 import logging
 import torch
 
-from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm, format_individual_splits
+from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm#, format_individual_splits
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import get_losses, load_learner
 from src.timetensor.utils import get_dirs, set_seed
@@ -38,7 +38,7 @@ def run(cfg):
     verbose, seed = cfg.misc.verbose, cfg.misc.seed
 
     output_dir, save_name = cfg.misc.output_dir, cfg.misc.save_name, 
-    save_name, save_dir = get_dirs(output_dir, save_name, model_name, norm_name, criterion_name, cfg.data.subsets.sizes)
+    save_name, save_dir = get_dirs(output_dir, save_name, model_name, norm_name, criterion_name, cfg.data.subsets)
 
     if verbose:
         logger.info(f"Fetched main configs, save directory : {save_dir}")
@@ -72,26 +72,47 @@ def run(cfg):
     stds_per_user_losses = {key: [] for key in loaders_dict}
     total_means = {key: [] for key in loaders_dict}
     w10_means = {key: [] for key in loaders_dict}
-    # suspects = [6, 111, 112, 113, 203]
-    for key in loaders_dict:
-        for indiv in range(loaders_dict[key].dataset.shape[0][0]):
-            splits_, subsets_ = format_individual_splits(cfg.data.splits, cfg.data.subsets)
+    
+    all_keys = list(loaders_dict.keys())
+
+    if len(all_keys) == 1: #we can subset individuals using [indiv] for indiv in range(...)
+        main_key = all_keys[0]
+        for indiv in range(loaders_dict[main_key].dataset.shape[0][0]):
+            # splits_, subsets_ = format_individual_splits(cfg.data.splits, cfg.data.subsets)
             loaders_dict_, stats_dict_, _ = fetch_training_data(
-                data_path, splits_, subsets_, cfg.training.bs, lags, horizon,
+                data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
                 seed=seed, random_eval=cfg.training.random_eval, cluster_ids=[indiv])
             if cfg.data.normalize:
                 apply_standard_norm(loaders_dict_, stats_dict_)
-            
-            losses, _ = learner.eval(loaders_dict_[key], return_mode="all",
+
+            losses, _ = learner.eval(loaders_dict_[main_key], return_mode="all",
                 runs=cfg.training.eval_runs, thresholds={criterion_name:100})
-            # if len(exotics[criterion_name])>0:
-            #     logger.info(f"Found exotics for indiv {indiv} in {key}")
-            #     logger.info(exotics)
             mean = symlog(losses[criterion_name].mean())
             std = symlog(losses[criterion_name].std())
-            per_user_losses[key].append(mean.item())
-            stds_per_user_losses[key].append(std.item())
+            per_user_losses[main_key].append(mean.item())
+            stds_per_user_losses[main_key].append(std.item())
 
+    else: #we need to use individuals subset fr om original splits
+        assert "train" in all_keys
+        indiv_keys = ["train"]
+        if "valid2" in all_keys: #6 way split
+            indiv_keys.append("valid2")
+        elif "test0" in all_keys: #4 way split
+            indiv_keys.append("test0")
+        
+        for key in indiv_keys:
+            for indiv in range(loaders_dict[key].dataset.shape[0][0]):
+                loaders_dict[key].dataset.set_sampler(subset_mode="individuals", subset_indices=[indiv])
+                
+                for key in loaders_dict_: #train, (valid1), test1
+                    losses, _ = learner.eval(loaders_dict_[key], return_mode="all",
+                        runs=cfg.training.eval_runs, thresholds={criterion_name:100})
+                    mean = symlog(losses[criterion_name].mean())
+                    std = symlog(losses[criterion_name].std())
+                    per_user_losses[key].append(mean.item())
+                    stds_per_user_losses[key].append(std.item())
+
+    for key in loaders_dict_:
         total_means[key] = np.mean(per_user_losses[key])
         w10_means[key] = np.mean(np.partition(per_user_losses[key], int(len(per_user_losses[key])*0.9))[int(len(per_user_losses[key])*0.9):])
         
@@ -110,9 +131,6 @@ def run(cfg):
         plt.tight_layout()
         plt.savefig(save_dir+ "plots/" + f"{key}_user_errors.pdf")
         plt.close()
-
-    # exotics = np.where(np.array(per_user_losses)>1)
-    # logger.info(exotics)
 
     logger.info('End of script\n')
 

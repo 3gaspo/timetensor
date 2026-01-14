@@ -10,7 +10,7 @@ def get_dirs(output_dir, save_name, model_name, norm_name=None, criterion_name=N
     
     get_training = ((norm_name is not None) and (("revin" in norm_name) or ("mIN" in norm_name))) or (model_name not in ["persistence", "repeat", "lookback", "expected"])
     if subsets is not None:
-        subset = float(subsets.split(";")[0])
+        subset = float(subsets.sizes["train"])
     else:
         subset=None
     if save_name is None:

@@ -8,72 +8,81 @@ import torch.nn as nn
 
 from hydra.utils import to_absolute_path
 
-import os
 
 class Chronos:
-    def __init__(self, horizon, cross_learning=False):
+    def __init__(self, lags, horizon, context_mode="past_only", cross_learning=False, device_map="cuda", weights_path="src/timetensor/sota/chronos2/weights"):
         super(Chronos, self).__init__()
-        self.horizon = horizon
-        self.cross_learning=cross_learning
-        
-        local_model_dir = to_absolute_path("src/timetensor/sota/chronos2/weights")
+        self.lags, self.horizon = lags, horizon
+        self.context_mode = context_mode  # "past_only" | "future" | "any"
+        self.cross_learning = bool(cross_learning)
+
+        local_model_dir = to_absolute_path(weights_path)
         self.pipeline: Chronos2Pipeline = BaseChronosPipeline.from_pretrained(
             local_model_dir,
-            device_map="cuda",
+            device_map=device_map,
             local_files_only=True,
         )
 
-    def predict_as_df(self, x, c=None): #x (bs, dim, lags)
-        """returns prediction via the predict_df pipeline"""
-        bs, dim, lags = x.shape
-        x_reordered = x.permute(0, 2, 1) # (bs, lags, dim)
-        x_arr = x_reordered.reshape(-1, dim).detach().cpu().numpy() # (bs*lags, dim)
-        ids = np.repeat(np.arange(bs), lags)
-        timestamps = np.tile(np.arange(lags), bs)
+    def _split_context(self, c):
+        """returns (past_only, future_included) contexts from c"""
+        if c is not None:
+            print("debug split", c)
+        if c is None:
+            return None, None
 
-        dim_cols = [f"dim_{i}" for i in range(dim)]
-        df = pd.DataFrame(x_arr, columns=dim_cols)
-        df.insert(0, "timestamps", timestamps)
-        df.insert(0, "ids", ids)
+        if self.context_mode == "past_only":
+            assert c.shape[-1] >= self.lags, f"Wrong context shape: {c}"
+            return c[:, :, :self.lags], None
 
-        preds_per_dim = []
-        for dim_ in range(dim):
-            preds = self.pipeline.predict_df(df,
-                prediction_length=self.horizon,
-                id_column="ids",
-                quantile_levels=[0.5],
-                timestamp_column="timestamps",
-                target=f"dim_{dim_}")
-            
-            y_hat = (
-                preds
-                .pivot(index="ids", columns="timestamps", values="predictions")
-                .sort_index()
-                .to_numpy()          # shape (bs, horizon)
-            )
-            preds_per_dim.append(y_hat)
+        if self.context_mode == "future":
+            assert c.shape[-1] == self.lags+self.horizon, f"Wrong context shape: {c}"
+            return None, c
 
-        preds_np = np.stack(preds_per_dim, axis=1)      # (bs, dim, horizon)
-        preds = torch.from_numpy(preds_np).to(x.device, dtype=x.dtype)
-        return preds
-
+        if self.context_mode == "both":
+            assert type(c) == tuple and len(c) == 2, f"Wrong context shape: {type(c)}, {len(c)}"
+            return c
 
     def __call__(self, x, c=None): #x (bs, dim, lags)
-        inputs = {"target": x}
-        if c is not None:
-            inputs["past_covariates"] = c[:, :, :x.shape[-1]]
-            if c.shape[-1] > x.shape[-1]: #TODO gerer le cas où certains sont past-only et d'autres non
-                inputs["future_covariates"] = c[:, :, x.shape[-1]:]
+        bs, dim, lags = x.shape
+        assert lags == self.lags
+        past_only, future_included = self._split_context(c)
+        assert past_only is None or past_only.shape[-1] == self.lags
+        assert future_included is None or future_included.shape == self.horizon
 
-        quantile_preds = self.pipeline.predict(
+        inputs = []
+        for b in range(bs):
+            d = {"target": x[b]}  # (dim, lags)
+
+            past_cov = {}
+            fut_cov = {}
+
+            if past_only is not None:
+                k = past_only.shape[1]
+                for i in range(k):
+                    past_cov[f"past_{i}"] = past_only[b, i, :]
+
+            if future_included is not None:
+                k2 = future_included.shape[1]
+                for i in range(k2):
+                    name = f"fut_{i}"
+                    past_cov[name] = future_included[b, i, :lags]
+                    fut_cov[name] = future_included[b, i, lags : lags + self.horizon]
+
+            if len(past_cov) > 0:
+                d["past_covariates"] = past_cov
+            if len(fut_cov) > 0:
+                d["future_covariates"] = fut_cov
+            inputs.append(d)
+
+        preds_list = self.pipeline.predict(
             inputs=inputs,
             prediction_length=self.horizon,
-            cross_learning=self.cross_learning,
-            quantile_levels=[0.5],
+            cross_learning=self.cross_learning
         )
 
-        preds = []
-        for pred in quantile_preds:
-            preds.append(pred[:, 0, :])
-        return preds
-    
+        out_items = []
+        for pred in preds_list:  # pred: (dim, Q, H)
+            q_med = pred.shape[1] // 2
+            out_items.append(pred[:, q_med, :])
+
+        return torch.stack(out_items, dim=0).to(device=x.device, dtype=x.dtype) # (bs, dim, horizon)

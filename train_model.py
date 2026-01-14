@@ -34,7 +34,7 @@ def run(cfg):
     verbose, seed = cfg.misc.verbose, cfg.misc.seed
 
     output_dir, save_name = cfg.misc.output_dir, cfg.misc.save_name, 
-    save_name, save_dir = get_dirs(output_dir, save_name, model_name, norm_name, criterion_name, cfg.data.subsets.sizes)
+    save_name, save_dir = get_dirs(output_dir, save_name, model_name, norm_name, criterion_name, cfg.data.subsets)
 
     if verbose:
         logger.info(f"Fetched main configs, save directory : {save_dir}")

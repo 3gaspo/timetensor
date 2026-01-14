@@ -35,19 +35,20 @@ def run(cfg):
     verbose, seed = cfg.misc.verbose, cfg.misc.seed
 
     output_dir, save_name = cfg.misc.output_dir, cfg.misc.save_name, 
-    save_name, save_dir = get_dirs(output_dir, save_name, model_name, norm_name, criterion_name, cfg.data.subsets.sizes)
+    save_name, save_dir = get_dirs(output_dir, save_name, model_name, norm_name, criterion_name, cfg.data.subsets)
 
     if verbose:
         logger.info(f"Fetched main configs, save directory : {save_dir}")
         logger.info(f"Model {model_name}, norm {norm_name}, criterion {criterion_name}, kwargs {kwargs}")
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if cfg.misc.device=="gpu" and torch.cuda.is_available() else "cpu")
     set_seed(seed)
 
     #data
-    loaders_dict, stats_dict, _ = fetch_training_data(
-        data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
-        seed=seed, random_eval=cfg.training.random_eval)
+    loaders_dict, stats_dict = fetch_training_data(
+        data_path, cfg.data.splits, cfg.data.sampling, cfg.data.subsets,
+        cfg.training.bs, lags, horizon,
+        seed=seed)
     if cfg.data.normalize:
         apply_standard_norm(loaders_dict, stats_dict)
 
@@ -63,12 +64,15 @@ def run(cfg):
 
 
     logger.info("--Model eval--")
-    exotics_dict = launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="test", runs=cfg.training.eval_runs, thresholds={"nMSE":100})
+    exotics_dict = launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir,
+        mode="test", runs=cfg.training.eval_runs, thresholds={"nMSE":100})
     for key in exotics_dict:
         if len(exotics_dict[key]["nMSE"])>0:
             logger.info(f"Found exotics nMSE in {key}")
             logger.info(exotics_dict[key]["nMSE"])
-    launch_example(data_path, model, lags, horizon, device, save_dir, save_name)
+
+    logger.info("--Example--")
+    launch_example(data_path, model, lags, horizon, device, save_dir, save_name, cfg.data.sampling.use_context)
 
     #weights
     plot_weights(model, save_dir + "plots/", save_name)

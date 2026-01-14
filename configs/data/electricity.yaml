@@ -6,16 +6,29 @@ normalize: False
 splits:
   indiv_split: 0.8
   date_splits: 0.6;0.2;0.2
-  idx_mode: individuals
+  drop_users: 57;106;127;182;298
+  reshuffle: True #to redraw splits
+  clusters: #Name of cluster folder
+
+sampling:
+  len_multiplier: 1
+  train_idx_mode: individuals
+  shuffle_train: True
   context_by_individuals: True
   return_all_individuals: False
-  reshuffle: True
+  shuffle_eval: True
+  eval_idx_mode: random
   remove_train_cte: True
   remove_eval_cte: True
-  drop_users: 57;106;127;182;298
-  clusters:
-
+  use_context: True
+  
 subsets:
   mode: dates
-  sizes: 1;1;1;1;1;1
-  cluster:
+  sizes:
+    train: 1
+    valid1: 1
+    valid2: 1
+    valid3: 1
+    test1: 1
+    test2: 1
+  cluster: #Name of cluster within cluster folder (.pt file)

@@ -327,7 +327,7 @@ def model_selector(model_name, lags, dim, horizon, **kwargs):
         model.model_name = "PatchTST"
         model.model_type = "pytorch"
     elif model_name == "chronos":
-        model = Chronos(horizon)
+        model = Chronos(lags, horizon, kwargs.get("context_mode", "past_only"), kwargs.get("cross_learning", False))
         model.model_name = "chronos"
         model.model_type = "pytorch"
         do_context = True
