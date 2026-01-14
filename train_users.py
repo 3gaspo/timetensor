@@ -45,7 +45,7 @@ def run(cfg):
         logger.info(f"Fetched main configs, save directory : {save_dir}")
         logger.info(f"Model {model_name}, norm {norm_name}, criterion {criterion_name}, kwargs {kwargs}")
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if cfg.misc.device=="gpu" and torch.cuda.is_available() else "cpu")
     set_seed(seed)
 
     #data
@@ -82,7 +82,7 @@ def run(cfg):
         if cfg.data.normalize:
             apply_standard_norm(loaders_dict_, stats_dict_)
 
-        model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device=="cpu", **kwargs)
+        model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device.type=="cpu", **kwargs)
         learner = launch_training(model,
             norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict_, eval_losses, device,
             save_dir_, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger, verbose=0, save=True)

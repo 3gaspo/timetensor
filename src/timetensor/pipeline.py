@@ -175,7 +175,7 @@ class TorchLearner:
                                 losses[loss_name] = {}
                             for i, indiv in enumerate(indiv_batch):
                                 if indiv not in losses[loss_name]:
-                                    losses[loss_name] = []
+                                    losses[loss_name][indiv] = []
                                 losses[loss_name][indiv].append(loss[i].mean().item()) # # {indiv: [ (1) x (steps * bs)]]
                         elif return_mode == "mean":
                             if loss_name not in losses:
@@ -201,15 +201,15 @@ class TorchLearner:
                 losses[loss_name] = torch.stack(losses[loss_name], dim=0) # (steps*bs*individuals)
             elif return_mode == "indiv":
                 for indiv in losses[loss_name]:
-                    losses[loss_name][indiv] = torch.stack(losses[loss_name], dim=0) # {indiv: (steps * bs)]
+                    losses[loss_name][indiv] = torch.tensor(losses[loss_name][indiv]) # {indiv: (steps * bs)]
             elif return_mode == "dim":
                 losses[loss_name] = torch.stack(losses[loss_name], dim=0).sum(dim=0) # (dim, horizon)
                 losses[loss_name] /= counts[loss_name]
             elif return_mode == "mean":
                 losses[loss_name] /= counts[loss_name] # (1)
-    
-        return losses, exotics
 
+        return losses, exotics
+        
 class ScikitLearner:
     def __init__(self, model, criterion, eval_losses):
         self.model_type = "scikit-learn"

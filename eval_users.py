@@ -44,13 +44,14 @@ def run(cfg):
         logger.info(f"Fetched main configs, save directory : {save_dir}")
         logger.info(f"Model {model_name}, norm {norm_name}, criterion {criterion_name}, kwargs {kwargs}")
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if cfg.misc.device=="gpu" and torch.cuda.is_available() else "cpu")
     set_seed(seed)
 
     #data
-    loaders_dict, stats_dict, _ = fetch_training_data(
-        data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
-        seed=seed, random_eval=cfg.training.random_eval)
+    loaders_dict, stats_dict = fetch_training_data(
+        data_path, cfg.data.splits, cfg.data.sampling, cfg.data.subsets,
+        cfg.training.bs, lags, horizon,
+        seed=seed)
     if cfg.data.normalize:
         apply_standard_norm(loaders_dict, stats_dict)
     
@@ -60,7 +61,7 @@ def run(cfg):
 
 
     #model
-    model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device=="cpu", **kwargs)
+    model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device.type=="cpu", **kwargs)
     learner = load_learner(model, criterion, cfg.training.lr, eval_losses, device)
     if verbose:
         logger.info("Fetched model and learner")
@@ -72,47 +73,19 @@ def run(cfg):
     stds_per_user_losses = {key: [] for key in loaders_dict}
     total_means = {key: [] for key in loaders_dict}
     w10_means = {key: [] for key in loaders_dict}
-    
-    all_keys = list(loaders_dict.keys())
 
-    if len(all_keys) == 1: #we can subset individuals using [indiv] for indiv in range(...)
-        main_key = all_keys[0]
-        for indiv in range(loaders_dict[main_key].dataset.shape[0][0]):
-            # splits_, subsets_ = format_individual_splits(cfg.data.splits, cfg.data.subsets)
-            loaders_dict_, stats_dict_, _ = fetch_training_data(
-                data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
-                seed=seed, random_eval=cfg.training.random_eval, cluster_ids=[indiv])
-            if cfg.data.normalize:
-                apply_standard_norm(loaders_dict_, stats_dict_)
-
-            losses, _ = learner.eval(loaders_dict_[main_key], return_mode="all",
-                runs=cfg.training.eval_runs, thresholds={criterion_name:100})
-            mean = symlog(losses[criterion_name].mean())
-            std = symlog(losses[criterion_name].std())
-            per_user_losses[main_key].append(mean.item())
-            stds_per_user_losses[main_key].append(std.item())
-
-    else: #we need to use individuals subset fr om original splits
-        assert "train" in all_keys
-        indiv_keys = ["train"]
-        if "valid2" in all_keys: #6 way split
-            indiv_keys.append("valid2")
-        elif "test0" in all_keys: #4 way split
-            indiv_keys.append("test0")
+    for key in loaders_dict:        
+        losses, exotics = learner.eval(loaders_dict[key], return_mode="indiv",
+            runs=cfg.training.eval_runs, thresholds={criterion_name:100}) # {loss_name: {indiv: [steps] }}
         
-        for key in indiv_keys:
-            for indiv in range(loaders_dict[key].dataset.shape[0][0]):
-                loaders_dict[key].dataset.set_sampler(subset_mode="individuals", subset_indices=[indiv])
-                
-                for key in loaders_dict_: #train, (valid1), test1
-                    losses, _ = learner.eval(loaders_dict_[key], return_mode="all",
-                        runs=cfg.training.eval_runs, thresholds={criterion_name:100})
-                    mean = symlog(losses[criterion_name].mean())
-                    std = symlog(losses[criterion_name].std())
-                    per_user_losses[key].append(mean.item())
-                    stds_per_user_losses[key].append(std.item())
+        indiv_losses = losses[criterion_name]
+        for indiv in indiv_losses:
+            indiv_loss = indiv_losses[indiv]
+            mean = symlog(indiv_loss.mean())
+            std = symlog(indiv_loss.std())
+            per_user_losses[key].append(mean.item())
+            stds_per_user_losses[key].append(std.item())
 
-    for key in loaders_dict_:
         total_means[key] = np.mean(per_user_losses[key])
         w10_means[key] = np.mean(np.partition(per_user_losses[key], int(len(per_user_losses[key])*0.9))[int(len(per_user_losses[key])*0.9):])
         
