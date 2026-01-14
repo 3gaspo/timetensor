@@ -2,9 +2,9 @@ import hydra
 import logging
 import torch
 
-from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm#, format_individual_splits
+from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm
 from src.timetensor.models import load_model
-from src.timetensor.pipeline import get_losses, load_learner, launch_training
+from src.timetensor.pipeline import get_losses, launch_training
 from src.timetensor.utils import get_dirs, set_seed
 
 import os
@@ -49,9 +49,10 @@ def run(cfg):
     set_seed(seed)
 
     #data
-    loaders_dict, stats_dict, _ = fetch_training_data(
-        data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
-        seed=seed, random_eval=cfg.training.random_eval)
+    loaders_dict, stats_dict = fetch_training_data(
+        data_path, cfg.data.splits, cfg.data.sampling, cfg.data.subsets,
+        cfg.training.bs, lags, horizon,
+        seed=seed)
     if cfg.data.normalize:
         apply_standard_norm(loaders_dict, stats_dict)
     shape, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
@@ -61,43 +62,39 @@ def run(cfg):
         logger.info(batch_str)
 
     #per user training
-    logger.info("--Per user training--")
+    logger.info("--Per user eval--")
     per_user_losses = {key: [] for key in loaders_dict}
     stds_per_user_losses = {key: [] for key in loaders_dict}
     total_means = {key: [] for key in loaders_dict}
     w10_means = {key: [] for key in loaders_dict}
 
-
-    for indiv in range(loaders_dict["train"].dataset.shape[0][0]):
-
-        #train indiv
+    train_keys = [key for key in loaders_dict if key in ["train","valid1", "test1"]]
+    for indiv in range(loaders_dict["train"].dataset.shape[0][0]): #train indivs
         save_dir_ = save_dir + f"user_{indiv}/"
         if not os.path.exists(save_dir_):
             os.makedirs(save_dir_)
-        
-        # splits_, subsets_ = format_individual_splits(cfg.data.splits, cfg.data.subsets)
-        loaders_dict_, stats_dict_, _ = fetch_training_data(
-            data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
-            seed=seed, random_eval=cfg.training.random_eval, cluster_ids=[indiv])
-        if cfg.data.normalize:
-            apply_standard_norm(loaders_dict_, stats_dict_)
 
         model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device.type=="cpu", **kwargs)
+
+        loaders_dict_ = {}
+        for key in train_keys:
+            loaders_dict[key].dataset.set_sampler(subset_mode="individuals", subset_indices=[indiv])
+            loaders_dict_[key] = loaders_dict[key]
+        
         learner = launch_training(model,
             norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict_, eval_losses, device,
             save_dir_, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger, verbose=0, save=True)
-        
-        #eval indiv model
 
-        for key in loaders_dict_: #train, (valid1), test1
-            losses, _ = learner.eval(loaders_dict_[key], return_mode="all",
-                runs=cfg.training.eval_runs, thresholds={criterion_name:100})
+        for key in train_keys: #train, (valid1), test1
+            losses, _ = learner.eval(loaders_dict_[key], return_mode="steps",
+                runs=cfg.training.eval_runs)
+            
             mean = symlog(losses[criterion_name].mean())
             std = symlog(losses[criterion_name].std())
             per_user_losses[key].append(mean.item())
             stds_per_user_losses[key].append(std.item())
 
-    for key in loaders_dict_: #train, (valid1), test1  (valid2 valid3 test2 don't have an associated model)
+    for key in train_keys: #train, (valid1), test1  (valid2 valid3 test2 don't have an associated model)
         total_means[key] = np.mean(per_user_losses[key])
         w10_means[key] = np.mean(np.partition(per_user_losses[key], int(len(per_user_losses[key])*0.9))[int(len(per_user_losses[key])*0.9):])
         

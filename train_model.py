@@ -4,11 +4,8 @@ import torch
 
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm
 from src.timetensor.models import load_model
-from src.timetensor.pipeline import get_losses
+from src.timetensor.pipeline import get_losses, launch_training, launch_eval, launch_example
 from src.timetensor.utils import get_dirs, set_seed
-
-from src.timetensor.pipeline import launch_training, launch_eval, launch_example
-
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -44,9 +41,10 @@ def run(cfg):
     set_seed(seed)
 
     #data
-    loaders_dict, stats_dict, _ = fetch_training_data(
-        data_path, cfg.data.splits, cfg.data.subsets, cfg.training.bs, lags, horizon,
-        seed=seed, random_eval=cfg.training.random_eval)
+    loaders_dict, stats_dict = fetch_training_data(
+        data_path, cfg.data.splits, cfg.data.sampling, cfg.data.subsets,
+        cfg.training.bs, lags, horizon,
+        seed=seed)
     if cfg.data.normalize:
         apply_standard_norm(loaders_dict, stats_dict)
     shape, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
@@ -73,7 +71,7 @@ def run(cfg):
 
     if cfg.training.test_eval:
         _ = launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="test", runs=cfg.training.eval_runs)
-        launch_example(data_path, model, lags, horizon, device, save_dir, save_name)
+        launch_example(data_path, model, lags, horizon, device, save_dir, save_name, use_context=cfg.data.sampling.use_context)
 
     logger.info('End of script\n')
 

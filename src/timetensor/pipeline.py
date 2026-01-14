@@ -198,7 +198,7 @@ class TorchLearner:
             if return_mode == "all":
                 losses[loss_name] = torch.stack(losses[loss_name], dim=0) # ((steps*bs*individuals), dim, horizon)
             elif return_mode == "steps":
-                losses[loss_name] = torch.stack(losses[loss_name], dim=0) # (steps*bs*individuals)
+                losses[loss_name] = torch.tensor(losses[loss_name]) # (steps*bs*individuals)
             elif return_mode == "indiv":
                 for indiv in losses[loss_name]:
                     losses[loss_name][indiv] = torch.tensor(losses[loss_name][indiv]) # {indiv: (steps * bs)]

@@ -54,7 +54,6 @@ def run(cfg):
         seed=seed)
     if cfg.data.normalize:
         apply_standard_norm(loaders_dict, stats_dict)
-    
     shape, shape_str, batch_str = get_sizes(loaders_dict, str_info=True)
     if verbose:
         logger.info("Fetched dataloaders")
