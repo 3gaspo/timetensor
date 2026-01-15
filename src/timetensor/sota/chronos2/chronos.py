@@ -1,11 +1,8 @@
 ## Adapted from https://github.com/amazon-science/chronos-forecasting
 
-from chronos import BaseChronosPipeline, Chronos2Pipeline
-import pandas as pd
-import numpy as np
 import torch
-import torch.nn as nn
 
+from chronos import BaseChronosPipeline, Chronos2Pipeline
 from hydra.utils import to_absolute_path
 
 
@@ -25,8 +22,6 @@ class Chronos:
 
     def _split_context(self, c):
         """returns (past_only, future_included) contexts from c"""
-        if c is not None:
-            print("debug split", c)
         if c is None:
             return None, None
 
@@ -38,7 +33,7 @@ class Chronos:
             assert c.shape[-1] == self.lags+self.horizon, f"Wrong context shape: {c}"
             return None, c
 
-        if self.context_mode == "both":
+        if self.context_mode == "any":
             assert type(c) == tuple and len(c) == 2, f"Wrong context shape: {type(c)}, {len(c)}"
             return c
 
@@ -57,16 +52,27 @@ class Chronos:
             fut_cov = {}
 
             if past_only is not None:
-                k = past_only.shape[1]
-                for i in range(k):
-                    past_cov[f"past_{i}"] = past_only[b, i, :]
+                cs, dim, ds = past_only.shape
+                if bs == cs:
+                    for i in range(dim):
+                        past_cov[f"past_{i}"] = past_only[b, i, :]
+                else:
+                    for b_ in range(cs):
+                        for i in range(dim):
+                            past_cov[f"past_{b_}_{i}"] = past_only[b_, i, :]
+
 
             if future_included is not None:
-                k2 = future_included.shape[1]
-                for i in range(k2):
-                    name = f"fut_{i}"
-                    past_cov[name] = future_included[b, i, :lags]
-                    fut_cov[name] = future_included[b, i, lags : lags + self.horizon]
+                cs, dim, ds = future_included.shape
+                if bs == cs:
+                    for i in range(dim):
+                        name = f"fut_{i}"
+                        past_cov[name] = future_included[b, i, :lags]
+                        fut_cov[name] = future_included[b, i, lags : lags + self.horizon]
+                else:
+                    for b_ in range(cs):
+                        for i in range(dim):
+                            past_cov[f"past_{b_}_{i}"] = past_only[b_, i, :]
 
             if len(past_cov) > 0:
                 d["past_covariates"] = past_cov

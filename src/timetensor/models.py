@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import numpy as np
 
 from .utils import get_normal_stats
 
@@ -8,6 +7,9 @@ from sklearn.linear_model import LinearRegression
 from .sota.patchtst.patch_tst import PatchTST
 from .sota.dlinear import DLinear
 from .sota.chronos2.chronos import Chronos
+
+import torch.nn.functional as F
+
 
 ## Baselines
 
@@ -17,7 +19,7 @@ class Persistence(nn.Module):
         super().__init__()
         self.model_name, self.model_type = "persistence", "pytorch"
         self.horizon = horizon
-    def forward(self, x):
+    def forward(self, x, c=None):
         past_values = x[:, :, -1:] # (B, dim, 1)
         output = past_values.repeat(1, 1, self.horizon) # (B, dim, horizon)
         return output
@@ -28,7 +30,7 @@ class Expected(nn.Module):
         super().__init__()
         self.model_name, self.model_type = "expected", "pytorch"
         self.horizon = horizon
-    def forward(self, x):
+    def forward(self, x, c=None):
         mean = x.mean(dim=-1, keepdim=True).detach()
         output = mean.repeat(1, 1, self.horizon) # (B, dim, horizon)
         return output
@@ -39,7 +41,7 @@ class Repeat(nn.Module):
         super().__init__()
         self.model_name, self.model_type = "repeat", "pytorch"
         self.horizon = horizon
-    def forward(self, x):
+    def forward(self, x, c=None):
         output = x[:, :, -self.horizon:] # (B, dim, horizon)
         return output
     
@@ -50,7 +52,7 @@ class Lookback(nn.Module):
         self.model_name, self.model_type = "lookback", "pytorch"
         self.horizon = horizon
         self.idx  = idx
-    def forward(self, x):
+    def forward(self, x, c=None):
         output = x[:, :, self.idx:self.idx+self.horizon] # (B, dim, horizon)
         return output
 
@@ -61,7 +63,7 @@ class Linear(nn.Module):
         self.model_name, self.model_type = "linear", "pytorch"
         self.lags, self.dim, self.horizon  = lags, dim, horizon
         self.fc = nn.Linear(lags * dim, horizon * dim)
-    def forward(self, x):
+    def forward(self, x, c=None):
         batch_size = x.shape[0]
         inpt = x.view(batch_size, self.lags * self.dim) # (B, lag*dim)
         output = self.fc(inpt) # (B, horizon*dim)
@@ -77,9 +79,9 @@ class LinearPeriod(nn.Module):
         self.period = period
 
         self.idx = [t for t in range(lags) if (t % period) in range(self.horizon)]
-        self.fc = nn.Linear(len(idx) * dim, horizon * dim)
+        self.fc = nn.Linear(len(self.idx) * dim, horizon * dim)
 
-    def forward(self, x): #(B, dim, lag)
+    def forward(self, x, c=None): #(B, dim, lag)
         batch_size = x.shape[0]
         subx = x[:, :, self.idx]
         inpt = subx.view(batch_size, len(self.idx) * self.dim) # (B, idxs*dim)
@@ -118,7 +120,7 @@ class Sklinear():
         mean, std = get_normal_stats(Xtrain)
         Xtrain, ytrain = self.norm(Xtrain, mean, std), self.norm(ytrain, mean, std)
         self.reg.fit(Xtrain, ytrain)
-    def __call__(self, X):
+    def __call__(self, X, c=None):
         mean, std = get_normal_stats(X)
         X = self.norm(X, mean, std)
         pred = torch.tensor(self.reg.predict(X.cpu()))
@@ -239,56 +241,64 @@ class RevIN(DefaultNorm):
 
 ## Models wrappers
 
-class ContextModel(nn.Module):
-    """Wrapper for model to enable optional context in forward"""
-    def __init__(self, model, do_context=False):
-        super().__init__()
-        self.model = model
-        self.do_context = do_context
-
-    def forward(self, x, c=None): #x : (B, dim, lags)
-        if self.do_context and c is not None:
-            return self.model(x, c)
-        else:
-            return self.model(x)
-        return
-    
-    def __getattr__(self, name): # only called if attribute not found normally
-        try:
-            return super().__getattr__(name)
-        except AttributeError:
-            pass
-        if hasattr(self.model, name):
-            return getattr(self.model, name)
-        else:
-            raise AttributeError(f"{type(self).__name__} has no attribute {name!r}")
-
-class ConstantModel(nn.Module):
+class AugmentModel(nn.Module):
     """Wrapper for model, repeats value in case of constant window"""
-    def __init__(self, model, horizon, do_constant=False):
+    def __init__(self, model, horizon, repeat_constant=False, self_augment=False, eps=1e-8):
         super().__init__()
         self.model = model
-        self.do_constant = do_constant
         self.horizon = horizon
+        self.eps = eps
 
-    def forward(self, x, c=None): #x : (B, dim, lags)
-        if self.do_constant:
-            std = x.std(dim=-1) # (B, dim)
-            non_cte_mask = (std > 0).any(dim=1) # (B)
-            last_values = x[:, :, -1].unsqueeze(2) # (B, dim, 1)
-            y = last_values.repeat(1, 1, self.horizon) # (B, dim, horizon)
-            if non_cte_mask.any():
-                x_nc = x[non_cte_mask]
-                if c is not None:
-                    c_nc = c[non_cte_mask]
-                else:
-                    c_nc = None
-                y_nc = self.model(x_nc, c=c_nc)
-                y[non_cte_mask] = y_nc
-        else:
-            y = self.model(x, c)
+        self.repeat_constant = repeat_constant
+        self.self_augment = self_augment
+
+        if self.self_augment == "all":
+            kernel_size, sigma = 5, 1.0
+            t = torch.arange(kernel_size).float() - kernel_size // 2
+            kernel = torch.exp(-0.5 * (t / sigma) ** 2)
+            kernel = kernel / kernel.sum()
+            self.register_buffer('smooth_kernel', kernel)
+
+    def _repeat_constant(self, x, c=None): #x : (B, dim, lags)
+        """repeats constant lookbacks instead of model prediction"""
+        std = x.std(dim=-1).sum(dim=1)
+        is_constant = (std < self.eps)
+        y = self.model(x, c=c)
+        if is_constant.any():
+            last_values = x[is_constant, :, -1:] # (B_const, dim, 1)
+            y[is_constant] = last_values.repeat(1, 1, self.horizon)
         return y
+
+    def _self_augment(self, x, c, mode="all"): #x : (B, dim, lags)
+        """returns augmentations of x and append to context c"""
+
+        z1 = x * x.abs() # signed square
+        if mode == "small":
+            return torch.cat([c, z1], dim=1) if c is not None else z1
+            
+        z2 = torch.sign(x) * torch.sqrt(x.abs() + self.eps) # signed sqrt
+        k = self.smooth_kernel.view(1, 1, -1).repeat(x.shape[1], 1, 1)
+        z3 = F.conv1d(x, k, padding=self.smooth_kernel.shape[0]//2, groups=x.shape[1]) #kernel smoothing
+            
+        if mode == "medium":
+            return torch.cat([c, z1, z2, z3], dim=1) if c is not None else torch.cat([z1, z2, z3], dim=1)
+
+        z4 = torch.sign(x)
+        z5 = -x
+        if mode == "large":
+            return torch.cat([c, z1, z2, z3, z4, z5], dim=1) if c is not None else torch.cat([z1, z2, z3, z4, z5], dim=1)
+        else:
+            raise ValueError(f"Unrecognized augment mode: {mode}")
     
+    def forward(self, x, c=None):
+        if self.self_augment:
+            c = self._self_augment(x, c, self.augment)
+            
+        if self.repeat_constant:
+            return self._repeat_constant(x, c)
+
+        return self.model(x, c=c)
+
     def __getattr__(self, name): # only called if attribute not found normally
         try:
             return super().__getattr__(name)
@@ -298,12 +308,10 @@ class ConstantModel(nn.Module):
             return getattr(self.model, name)
         else:
             raise AttributeError(f"{type(self).__name__} has no attribute {name!r}")
-
 
 ## Loading model
 
 def model_selector(model_name, lags, dim, horizon, **kwargs):
-    do_context = False
     if model_name == "persistence":
         model = Persistence(horizon)
     elif model_name == "repeat":
@@ -330,10 +338,9 @@ def model_selector(model_name, lags, dim, horizon, **kwargs):
         model = Chronos(lags, horizon, kwargs.get("context_mode", "past_only"), kwargs.get("cross_learning", False))
         model.model_name = "chronos"
         model.model_type = "pytorch"
-        do_context = True
     else:
         raise ValueError(f"Model name not recognized : {model_name}")
-    return model, do_context
+    return model
 
 def normalization_selector(model, norm_name, dim, **kwargs):
     if norm_name is None or norm_name == "None":
@@ -362,15 +369,14 @@ def normalization_selector(model, norm_name, dim, **kwargs):
         raise ValueError(f"Normalization not recognized : {norm_name}")
     return model
 
-def load_model(model_name, shape, norm_name=None, init_path=None, do_constants=True, cpu=False, **kwargs):
+def load_model(model_name, shape, norm_name=None, init_path=None, cpu=False, **kwargs):
     """loads models from str model name"""
     lags, dim, horizon = shape[0], shape[1], shape[2]
     
-    model, do_context = model_selector(model_name, lags, dim, horizon, **kwargs) #model architecture
+    model = model_selector(model_name, lags, dim, horizon, **kwargs) #model architecture
     if model.model_type == "pytorch": 
-        model = ContextModel(model, do_context) #allow context in call input
+        model = AugmentModel(model, horizon, kwargs.get("repeat_constant"), kwargs.get("self_augment")) #allow context in call input
         model = normalization_selector(model, norm_name, dim, **kwargs)
-        model = ConstantModel(model, horizon, kwargs.get(do_constants))
 
     #init
     if init_path is not None and model.model_type == "pytorch":
@@ -381,36 +387,6 @@ def load_model(model_name, shape, norm_name=None, init_path=None, do_constants=T
         model.load_state_dict(weights)
 
     return model
-
-#TODO format kwargs pour grevin, requiert stats_dict et nodes_stats_dict dans load_model
-
-# def format_min_kwargs(kwargs, norm_name, nodes_stats_dict, stats_dict, logger):
-#     """utils methods to format model kwargs"""
-#     if (norm_name is not None and "cmIN" in norm_name) and kwargs.get("n_clusters") is None and not (kwargs.get("init_alpha") or kwargs.get("init_beta")):
-#         kwargs["n_clusters"] = len(nodes_stats_dict)
-
-#     if kwargs.get("init_alpha") is True:
-#         if "cmIN" in norm_name:
-#             kwargs["init_alpha"] = [nodes_stats_dict[node]["train"]["alpha"] for node in nodes_stats_dict]
-#             if len(kwargs["init_alpha"])<10:
-#                 logger.info(f"Loaded init_alphas: {kwargs['init_alpha']}")
-#         else:
-#             if stats_dict is not None:
-#                 kwargs["init_alpha"] = stats_dict["train"]["alpha"]
-#             else:
-#                 kwargs["init_alpha"] = None
-#             logger.info(f"Loaded init_alphas: {kwargs['init_alpha']}")
-#     if kwargs.get("init_beta") is True:
-#         if "cmIN" in norm_name:
-#             kwargs["init_beta"] = [nodes_stats_dict[node]["train"]["beta"] for node in nodes_stats_dict]
-#             if len(kwargs["init_beta"])<10:
-#                 logger.info(f"Loaded init_betas: {kwargs['init_beta']}")
-#         else:
-#             if stats_dict is not None:
-#                 kwargs["init_beta"] = stats_dict["train"]["beta"]
-#             else:
-#                 kwargs["init_beta"] = None
-#             logger.info(f"Loaded init_betas: {kwargs['init_beta']}")
 
 
 ## Experimental
@@ -500,6 +476,8 @@ class GRevIN(DefaultNorm):
     def _parse_cluster(self, c):
         if c is None:
             return None
+
+        #TODO : what if c includes both the normalization and model's context?
         if isinstance(c, torch.Tensor):
             if c.ndim == 1:
                 return c

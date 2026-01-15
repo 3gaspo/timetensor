@@ -74,7 +74,7 @@ def run(cfg):
         if not os.path.exists(save_dir_):
             os.makedirs(save_dir_)
 
-        model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device.type=="cpu", **kwargs)
+        model = load_model(model_name, shape, norm_name, cfg.training.init, device.type=="cpu", **kwargs)
 
         loaders_dict_ = {}
         for key in train_keys:

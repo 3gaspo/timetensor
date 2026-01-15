@@ -46,6 +46,6 @@ class PatchTST(nn.Module):
                                 pretrain_head=pretrain_head, head_type=head_type, individual=individual, verbose=verbose, **kwargs)
     
     
-    def forward(self, x):  # x: [Batch, Channel, Input length]
+    def forward(self, x, c=None):  # x: [Batch, Channel, Input length]
         x = self.model(x)
         return x

@@ -1,4 +1,4 @@
 name: DLinear
-do_constants: False
 configs:
+  repeat_constant: False
   kernel_size: 25

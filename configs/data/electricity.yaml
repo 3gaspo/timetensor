@@ -13,14 +13,16 @@ splits:
 sampling:
   len_multiplier: 1
   train_idx_mode: individuals
-  shuffle_train: True
-  context_by_individuals: True
-  return_all_individuals: False
-  shuffle_eval: True
   eval_idx_mode: random
+  shuffle_train: True
+  shuffle_eval: True
+  train_stride: 1
+  eval_stride: 1
   remove_train_cte: True
   remove_eval_cte: True
+  block_individuals: 1
   use_context: True
+  context_by_individuals: False
   
 subsets:
   mode: dates

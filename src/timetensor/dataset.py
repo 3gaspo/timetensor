@@ -12,28 +12,42 @@ from .utils import normalize, is_cte, set_seed
 from .analysis import get_dataset_stats
 
 
-
 class IndexSampler:
-    def __init__(self, values, lags, horizon, idx_mode="random", return_all_individuals=False, use_context=True, context_by_individuals=False, remove_cte=False, weight=1, subset_indices=None, subset_mode="dates"):
+    def __init__(self, values, context, lags, horizon, idx_mode="random", block_individuals=1, use_context=True, remove_cte=False, weight=1, subset_indices=None, subset_mode="dates", stride=1):
         """sampler to fetch indiv and date indices for dataset
         idx_mode: what idx corresponds to
         subset_mode: what subsets_indices correspond to
         """
-        self.values = values
+        self.values, self.context = values, context
         self.individuals, self.dim_values, self.dates = self.values.shape
+        self.contexts, self.dim_context, self.context_dates = self.context.shape
         self.lags, self.horizon = lags, horizon
-        self.max_dates = self.dates - (self.lags + self.horizon) + 1
-        self.idx_mode, self.return_all_individuals = idx_mode, return_all_individuals
-        self.use_context, self.context_by_individuals = use_context, context_by_individuals
+        
+        self.idx_mode, self.block_individuals = idx_mode, block_individuals
+        self.use_context = use_context
         self.remove_cte = remove_cte
         self.weight = weight
         self.subset_indices, self.subset_mode = subset_indices, subset_mode
+        self.stride = stride
 
-    def true_len(self):
+        self.max_dates = self.dates - (self.lags + self.horizon) + 1
+        if self.contexts == self.individuals:
+            self.context_by_individuals = True
+        else:
+            self.context_by_individuals = False
+
+    @property
+    def max_strided_dates(self):
+        """Dynamically calculates max available strided steps based on current config"""
+        if self.subset_indices is not None and self.subset_mode == "dates":
+            n_dates = len(self.subset_indices)
+        else:
+            n_dates = self.max_dates
+        return (n_dates - 1) // self.stride + 1
+
+    def _true_len(self):
         if self.idx_mode == "dates":
-            if self.subset_indices is not None and self.subset_mode == "dates":
-                return len(self.subset_indices)
-            return self.max_dates
+            return self.max_strided_dates
         elif self.idx_mode == "individuals":
             if self.subset_indices is not None and self.subset_mode == "individuals":
                 return len(self.subset_indices)
@@ -41,184 +55,136 @@ class IndexSampler:
         elif self.idx_mode == "all":
             if self.subset_indices is not None:
                 if self.subset_mode == "dates":
-                    return self.individuals * len(self.subset_indices)
+                    return self.individuals * self.max_strided_dates
                 elif self.subset_mode == "individuals":
-                    return len(self.subset_indices) * self.max_dates
+                    return len(self.subset_indices) * self.max_strided_dates
                 elif self.subset_mode == "all":
                     return len(self.subset_indices)
-            return self.individuals * self.max_dates
+            return self.individuals * self.max_strided_dates
         elif self.idx_mode == "random":
             return 1
         else:
             raise ValueError(f"Unrecognized idx_mode: {self.idx_mode}")
 
-    def __len__(self):
-        return self.weight * self.true_len()
+    @property
+    def shape(self):
+        #values
+        if self.subset_indices is not None and self.subset_mode == "individuals":
+            n_indivs = len(self.subset_indices)
+        else:
+            n_indivs = self.individuals
+        n_dates = self.max_strided_dates
 
-    def get_mask(self, values, lags, indivs, date):
+        #context
+        if self.context_dates == 1:
+            n_context_dates = 1
+        else:
+            n_context_dates = n_dates
+
+        return (n_indivs, self.dim_values, n_dates), (self.contexts, self.dim_context, n_context_dates)
+
+    def __len__(self):
+        return self.weight * self._true_len()
+
+    def _get_non_cte_mask(self, indivs, date, eps=1e-8):
         """return mask of indiv with non constant lookback"""
-        lookbacks = values[indivs, :, date: date + lags] #(individuals, dim_values, lags)
-        mask = (lookbacks.std(dim=-1) > 0).any(dim=1)
+        lookbacks = self.values[indivs, :, date: date + self.lags] #(individuals, dim_values, lags)
+        mask = (lookbacks.std(dim=-1) > eps).any(dim=1)
         return mask
     
-    def __call__(self, raw_idx):
-        idx = raw_idx % self.true_len()
+    def _get_strided_date(self, raw_step=None):
+        """Returns actual date index from a raw step (0 to max_strided-1) or random if None"""
+        if raw_step is None:
+            raw_step = np.random.randint(self.max_strided_dates)
+            
+        date_idx = raw_step * self.stride
         
+        if self.subset_indices is not None and self.subset_mode == "dates":
+            date = self.subset_indices[date_idx]
+            assert date < self.max_dates
+        else:
+            date = date_idx
+        return date
+
+    def _get_indivs(self, idx=None):
+        """Returns list of individuals based on current mode/subset"""
+        if self.subset_indices is not None and self.subset_mode == "individuals":
+            if idx is not None:
+                return [self.subset_indices[idx]]
+            # Random selection from subset
+            if self.block_individuals > 1:
+                if self.block_individuals < len(self.subset_indices):
+                    return list(np.random.choice(self.subset_indices, self.block_individuals))
+                return self.subset_indices
+            else:
+                return [np.random.choice(self.subset_indices)]
+        else:
+            if idx is not None:
+                return [idx]
+            # Random selection from all
+            if self.block_individuals > 1:
+                if self.block_individuals < self.individuals:
+                    return list(np.random.choice(self.individuals, self.block_individuals))
+                return slice(None)
+            else:
+                return [np.random.randint(self.individuals)]
+
+    def __call__(self, raw_idx):
+        idx = raw_idx % self._true_len()
+        
+        # 1. Determine initial indivs and date based on idx_mode
         if self.idx_mode == "dates":
-            if self.subset_indices is not None and self.subset_mode == "dates":
-                date = self.subset_indices[idx]
-                assert date < self.max_dates
-            else:
-                date = idx
-            if self.return_all_individuals: #1 batch = all individuals * batch of dates
-                if self.subset_indices is not None and self.subset_mode == "individuals":
-                    indivs = self.subset_indices
-                else:
-                    indivs = slice(None)
-                if self.remove_cte:
-                    remove_cte_counter = 0
-                    mask = self.get_mask(self.values, self.lags, indivs, date)
-                    while mask.sum().item() == 0: #search for new date
-                        if self.subset_indices is not None and self.subset_mode == "dates":
-                            date = np.random.choice(self.subset_indices)
-                        else:
-                            date = np.random.randint(self.max_dates)
-                        remove_cte_counter += 1
-                        if remove_cte_counter > 100:
-                            raise ValueError("Overflow constant windows")
-                        mask = self.get_mask(self.values, self.lags, indivs, date)
+            date = self._get_strided_date(idx)
+            indivs = self._get_indivs(idx=None) # random indivs
 
-            else: #1 batch = 1 individual, batch of dates
-                if self.subset_indices is not None and self.subset_mode == "individuals":
-                    indivs = [np.random.choice(self.subset_indices)]
-                else:
-                    indivs = [np.random.randint(self.individuals)]
-                if self.remove_cte:
-                    remove_cte_counter = 0
-                    mask = self.get_mask(self.values, self.lags, indivs, date)
-                    while mask.sum().item() == 0: #search for new indiv
-                        if self.subset_indices is not None and self.subset_mode == "individuals":
-                            indivs = [np.random.choice(self.subset_indices)]
-                        else:
-                            indivs = [np.random.randint(self.individuals)]
-                        remove_cte_counter += 1
-                        if remove_cte_counter >= 100:
-                            remove_cte_counter_ = 0
-                            while mask.sum().item() == 0: #search for new date
-                                if self.subset_indices is not None and self.subset_mode == "dates":
-                                    date = np.random.choice(self.subset_indices)
-                                else:
-                                    date = np.random.randint(self.max_dates)
-                                remove_cte_counter_ += 1
-                                if remove_cte_counter_ > 100:
-                                    raise ValueError("Overflow constant windows")
-                                mask = self.get_mask(self.values, self.lags, indivs, date)
-                        mask = self.get_mask(self.values, self.lags, indivs, date)
+        elif self.idx_mode == "individuals":
+            indivs = self._get_indivs(idx=idx)
+            date = self._get_strided_date(raw_step=None) # random date
 
-        elif self.idx_mode == "individuals": #1 batch = batch of individuals, random date
-            if self.subset_indices is not None:
-                if self.subset_mode == "dates":
-                    indivs, date = [idx], np.random.choice(self.subset_indices)
-                elif self.subset_mode == "individuals":
-                    indivs, date = [self.subset_indices[idx]], np.random.randint(self.max_dates)
-            else:
-                indivs, date = [idx], np.random.randint(self.max_dates)
-            if self.remove_cte:
-                if is_cte(self.values[indivs, :, :]): #indiv is fully constant
-                    remove_cte_counter = 0
-                    mask = self.get_mask(self.values, self.lags, indivs, date)
-                    while mask.sum().item() == 0: #search for new indiv and date
-                        if self.subset_indices is not None:
-                            if self.subset_mode == "dates":
-                                indivs, date =  [np.random.randint(self.individuals)], np.random.choice(self.subset_indices)
-                            elif self.subset_mode == "individuals":
-                                indivs, date = [np.random.choice(self.subset_indices)], np.random.randint(self.max_dates)
-                        else:
-                            indivs, date = [idx], np.random.randint(self.max_dates)
-                        remove_cte_counter += 1
-                        if remove_cte_counter > 100:
-                            raise ValueError("Overflow constant windows")
-                        mask = self.get_mask(self.values, self.lags, indivs, date)
-                else:
-                    remove_cte_counter = 0
-                    mask = self.get_mask(self.values, self.lags, indivs, date)
-                    while mask.sum().item() == 0: #search for new date
-                        if self.subset_indices is not None:
-                            if self.subset_mode == "dates":
-                                indivs, date =  [idx], np.random.choice(self.subset_indices)
-                            elif self.subset_mode == "individuals":
-                                indivs, date = [self.subset_indices[idx]], np.random.randint(self.max_dates)
-                        else:
-                            date = np.random.randint(self.max_dates)
-                        remove_cte_counter += 1
-                        if remove_cte_counter > 100:
-                            raise ValueError("Overflow constant windows")
-                        mask = self.get_mask(self.values, self.lags, indivs, date)
-                
         elif self.idx_mode == "all":
-            if self.subset_indices is not None:
-                if self.subset_mode == "dates":
-                    indivs, date = [idx % self.individuals], idx // self.individuals
-                    date = self.subset_indices[date]
-                    assert date + self.lags + self.horizon <= self.dates
-                elif self.subset_mode == "individuals":
-                    indiv, date = idx % len(self.subset_indices), idx // len(self.subset_indices)
-                    indivs = [self.subset_indices[indiv]]
-                elif self.subset_mode == "all":
-                    idx = self.subset_indices[idx]
-                    indivs, date = [idx % self.individuals], idx // self.individuals
+            if self.subset_indices is not None and self.subset_mode == "all":
+                # Warning: stride is technically ignored here, idx selects the pair indiv, date
+                raw_pair_idx = self.subset_indices[idx]
+                indivs, date = [raw_pair_idx % self.individuals], raw_pair_idx // self.individuals
             else:
-                indivs, date = [idx % self.individuals], idx // self.individuals
-            if self.remove_cte:
-                remove_cte_counter = 0
-                mask = self.get_mask(self.values, self.lags, indivs, date)
-                while mask.sum().item() == 0: #search for new date
-                    idx = np.random.randint(self.true_len())
-                    if self.subset_indices is not None:
-                        if self.subset_mode == "dates":
-                            indivs, date = [idx % self.individuals], idx // self.individuals
-                            date = self.subset_indices[date]
-                            assert date + self.lags + self.horizon <= self.dates
-                        elif self.subset_mode == "individuals":
-                            indiv, date = idx % len(self.subset_indices), idx // len(self.subset_indices)
-                            indivs = [self.subset_indices[indiv]]
-                        elif self.subset_mode == "all":
-                            idx = self.subset_indices[idx]
-                            indivs, date = [idx % self.individuals], idx // self.individuals
-                    else:
-                        indivs, date = [idx % self.individuals], idx // self.individuals
-                    remove_cte_counter += 1
-                    if remove_cte_counter > 100:
-                        raise ValueError("Overflow constant windows")
-                    mask = self.get_mask(self.values, self.lags, indivs, date)
+                if self.subset_indices is not None and self.subset_mode == "individuals":
+                    n_indivs = len(self.subset_indices)
+                    indiv_idx = idx % n_indivs
+                    date_step = idx // n_indivs
+                    indivs = self._get_indivs(idx=indiv_idx)
+                else:
+                    n_indivs = self.individuals
+                    indiv_idx = idx % n_indivs
+                    date_step = idx // n_indivs
+                    indivs = [indiv_idx]
+                
+                date = self._get_strided_date(raw_step=date_step)
 
         elif self.idx_mode == "random":
-            if self.subset_indices is not None:
-                if self.subset_mode == "dates":
-                    indivs, date = [np.random.randint(self.individuals)], np.random.choice(self.subset_indices)
-                elif self.subset_mode == "individuals":
-                    indivs, date = [np.random.choice(self.subset_indices)], np.random.randint(self.max_dates)
-            else:
-                indivs, date = [np.random.randint(self.individuals)], np.random.randint(self.max_dates)
-            if self.remove_cte:
-                remove_cte_counter = 0
-                mask = self.get_mask(self.values, self.lags, indivs, date)
-                while mask.sum().item() == 0: #search for new date
-                    if self.subset_indices is not None:
-                        if self.subset_mode == "dates":
-                            indivs, date = [np.random.randint(self.individuals)], np.random.choice(self.subset_indices)
-                        elif self.subset_mode == "individuals":
-                            indivs, date = [np.random.choice(self.subset_indices)], np.random.randint(self.max_dates)
-                    else:
-                        indivs, date = [np.random.randint(self.individuals)], np.random.randint(self.max_dates)
-                    remove_cte_counter += 1
-                    if remove_cte_counter > 100:
-                        raise ValueError("Overflow constant windows")
-                    mask = self.get_mask(self.values, self.lags, indivs, date)
-
+            date = self._get_strided_date(raw_step=None)
+            indivs = self._get_indivs(idx=None)
         else:
             raise ValueError(f"Unrecognized idx_mode: {self.idx_mode}")
 
+        # 2. Handle constant windows
+        if self.remove_cte:
+            mask = self._get_non_cte_mask(indivs, date)
+            if mask.sum().item() == 0:
+                remove_cte_counter = 0
+                while mask.sum().item() == 0:
+
+                    if self.idx_mode == "individuals":
+                        date = self._get_strided_date(raw_step=None)
+                    else:
+                        indivs = self._get_indivs(idx=None)
+                        date = self._get_strided_date(raw_step=None)
+
+                    remove_cte_counter += 1
+                    if remove_cte_counter > 100:
+                        raise ValueError("Overflow constant windows")
+                    mask = self._get_non_cte_mask(indivs, date)
+
+        # 3. Context
         if self.use_context:
             if self.context_by_individuals:
                 context_idx = indivs
@@ -232,16 +198,14 @@ class IndexSampler:
 
 class TimeSeriesDataset(Dataset):
     """dataset of multiple individuals"""
-    def __init__(self, values, datetimes=None, context=None, lags=168, horizon=24, build_context=True):   
+    def __init__(self, values, datetimes=None, context=None, lags=168, horizon=24, build_context=False):   
         """
         values (N_individuals, dim_values, dates):  past target values 
         datetimes (dates): list of dates in datetime Y-m-d H:M:S format
         context (N_contexts, dim_context, dates): exogenous variates  e.g N_contexts=1 or N_contexts=N_individuals
         lags (int): size of lookback window
         horizon (int): size of target horizon
-        idx_mode (str): access items by date or individuals, or both
-        return_all_individuals (bool): return all individuals or a random
-        context_by_individuals(bool): return one context per individual or all
+        build_context (bool): add users index as context
         """
         super().__init__()
 
@@ -272,12 +236,16 @@ class TimeSeriesDataset(Dataset):
         else:
             self.contexts, self.dim_context, self.context_dates = 0, 0, 0
 
-        self.index_sampler = IndexSampler(self.values, self.lags, self.horizon) #default random sampler
+        self.index_sampler = IndexSampler(self.values, self.context, self.lags, self.horizon) #default random sampler
+
+    @property
+    def original_shape(self):
+        return (self.individuals, self.dim_values, self.dates), (self.contexts, self.dim_context, self.context_dates)
 
     @property
     def shape(self):
-        return (self.individuals, self.dim_values, self.dates), (self.contexts, self.dim_context, self.context_dates)
-
+        return self.index_sampler.shape
+    
     def __len__(self):
         return len(self.index_sampler)
 
@@ -298,8 +266,7 @@ class TimeSeriesDataset(Dataset):
                 raise AttributeError(f"IndexSampler has no attribute '{key}'")
             if key in ["values", "lags", "horizon"]:
                 raise AttributeError(f"{key} should not be changed after dataset init")
-            if key == "context_by_individuals" and value==True:
-                assert self.contexts == self.individuals, f"error context indiv size {self.context.shape}"
+            if key == "stride": assert value>0 and value < (self.dates-self.lags-self.horizon)
             setattr(self.index_sampler, key, value)
 
     def __getitem__(self, idx):                
@@ -309,6 +276,8 @@ class TimeSeriesDataset(Dataset):
         target = values[:, :, self.lags:] # (individuals, dim, horizon)
         
         if (self.context is not None) and (context_idx is not None):
+            print("debug get item")
+
             if self.context_dates == 1:
                 context = self.context[context_idx, :, 0].unsqueeze(-1) # (individuals, dim_context, 1)
             else:
@@ -576,8 +545,7 @@ def get_dataset_splits(splits, sampling, data_path=None, save_path=None, cluster
     """splits data from path. If str splits, will load given split, if float will save new split
     set_cluster_context: associated provided integer value to specified cluster (via cluster_ids or cluster_path)
     """
-    context_by_indiv, reshuffle = sampling["context_by_individuals"], splits["reshuffle"]
-    date_splits, indiv_split = splits["date_splits"], splits["indiv_split"]
+    date_splits, indiv_split, reshuffle = splits["date_splits"], splits["indiv_split"], splits["reshuffle"]
 
     #load whole data
     if data is None:
@@ -590,10 +558,13 @@ def get_dataset_splits(splits, sampling, data_path=None, save_path=None, cluster
         indiv_split = 1
     
     timed_context = True
+    context_by_individuals = False
     if context is not None:
         contexts, dim_context, context_dates = context.shape
         if context_dates == 1:
             timed_context = False
+        if contexts == individuals:
+            context_by_individuals = True
 
     #filter values at cluster path
     if cluster_path is not None or cluster_ids is not None:
@@ -602,7 +573,7 @@ def get_dataset_splits(splits, sampling, data_path=None, save_path=None, cluster
         else:
             indices = cluster_ids
         values = values[indices]
-        if context is not None and context_by_indiv:
+        if context is not None and context_by_individuals:
             context = context[indices]
         if set_cluster_context is not None:
             context = torch.full((len(indices), 1, 1), set_cluster_context) # (indices, 1, 1)
@@ -633,9 +604,9 @@ def get_dataset_splits(splits, sampling, data_path=None, save_path=None, cluster
     elif type_split == 3:
         data_dict = split_3_way(values, context, datetimes, date_splits, timed_context=timed_context)
     elif type_split == 4:
-        data_dict = split_4_way(values, context, datetimes, indiv_split, date_splits[0], context_by_indiv, save_path, reshuffle=reshuffle, timed_context=timed_context)
+        data_dict = split_4_way(values, context, datetimes, indiv_split, date_splits[0], context_by_individuals, save_path, reshuffle=reshuffle, timed_context=timed_context)
     elif type_split == 6:
-        data_dict = split_6_way(values, context, datetimes, indiv_split, date_splits, context_by_indiv, save_path, reshuffle=reshuffle, timed_context=timed_context)
+        data_dict = split_6_way(values, context, datetimes, indiv_split, date_splits, context_by_individuals, save_path, reshuffle=reshuffle, timed_context=timed_context)
     else:
         raise ValueError(f"Unrecognized type_split: {type_split}")
 
@@ -660,10 +631,12 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, splits, sampling, su
             idx_mode = sampling["train_idx_mode"]
             remove_cte = sampling["remove_train_cte"]
             shuffle = sampling["shuffle_train"]
+            stride = sampling["train_stride"]
         else:
             idx_mode = sampling["eval_idx_mode"]
             remove_cte = sampling["remove_eval_cte"]
             shuffle = sampling["shuffle_eval"]
+            stride = sampling["eval_stride"]
 
         #subsets
         subset = subsets[key]
@@ -684,8 +657,8 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, splits, sampling, su
         #loader
         dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon)
         dataset.set_sampler(idx_mode = idx_mode,
-            return_all_individuals = sampling["return_all_individuals"], use_context = sampling["use_context"], context_by_individuals = sampling["context_by_individuals"], remove_cte=remove_cte,
-            weight=sampling["len_multiplier"], subset_indices=subset_indices, subset_mode=subset_mode)       
+            block_individuals = sampling["block_individuals"], use_context = sampling["use_context"], remove_cte=remove_cte,
+            weight=sampling["len_multiplier"], subset_indices=subset_indices, subset_mode=subset_mode, stride=stride)       
         if standard_stats is not None:
             dataset.normalize(standard_stats)
         loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=collate_fn, num_workers=0)
@@ -699,6 +672,7 @@ def collate_fn(data):
     inputs = torch.cat(inputs, dim=0)   # (bs*(individuals), dim, lookback)
     targets = torch.cat(targets, dim=0)   # (bs*(individuals), dim, horizon)
     if contexts[0] is not None:
+        print("debug collate context")
         contexts = torch.cat(contexts, dim=0)  # (bs*(individuals), dim_context, 1*(lookback+horizon))  
     else:
         contexts = None
@@ -711,7 +685,6 @@ def aggregate_loaders_dict(loaders_dicts, lags, horizon, sampling, batch_size):
     """aggregates loaders of different individuals. Expects same dates.
     loaders_dicts: list of loaders_dict
     no weighting nor subsetting"""
-    context_by_indiv, return_all_indiv = sampling["context_by_individuals"], sampling["return_all_individuals"]
 
     keys = list(loaders_dicts[0].keys())
     loaders_dict = {}
@@ -726,7 +699,9 @@ def aggregate_loaders_dict(loaders_dicts, lags, horizon, sampling, batch_size):
             shuffle = sampling["shuffle_eval"]
 
         datetimes = loaders_dicts[0][key].dataset.datetimes
-        if context_by_indiv:
+        block_individuals = loaders_dicts[0][key].dataset.index_sampler.block_individuals
+        context_by_individuals = loaders_dicts[0][key].dataset.index_sampler.context_by_individuals
+        if context_by_individuals:
             context_list = []
         else:
             context = loaders_dicts[0][key].dataset.context
@@ -734,10 +709,10 @@ def aggregate_loaders_dict(loaders_dicts, lags, horizon, sampling, batch_size):
         for new_dict in loaders_dicts:
             values = new_dict[key].dataset.values
             values_list.append(values)
-            if context_by_indiv:
+            if context_by_individuals:
                 context = new_dict[key].dataset.context
                 context_list.append(context)
-        if context_by_indiv:
+        if context_by_individuals:
             if context_list[0] is None:
                 context = None
             else:
@@ -745,7 +720,7 @@ def aggregate_loaders_dict(loaders_dicts, lags, horizon, sampling, batch_size):
         values = torch.cat(values_list, dim=0)
         extended_dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon)
         extended_dataset.set_sampler(idx_mode = idx_mode,
-            return_all_individuals = return_all_indiv, context_by_individuals = context_by_indiv, remove_cte=remove_cte)
+            block_individuals = block_individuals, remove_cte=remove_cte)
         extended_loader = DataLoader(extended_dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=collate_fn, num_workers=0)
         loaders_dict[key] = extended_loader
     
@@ -883,7 +858,7 @@ def apply_standard_norm(loaders_dict, stats_dict):
         loader.dataset.normalize(stats_dict[key])
 
 
-def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_by_individuals=True, prefix=""):
+def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", prefix=""):
     """gets a random individual and random window from dataset"""
     values, context, datetimes = load_data(path, prefix)
 
@@ -895,7 +870,7 @@ def set_random_data(path="datasets/", lag=168, horizon=24, name="rand", context_
     target = values[rand_indiv, :, rand_date+lag : rand_date+lag+horizon]
     if context is not None:
         if context.shape[-1] > 1:
-            if context_by_individuals:
+            if context.shape[0] == individuals:
                 context = context[rand_indiv, :, rand_date : rand_date+lag+horizon]
             else:
                 context = context[:, :, rand_date : rand_date+lag+horizon]

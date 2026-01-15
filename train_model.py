@@ -54,7 +54,7 @@ def run(cfg):
         logger.info(batch_str)
 
     #model
-    model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device.type=="cpu", **kwargs)
+    model = load_model(model_name, shape, norm_name, cfg.training.init, device.type=="cpu", **kwargs)
     if verbose:
         logger.info("Fetched model")
 

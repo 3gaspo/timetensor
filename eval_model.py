@@ -56,7 +56,7 @@ def run(cfg):
         logger.info("Fetched dataloaders")
 
     #model
-    model = load_model(model_name, shape, norm_name, cfg.training.init, cfg.model.do_constants, device.type=="cpu", **kwargs)
+    model = load_model(model_name, shape, norm_name, cfg.training.init, device.type=="cpu", **kwargs)
     learner = load_learner(model, criterion, cfg.training.lr, eval_losses, device)
     if verbose:
         logger.info("Fetched model and learner")
