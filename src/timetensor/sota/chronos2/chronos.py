@@ -46,7 +46,7 @@ class Chronos:
 
         inputs = []
         for b in range(bs):
-            d = {"target": x[b]}  # (dim, lags)
+            d = {"target": x[b].cpu()}  # (dim, lags)
 
             past_cov = {}
             fut_cov = {}
@@ -55,11 +55,11 @@ class Chronos:
                 cs, dim, ds = past_only.shape
                 if bs == cs:
                     for i in range(dim):
-                        past_cov[f"past_{i}"] = past_only[b, i, :]
+                        past_cov[f"past_{i}"] = past_only[b, i, :].cpu()
                 else:
                     for b_ in range(cs):
                         for i in range(dim):
-                            past_cov[f"past_{b_}_{i}"] = past_only[b_, i, :]
+                            past_cov[f"past_{b_}_{i}"] = past_only[b_, i, :].cpu()
 
 
             if future_included is not None:

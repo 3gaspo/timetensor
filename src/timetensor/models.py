@@ -250,9 +250,17 @@ class AugmentModel(nn.Module):
         self.eps = eps
 
         self.repeat_constant = repeat_constant
-        self.self_augment = self_augment
 
-        if self.self_augment == "all":
+        assert self_augment is None or self_augment is False or type(self_augment) == str, f"Unrecognized self_augment mode {self_augment}"
+        self.modes = self_augment
+        if self.modes is None or self.modes is False or self.modes == "None" or self.modes == "" or self.modes == "none":
+            self.modes = []
+        elif self.modes == "all" or self.modes == "All":
+            self.modes = ["kernel", "square", "root", "sign", "mirror"]
+        else:
+            self.modes = self.modes.split(";")
+
+        if "kernel" in self.modes:
             kernel_size, sigma = 5, 1.0
             t = torch.arange(kernel_size).float() - kernel_size // 2
             kernel = torch.exp(-0.5 * (t / sigma) ** 2)
@@ -269,30 +277,31 @@ class AugmentModel(nn.Module):
             y[is_constant] = last_values.repeat(1, 1, self.horizon)
         return y
 
-    def _self_augment(self, x, c, mode="all"): #x : (B, dim, lags)
+    def _self_augment(self, x, c, modes=[]): #x : (B, dim, lags)
         """returns augmentations of x and append to context c"""
+        transforms = []
+        if c is not None:
+            transforms.append(c)
+        for mode in modes:
+            if mode == "kernel": # kernel smoothing
+                k = self.smooth_kernel.view(1, 1, -1).repeat(x.shape[1], 1, 1)
+                transforms.append(F.conv1d(x, k, padding=self.smooth_kernel.shape[0]//2, groups=x.shape[1])) 
+            elif mode == "square":  # signed square
+                transforms.append(x * x.abs())
+            elif mode == "root": # signed sqrt
+                transforms.append(torch.sign(x) * torch.sqrt(x.abs() + self.eps))
+            elif mode == "sign": #signed
+                transforms.append(torch.sign(x))
+            elif mode == "mirror":
+                transforms.append(-x)
+            else:
+                raise ValueError(f"Unrecognized augment mode: {mode}")
+        return torch.cat(transforms, dim=1)
 
-        z1 = x * x.abs() # signed square
-        if mode == "small":
-            return torch.cat([c, z1], dim=1) if c is not None else z1
-            
-        z2 = torch.sign(x) * torch.sqrt(x.abs() + self.eps) # signed sqrt
-        k = self.smooth_kernel.view(1, 1, -1).repeat(x.shape[1], 1, 1)
-        z3 = F.conv1d(x, k, padding=self.smooth_kernel.shape[0]//2, groups=x.shape[1]) #kernel smoothing
-            
-        if mode == "medium":
-            return torch.cat([c, z1, z2, z3], dim=1) if c is not None else torch.cat([z1, z2, z3], dim=1)
-
-        z4 = torch.sign(x)
-        z5 = -x
-        if mode == "large":
-            return torch.cat([c, z1, z2, z3, z4, z5], dim=1) if c is not None else torch.cat([z1, z2, z3, z4, z5], dim=1)
-        else:
-            raise ValueError(f"Unrecognized augment mode: {mode}")
     
     def forward(self, x, c=None):
         if self.self_augment:
-            c = self._self_augment(x, c, self.augment)
+            c = self._self_augment(x, c, self.self_augment)
             
         if self.repeat_constant:
             return self._repeat_constant(x, c)

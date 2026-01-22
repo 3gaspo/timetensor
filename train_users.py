@@ -5,7 +5,7 @@ import torch
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import get_losses, launch_training
-from src.timetensor.utils import get_dirs, set_seed
+from src.timetensor.utils import get_dirs, set_seed, save_results
 
 import os
 import pandas as pd
@@ -38,7 +38,7 @@ def run(cfg):
 
     verbose, seed = cfg.misc.verbose, cfg.misc.seed
 
-    output_dir, save_name = cfg.misc.output_dir, cfg.misc.save_name, 
+    output_dir, save_name = cfg.misc.output_dir, cfg.misc.save_name
     save_name, save_dir = get_dirs(output_dir, save_name, model_name, norm_name, criterion_name, cfg.data.subsets)
 
     if verbose:
@@ -98,6 +98,9 @@ def run(cfg):
         total_means[key] = np.mean(per_user_losses[key])
         w10_means[key] = np.mean(np.partition(per_user_losses[key], int(len(per_user_losses[key])*0.9))[int(len(per_user_losses[key])*0.9):])
         
+        save_results(total_means[key], save_dir, f"{key}_mean_results.json", save_name, f"{criterion_name}")
+        save_results(w10_means[key], save_dir, f"{key}_mean_results.json", save_name, f"{criterion_name}")
+
         stats_df = pd.DataFrame({
             "log(mean_error)": per_user_losses[key],
             "log(std_error)": stds_per_user_losses[key]})

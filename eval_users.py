@@ -1,11 +1,12 @@
 import hydra
 import logging
 import torch
+from time import perf_counter
 
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm#, format_individual_splits
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import get_losses, load_learner
-from src.timetensor.utils import get_dirs, set_seed
+from src.timetensor.utils import get_dirs, set_seed, save_results
 
 import numpy as np
 import pandas as pd
@@ -37,7 +38,7 @@ def run(cfg):
 
     verbose, seed = cfg.misc.verbose, cfg.misc.seed
 
-    output_dir, save_name = cfg.misc.output_dir, cfg.misc.save_name, 
+    output_dir, save_name = cfg.misc.output_dir, cfg.misc.save_name
     save_name, save_dir = get_dirs(output_dir, save_name, model_name, norm_name, criterion_name, cfg.data.subsets)
 
     if verbose:
@@ -73,6 +74,7 @@ def run(cfg):
     total_means = {key: [] for key in loaders_dict}
     w10_means = {key: [] for key in loaders_dict}
 
+    t1 = perf_counter()
     for key in loaders_dict:        
         losses, exotics = learner.eval(loaders_dict[key], return_mode="indiv",
             runs=cfg.training.eval_runs, thresholds={criterion_name:100}) # {loss_name: {indiv: [steps] }}
@@ -88,6 +90,9 @@ def run(cfg):
         total_means[key] = np.mean(per_user_losses[key])
         w10_means[key] = np.mean(np.partition(per_user_losses[key], int(len(per_user_losses[key])*0.9))[int(len(per_user_losses[key])*0.9):])
         
+        save_results(total_means[key], save_dir, f"{key}_mean_results.json", save_name, f"{criterion_name}")
+        save_results(w10_means[key], save_dir, f"{key}_mean_results.json", save_name, f"w10 {criterion_name}")
+
         stats_df = pd.DataFrame({
             "log(mean_error)": per_user_losses[key],
             "log(std_error)": stds_per_user_losses[key]})
@@ -99,10 +104,14 @@ def run(cfg):
             kind='scatter',
             palette='Set1',
         )
-        plt.suptitle(f"Per-user {key} {criterion_name} of {save_name} (mean:{total_means[key]:.3f}, W10:{w10_means[key]:.3f})")
+        plt.suptitle(f"Per-user {key} {criterion_name} of {save_name} (mean:{total_means[key]:.4f}, W10:{w10_means[key]:.4f})")
         plt.tight_layout()
         plt.savefig(save_dir+ "plots/" + f"{key}_user_errors.pdf")
         plt.close()
+
+    t2 = perf_counter()
+    delta_t = (t2-t1)/60
+    save_results(delta_t, save_dir, f"mean_results.json", save_name, f"compute (min)")
 
     logger.info('End of script\n')
 

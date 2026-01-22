@@ -1,6 +1,7 @@
 import hydra
 import logging
 import torch
+from time import perf_counter
 
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm
 from src.timetensor.models import load_model
@@ -9,7 +10,6 @@ from src.timetensor.visu import plot_weights
 from src.timetensor.utils import get_dirs, set_seed
 
 from src.timetensor.pipeline import launch_eval, launch_example
-from src.timetensor.utils import symlog
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -34,7 +34,7 @@ def run(cfg):
 
     verbose, seed = cfg.misc.verbose, cfg.misc.seed
 
-    output_dir, save_name = cfg.misc.output_dir, cfg.misc.save_name, 
+    output_dir, save_name = cfg.misc.output_dir, cfg.misc.save_name
     save_name, save_dir = get_dirs(output_dir, save_name, model_name, norm_name, criterion_name, cfg.data.subsets)
 
     if verbose:

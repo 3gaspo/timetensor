@@ -22,15 +22,19 @@ def get_dirs(output_dir, save_name, model_name, norm_name=None, criterion_name=N
         if get_training and (subset is not None) and (subset != 1):
             save_name = save_name + "_" + str(subset)
     save_dir = output_dir + save_name + "/" #current experiment dir
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+    # if not os.path.exists(save_dir):
+    #     os.makedirs(save_dir)
+    os.makedirs(save_dir, exist_ok=True)
     hydra_dir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir #hydra logs
     with open(save_dir + f'hydra_dir.txt', 'w') as file: 
         file.write(f"{hydra_dir}") #save path of hydra logs to experiment dir
-    if not os.path.exists(save_dir + "examples/"): #dir for example predictions
-        os.makedirs(save_dir + "examples/")
-    if not os.path.exists(save_dir + "plots/"): #dir for example predictions
-        os.makedirs(save_dir + "plots/")
+    # if not os.path.exists(save_dir + "examples/"): #dir for example predictions
+    #     os.makedirs(save_dir + "examples/")
+    os.makedirs(save_dir + "examples/", exist_ok=True)
+    # if not os.path.exists(save_dir + "plots/"): #dir for example predictions
+    #     os.makedirs(save_dir + "plots/")
+    os.makedirs(save_dir + "plots/", exist_ok=True)
+
     return save_name, save_dir
 
 def unroll_windows(dataloader, cap=None, normal=False, alpha=1, beta=0, mean=None, std=None, do_context=False, seed=None):
@@ -149,6 +153,7 @@ def text_list(L):
 def set_seed(seed):
     if seed == "None":
         seed =  None
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    np.random.seed(seed)
+    if seed is not None:
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        np.random.seed(seed)

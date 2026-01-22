@@ -30,7 +30,7 @@ def run(cfg):
 
     verbose, seed = cfg.misc.verbose, cfg.misc.seed
 
-    output_dir, save_name = cfg.misc.output_dir, cfg.misc.save_name, 
+    output_dir, save_name = cfg.misc.output_dir, cfg.misc.save_name
     save_name, save_dir = get_dirs(output_dir, save_name, model_name, norm_name, criterion_name, cfg.data.subsets)
 
     if verbose:
@@ -62,15 +62,15 @@ def run(cfg):
     logger.info("--Training--")
     learner = launch_training(model,
         norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict, eval_losses, device,
-        save_dir, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger, save=True)
+        save_dir, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger, save=True, seed=seed)
     
     #eval
     logger.info("--Eval--")
     if cfg.training.valid_eval:
-        _ = launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="valid", runs=cfg.training.eval_runs)
+        _ = launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="valid", runs=cfg.training.eval_runs, seed=seed)
 
     if cfg.training.test_eval:
-        _ = launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="test", runs=cfg.training.eval_runs)
+        _ = launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, cfg.training.complete_evaluation, results_dir=output_dir, mode="test", runs=cfg.training.eval_runs, seed=seed)
         launch_example(data_path, model, lags, horizon, device, save_dir, save_name, use_context=cfg.data.sampling.use_context)
 
     logger.info('End of script\n')

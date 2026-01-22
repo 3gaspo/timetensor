@@ -100,7 +100,7 @@ def build_dataset(data_path, clusters=None, n1=100, n2=100, r1=0, r2=0, dates=20
     values_df.to_csv(data_path + "synthetic.csv")
     datetimes = list(values_df.index)
     #tensors
-    context_pt =  torch.tensor([0 for _ in range(n1)] + [1 for _ in range(n2)]).unsqueeze(dim=1).unsqueeze(dim=1).repeat(1, 1, dates)
+    context_pt =  torch.tensor([0 for _ in range(n1)] + [1 for _ in range(n2)]).unsqueeze(dim=1).unsqueeze(dim=1) #.repeat(1, 1, dates)
     values_pt = torch.tensor(values_df.values.T, dtype=torch.float32).unsqueeze(1)
     #save
     torch.save(values_pt, data_path + "values.pt")

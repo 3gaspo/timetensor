@@ -300,13 +300,6 @@ def get_multiple_expe_results(dir_name, file_name, n_paths, multipliers=None, na
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
-    # if save_latex:
-    #     df_latex = df_mean.copy()
-    #     for col in df_mean.columns:
-    #         df_latex[col] = df_mean[col].map("{:.2f}".format)
-    #     df_latex.columns = df_latex.columns.str.replace("_", "\\_", regex=False)
-    #     pd_to_latex(df_latex, save_path, save_name=f"{save_name[:-3]}.tex")
-
     if print_table:
         table = tabulate(df_formatted, headers='keys', tablefmt='grid', showindex=True)
         print(f"==Table of {dir_name}==")
@@ -435,16 +428,6 @@ def plot_expe(losses_path, eval_freq=10, names=None, save_path=None, lr=None, bs
 
 ## Latex
 
-# def pd_to_latex(df, save_path, save_name="results_table.tex"):
-#     """returns latex code to create table from dataframe in path"""
-#     colfmt = "l" + "c" * len(df.columns)
-#     latex_str = df.to_latex(
-#         index=True, escape=False, bold_rows=False,
-#         column_format=colfmt, na_rep="--", caption=None, label=None, buf=None,
-#         longtable=False, multirow=False, multicolumn=True, multicolumn_format='c',
-#         header=True)
-#     with open(save_path + save_name, "w", encoding="utf-8") as f:
-#         f.write(latex_str)
 
 def latex_formated_number(value, decimals=3, color=False, row=None, std=None):
     """return formated string value"""
@@ -545,7 +528,7 @@ def build_results_table_latex(
         else:
             std = None
         cells = [latex_formated_number(v, decimals=decimals, color=color, row=values[key], std=std) for i, v in enumerate(values[key])]
-        if i % n_settings == 0: #TODO: below instead of len(datasets), should be len(settings per dataset) but it depends on the dataset...
+        if i % n_settings == 0: #TODO: below instead of n_settings, it should depend on the dataset...
             lines.append("\\multirow{" + str(n_settings) + "}{*}{" + ds_latex + "}" + " & " + f"{L}-{H}" + " & " + " & ".join(cells) + r" \\")
         else:
             lines.append(" & " + f"{L}-{H}" + " & " + " & ".join(cells) + r" \\")

@@ -125,7 +125,7 @@ class IndexSampler:
             if self.block_individuals > 1:
                 if self.block_individuals < self.individuals:
                     return list(np.random.choice(self.individuals, self.block_individuals))
-                return slice(None)
+                return list(range(self.individuals))
             else:
                 return [np.random.randint(self.individuals)]
 
@@ -189,7 +189,7 @@ class IndexSampler:
             if self.context_by_individuals:
                 context_idx = indivs
             else:
-                context_idx = slice(None)
+                context_idx = list(range(self.contexts))
         else:
             context_idx = None
 
@@ -276,8 +276,6 @@ class TimeSeriesDataset(Dataset):
         target = values[:, :, self.lags:] # (individuals, dim, horizon)
         
         if (self.context is not None) and (context_idx is not None):
-            print("debug get item")
-
             if self.context_dates == 1:
                 context = self.context[context_idx, :, 0].unsqueeze(-1) # (individuals, dim_context, 1)
             else:
@@ -287,7 +285,7 @@ class TimeSeriesDataset(Dataset):
         return inputs, context, target, indivs, date
 
 
-def fetch_csv(data_path, data_name, context_cols=None, drop_users=None):
+def fetch_csv(data_path, data_name, context_cols=None, drop_users=None, rename_cols=None, aggr=None, aggr_period="h"):
     """fetches data csv (optional context) and returns dataframe"""
     with warnings.catch_warnings():
         warnings.filterwarnings(
@@ -302,21 +300,35 @@ def fetch_csv(data_path, data_name, context_cols=None, drop_users=None):
     else:
         context_df = df[context_cols]
         values_df = df.drop(columns=context_cols)
-    values_df.columns = [f"user_{k}" for k in range(values_df.shape[1])] #range(values_df.shape[1]) 
-    datetimes = list(df.index)
+    if rename_cols is not None:
+        values_df = values_df.rename(columns=rename_cols)
+    else:
+        values_df.columns = [f"user_{k}" for k in range(values_df.shape[1])] #range(values_df.shape[1]) 
     if drop_users:
         drop = drop_users.split(";")
         drop = [f"user_{int(idx)}" for idx in drop]
         values_df = values_df.drop(columns=drop)
         values_df.columns = [f"user_{k}" for k in range(values_df.shape[1])]
+
+    if aggr == "sum":
+        values_df = values_df.resample(aggr_period).sum()
+        if context_df is not None:
+            context_df = context_df.resample(aggr_period).sum()
+    elif aggr == "":
+        values_df = values_df.asfreq(aggr_period)
+        if context_df is not None:
+            context_df = context_df.asfreq(aggr_period)
+
+    datetimes = list(values_df.index)
+
     return values_df, context_df, datetimes
 
 
-def build_dataset(data_path, data_name, context_cols=None, drop_users=None, do_context=True, raw_format="csv"):
+def build_dataset(data_path, data_name, context_cols=None, drop_users=None, do_context=True, raw_format="csv", rename_cols=None, aggr=None, aggr_period="h"):
     """builds pytorch tensors from csv path"""
     #load csv
     if raw_format == "csv":
-        values_df, context_df, datetimes = fetch_csv(data_path, data_name, context_cols, drop_users=drop_users)
+        values_df, context_df, datetimes = fetch_csv(data_path, data_name, context_cols, drop_users, rename_cols, aggr, aggr_period)
     else:
         raise ValueError("Unsupported input format")
     
@@ -632,11 +644,15 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, splits, sampling, su
             remove_cte = sampling["remove_train_cte"]
             shuffle = sampling["shuffle_train"]
             stride = sampling["train_stride"]
+            weight = sampling["train_len_multiplier"]
+            blocks = sampling["train_block_individuals"]
         else:
             idx_mode = sampling["eval_idx_mode"]
             remove_cte = sampling["remove_eval_cte"]
             shuffle = sampling["shuffle_eval"]
             stride = sampling["eval_stride"]
+            weight = sampling["eval_len_multiplier"]
+            blocks = sampling["eval_block_individuals"]
 
         #subsets
         subset = subsets[key]
@@ -657,8 +673,8 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, splits, sampling, su
         #loader
         dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon)
         dataset.set_sampler(idx_mode = idx_mode,
-            block_individuals = sampling["block_individuals"], use_context = sampling["use_context"], remove_cte=remove_cte,
-            weight=sampling["len_multiplier"], subset_indices=subset_indices, subset_mode=subset_mode, stride=stride)       
+            block_individuals = blocks, use_context = sampling["use_context"], remove_cte=remove_cte,
+            weight=weight, subset_indices=subset_indices, subset_mode=subset_mode, stride=stride)       
         if standard_stats is not None:
             dataset.normalize(standard_stats)
         loaders_dict[key] = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, collate_fn=collate_fn, num_workers=0)
@@ -672,13 +688,12 @@ def collate_fn(data):
     inputs = torch.cat(inputs, dim=0)   # (bs*(individuals), dim, lookback)
     targets = torch.cat(targets, dim=0)   # (bs*(individuals), dim, horizon)
     if contexts[0] is not None:
-        print("debug collate context")
         contexts = torch.cat(contexts, dim=0)  # (bs*(individuals), dim_context, 1*(lookback+horizon))  
     else:
         contexts = None
-    indivs = [indiv for item in indivs for indiv in item] # (bs*(individuals))
-
-    return inputs, contexts, targets, indivs, dates
+    flat_indivs = [indiv for item in indivs for indiv in item] # (bs*(individuals))
+    flat_dates = [dates[i] for i,item in enumerate(indivs) for _ in range(len(item))] # (bs*(individuals))
+    return inputs, contexts, targets, flat_indivs, flat_dates
     
     
 def aggregate_loaders_dict(loaders_dicts, lags, horizon, sampling, batch_size):
@@ -743,18 +758,6 @@ def get_sizes(loaders_dict, str_info=False):
             batch_str = f"Batches:\n X={list(X.shape)}\n y={list(y.shape)}"
 
         return shape, shape_str, batch_str
-
-
-# def format_individual_splits(splits, subsets):
-#     """formats provided splits and subsets args for 1 indiv's split"""
-#     splits_ = copy.deepcopy(splits)
-#     splits_["indiv_split"] = None
-#     subsets_ = copy.deepcopy(subsets)
-#     if len(subsets_["sizes"].split(";")) > 3:
-#         subsets_sizes_ = subsets_["sizes"].split(";")
-#         subsets_["sizes"] = ";".join([subsets_sizes_[0], subsets_sizes_[1], subsets_sizes_[4]])
-#     return splits_, subsets_
-
 
 def fetch_training_data(data_path, splits, sampling, subsets, batch_size, lags, horizon, aggregate=True, seed=None, save=False, cluster_ids=None):#, do_indiv_stats=False):
     """returns loaders dict and stats dicts

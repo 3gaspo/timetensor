@@ -4,7 +4,7 @@ import torch.optim as optim
 from time import perf_counter
 import os
 
-from .utils import get_normal_stats, unroll_windows, normalize, save_results
+from .utils import get_normal_stats, unroll_windows, normalize, save_results, set_seed
 from .visu import plot_losses, plot_multi_losses, plot_serie, plot_named_example, plot_horizon_errors, plot_pred, plot_horizon_errors, plot_weights, plot_errors
 from .dataset import set_random_data, fetch_example_data
 
@@ -137,12 +137,13 @@ class TorchLearner:
 
         return loss.item()
 
-    def eval(self, loader, return_mode="mean", runs=1, thresholds={}):
+    def eval(self, loader, return_mode="mean", runs=1, thresholds={}, seed=None):
         """evaluates model on loader and returns mean loss"""
         losses = {}
         exotics = {}
         counts = {}
 
+        set_seed(seed)
         self.model.eval()
         with torch.inference_mode():
             for run in range(runs):
@@ -189,7 +190,7 @@ class TorchLearner:
                             if return_mode == "all": #may cause memory issues on cpu if too many samples
                                 losses[loss_name] += [l.cpu() for l in loss] # [ (dim, horizon) x (steps*bs*(individuals))]
                             elif return_mode == "steps":
-                                losses[loss_name] += [aggr_loss.detach().cpu()] # [ (1) x (steps*bs*(individuals))]
+                                losses[loss_name] += aggr_loss.detach().tolist() # [ (1) x (steps*bs*(individuals))]
                             elif return_mode == "dim":
                                 losses[loss_name].append(loss.sum(dim=0).cpu()) # [ (dim, horizon) x steps] 
                                 counts[loss_name] = counts.get(loss_name, 0) + loss.shape[0]
@@ -251,7 +252,7 @@ def load_learner(model, criterion, lr, eval_losses, device, optimizer=None, sche
     else:
         raise ValueError(f"Unknown model type: {model.model_type}")
 
-def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, verbose=1, do_eval=True, logger=None, eval_runs=1, weight_follow=None):
+def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, verbose=1, do_eval=True, logger=None, eval_runs=1, weight_follow=None, seed=None):
     """trains model in learner on loaders and returns train and valid losses"""
     
     #data
@@ -274,6 +275,7 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
     weights_dict = {}
     t1 = perf_counter()
 
+    set_seed(seed)
     #training
     step = 0
     for epoch in range(epochs):
@@ -285,7 +287,7 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
             if do_eval and (step == 1 or step % eval_freq == 0 or step == total_steps):
                 #valid eval
                 for valid_key in valid_keys:
-                    valid_loss, _ = learner.eval(loaders_dict[valid_key], runs=eval_runs)
+                    valid_loss, _ = learner.eval(loaders_dict[valid_key], runs=eval_runs, seed=seed)
                     for loss_key in valid_loss:
                         if loss_key not in valid_losses[valid_key]:
                             valid_losses[valid_key][loss_key] = []
@@ -310,7 +312,7 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
     return train_losses, valid_losses, weights_dict
 
 
-def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, eval_losses, device, save_dir, save_name, eval_freq, print_freq, logger, optimizer=None, scheduler=None, weight_follow=None, verbose=1, save=False):
+def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, eval_losses, device, save_dir, save_name, eval_freq, print_freq, logger, optimizer=None, scheduler=None, weight_follow=None, verbose=1, save=False, seed=None):
     """launches training of model"""
     model_name, criterion_name = model.model_name, criterion.name
     if not os.path.exists(save_dir + "plots/"):
@@ -336,7 +338,7 @@ def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, e
         if verbose:
             logger.info(f"Starting training pytorch with lr={lr}")
         learner.reset_optimizer()
-        train_losses, valid_losses, followed_weights = train_model(learner, loaders_dict, epochs=epochs, logger=logger, eval_runs=1, eval_freq=eval_freq, print_freq=print_freq, verbose=verbose,weight_follow=weight_follow)
+        train_losses, valid_losses, followed_weights = train_model(learner, loaders_dict, epochs=epochs, logger=logger, eval_runs=1, eval_freq=eval_freq, print_freq=print_freq, verbose=verbose,weight_follow=weight_follow, seed=seed)
 
         if save:
             torch.save(learner.model.state_dict(), save_dir + "trained_model.pt")
@@ -374,7 +376,7 @@ def launch_training(model, normalization, criterion, lr, epochs, loaders_dict, e
     return learner
 
 
-def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complete_evaluation, save=False, results_dir=None, mode="test", denormalize_stats=None, runs=1, return_mode="dim", thresholds={}):
+def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complete_evaluation, save=False, results_dir=None, mode="test", denormalize_stats=None, runs=1, return_mode="dim", thresholds={}, seed=None):
     """evaluating model script"""
     if results_dir is None:
         results_dir = save_dir
@@ -384,7 +386,7 @@ def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complet
     exotics_dict = {}
     for key in loaders_dict:
         if mode == "all" or mode in key:
-            losses, exotics = learner.eval(loaders_dict[key], return_mode=return_mode, runs=runs, thresholds=thresholds)
+            losses, exotics = learner.eval(loaders_dict[key], return_mode=return_mode, runs=runs, thresholds=thresholds, seed=seed)
             exotics_dict[key] = exotics
             if save:
                 torch.save(losses, save_dir + f"{key}_losses.pt")

@@ -1046,9 +1046,11 @@ def plot_distances_dict_widget(df_dict, seed=None):
 
 # --------- clustering core ---------
 
-def calculate_distances(df, metric='cosine'):
+def calculate_distances(df, metric='cosine', matrix=False):
     """Pairwise distances between columns."""
     D = pdist(df.T.values, metric=metric)
+    if matrix:
+        return squareform(D)
     return D
 
 

@@ -42,7 +42,7 @@ def run(cfg):
             build_dataset(data_path, n1=cfg.data.n1, n2=cfg.data.n2, r1=cfg.data.r1, r2=cfg.data.r2, seed=seed)
         else:
             from src.timetensor.dataset import build_dataset
-            build_dataset(data_path, dataset_name, context_cols, drop_users=cfg.data.splits.drop_users)
+            build_dataset(data_path, dataset_name, context_cols, drop_users=cfg.data.splits.drop_users, aggr=cfg.data.aggregation)
         t2 = perf_counter()
         if verbose:
             logger.info(f"Rebuilt dataset in {(t2-t1)/60:.3f} min")
