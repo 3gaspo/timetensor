@@ -1,4 +1,9 @@
-for job in chronos tst users # augment cross
+for job in chronos tst users self_augment
 do
-    sbatch temp_scripts/${job}.slurm
+    sbatch scripts_fm/${job}.slurm
+done
+
+for job in clusters indiv loss
+do
+    sbatch scripts_fm/cross_learning_${job}.slurm
 done

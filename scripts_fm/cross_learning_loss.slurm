@@ -4,7 +4,7 @@
 #SBATCH --output=script_outputs/cl_loss.out
 #SBATCH --error=script_outputs/cl_loss.err
 #SBATCH --time=23:00:00
-#SBATCH --partition=h100
+#SBATCH --partition=a100
 source .venv/bin/activate
 
 seed=1
@@ -27,7 +27,7 @@ do
         "data.sampling.train_stride=$stride" \
         "data.sampling.eval_stride=$stride" \
         "training.bs=$bs" \
-        "training.eval_runs=1" \
+        "training.eval_runs=100" \
         "misc.seed=$seed" \
         "misc.device='cpu'" \
         "misc.save_name='chronos2_None_bs$bs'" \
@@ -53,7 +53,7 @@ do
         "data.sampling.train_stride=$stride" \
         "data.sampling.eval_stride=$stride" \
         "training.bs=$bs" \
-        "training.eval_runs=1" \
+        "training.eval_runs=100" \
         "misc.seed=$seed" \
         "misc.device='cpu'" \
         "misc.save_name='chronos2_None_bs$bs'" \
@@ -79,7 +79,7 @@ do
         "data.sampling.train_stride=$stride" \
         "data.sampling.eval_stride=$stride" \
         "training.bs=$bs" \
-        "training.eval_runs=1" \
+        "training.eval_runs=100" \
         "misc.seed=$seed" \
         "misc.device='cpu'" \
         "misc.save_name='chronos2_None_bs$bs'" \

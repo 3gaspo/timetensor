@@ -15,7 +15,7 @@ horizon=168
 stride=672
 for data in electricity traffic solar exchange_rate
     do
-    for bs in 1 2 3 4 5 10 100 350
+    for bs in 1 2 3 4 5 10
     do
         for cross in True False
         do
@@ -45,7 +45,7 @@ horizon=24
 stride=24
 for data in electricity traffic solar exchange_rate
     do
-    for bs in 1 2 3 4 5 10 100 350
+    for bs in 1 2 3 4 5 10
     do
         for cross in True False
         do
@@ -75,7 +75,7 @@ horizon=24
 stride=24
 for data in electricity traffic solar exchange_rate
     do
-    for bs in 1 2 3 4 5 10 100 350
+    for bs in 1 2 3 4 5 10
     do
         for cross in True False
         do

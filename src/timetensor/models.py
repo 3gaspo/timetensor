@@ -253,7 +253,9 @@ class AugmentModel(nn.Module):
 
         assert self_augment is None or self_augment is False or type(self_augment) == str, f"Unrecognized self_augment mode {self_augment}"
         self.modes = self_augment
+        self.augment = True
         if self.modes is None or self.modes is False or self.modes == "None" or self.modes == "" or self.modes == "none":
+            self.augment = False
             self.modes = []
         elif self.modes == "all" or self.modes == "All":
             self.modes = ["kernel", "square", "root", "sign", "mirror"]
@@ -300,7 +302,7 @@ class AugmentModel(nn.Module):
 
     
     def forward(self, x, c=None):
-        if self.self_augment:
+        if self.augment:
             c = self._self_augment(x, c, self.self_augment)
             
         if self.repeat_constant:

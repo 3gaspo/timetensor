@@ -4,7 +4,7 @@
 #SBATCH --output=script_outputs/cl_clusters.out
 #SBATCH --error=script_outputs/cl_clusters.err
 #SBATCH --time=23:00:00
-#SBATCH --partition=h100
+#SBATCH --partition=a100
 source .venv/bin/activate
 
 seed=1
@@ -14,7 +14,7 @@ horizon=168
 stride=672
 for data in electricity traffic solar exchange_rate
 do
-    for bs in 1 2 3 4 510 100 350 
+    for bs in 1 2 3 4 5 10
     do
         use_context=False
         cross_learning=True
@@ -42,7 +42,7 @@ horizon=24
 stride=24
 for data in electricity traffic solar exchange_rate
 do
-    for bs in 1 2 3 4 510 100 350 
+    for bs in 1 2 3 4 5 10
     do
         use_context=False
         cross_learning=True
@@ -70,7 +70,7 @@ horizon=24
 stride=24
 for data in electricity traffic solar exchange_rate
 do
-    for bs in 1 2 3 4 510 100 350 
+    for bs in 1 2 3 4 5 10
     do
         use_context=False
         cross_learning=True

@@ -14,7 +14,7 @@ horizon=168
 stride=672
 for data in electricity traffic solar exchange_rate
 do
-    for augment in none kernel square root sign mirror 'kernel;square;root' 'all'
+    for augment in none kernel square root sign mirror all 'kernel;square;root'
     do
         srun python3 eval_users.py \
         "model=chronos" \
@@ -46,7 +46,7 @@ horizon=24
 stride=24
 for data in electricity traffic solar exchange_rate
 do
-    for augment in none kernel square root sign mirror 'kernel;square;root' 'all'
+    for augment in none kernel square root sign mirror all 'kernel;square;root'
     do
         srun python3 eval_users.py \
         "model=chronos" \
@@ -79,7 +79,7 @@ horizon=24
 stride=24
 for data in electricity traffic solar exchange_rate
 do
-    for augment in none kernel square root sign mirror 'kernel;square;root' 'all'
+    for augment in none kernel square root sign mirror all 'kernel;square;root'
     do
         srun python3 eval_users.py \
         "model=chronos" \
