@@ -19,8 +19,8 @@ do
         srun python3 cross_learning_loss.py \
         "model=chronos" \
         "model.configs.cross_learning=False" \
-        "task.lags=672" \
-        "task.horizon=168" \
+        "task.lags=$lags" \
+        "task.horizon=$horizon" \
         "normalization=instance" \
         "data=$data" \
         "data.sampling.use_context=False" \
@@ -45,8 +45,8 @@ do
         srun python3 cross_learning_loss.py \
         "model=chronos" \
         "model.configs.cross_learning=False" \
-        "task.lags=672" \
-        "task.horizon=168" \
+        "task.lags=$lags" \
+        "task.horizon=$horizon" \
         "normalization=instance" \
         "data=$data" \
         "data.sampling.use_context=$use_context" \
@@ -71,8 +71,8 @@ do
         srun python3 cross_learning_loss.py \
         "model=chronos" \
         "model.configs.cross_learning=False" \
-        "task.lags=672" \
-        "task.horizon=168" \
+        "task.lags=$lags" \
+        "task.horizon=$horizon" \
         "normalization=instance" \
         "data=$data" \
         "data.sampling.use_context=$use_context" \
