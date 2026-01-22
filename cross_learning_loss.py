@@ -91,12 +91,12 @@ def run(cfg):
             
             mean, std = get_normal_stats(x_batch)
             pred_batch = model(x_batch, c_batch)
-            loss = criterion(pred_batch, y_batch, mean, std) # (bs, dim, H)
+            loss = criterion(pred_batch, y_batch, mean, std).mean(dim=(1,2)) # (bs)
             
             for i, indiv in enumerate(indivs):
                 for j, neighbor in enumerate(indivs):
                     if j!=i:
-                        errors[indiv][neighbor] = (1-alpha) * errors[indiv][neighbor] + alpha * loss[i]
+                        errors[indiv][neighbor] = (1-alpha) * errors[indiv][neighbor] + alpha * loss[i].item()
 
 
     for indiv in range(len(all_indiv)):

@@ -303,7 +303,7 @@ class AugmentModel(nn.Module):
     
     def forward(self, x, c=None):
         if self.augment:
-            c = self._self_augment(x, c, self.self_augment)
+            c = self._self_augment(x, c, self.modes)
             
         if self.repeat_constant:
             return self._repeat_constant(x, c)

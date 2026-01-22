@@ -37,7 +37,7 @@ do
     "data.sampling.eval_len_multiplier=1" \
     "misc.seed=$seed" \
     "misc.save_name='PatchTST'" \
-    "misc.output_dir='../outputs/fm/central/'"
+    "misc.output_dir='../outputs/fm/central/$data/${lags}_$horizon/'"
 
     srun python3 eval_users.py \
     "model=PatchTST" \
@@ -63,7 +63,7 @@ do
     "data.sampling.eval_len_multiplier=1" \
     "misc.seed=$seed" \
     "misc.save_name='PatchTST'" \
-    "misc.output_dir='../outputs/fm/central/'"
+    "misc.output_dir='../outputs/fm/central/$data/${lags}_$horizon/'"
 done
 
 

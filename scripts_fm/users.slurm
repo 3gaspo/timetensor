@@ -37,5 +37,5 @@ do
     "training.eval_freq=1000" \
     "misc.seed=$seed" \
     "misc.save_name='PatchTST_users'" \
-    "misc.output_dir='../outputs/fm/central/'"
+    "misc.output_dir='../outputs/fm/central/$data/${lags}_$horizon/'"
 done

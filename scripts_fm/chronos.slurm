@@ -36,7 +36,7 @@ do
     "misc.seed=$seed" \
     "misc.device='cpu'" \
     "misc.save_name='chronos2'" \
-    "misc.output_dir='../outputs/fm/central/'"
+    "misc.output_dir='../outputs/fm/central/$data/${lags}_$horizon/'"
 
     srun python3 eval_users.py \
     "model=chronos" \
@@ -60,5 +60,5 @@ do
     "misc.seed=$seed" \
     "misc.device='cpu'" \
     "misc.save_name='chronos2'" \
-    "misc.output_dir='../outputs/fm/central/'"
+    "misc.output_dir='../outputs/fm/central/$data/${lags}_$horizon/'"
 done
