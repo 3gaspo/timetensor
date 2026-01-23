@@ -98,8 +98,8 @@ def run(cfg):
         total_means[key] = np.mean(per_user_losses[key])
         w10_means[key] = np.mean(np.partition(per_user_losses[key], int(len(per_user_losses[key])*0.9))[int(len(per_user_losses[key])*0.9):])
         
-        save_results(total_means[key], save_dir, f"{key}_mean_results.json", save_name, f"{criterion_name}")
-        save_results(w10_means[key], save_dir, f"{key}_mean_results.json", save_name, f"{criterion_name}")
+        save_results(total_means[key], output_dir, f"{key}_mean_results.json", save_name, f"{criterion_name}")
+        save_results(w10_means[key], output_dir, f"{key}_mean_results.json", save_name, f"w10 {criterion_name}")
 
         stats_df = pd.DataFrame({
             "log(mean_error)": per_user_losses[key],
@@ -112,7 +112,9 @@ def run(cfg):
             kind='scatter',
             palette='Set1',
         )
-        plt.suptitle(f"Per-user {key} {criterion_name} of {save_name} (mean:{total_means[key]:.3f}, W10:{w10_means[key]:.3f})")
+        plt.suptitle(
+            f"Per-user {key} {criterion_name} of {save_name} (mean:{total_means[key]:.4f}, W10:{w10_means[key]:.4f})",
+            fontsize=20)
         plt.tight_layout()
         plt.savefig(save_dir+ "plots/" + f"{key}_user_errors.pdf")
         plt.close()

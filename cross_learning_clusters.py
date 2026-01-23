@@ -125,9 +125,9 @@ def run(cfg):
     t2 = perf_counter()
     delta_t = (t2-t1)/60
 
-    save_results(total_means, save_dir, f"mean_results.json", save_name, f"nMSE")
-    save_results(w10_means, save_dir, f"mean_results.json", save_name, f"w10 nMSE")
-    save_results(delta_t, save_dir, f"mean_results.json", save_name, f"compute (min)")
+    save_results(total_means, output_dir, f"mean_results.json", save_name, f"nMSE")
+    save_results(w10_means, output_dir, f"mean_results.json", save_name, f"w10 nMSE")
+    save_results(delta_t, output_dir, f"mean_results.json", save_name, f"compute (min)")
 
     stats_df = pd.DataFrame({
         "log(mean_error)": per_user_losses,
@@ -141,7 +141,9 @@ def run(cfg):
         kind='scatter',
         palette='Set1',
     )
-    plt.suptitle(f"Per-user nMSE of {save_name} (mean:{total_means:.4f}, W10:{w10_means:.4f})")
+    plt.suptitle(
+        f"Per-user nMSE of {save_name} (mean:{total_means:.4f}, W10:{w10_means:.4f})",
+        fontsize=20)   
     plt.tight_layout()
     plt.savefig(save_dir+ "plots/" + f"{bs}_user_errors.pdf")
     plt.close()

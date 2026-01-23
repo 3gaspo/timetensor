@@ -11,7 +11,7 @@ seed=1
 
 lags=672
 horizon=168
-stride=672
+stride=512
 for data in electricity traffic solar exchange_rate
 do
     for bs in 3
@@ -31,13 +31,13 @@ do
         "misc.seed=$seed" \
         "misc.device='cpu'" \
         "misc.save_name='chronos2_None_bs$bs'" \
-        "misc.output_dir='../outputs/fm/cross_learning_loss/$data/${lags}_$horizon/'"
+        "misc.output_dir='../outputs/fm/cross_learning/loss/$data/${lags}_$horizon/'"
     done
 done
 
 lags=168
 horizon=24
-stride=24
+stride=512
 for data in electricity traffic solar exchange_rate
 do
     for bs in 3
@@ -57,13 +57,13 @@ do
         "misc.seed=$seed" \
         "misc.device='cpu'" \
         "misc.save_name='chronos2_None_bs$bs'" \
-        "misc.output_dir='../outputs/fm/cross_learning_loss/$data/${lags}_$horizon/'"
+        "misc.output_dir='../outputs/fm/cross_learning/loss/$data/${lags}_$horizon/'"
     done
 done
 
 lags=24
 horizon=24
-stride=24
+stride=512
 for data in electricity traffic solar exchange_rate
 do
     for bs in 3
@@ -83,6 +83,6 @@ do
         "misc.seed=$seed" \
         "misc.device='cpu'" \
         "misc.save_name='chronos2_None_bs$bs'" \
-        "misc.output_dir='../outputs/fm/cross_learning_loss/$data/${lags}_$horizon/'"
+        "misc.output_dir='../outputs/fm/cross_learning/loss/$data/${lags}_$horizon/'"
     done
 done

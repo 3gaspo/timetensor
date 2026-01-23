@@ -12,7 +12,7 @@ eval_runs=10
 
 lags=672
 horizon=168
-stride=672
+stride=512
 for data in electricity traffic solar exchange_rate
     do
     for bs in 1 2 3 4 5 10
@@ -34,7 +34,7 @@ for data in electricity traffic solar exchange_rate
             "misc.seed=$seed" \
             "misc.device='cpu'" \
             "misc.save_name='chronos2_cross${cross}_bs$bs'" \
-            "misc.output_dir='../outputs/fm/cross_indiv/$data/${lags}_$horizon/'"
+            "misc.output_dir='../outputs/fm/cross_learning/indiv/$data/${lags}_$horizon/'"
         done
     done
 done
@@ -42,7 +42,7 @@ done
 
 lags=168
 horizon=24
-stride=24
+stride=512
 for data in electricity traffic solar exchange_rate
     do
     for bs in 1 2 3 4 5 10
@@ -64,7 +64,7 @@ for data in electricity traffic solar exchange_rate
             "misc.seed=$seed" \
             "misc.device='cpu'" \
             "misc.save_name='chronos2_cross${cross}_bs$bs'" \
-            "misc.output_dir='../outputs/fm/cross_indiv/$data/${lags}_$horizon/'"
+            "misc.output_dir='../outputs/fm/cross_learning/indiv/$data/${lags}_$horizon/'"
         done
     done
 done
@@ -72,7 +72,7 @@ done
 
 lags=24
 horizon=24
-stride=24
+stride=512
 for data in electricity traffic solar exchange_rate
     do
     for bs in 1 2 3 4 5 10
@@ -94,7 +94,7 @@ for data in electricity traffic solar exchange_rate
             "misc.seed=$seed" \
             "misc.device='cpu'" \
             "misc.save_name='chronos2_cross${cross}_bs$bs'" \
-            "misc.output_dir='../outputs/fm/cross_indiv/$data/${lags}_$horizon/'"
+            "misc.output_dir='../outputs/fm/cross_learning/indiv/$data/${lags}_$horizon/'"
         done
     done
 done

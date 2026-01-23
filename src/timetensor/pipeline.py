@@ -395,10 +395,10 @@ def launch_eval(learner, loaders_dict, eval_losses, save_dir, save_name, complet
                 mean = losses[loss_name].mean()
                 if denormalize_stats is not None: #TODO check si utile
                     mean *= denormalize_stats["train"]["std"]**2
-                save_results(mean, results_dir, f"{key}_mean_results.json", save_name, f"{mode} {loss_name}")
+                save_results(mean, results_dir, f"{key}_mean_results.json", save_name, f"{loss_name}")
                 if complete_evaluation:
                     std = losses[loss_name].std()
-                    save_results(std, results_dir, f"{key}_std_results.json", save_name, f"{mode} {loss_name}")
+                    save_results(std, results_dir, f"{key}_std_results.json", save_name, f"{loss_name}")
                     if return_mode == "all":
                         plot_errors(losses[loss_name].mean(dim=(1,2)), save_dir + "plots/", f"{key}_{loss_name}.pdf", f"{mode} 1 {loss_name} of {save_name} : {mean}")
                         plot_horizon_errors(losses[loss_name].mean(dim=(0,1)), save_dir + "plots/", f"{key}_horizon_{loss_name}.pdf", f"{mode} 1 {loss_name} of {save_name} : {mean}")

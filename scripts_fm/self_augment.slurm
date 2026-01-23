@@ -11,14 +11,14 @@ seed=1
 
 lags=672
 horizon=168
-stride=672
+stride=512
 for data in electricity traffic solar exchange_rate
 do
     for augment in none kernel square root sign mirror all 'kernel;square;root'
     do
         srun python3 eval_users.py \
         "model=chronos" \
-        "model.configs.self_augment=$augment" \
+        "model.configs.self_augment='$augment'" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -43,14 +43,14 @@ done
 
 lags=168
 horizon=24
-stride=24
+stride=512
 for data in electricity traffic solar exchange_rate
 do
     for augment in none kernel square root sign mirror all 'kernel;square;root'
     do
         srun python3 eval_users.py \
         "model=chronos" \
-        "model.configs.self_augment=$augment" \
+        "model.configs.self_augment='$augment'" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -76,14 +76,14 @@ done
 
 lags=24
 horizon=24
-stride=24
+stride=512
 for data in electricity traffic solar exchange_rate
 do
     for augment in none kernel square root sign mirror all 'kernel;square;root'
     do
         srun python3 eval_users.py \
         "model=chronos" \
-        "model.configs.self_augment=$augment" \
+        "model.configs.self_augment='$augment'" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
