@@ -22,7 +22,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def run(cfg):
     logger = logging.getLogger(__name__)
-    logger.info("=====Running eval script=====")
+    logger.info("=====Running eval users script=====")
 
     #configs
     data_path = cfg.data.path
@@ -74,8 +74,8 @@ def run(cfg):
     total_means = {key: [] for key in loaders_dict}
     w10_means = {key: [] for key in loaders_dict}
 
-    t1 = perf_counter()
-    for key in loaders_dict:        
+    for key in loaders_dict:
+        t1 = perf_counter()
         losses, exotics = learner.eval(loaders_dict[key], return_mode="indiv",
             runs=cfg.training.eval_runs, thresholds={criterion_name:100}) # {loss_name: {indiv: [steps] }}
         
@@ -90,8 +90,12 @@ def run(cfg):
         total_means[key] = np.mean(per_user_losses[key])
         w10_means[key] = np.mean(np.partition(per_user_losses[key], int(len(per_user_losses[key])*0.9))[int(len(per_user_losses[key])*0.9):])
         
+        t2 = perf_counter()
+        delta_t = (t2-t1)/60
+        
         save_results(total_means[key], output_dir, f"{key}_mean_results.json", save_name, f"{criterion_name}")
         save_results(w10_means[key], output_dir, f"{key}_mean_results.json", save_name, f"w10 {criterion_name}")
+        save_results(delta_t, output_dir, f"{key}_mean_results.json", save_name, f"compute (min)")
 
         stats_df = pd.DataFrame({
             "log(mean_error)": per_user_losses[key],
@@ -110,10 +114,6 @@ def run(cfg):
         plt.tight_layout()
         plt.savefig(save_dir+ "plots/" + f"{key}_user_errors.pdf")
         plt.close()
-
-    t2 = perf_counter()
-    delta_t = (t2-t1)/60
-    save_results(delta_t, output_dir, f"mean_results.json", save_name, f"compute (min)")
 
     logger.info('End of script\n')
 

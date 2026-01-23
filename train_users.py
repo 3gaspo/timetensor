@@ -22,7 +22,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def run(cfg):
     logger = logging.getLogger(__name__)
-    logger.info("=====Running eval script=====")
+    logger.info("=====Running train users script=====")
 
     #configs
     data_path = cfg.data.path
@@ -88,12 +88,12 @@ def run(cfg):
         for key in train_keys: #train, (valid1), test1
             losses, _ = learner.eval(loaders_dict_[key], return_mode="steps",
                 runs=cfg.training.eval_runs)
-            
+
             mean = symlog(losses[criterion_name].mean())
             std = symlog(losses[criterion_name].std())
             per_user_losses[key].append(mean.item())
             stds_per_user_losses[key].append(std.item())
-
+            
     for key in train_keys: #train, (valid1), test1  (valid2 valid3 test2 don't have an associated model)
         total_means[key] = np.mean(per_user_losses[key])
         w10_means[key] = np.mean(np.partition(per_user_losses[key], int(len(per_user_losses[key])*0.9))[int(len(per_user_losses[key])*0.9):])

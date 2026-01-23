@@ -4,7 +4,7 @@
 #SBATCH --output=script_outputs/cl_clusters.out
 #SBATCH --error=script_outputs/cl_clusters.err
 #SBATCH --time=23:00:00
-#SBATCH --partition=a100
+#SBATCH --partition=h100-bis
 source .venv/bin/activate
 
 seed=1

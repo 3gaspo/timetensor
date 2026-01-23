@@ -23,7 +23,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def run(cfg):
     logger = logging.getLogger(__name__)
-    logger.info("=====Running eval script=====")
+    logger.info("=====Running cross learning clusters script=====")
 
     #configs
     data_path = cfg.data.path
@@ -69,7 +69,7 @@ def run(cfg):
     strided_dates = (max_dates - 1) // stride + 1
 
     logger.info(f"Stride dates: {strided_dates}")
-    logger.info(f"Total loops: {strided_dates*len(all_indiv)*cfg.training.eval_runs}")
+    logger.info(f"Total loops: {strided_dates * len(all_indiv) * cfg.training.eval_runs}")
 
     indiv_losses = {indiv: [] for indiv in range(len(all_indiv))}
     per_user_losses, stds_per_user_losses = [], []

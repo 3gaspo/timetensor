@@ -4,7 +4,7 @@
 #SBATCH --output=script_outputs/tst.out
 #SBATCH --error=script_outputs/tst.err
 #SBATCH --time=23:00:00
-#SBATCH --partition=a100
+#SBATCH --partition=h100
 source .venv/bin/activate
 
 seed=1
@@ -41,7 +41,7 @@ do
 
     srun python3 eval_users.py \
     "model=PatchTST" \
-    "training.init=../outputs/fm/central/PatchTST/trained_model.pt" \
+    "training.init=../outputs/fm/central/$data/${lags}_$horizon/PatchTST/trained_model.pt" \
     "task.lags=$lags" \
     "task.horizon=$horizon" \
     "normalization=instance" \
@@ -99,7 +99,7 @@ do
 
     srun python3 eval_users.py \
     "model=PatchTST" \
-    "training.init=../outputs/fm/central/PatchTST/trained_model.pt" \
+    "training.init=../outputs/fm/central/$data/${lags}_$horizon/PatchTST/trained_model.pt" \
     "task.lags=$lags" \
     "task.horizon=$horizon" \
     "normalization=instance" \
@@ -156,7 +156,7 @@ do
 
     srun python3 eval_users.py \
     "model=PatchTST" \
-    "training.init=../outputs/fm/central/PatchTST/trained_model.pt" \
+    "training.init=../outputs/fm/central/$data/${lags}_$horizon/PatchTST/trained_model.pt" \
     "task.lags=$lags" \
     "task.horizon=$horizon" \
     "normalization=instance" \

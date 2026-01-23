@@ -22,7 +22,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def run(cfg):
     logger = logging.getLogger(__name__)
-    logger.info("=====Running eval script=====")
+    logger.info("=====Running cross learning indiv script=====")
 
     #configs
     data_path = cfg.data.path

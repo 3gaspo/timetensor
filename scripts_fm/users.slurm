@@ -4,7 +4,7 @@
 #SBATCH --output=script_outputs/users.out
 #SBATCH --error=script_outputs/users.err
 #SBATCH --time=23:00:00
-#SBATCH --partition=a100
+#SBATCH --partition=h100
 source .venv/bin/activate
 
 seed=1
@@ -30,7 +30,7 @@ do
     "data.sampling.remove_train_cte=True" \
     "data.sampling.remove_eval_cte=True" \
     "training.complete_evaluation=False" \
-    "training.epochs=1" \
+    "training.epochs=3" \
     "training.bs=256" \
     "training.eval_runs=1" \
     "training.print_freq=1000" \
@@ -61,7 +61,7 @@ do
     "data.sampling.remove_train_cte=True" \
     "data.sampling.remove_eval_cte=True" \
     "training.complete_evaluation=False" \
-    "training.epochs=1" \
+    "training.epochs=3" \
     "training.bs=256" \
     "training.eval_runs=1" \
     "training.print_freq=1000" \
@@ -92,7 +92,7 @@ do
     "data.sampling.remove_train_cte=True" \
     "data.sampling.remove_eval_cte=True" \
     "training.complete_evaluation=False" \
-    "training.epochs=1" \
+    "training.epochs=3" \
     "training.bs=256" \
     "training.eval_runs=1" \
     "training.print_freq=1000" \
