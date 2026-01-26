@@ -61,10 +61,14 @@ def run(cfg):
     
     #user eval
     all_indiv = list(range(data.shape[1]))
+    individuals = len(all_indiv)
     max_dates = data.shape[0] - (lags+horizon)
     stride = cfg.data.sampling.train_stride
     strided_dates = (max_dates - 1) // stride + 1
-    num_full_batches = len(all_indiv) // bs
+    if bs < individuals:
+        num_full_batches = individuals // bs
+    else:
+        num_full_batches = 1
     num_runs = cfg.training.eval_runs
     if bs==1:
         num_runs=1
@@ -72,7 +76,7 @@ def run(cfg):
     logger.info(f"Stride dates: {strided_dates}")
     logger.info(f"Total loops: {strided_dates * num_runs * num_full_batches}")
 
-    indiv_losses = {indiv: [] for indiv in range(len(all_indiv))}
+    indiv_losses = {indiv: [] for indiv in range(individuals)}
     per_user_losses, stds_per_user_losses = [], []
 
     t1 = perf_counter()
@@ -81,7 +85,7 @@ def run(cfg):
         for _ in range(num_runs):
 
             if bs>1:
-                shuffled_indices = np.random.permutation(len(all_indiv))
+                shuffled_indices = np.random.permutation(individuals)
                 batches = [shuffled_indices[i:i + bs] for i in range(0, num_full_batches * bs, bs)]
             else:
                 batches = [[indiv] for indiv in all_indiv]
@@ -99,7 +103,7 @@ def run(cfg):
                 for i, indiv in enumerate(indivs):
                     indiv_losses[indiv].append(loss[i].mean().item())
 
-    for indiv in range(len(all_indiv)):
+    for indiv in range(individuals):
         indiv_loss = indiv_losses[indiv]
         if len(indiv_loss) > 0:
             per_user_losses.append(symlog(np.mean(indiv_loss)))

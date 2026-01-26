@@ -548,3 +548,255 @@ def build_results_table_latex(
     
     with open(save_dir + save_name, "w", encoding="utf-8") as f:
         f.write(latex)
+
+
+
+
+import json
+import os
+import numpy as np
+
+def generate_results_table(
+    experiment_dir: str,
+    dataset_names: list = None,  # Default to None for auto-detection
+    settings: any = None,        # Default to None for auto-detection
+    json_filename: str = "results.json",
+    model_names: list = None,    # Default to None for auto-detection
+    metric_key: str = "nMSE",    # Default to nMSE
+    output_tex_path: str = None, 
+    lower_is_better: bool = True,
+    decimals: int = 3,
+    baseline_idx: int = 0,
+    multiplier: any = 1
+):
+    """
+    Generates a LaTeX table from JSON result files. 
+    Auto-detects structure (datasets, settings, models) from the file system.
+    """
+
+    # --- 0. Path Setup ---
+    if output_tex_path is None:
+        output_tex_path = os.path.join(experiment_dir, "results.tex")
+
+    # --- 1. Auto-Detection of Structure ---
+    
+    # A. Detect Datasets
+    if dataset_names is None:
+        if os.path.exists(experiment_dir):
+            dataset_names = sorted([
+                d for d in os.listdir(experiment_dir) 
+                if os.path.isdir(os.path.join(experiment_dir, d)) and not d.startswith('.')
+            ])
+            print(f"Auto-detected datasets: {dataset_names}")
+        else:
+            print(f"Error: Experiment directory '{experiment_dir}' does not exist.")
+            return
+
+    # B. Detect Settings
+    if settings is None:
+        detected_settings = {}
+        for ds in dataset_names:
+            ds_path = os.path.join(experiment_dir, ds)
+            if os.path.exists(ds_path):
+                subs = sorted([
+                    s for s in os.listdir(ds_path) 
+                    if os.path.isdir(os.path.join(ds_path, s)) and not s.startswith('.')
+                ])
+                detected_settings[ds] = subs
+            else:
+                detected_settings[ds] = []
+        settings = detected_settings
+
+    # C. Detect Models (From Folders)
+    if model_names is None or len(model_names) == 0:
+        found_models = set()
+        
+        for ds in dataset_names:
+            current_settings = settings.get(ds, []) if isinstance(settings, dict) else settings
+            
+            for setting in current_settings:
+                setting_path = os.path.join(experiment_dir, ds, setting)
+                if os.path.exists(setting_path):
+                    subdirs = [
+                        d for d in os.listdir(setting_path) 
+                        if os.path.isdir(os.path.join(setting_path, d)) and not d.startswith('.')
+                    ]
+                    found_models.update(subdirs)
+        
+        if found_models:
+            model_names = sorted(list(found_models))
+            print(f"Auto-detected models from folders: {model_names}")
+        else:
+            print("Warning: No model folders found. Will attempt to detect from JSON keys.")
+            model_names = [] 
+
+    # --- 2. Data Loading ---
+    table_data = {}
+    auto_detect_from_json = (len(model_names) == 0)
+    
+    for dataset in dataset_names:
+        table_data[dataset] = []
+        
+        if isinstance(settings, dict):
+            current_settings = settings.get(dataset, [])
+        else:
+            current_settings = settings
+
+        if isinstance(multiplier, dict):
+            current_mult = multiplier.get(dataset, 1)
+        else:
+            current_mult = multiplier
+
+        for setting in current_settings:
+            file_path = os.path.join(experiment_dir, dataset, setting, json_filename)
+            row_values = []
+            
+            if os.path.exists(file_path):
+                try:
+                    with open(file_path, 'r') as f:
+                        data = json.load(f)
+                    
+                    if auto_detect_from_json:
+                        model_names = sorted(list(data.keys()))
+                        auto_detect_from_json = False
+                        print(f"Auto-detected models from JSON keys: {model_names}")
+                    
+                    if model_names:
+                        for model in model_names:
+                            val = data.get(model, {}).get(metric_key, float('nan'))
+                            if not np.isnan(val):
+                                val = val * current_mult
+                            row_values.append(val)
+                    else:
+                        row_values = []
+
+                except Exception as e:
+                    print(f"Error reading {file_path}: {e}")
+                    row_values = [] 
+            else:
+                row_values = []
+
+            table_data[dataset].append((setting, row_values))
+
+    if not model_names:
+        print("Error: Could not detect model names from folders or JSON files.")
+        return
+
+    # Post-processing: Fill missing file rows with NaNs
+    num_models = len(model_names)
+    for ds in dataset_names:
+        new_rows = []
+        for setting, vals in table_data[ds]:
+            if len(vals) != num_models:
+                new_rows.append((setting, [float('nan')] * num_models))
+            else:
+                new_rows.append((setting, vals))
+        table_data[ds] = new_rows
+
+    # --- 3. Compute Improvements ---
+    improvement_percentages = []
+    
+    flat_rows = []
+    for ds in dataset_names:
+        for _, values in table_data[ds]:
+            flat_rows.append(values)
+            
+    for col_idx in range(len(model_names)):
+        if col_idx == baseline_idx:
+            improvement_percentages.append(0.0)
+            continue
+            
+        rel_diffs = []
+        for row in flat_rows:
+            baseline_val = row[baseline_idx]
+            current_val = row[col_idx]
+            
+            if np.isnan(baseline_val) or np.isnan(current_val) or baseline_val == 0:
+                continue
+                
+            if lower_is_better:
+                diff = (baseline_val - current_val) / baseline_val
+            else:
+                diff = (current_val - baseline_val) / baseline_val
+                
+            rel_diffs.append(diff)
+        
+        if rel_diffs:
+            improvement_percentages.append(np.mean(rel_diffs) * 100)
+        else:
+            improvement_percentages.append(0.0)
+
+    # --- 4. Generate LaTeX ---
+    lines = []
+    lines.append(r"\begin{table}[h!]")
+    lines.append(r"\vspace{-0.5cm}")
+    lines.append(fr"\caption{{Results for {metric_key} metric.}}")
+    lines.append(r"\vspace{0.1cm}")
+    lines.append(r"\centering")
+    lines.append(r"\scalebox{0.6}{")
+    
+    col_def = "lc" + "c" * len(model_names)
+    lines.append(fr"\begin{{tabular}}{{{col_def}}}")
+    lines.append(r"\toprule")
+    
+    # Header Row: Escape underscores in model names for display
+    # We use m.replace('_', r'\_') for the display string only
+    header_cells = ["", "Setting"] + [fr"\thead{{{m.replace('_', r'\_')}}}" for m in model_names]
+    lines.append(" & ".join(header_cells) + r" \\")
+    lines.append(r"\midrule")
+
+    for d_idx, dataset in enumerate(dataset_names):
+        rows = table_data[dataset]
+        num_rows = len(rows)
+        
+        for r_idx, (setting, values) in enumerate(rows):
+            if r_idx == 0:
+                ds_display = dataset.replace('_', r'\_')
+                ds_cell = fr"\multirow{{{num_rows}}}{{*}}{{{ds_display}}}"
+            else:
+                ds_cell = ""
+            
+            setting_display = setting.replace('_', '-')
+
+            valid_values = [v for v in values if not np.isnan(v)]
+            best_val = None
+            if valid_values:
+                if lower_is_better:
+                    best_val = min(valid_values)
+                else:
+                    best_val = max(valid_values)
+            
+            val_cells = []
+            for v in values:
+                if np.isnan(v):
+                    val_cells.append("-")
+                else:
+                    s_val = f"{v:.{decimals}f}"
+                    if best_val is not None and abs(v - best_val) < 1e-9:
+                        val_cells.append(fr"\textbf{{{s_val}}}")
+                    else:
+                        val_cells.append(s_val)
+            
+            line_content = [ds_cell, setting_display] + val_cells
+            lines.append(" & ".join(line_content) + r" \\")
+        
+        if d_idx < len(dataset_names) - 1:
+            lines.append(r"\midrule")
+            
+    lines.append(r"\midrule")
+    imp_cells = ["Improvements", ""]
+    for i, imp in enumerate(improvement_percentages):
+        imp_cells.append(f"{imp:.1f}\\%")
+    
+    lines.append(" & ".join(imp_cells) + r" \\")
+    
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabular}")
+    lines.append(r"}")
+    lines.append(r"\label{tab:main}")
+    lines.append(r"\end{table}")
+
+    with open(output_tex_path, "w") as f:
+        f.write("\n".join(lines))
+    
+    print(f"LaTeX table generated at: {output_tex_path}")

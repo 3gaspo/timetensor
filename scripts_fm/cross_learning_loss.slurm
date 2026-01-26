@@ -14,7 +14,7 @@ horizon=168
 stride=512
 for data in electricity traffic solar exchange_rate
 do
-    for bs in 3
+    for bs in 1 3
     do
         srun python3 cross_learning_loss.py \
         "model=chronos" \
@@ -40,7 +40,7 @@ horizon=24
 stride=512
 for data in electricity traffic solar exchange_rate
 do
-    for bs in 3
+    for bs in 1 3
     do
         srun python3 cross_learning_loss.py \
         "model=chronos" \
@@ -66,7 +66,7 @@ horizon=24
 stride=512
 for data in electricity traffic solar exchange_rate
 do
-    for bs in 3
+    for bs in 1 3
     do
         srun python3 cross_learning_loss.py \
         "model=chronos" \

@@ -64,14 +64,15 @@ def run(cfg):
 
     #user eval
     all_indiv = list(range(data.shape[1]))
+    individuals = len(all_indiv)
     max_dates = data.shape[0] - (lags+horizon)
     stride = cfg.data.sampling.train_stride
     strided_dates = (max_dates - 1) // stride + 1
 
     logger.info(f"Stride dates: {strided_dates}")
-    logger.info(f"Total loops: {strided_dates * len(all_indiv) * cfg.training.eval_runs}")
+    logger.info(f"Total loops: {strided_dates * individuals * cfg.training.eval_runs}")
 
-    indiv_losses = {indiv: [] for indiv in range(len(all_indiv))}
+    indiv_losses = {indiv: [] for indiv in range(individuals)}
     per_user_losses, stds_per_user_losses = [], []
 
     bs = cfg.training.bs 
@@ -89,7 +90,7 @@ def run(cfg):
                 x, y = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
                 
                 if is_context:
-                    if bs > len(all_indiv):
+                    if bs > individuals:
                         context_indivs = [indiv_ for indiv_ in all_indiv if indiv_ != indiv]
                     else:
                         sorted_indices = np.argsort(D[indiv])

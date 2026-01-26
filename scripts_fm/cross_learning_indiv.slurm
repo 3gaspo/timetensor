@@ -13,9 +13,9 @@ eval_runs=10
 lags=672
 horizon=168
 stride=512
-for data in electricity traffic solar exchange_rate
+for data in exchange_rate #electricity traffic solar exchange_rate
     do
-    for bs in 1 2 3 4 5 10
+    for bs in 10 #1 2 3 4 5 10
     do
         for cross in True False
         do
@@ -43,9 +43,9 @@ done
 lags=168
 horizon=24
 stride=512
-for data in electricity traffic solar exchange_rate
+for data in exchange_rate #electricity traffic solar exchange_rate
     do
-    for bs in 1 2 3 4 5 10
+    for bs in 10 #1 2 3 4 5 10
     do
         for cross in True False
         do
@@ -73,9 +73,9 @@ done
 lags=24
 horizon=24
 stride=512
-for data in electricity traffic solar exchange_rate
+for data in exchange_rate #electricity traffic solar exchange_rate
     do
-    for bs in 1 2 3 4 5 10
+    for bs in 10 #1 2 3 4 5 10
     do
         for cross in True False
         do

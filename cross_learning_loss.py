@@ -11,9 +11,8 @@ from time import perf_counter
 from src.timetensor.dataset import fetch_csv
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import Loss
-from src.timetensor.utils import get_dirs, set_seed, get_normal_stats, save_results
-
-from src.timetensor.utils import symlog
+from src.timetensor.utils import get_dirs, set_seed, get_normal_stats, save_results, symlog
+from src.timetensor.visu import plot_weights_
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -61,66 +60,72 @@ def run(cfg):
     
     #user eval
     all_indiv = list(range(data.shape[1]))
+    individuals = len(all_indiv)
     max_dates = data.shape[0] - (lags+horizon)
     stride = cfg.data.sampling.train_stride
     strided_dates = (max_dates - 1) // stride + 1
-    num_full_batches = len(all_indiv) // bs
     num_runs = cfg.training.eval_runs
-    assert bs > 1
+    if bs==1:
+        num_runs=1
     alpha = 0.5
     
     logger.info(f"Stride dates: {strided_dates}")
-    logger.info(f"Total loops: {strided_dates * num_runs + strided_dates * len(all_indiv)}")
+    logger.info(f"Total loops: {strided_dates * num_runs + strided_dates * individuals}")
 
-    indiv_losses = {indiv: [] for indiv in range(len(all_indiv))}
+    indiv_losses = {indiv: [] for indiv in range(individuals)}
     per_user_losses, stds_per_user_losses = [], []
 
-    errors = np.zeros((len(all_indiv), len(all_indiv)))
-    scores = np.zeros((len(all_indiv), len(all_indiv)))
+    errors = np.zeros((individuals, individuals))
+    scores = np.zeros((individuals, individuals))
 
     t1 = perf_counter()
-    for t in range(strided_dates):
-        date_idx = t * stride
-        for _ in range(num_runs):
 
-            indivs = np.random.choice(all_indiv, bs)
-            x, y = data.iloc[date_idx : date_idx+lags, indivs], data.iloc[date_idx+lags : date_idx+lags+horizon, indivs]
+    if bs>1:
+        for t in range(strided_dates):
+            date_idx = t * stride
+            for _ in range(num_runs):
 
-            x_batch, y_batch = torch.tensor(x.values).transpose(1,0).unsqueeze(1), torch.tensor(y.values).transpose(1,0).unsqueeze(1) # x: (bs, 1, L)
-            c_batch = None
-            
-            mean, std = get_normal_stats(x_batch)
-            pred_batch = model(x_batch, c_batch)
-            loss = criterion(pred_batch, y_batch, mean, std).mean(dim=(1,2)) # (bs)
-            
-            for i, indiv in enumerate(indivs):
-                for j, neighbor in enumerate(indivs):
-                    if j!=i:
-                        errors[indiv][neighbor] = (1-alpha) * errors[indiv][neighbor] + alpha * loss[i].item()
+                indivs = np.random.choice(all_indiv, bs)
+                x, y = data.iloc[date_idx : date_idx+lags, indivs], data.iloc[date_idx+lags : date_idx+lags+horizon, indivs]
 
+                x_batch, y_batch = torch.tensor(x.values).transpose(1,0).unsqueeze(1), torch.tensor(y.values).transpose(1,0).unsqueeze(1) # x: (bs, 1, L)
+                c_batch = None
+                
+                mean, std = get_normal_stats(x_batch)
+                pred_batch = model(x_batch, c_batch)
+                loss = criterion(pred_batch, y_batch, mean, std).mean(dim=(1,2)) # (bs)
+                
+                for i, indiv in enumerate(indivs):
+                    for j, neighbor in enumerate(indivs):
+                        if j!=i:
+                            errors[indiv][neighbor] = (1-alpha) * errors[indiv][neighbor] + alpha * loss[i].item()
 
-    for indiv in range(len(all_indiv)):
-        for neighbor in range(len(all_indiv)):
-            if indiv == neighbor:
-                scores[indiv][neighbor] = np.inf
-            else:
-                scores[indiv][neighbor] = np.exp(- errors[indiv][neighbor] / np.sum(errors[indiv]))
+        for indiv in range(individuals):
+            for neighbor in range(individuals):
+                if indiv == neighbor:
+                    scores[indiv][neighbor] = np.inf
+                else:
+                    scores[indiv][neighbor] = np.exp(- errors[indiv][neighbor] / np.sum(errors[indiv]))
 
+        plot_weights_(scores, save_dir, name="scores.pdf", title='Neighbor scores')
 
+    t2 = perf_counter()
     for t in range(strided_dates):
         date_idx = t * stride
 
         for indiv in range(len(all_indiv)):
 
-            sorted_indices = np.argsort(scores[indiv])
-            context_indivs = list(sorted_indices[1:bs])
-
             x, y = data.iloc[date_idx : date_idx+lags, indiv], data.iloc[date_idx+lags : date_idx+lags+horizon, indiv]  # x: (L)
-            xc, yc = data.iloc[date_idx : date_idx+lags, context_indivs], data.iloc[date_idx+lags : date_idx+lags+horizon, context_indivs]
-            
-            x_batch, y_batch = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
-            c_batch, _ = torch.tensor(xc.values).transpose(1,0).unsqueeze(1), torch.tensor(yc.values).transpose(1,0).unsqueeze(1) # c: (bs-1, 1, L)
-            
+
+            if bs>1:
+                sorted_indices = np.argsort(scores[indiv])
+                context_indivs = list(sorted_indices[1:bs])
+                xc, yc = data.iloc[date_idx : date_idx+lags, context_indivs], data.iloc[date_idx+lags : date_idx+lags+horizon, context_indivs]        
+                x_batch, y_batch = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
+                c_batch, _ = torch.tensor(xc.values).transpose(1,0).unsqueeze(1), torch.tensor(yc.values).transpose(1,0).unsqueeze(1) # c: (bs-1, 1, L)
+            else:
+                c_batch = None
+
             mean, std = get_normal_stats(x_batch)
             pred_batch = model(x_batch, c_batch)
             loss = criterion(pred_batch, y_batch, mean, std) # (1, dim, H)
@@ -139,12 +144,15 @@ def run(cfg):
     total_means = np.mean(per_user_losses)
     w10_means = np.mean(np.partition(per_user_losses, int(len(per_user_losses)*0.9))[int(len(per_user_losses)*0.9):])
     
-    t2 = perf_counter()
-    delta_t = (t2-t1)/60
+    t3 = perf_counter()
+
+    delta_training = (t2-t1)/60
+    delta_testing = (t3-t2)/60
     
     save_results(total_means, output_dir, f"mean_results.json", save_name, f"nMSE")
     save_results(w10_means, output_dir, f"mean_results.json", save_name, f"w10 nMSE")
-    save_results(delta_t, output_dir, f"mean_results.json", save_name, f"compute (min)")
+    save_results(delta_training, output_dir, f"mean_results.json", save_name, f"training (min)")
+    save_results(delta_testing, output_dir, f"mean_results.json", save_name, f"testing (min)")
 
     stats_df = pd.DataFrame({
         "log(mean_error)": per_user_losses,
