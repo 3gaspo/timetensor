@@ -1,11 +1,12 @@
 import hydra
 import logging
 import torch
+from time import perf_counter
 
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import get_losses, launch_training, launch_eval, launch_example
-from src.timetensor.utils import get_dirs, set_seed
+from src.timetensor.utils import get_dirs, set_seed, save_results
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -60,10 +61,15 @@ def run(cfg):
 
     #training
     logger.info("--Training--")
+    t1 = perf_counter()
     learner = launch_training(model,
         norm_name, criterion, cfg.training.lr, cfg.training.epochs, loaders_dict, eval_losses, device,
         save_dir, save_name, cfg.training.eval_freq, cfg.training.print_freq, logger, save=True, seed=seed)
-    
+    t2 = perf_counter()
+    delta_t = (t2-t1)/60
+    save_results(delta_t, output_dir, f"train_mean_results.json", save_name, f"train time (min)")
+
+
     #eval
     logger.info("--Eval--")
     if cfg.training.valid_eval:

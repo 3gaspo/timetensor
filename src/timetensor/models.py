@@ -1,15 +1,15 @@
 import torch
 import torch.nn as nn
+from sklearn.linear_model import LinearRegression
+import torch.nn.functional as F
 
 from .utils import get_normal_stats
 
-from sklearn.linear_model import LinearRegression
 from .sota.patchtst.patch_tst import PatchTST
 from .sota.dlinear import DLinear
 from .sota.chronos2.chronos import Chronos
-
-import torch.nn.functional as F
-
+from .sota.tabpfnts.tabpfn import TabPFN
+from .generation.kernel_synth import generate_multiple_time_series
 
 ## Baselines
 
@@ -285,7 +285,46 @@ class AugmentModel(nn.Module):
         if c is not None:
             transforms.append(c)
         for mode in modes:
-            if mode == "kernel": # kernel smoothing
+            
+            #garbage covariates
+            shape = (x.shape[0], 1, x.shape[-1])
+            if "noise" in mode:
+                a, b = mode.split("=")
+                assert a[-5:] == "noise"
+                n=1
+                if len(a)>5:
+                    n=int(a[0])
+                b = float(b)
+                for _ in range(n):
+                    transforms.append(b*torch.randn(shape))
+            elif "constant" in mode:
+                a, b = mode.split("=")
+                assert a[-8:] == "constant"
+                n=1
+                if len(a)>8:
+                    n=int(a[0])
+                b = float(b)
+                for _ in range(n):
+                    tensor = torch.empty(shape)
+                    tensor.fill_(b)
+                    transforms.append(tensor)
+            elif mode == "identity":
+                transforms.append(x)
+            elif "synthetic" in mode:
+                a, b = mode.split("=")
+                aa, bb = a.split("_")
+                assert[bb] == "synthetic"
+                num_series = int(b)
+                synthetic_covariates = generate_multiple_time_series(num_series=num_series)
+                for i, covariates in synthetic_covariates:
+                    if aa == "past":
+                        tensor = covariates[i]["target"][:x.shape[-1]+self.horizon]
+                    elif aa == "future":
+                        tensor = covariates[i]["target"][:x.shape[-1]]
+                    transforms.append(tensor.expand(x.shape[0], 1, tensor.shape[1]))
+
+            #self augmentation
+            elif mode == "kernel": # kernel smoothing
                 k = self.smooth_kernel.view(1, 1, -1).repeat(x.shape[1], 1, 1)
                 transforms.append(F.conv1d(x, k, padding=self.smooth_kernel.shape[0]//2, groups=x.shape[1])) 
             elif mode == "square":  # signed square
@@ -348,6 +387,11 @@ def model_selector(model_name, lags, dim, horizon, **kwargs):
     elif model_name == "chronos":
         model = Chronos(lags, horizon, kwargs.get("context_mode", "past_only"), kwargs.get("cross_learning", False))
         model.model_name = "chronos"
+        model.model_type = "pytorch"
+    elif model_name == "tabpfn":
+        model = TabPFN(lags, horizon, kwargs.get("context_mode", "past_only"), kwargs.get("seasonal_periods", None),
+                       kwargs.get("cross_learning", False), kwargs.get("dimension_encoding", "ordinal"))
+        model.model_name = "tabpfn"
         model.model_type = "pytorch"
     else:
         raise ValueError(f"Model name not recognized : {model_name}")
@@ -432,6 +476,7 @@ class GRevIN(DefaultNorm):
         tie_revin: bool = False,    # enforce symmetric RevIN inverse + output modulation invert
         clamp_gamma_eps: float = 1e-6,
         latent: str = "none", # "none", "model", "affine"
+        **kwargs
     ):
         super().__init__(model, latent=False)
         assert personalize in {"none", "affine", "all"}
@@ -443,6 +488,7 @@ class GRevIN(DefaultNorm):
         self.unknown_cluster_id = unknown_cluster_id
         self.tie_revin = tie_revin
         self.clamp_gamma_eps = clamp_gamma_eps
+        self.latent = latent
 
         def free_gate_param(init_one: bool):
             return nn.Parameter(torch.full((1, dim, 1), 1.0 if init_one else 0.0))

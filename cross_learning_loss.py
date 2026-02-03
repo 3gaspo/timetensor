@@ -12,7 +12,7 @@ from src.timetensor.dataset import fetch_csv
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import Loss
 from src.timetensor.utils import get_dirs, set_seed, get_normal_stats, save_results, symlog
-from src.timetensor.visu import plot_weights_
+from src.timetensor.visu import plot_2D
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -67,20 +67,28 @@ def run(cfg):
     num_runs = cfg.training.eval_runs
     if bs==1:
         num_runs=1
-    alpha = 0.5
     
+    neighbors = bs
+    temperature = 0.5
+
     logger.info(f"Stride dates: {strided_dates}")
-    logger.info(f"Total loops: {strided_dates * num_runs + strided_dates * individuals}")
+
+    total_runs = 0
+    if bs>1:
+        total_runs += strided_dates * num_runs
+    total_runs += strided_dates * individuals
+    logger.info(f"Total loops: {total_runs}")
 
     indiv_losses = {indiv: [] for indiv in range(individuals)}
     per_user_losses, stds_per_user_losses = [], []
 
     errors = np.zeros((individuals, individuals))
+    counts = np.zeros((individuals, individuals))
     scores = np.zeros((individuals, individuals))
+    mask = np.full((individuals, individuals), False)
 
     t1 = perf_counter()
-
-    if bs>1:
+    if bs > 1:
         for t in range(strided_dates):
             date_idx = t * stride
             for _ in range(num_runs):
@@ -98,16 +106,18 @@ def run(cfg):
                 for i, indiv in enumerate(indivs):
                     for j, neighbor in enumerate(indivs):
                         if j!=i:
-                            errors[indiv][neighbor] = (1-alpha) * errors[indiv][neighbor] + alpha * loss[i].item()
-
+                            mask[indiv][neighbor] = True
+                            errors[indiv][neighbor] += loss[i].item()
+                            counts[indiv][neighbor] += 1
+        
+        errors = errors / np.max(counts, 1)
+        
         for indiv in range(individuals):
             for neighbor in range(individuals):
-                if indiv == neighbor:
-                    scores[indiv][neighbor] = np.inf
-                else:
-                    scores[indiv][neighbor] = np.exp(- errors[indiv][neighbor] / np.sum(errors[indiv]))
+                if mask[indiv][neighbor]:
+                    scores[indiv][neighbor] = np.exp(- errors[indiv][neighbor] / temperature) / np.sum(np.exp(-errors[indiv] / temperature))
 
-        plot_weights_(scores, save_dir, name="scores.pdf", title='Neighbor scores')
+        plot_2D(scores, save_dir, name="scores.pdf", title='Neighbor scores', x_name="Users", y_name="Users")
 
     t2 = perf_counter()
     for t in range(strided_dates):
@@ -116,15 +126,14 @@ def run(cfg):
         for indiv in range(len(all_indiv)):
 
             x, y = data.iloc[date_idx : date_idx+lags, indiv], data.iloc[date_idx+lags : date_idx+lags+horizon, indiv]  # x: (L)
+            x_batch, y_batch = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
 
+            c_batch = None
             if bs>1:
-                sorted_indices = np.argsort(scores[indiv])
-                context_indivs = list(sorted_indices[1:bs])
+                sorted_indices = np.argsort(scores[indiv])[::-1]
+                context_indivs = list(sorted_indices[:neighbors+1])
                 xc, yc = data.iloc[date_idx : date_idx+lags, context_indivs], data.iloc[date_idx+lags : date_idx+lags+horizon, context_indivs]        
-                x_batch, y_batch = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
                 c_batch, _ = torch.tensor(xc.values).transpose(1,0).unsqueeze(1), torch.tensor(yc.values).transpose(1,0).unsqueeze(1) # c: (bs-1, 1, L)
-            else:
-                c_batch = None
 
             mean, std = get_normal_stats(x_batch)
             pred_batch = model(x_batch, c_batch)
@@ -151,8 +160,8 @@ def run(cfg):
     
     save_results(total_means, output_dir, f"mean_results.json", save_name, f"nMSE")
     save_results(w10_means, output_dir, f"mean_results.json", save_name, f"w10 nMSE")
-    save_results(delta_training, output_dir, f"mean_results.json", save_name, f"training (min)")
-    save_results(delta_testing, output_dir, f"mean_results.json", save_name, f"testing (min)")
+    save_results(delta_training, output_dir, f"mean_results.json", save_name, f"train time (min)")
+    save_results(delta_testing, output_dir, f"mean_results.json", save_name, f"eval time (min)")
 
     stats_df = pd.DataFrame({
         "log(mean_error)": per_user_losses,
@@ -177,5 +186,3 @@ def run(cfg):
 
 if __name__ == "__main__":
     run()
-
-

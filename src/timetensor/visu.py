@@ -100,6 +100,17 @@ def plot_preds(x, y, preds, path="", name="prediction.pdf", title="Predictions",
 
 ## 2D plots
 
+def plot_2D(matrix, path, name="weights.pdf", title='Model weights', x_name="x", y_name="y"):
+    """plots weights of a model"""
+    plt.figure()
+    plt.imshow(matrix, aspect='auto', cmap='viridis')
+    plt.colorbar(label='Weight value')
+    plt.xlabel(x_name)
+    plt.ylabel(y_name)
+    plt.title(title)
+    plt.savefig(path + name)
+    plt.close()
+
 def plot_weights_(weights, path, name="weights.pdf", title='Model weights'):
     """plots weights of a model"""
     plt.figure()
@@ -561,7 +572,7 @@ def generate_results_table(
     dataset_names: list = None,  # Default to None for auto-detection
     settings: any = None,        # Default to None for auto-detection
     json_filename: str = "results.json",
-    model_names: list = None,    # Default to None for auto-detection
+    model_names: any = None,    # Default to None for auto-detection
     metric_key: str = "nMSE",    # Default to nMSE
     output_tex_path: str = None, 
     lower_is_better: bool = True,
@@ -573,6 +584,11 @@ def generate_results_table(
     Generates a LaTeX table from JSON result files. 
     Auto-detects structure (datasets, settings, models) from the file system.
     """
+
+    if type(model_names)==str:
+        model_names = model_names.split(";")
+    if type(settings)==str:
+        settings = settings.split(";")
 
     # --- 0. Path Setup ---
     if output_tex_path is None:

@@ -3,9 +3,9 @@ import logging
 import torch
 from time import perf_counter
 
-from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm#, format_individual_splits
+from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm
 from src.timetensor.models import load_model
-from src.timetensor.pipeline import get_losses, load_learner
+from src.timetensor.pipeline import get_losses, load_learner, launch_example
 from src.timetensor.utils import get_dirs, set_seed, save_results
 
 import numpy as np
@@ -66,6 +66,8 @@ def run(cfg):
     if verbose:
         logger.info("Fetched model and learner")
 
+    #example
+    launch_example(data_path, model, lags, horizon, device, save_dir, save_name, cfg.data.sampling.use_context)
 
     #per user errors
     logger.info("--Per user eval--")
@@ -95,7 +97,7 @@ def run(cfg):
         
         save_results(total_means[key], output_dir, f"{key}_mean_results.json", save_name, f"{criterion_name}")
         save_results(w10_means[key], output_dir, f"{key}_mean_results.json", save_name, f"w10 {criterion_name}")
-        save_results(delta_t, output_dir, f"{key}_mean_results.json", save_name, f"compute (min)")
+        save_results(delta_t, output_dir, f"{key}_mean_results.json", save_name, f"eval time (min)")
 
         stats_df = pd.DataFrame({
             "log(mean_error)": per_user_losses[key],

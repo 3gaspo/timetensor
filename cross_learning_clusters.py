@@ -70,7 +70,7 @@ def run(cfg):
     strided_dates = (max_dates - 1) // stride + 1
 
     logger.info(f"Stride dates: {strided_dates}")
-    logger.info(f"Total loops: {strided_dates * individuals * cfg.training.eval_runs}")
+    logger.info(f"Total loops: {strided_dates * individuals}")
 
     indiv_losses = {indiv: [] for indiv in range(individuals)}
     per_user_losses, stds_per_user_losses = [], []
@@ -83,35 +83,34 @@ def run(cfg):
     t1 = perf_counter()
     for t in range(strided_dates):
         date_idx = t * stride
-        for _ in range(cfg.training.eval_runs):
-            for indiv in all_indiv:
-                                    
-                x, y = data.iloc[date_idx : date_idx+lags, indiv], data.iloc[date_idx+lags : date_idx+lags+horizon, indiv]
-                x, y = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
-                
-                if is_context:
-                    if bs > individuals:
-                        context_indivs = [indiv_ for indiv_ in all_indiv if indiv_ != indiv]
-                    else:
-                        sorted_indices = np.argsort(D[indiv])
-                        context_indivs = list(sorted_indices[1:bs])
-                    xc, yc = data.iloc[date_idx : date_idx+lags, context_indivs], data.iloc[date_idx+lags : date_idx+lags+horizon, context_indivs]
-                    xc, yc = torch.tensor(xc.values).transpose(1,0).unsqueeze(1), torch.tensor(yc.values).transpose(1,0).unsqueeze(1) # c: (bs-1, 1, L)
-
-                c_batch = None
-                if is_context and cross_learning:
-                        x_batch = torch.cat((x,xc), dim=0) # x: (bs, 1, L)
-                        y_batch = torch.cat((y,yc), dim=0)
+        for indiv in all_indiv:
+                                
+            x, y = data.iloc[date_idx : date_idx+lags, indiv], data.iloc[date_idx+lags : date_idx+lags+horizon, indiv]
+            x, y = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
+            
+            if is_context:
+                if bs > individuals:
+                    context_indivs = [indiv_ for indiv_ in all_indiv if indiv_ != indiv]
                 else:
-                    x_batch = x
-                    y_batch = y
-                    if is_context and use_context:
-                        c_batch = xc
-                
-                mean, std = get_normal_stats(x_batch)
-                pred_batch = model(x_batch, c_batch)
-                loss = criterion(pred_batch, y_batch, mean, std) # (bs, dim, H)
-                indiv_losses[indiv].append(loss[0].mean().item())
+                    sorted_indices = np.argsort(D[indiv])
+                    context_indivs = list(sorted_indices[1:bs])
+                xc, yc = data.iloc[date_idx : date_idx+lags, context_indivs], data.iloc[date_idx+lags : date_idx+lags+horizon, context_indivs]
+                xc, yc = torch.tensor(xc.values).transpose(1,0).unsqueeze(1), torch.tensor(yc.values).transpose(1,0).unsqueeze(1) # c: (bs-1, 1, L)
+
+            c_batch = None
+            if is_context and cross_learning:
+                x_batch = torch.cat((x,xc), dim=0) # x: (bs, 1, L)
+                y_batch = torch.cat((y,yc), dim=0)
+            else:
+                x_batch = x
+                y_batch = y
+                if is_context and use_context:
+                    c_batch = xc
+            
+            mean, std = get_normal_stats(x_batch)
+            pred_batch = model(x_batch, c_batch)
+            loss = criterion(pred_batch, y_batch, mean, std) # (bs, dim, H)
+            indiv_losses[indiv].append(loss[0].mean().item())
                 
     for indiv in all_indiv:
         indiv_loss = indiv_losses[indiv]
@@ -128,7 +127,7 @@ def run(cfg):
 
     save_results(total_means, output_dir, f"mean_results.json", save_name, f"nMSE")
     save_results(w10_means, output_dir, f"mean_results.json", save_name, f"w10 nMSE")
-    save_results(delta_t, output_dir, f"mean_results.json", save_name, f"compute (min)")
+    save_results(delta_t, output_dir, f"mean_results.json", save_name, f"eval time (min)")
 
     stats_df = pd.DataFrame({
         "log(mean_error)": per_user_losses,

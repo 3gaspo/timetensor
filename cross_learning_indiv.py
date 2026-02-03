@@ -120,7 +120,7 @@ def run(cfg):
     
     save_results(total_means, output_dir, f"mean_results.json", save_name, f"nMSE")
     save_results(w10_means, output_dir, f"mean_results.json", save_name, f"w10 nMSE")
-    save_results(delta_t, output_dir, f"mean_results.json", save_name, f"compute (min)")
+    save_results(delta_t, output_dir, f"mean_results.json", save_name, f"eval time (min)")
 
     stats_df = pd.DataFrame({
         "log(mean_error)": per_user_losses,
