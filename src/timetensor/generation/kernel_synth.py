@@ -22,7 +22,7 @@ from sklearn.gaussian_process.kernels import (
 from tqdm.auto import tqdm
 import pyarrow as pa
 
-LENGTH = 1024
+LENGTH = 1345 #1024
 KERNEL_BANK = [
     ExpSineSquared(periodicity=24 / LENGTH),  # H
     ExpSineSquared(periodicity=48 / LENGTH),  # 0.5H
@@ -190,7 +190,7 @@ def generate_single_time_series(max_kernels: int = 5, seed: Optional[int] = None
 
 import pandas as pd
 
-def generate_multiple_time_series(max_kernels: int, num_series: int, seed: Optional[int] = None):
+def generate_multiple_time_series(num_series: int, max_kernels: int = 5, seed: Optional[int] = None):
 
     generated_time_series = Parallel(n_jobs=-1)(
         delayed(generate_single_time_series)(max_kernels=max_kernels, seed=seed)

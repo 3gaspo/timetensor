@@ -7,131 +7,133 @@
 #SBATCH --partition=a100
 source .venv/bin/activate
 
+#les sota ont été run sur h100-bis
+
 seed=1
 experiment_dir="../outputs/iclr/sota/"
 
-lags=1344
-horizon=336
-stride=512
-for data in electricity traffic solar exchange_rate
-do
-    srun python3 eval_users.py \
-    "model=tabpfn" \
-    "task.lags=$lags" \
-    "task.horizon=$horizon" \
-    "normalization=instance" \
-    "data=$data" \
-    "data.sampling.use_context=False" \
-    "data.splits.date_splits=0.7" \
-    "data.splits.indiv_split=1" \
-    "data.sampling.train_idx_mode='all'" \
-    "data.sampling.eval_idx_mode='all'" \
-    "data.sampling.train_stride=$stride" \
-    "data.sampling.eval_stride=$stride" \
-    "data.sampling.remove_train_cte=True" \
-    "data.sampling.remove_eval_cte=True" \
-    "training.complete_evaluation=False" \
-    "training.epochs=1" \
-    "training.bs=350" \
-    "training.eval_runs=1" \
-    "misc.seed=$seed" \
-    "misc.device='cpu'" \
-    "misc.save_name='tabpfn'" \
-    "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-done
+# lags=1344
+# horizon=336
+# stride=512
+# for data in electricity traffic solar exchange_rate
+# do
+#     srun python3 eval_users.py \
+#     "model=tabpfn" \
+#     "task.lags=$lags" \
+#     "task.horizon=$horizon" \
+#     "normalization=instance" \
+#     "data=$data" \
+#     "data.sampling.use_context=False" \
+#     "data.splits.date_splits=0.7" \
+#     "data.splits.indiv_split=1" \
+#     "data.sampling.train_idx_mode='all'" \
+#     "data.sampling.eval_idx_mode='all'" \
+#     "data.sampling.train_stride=$stride" \
+#     "data.sampling.eval_stride=$stride" \
+#     "data.sampling.remove_train_cte=True" \
+#     "data.sampling.remove_eval_cte=True" \
+#     "training.complete_evaluation=False" \
+#     "training.epochs=1" \
+#     "training.bs=350" \
+#     "training.eval_runs=1" \
+#     "misc.seed=$seed" \
+#     "misc.device='cpu'" \
+#     "misc.save_name='tabpfn'" \
+#     "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+# done
 
-lags=672
-horizon=168
-stride=512
-for data in electricity traffic solar exchange_rate
-do
-    srun python3 eval_users.py \
-    "model=tabpfn" \
-    "task.lags=$lags" \
-    "task.horizon=$horizon" \
-    "normalization=instance" \
-    "data=$data" \
-    "data.sampling.use_context=False" \
-    "data.splits.date_splits=0.7" \
-    "data.splits.indiv_split=1" \
-    "data.sampling.train_idx_mode='all'" \
-    "data.sampling.eval_idx_mode='all'" \
-    "data.sampling.train_stride=$stride" \
-    "data.sampling.eval_stride=$stride" \
-    "data.sampling.remove_train_cte=True" \
-    "data.sampling.remove_eval_cte=True" \
-    "training.complete_evaluation=False" \
-    "training.epochs=1" \
-    "training.bs=350" \
-    "training.eval_runs=1" \
-    "misc.seed=$seed" \
-    "misc.device='cpu'" \
-    "misc.save_name='tabpfn'" \
-    "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-done
+# lags=672
+# horizon=168
+# stride=512
+# for data in electricity traffic solar exchange_rate
+# do
+#     srun python3 eval_users.py \
+#     "model=tabpfn" \
+#     "task.lags=$lags" \
+#     "task.horizon=$horizon" \
+#     "normalization=instance" \
+#     "data=$data" \
+#     "data.sampling.use_context=False" \
+#     "data.splits.date_splits=0.7" \
+#     "data.splits.indiv_split=1" \
+#     "data.sampling.train_idx_mode='all'" \
+#     "data.sampling.eval_idx_mode='all'" \
+#     "data.sampling.train_stride=$stride" \
+#     "data.sampling.eval_stride=$stride" \
+#     "data.sampling.remove_train_cte=True" \
+#     "data.sampling.remove_eval_cte=True" \
+#     "training.complete_evaluation=False" \
+#     "training.epochs=1" \
+#     "training.bs=350" \
+#     "training.eval_runs=1" \
+#     "misc.seed=$seed" \
+#     "misc.device='cpu'" \
+#     "misc.save_name='tabpfn'" \
+#     "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+# done
 
-lags=168
-horizon=24
-stride=512
-for data in electricity traffic solar exchange_rate
-do
-    srun python3 eval_users.py \
-    "model=tabpfn" \
-    "task.lags=$lags" \
-    "task.horizon=$horizon" \
-    "normalization=instance" \
-    "data=$data" \
-    "data.sampling.use_context=False" \
-    "data.splits.date_splits=0.7" \
-    "data.splits.indiv_split=1" \
-    "data.sampling.train_idx_mode='all'" \
-    "data.sampling.eval_idx_mode='all'" \
-    "data.sampling.train_stride=$stride" \
-    "data.sampling.eval_stride=$stride" \
-    "data.sampling.remove_train_cte=True" \
-    "data.sampling.remove_eval_cte=True" \
-    "training.complete_evaluation=False" \
-    "training.epochs=1" \
-    "training.bs=350" \
-    "training.eval_runs=1" \
-    "misc.seed=$seed" \
-    "misc.device='cpu'" \
-    "misc.save_name='tabpfn'" \
-    "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-done
+# lags=168
+# horizon=24
+# stride=512
+# for data in electricity traffic solar exchange_rate
+# do
+#     srun python3 eval_users.py \
+#     "model=tabpfn" \
+#     "task.lags=$lags" \
+#     "task.horizon=$horizon" \
+#     "normalization=instance" \
+#     "data=$data" \
+#     "data.sampling.use_context=False" \
+#     "data.splits.date_splits=0.7" \
+#     "data.splits.indiv_split=1" \
+#     "data.sampling.train_idx_mode='all'" \
+#     "data.sampling.eval_idx_mode='all'" \
+#     "data.sampling.train_stride=$stride" \
+#     "data.sampling.eval_stride=$stride" \
+#     "data.sampling.remove_train_cte=True" \
+#     "data.sampling.remove_eval_cte=True" \
+#     "training.complete_evaluation=False" \
+#     "training.epochs=1" \
+#     "training.bs=350" \
+#     "training.eval_runs=1" \
+#     "misc.seed=$seed" \
+#     "misc.device='cpu'" \
+#     "misc.save_name='tabpfn'" \
+#     "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+# done
 
-lags=24
-horizon=24
-stride=512
-for data in electricity traffic solar exchange_rate
-do
-    srun python3 eval_users.py \
-    "model=tabpfn" \
-    "task.lags=$lags" \
-    "task.horizon=$horizon" \
-    "normalization=instance" \
-    "data=$data" \
-    "data.sampling.use_context=False" \
-    "data.splits.date_splits=0.7" \
-    "data.splits.indiv_split=1" \
-    "data.sampling.train_idx_mode='all'" \
-    "data.sampling.eval_idx_mode='all'" \
-    "data.sampling.train_stride=$stride" \
-    "data.sampling.eval_stride=$stride" \
-    "data.sampling.remove_train_cte=True" \
-    "data.sampling.remove_eval_cte=True" \
-    "training.complete_evaluation=False" \
-    "training.epochs=1" \
-    "training.bs=350" \
-    "training.eval_runs=1" \
-    "misc.seed=$seed" \
-    "misc.device='cpu'" \
-    "misc.save_name='tabpfn'" \
-    "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-done
+# lags=24
+# horizon=24
+# stride=512
+# for data in electricity traffic solar exchange_rate
+# do
+#     srun python3 eval_users.py \
+#     "model=tabpfn" \
+#     "task.lags=$lags" \
+#     "task.horizon=$horizon" \
+#     "normalization=instance" \
+#     "data=$data" \
+#     "data.sampling.use_context=False" \
+#     "data.splits.date_splits=0.7" \
+#     "data.splits.indiv_split=1" \
+#     "data.sampling.train_idx_mode='all'" \
+#     "data.sampling.eval_idx_mode='all'" \
+#     "data.sampling.train_stride=$stride" \
+#     "data.sampling.eval_stride=$stride" \
+#     "data.sampling.remove_train_cte=True" \
+#     "data.sampling.remove_eval_cte=True" \
+#     "training.complete_evaluation=False" \
+#     "training.epochs=1" \
+#     "training.bs=350" \
+#     "training.eval_runs=1" \
+#     "misc.seed=$seed" \
+#     "misc.device='cpu'" \
+#     "misc.save_name='tabpfn'" \
+#     "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+# done
 
-settings="1344-336;672-168;168-24;24-24"
-model_names="PatchTST;chronos;tabpfn"
+settings="1344_336;672_168;168_24;24_24"
+model_names="PatchTST;chronos2;tabpfn"
 
 for metric in nMSE 'w10 nMSE' 'eval time (min)'
 do

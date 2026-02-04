@@ -4,7 +4,7 @@
 #SBATCH --output=script_outputs/identity_cr.out
 #SBATCH --error=script_outputs/identity_cr.err
 #SBATCH --time=23:00:00
-#SBATCH --partition=h100-bis
+#SBATCH --partition=a100
 source .venv/bin/activate
 
 seed=1
@@ -153,9 +153,9 @@ do
 done
 
 settings="1344_336;672_168;168_24;24_24"
-file_name=test1_mean_results.json
+file_name=mean_results.json
 metric=nMSE
-output_path="${experiment_dir}${prefix}_${metric}_results.tex"
+output_path="${experiment_dir}${metric}_results.tex"
 
 for model in chronos
 do

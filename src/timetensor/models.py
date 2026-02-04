@@ -311,17 +311,22 @@ class AugmentModel(nn.Module):
             elif mode == "identity":
                 transforms.append(x)
             elif "synthetic" in mode:
-                a, b = mode.split("=")
+                a, b = mode.split("=") #e.g past_synthetic=10
                 aa, bb = a.split("_")
-                assert[bb] == "synthetic"
+                assert bb == "synthetic", f"aa:{aa}, bb:{bb}, b:{b}"
                 num_series = int(b)
-                synthetic_covariates = generate_multiple_time_series(num_series=num_series)
-                for i, covariates in synthetic_covariates:
+                synthetic_series = generate_multiple_time_series(num_series=x.shape[0]*num_series)
+                
+                covariates_tensor = []
+                for serie in synthetic_series:
+                    serie_array = serie["target"] #array
                     if aa == "past":
-                        tensor = covariates[i]["target"][:x.shape[-1]+self.horizon]
+                        tensor = torch.tensor(serie_array[:x.shape[-1]])
                     elif aa == "future":
-                        tensor = covariates[i]["target"][:x.shape[-1]]
-                    transforms.append(tensor.expand(x.shape[0], 1, tensor.shape[1]))
+                        tensor = torch.tensor(serie_array[:x.shape[-1]+self.horizon])
+                    covariates_tensor.append(tensor)
+                covariates_tensor = torch.stack(covariates_tensor, dim=0) # (bs*num_series, L(+H))
+                transforms.append(covariates_tensor.expand(x.shape[0], 1, num_series, tensor.shape[0])) # (bs, 1, num_series)
 
             #self augmentation
             elif mode == "kernel": # kernel smoothing
@@ -398,7 +403,7 @@ def model_selector(model_name, lags, dim, horizon, **kwargs):
     return model
 
 def normalization_selector(model, norm_name, dim, **kwargs):
-    if norm_name is None or norm_name == "None":
+    if norm_name is None or norm_name == "None" or norm_name == "none":
         model = DefaultNorm(model)
     elif norm_name == "standard":
         model = StandardNorm(model, **kwargs)

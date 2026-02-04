@@ -13,7 +13,7 @@ import torch.nn.functional as F
 class TabPFN:
     def __init__(self, lags, horizon, context_mode="past_only", seasonal_periods=None,
         cross_learning=False, dimension_encoding="ordinal",
-        device="cuda", weights_path="src/timetensor/sota/tabpfn/weights"
+        device="cuda", weights_path="src/timetensor/sota/tabpfnts/weights/tabpfn-v2.5-regressor-v2.5_default.ckpt"
     ):
         self.lags = lags
         self.horizon = horizon
@@ -27,8 +27,8 @@ class TabPFN:
             self.seasonal_periods = seasonal_periods
         else: # assumes hourly data
             self.seasonal_periods = []
-            if lags > 24: self.seasonal_periods.append(lags//24)
-            if lags > 168: self.seasonal_periods.append(lags//168)
+            if lags > 24: self.seasonal_periods.append(24)#lags//24)
+            if lags > 168: self.seasonal_periods.append(168)#lags//168)
         
         local_model_dir = to_absolute_path(weights_path)
         self.model = TabPFNRegressor(device=device, model_path=local_model_dir)

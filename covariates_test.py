@@ -11,8 +11,10 @@ from time import perf_counter
 from src.timetensor.dataset import fetch_csv
 from src.timetensor.models import load_model
 from src.timetensor.pipeline import Loss
-from src.timetensor.utils import get_dirs, set_seed, get_normal_stats, save_results, symlog
-from src.timetensor.visu import plot_horizon_errors, plot_errors, plot_pred
+from src.timetensor.utils import get_dirs, set_seed, get_normal_stats, save_results
+
+from src.timetensor.analysis import calculate_distances
+from src.timetensor.utils import symlog
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -56,7 +58,7 @@ def run(cfg):
     #model
     model = load_model(model_name, (lags, 1, horizon), norm_name, cfg.training.init, device.type=="cpu", **kwargs)
     model.eval()
-    
+
     #user eval
     all_indiv = list(range(data.shape[1]))
     individuals = len(all_indiv)
@@ -65,54 +67,46 @@ def run(cfg):
     strided_dates = (max_dates - 1) // stride + 1
 
     logger.info(f"Stride dates: {strided_dates}")
-    logger.info(f"Total loops: {strided_dates * individuals * cfg.training.eval_runs}")
+    logger.info(f"Total loops: {strided_dates * individuals}")
 
     indiv_losses = {indiv: [] for indiv in range(individuals)}
-    all_losses = []
     per_user_losses, stds_per_user_losses = [], []
-    horizon_losses = np.zeros(horizon)
 
     bs = cfg.training.bs 
     use_context = cfg.data.sampling.use_context
+    is_context = (bs > 1)
 
-    #example
-    rand_t = np.random.randint(strided_dates) * stride
-    rand_indiv = np.random.randint(individuals)
-    x, y = data.iloc[rand_t : rand_t+lags, rand_indiv].values, data.iloc[rand_t+lags : rand_t+lags+horizon, rand_indiv].values
-    x_batch, y_batch = torch.tensor(x).unsqueeze(0).unsqueeze(0), torch.tensor(y).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
-    c_batch = None
-    if use_context:
-        xc = data.iloc[rand_t : rand_t+lags+horizon, rand_indiv].values
-        c_batch = torch.tensor(xc).unsqueeze(0).unsqueeze(0)
-    mean, std = get_normal_stats(x_batch)
-    pred_batch = model(x_batch, c_batch)
-    plot_pred(x_batch[0][0].cpu().detach().tolist(), y_batch[0][0].cpu().detach().tolist(), pred_batch[0,0].cpu().detach().tolist(), save_dir + "examples/", f"example_prediction.pdf", f"Example prediction for {save_name}")
+    if is_context:
+        D = calculate_distances(data, matrix=True)
 
-    #eval
     t1 = perf_counter()
     for t in range(strided_dates):
         date_idx = t * stride
-        for indiv in all_indiv:                      
+        for indiv in all_indiv:
+                                
             x, y = data.iloc[date_idx : date_idx+lags, indiv], data.iloc[date_idx+lags : date_idx+lags+horizon, indiv]
-            x_batch, y_batch = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
+            x, y = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
+            
+            if is_context:
+                if bs > individuals:
+                    context_indivs = [indiv_ for indiv_ in all_indiv if indiv_ != indiv]
+                else:
+                    sorted_indices = np.argsort(D[indiv])
+                    context_indivs = list(sorted_indices[1:bs])
+                xc, yc = data.iloc[date_idx : date_idx+lags, context_indivs], data.iloc[date_idx+lags : date_idx+lags+horizon, context_indivs]
+                xc, yc = torch.tensor(xc.values).transpose(1,0).unsqueeze(1), torch.tensor(yc.values).transpose(1,0).unsqueeze(1) # c: (bs-1, 1, L)
 
             c_batch = None
-            if use_context:
-                xc = data.iloc[date_idx : date_idx+lags+horizon, indiv]
-                c_batch = torch.tensor(xc.values).unsqueeze(0).unsqueeze(0)
-                
+            x_batch = x
+            y_batch = y
+            if is_context and use_context:
+                c_batch = xc
+            
             mean, std = get_normal_stats(x_batch)
             pred_batch = model(x_batch, c_batch)
             loss = criterion(pred_batch, y_batch, mean, std) # (bs, dim, H)
-            point_loss = loss[0].mean().item()
-            indiv_losses[indiv].append(point_loss)
-            horizon_losses += loss[0].mean(dim=0).numpy() # (H)
-            all_losses.append(point_loss)
-
-    horizon_losses /= (individuals*strided_dates)
-    plot_horizon_errors(horizon_losses, save_dir, name=f"{save_name}_horizon.pdf")
-    plot_errors(all_losses, save_dir, name=f"{save_name}_error.pdf", title="Loss distribution")
-
+            indiv_losses[indiv].append(loss[0].mean().item())
+                
     for indiv in all_indiv:
         indiv_loss = indiv_losses[indiv]
         mean = symlog(np.mean(indiv_loss))
@@ -146,7 +140,7 @@ def run(cfg):
         f"Per-user nMSE of {save_name} (mean:{total_means:.4f}, W10:{w10_means:.4f})",
         fontsize=20)   
     plt.tight_layout()
-    plt.savefig(save_dir+ "plots/" + f"user_errors.pdf")
+    plt.savefig(save_dir+ "plots/" + f"{bs}_user_errors.pdf")
     plt.close()
 
     
