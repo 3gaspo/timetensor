@@ -47,7 +47,7 @@ def run(cfg):
     set_seed(seed)
 
     #data
-    data, _, _ = fetch_csv(data_path, cfg.data.dataset, drop_users=cfg.data.splits.drop_users)
+    data, _, _ = fetch_csv(data_path, cfg.data.dataset, drop_users=cfg.data.splits.drop_users, aggr=cfg.data.aggregation)
     data = data.reset_index(drop=True)
     if verbose:
         logger.info("Fetched data csv")

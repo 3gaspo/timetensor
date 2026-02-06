@@ -117,12 +117,12 @@ class TabPFN:
             y_train_blocks.append(y_c)
             
         if future_context is not None:
-            X_cf, y_cf = self._create_tabular_block(future_context, time_features, channel_id=1, has_context=True)
+            X_cf, y_cf = self._create_tabular_block(future_context, time_features, start_idx=lags, channel_id=1, has_context=True)
             X_train_blocks.append(X_cf)
             y_train_blocks.append(y_cf)
 
         dummy = torch.zeros((bs, dim, horizon), device=x.device)
-        X_test, _ = self._create_tabular_block(dummy, time_features, start_idx=lags, channel_id=0)
+        X_test, _ = self._create_tabular_block(dummy, time_features, start_idx=lags, channel_id=0, has_context=has_context)
 
         X_train = torch.cat(X_train_blocks, dim=0)
         y_train = torch.cat(y_train_blocks, dim=0)

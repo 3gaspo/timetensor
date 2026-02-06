@@ -326,7 +326,7 @@ class AugmentModel(nn.Module):
                         tensor = torch.tensor(serie_array[:x.shape[-1]+self.horizon])
                     covariates_tensor.append(tensor)
                 covariates_tensor = torch.stack(covariates_tensor, dim=0) # (bs*num_series, L(+H))
-                transforms.append(covariates_tensor.expand(x.shape[0], 1, num_series, tensor.shape[0])) # (bs, 1, num_series)
+                transforms.append(covariates_tensor.expand(x.shape[0], num_series, tensor.shape[0])) # (bs, 1, num_series)
 
             #self augmentation
             elif mode == "kernel": # kernel smoothing
@@ -342,6 +342,7 @@ class AugmentModel(nn.Module):
                 transforms.append(-x)
             else:
                 raise ValueError(f"Unrecognized augment mode: {mode}")
+
         return torch.cat(transforms, dim=1)
 
     

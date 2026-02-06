@@ -314,7 +314,7 @@ def fetch_csv(data_path, data_name, context_cols=None, drop_users=None, rename_c
         values_df = values_df.resample(aggr_period).sum()
         if context_df is not None:
             context_df = context_df.resample(aggr_period).sum()
-    elif aggr == "":
+    elif aggr:
         values_df = values_df.asfreq(aggr_period)
         if context_df is not None:
             context_df = context_df.asfreq(aggr_period)

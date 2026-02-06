@@ -17,7 +17,7 @@ for model in tabpfn
 do
     for data in electricity traffic solar exchange_rate
     do
-        for use_context in False True 
+        for use_context in True 
         do
             srun python3 identity_test.py \
             "model='$model'" \
@@ -54,7 +54,7 @@ for model in tabpfn
 do
     for data in electricity traffic solar exchange_rate
     do
-        for use_context in False True 
+        for use_context in True 
         do
             srun python3 identity_test.py \
             "model='$model'" \
@@ -89,7 +89,7 @@ for model in tabpfn
 do
     for data in electricity traffic solar exchange_rate
     do
-        for use_context in False True 
+        for use_context in True 
         do
             srun python3 identity_test.py \
             "model='$model'" \
@@ -124,7 +124,7 @@ for model in tabpfn
 do
     for data in electricity traffic solar exchange_rate
     do
-        for use_context in False True 
+        for use_context in True 
         do
             srun python3 identity_test.py \
             "model='$model'" \
@@ -152,13 +152,13 @@ do
     done
 done
 
-settings="1344-336;672-168;168-24;24-24"
-file_name=test1_mean_results.json
+settings="1344_336;672_168;168_24;24_24"
+file_name=mean_results.json
 metric=nMSE
-output_path="${experiment_dir}${prefix}_${metric}_results.tex"
+output_path="${experiment_dir}${metric}_results.tex"
 
 for model in chronos tabpfn
 do
-    model_names="${model}_identityFalse;${model}_identityTrue"
+    model_names="${model}_identityTrue"
     srun python3 -c "from src.timetensor.visu import generate_results_table;generate_results_table('$experiment_dir', json_filename='$file_name', metric_key='$metric', output_tex_path='$output_path', model_names='$model_names', settings='$settings', decimals=4)"
 done

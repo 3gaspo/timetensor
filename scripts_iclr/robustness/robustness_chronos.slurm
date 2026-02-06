@@ -10,353 +10,353 @@ source .venv/bin/activate
 seed=1
 experiment_dir="../outputs/iclr/robust/"
 
-# lags=1344
-# horizon=336
-# stride=512
-# for model in chronos
-# do
-#     for data in electricity traffic solar exchange_rate
-#     do
-#         for augment in none "noise=1" "noise=0.1" "noise=0.01" "constant=0" "constant=1"
-#         do
-#             srun python3 eval_users.py \
-#             "model='$model'" \
-#             "model.configs.self_augment='$augment'" \
-#             "task.lags=$lags" \
-#             "task.horizon=$horizon" \
-#             "normalization=instance" \
-#             "data=$data" \
-#             "data.sampling.use_context=False" \
-#             "data.splits.date_splits=1" \
-#             "data.splits.indiv_split=1" \
-#             "data.sampling.train_idx_mode='all'" \
-#             "data.sampling.eval_idx_mode='all'" \
-#             "data.sampling.train_stride=$stride" \
-#             "data.sampling.eval_stride=$stride" \
-#             "data.sampling.remove_train_cte=False" \
-#             "data.sampling.remove_eval_cte=False" \
-#             "training.complete_evaluation=False" \
-#             "training.eval_runs=1" \
-#             "misc.seed=$seed" \
-#             "misc.device='cpu'" \
-#             "misc.save_name='${model}_$augment'" \
-#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-#         done
+lags=1344
+horizon=336
+stride=512
+for model in chronos
+do
+    for data in electricity traffic solar exchange_rate
+    do
+        for augment in none "noise=1" "noise=0.1" "noise=0.01" "constant=0" "constant=1"
+        do
+            srun python3 eval_users.py \
+            "model='$model'" \
+            "model.configs.self_augment='$augment'" \
+            "task.lags=$lags" \
+            "task.horizon=$horizon" \
+            "normalization=instance" \
+            "data=$data" \
+            "data.sampling.use_context=False" \
+            "data.splits.date_splits=1" \
+            "data.splits.indiv_split=1" \
+            "data.sampling.train_idx_mode='all'" \
+            "data.sampling.eval_idx_mode='all'" \
+            "data.sampling.train_stride=$stride" \
+            "data.sampling.eval_stride=$stride" \
+            "data.sampling.remove_train_cte=False" \
+            "data.sampling.remove_eval_cte=False" \
+            "training.complete_evaluation=False" \
+            "training.eval_runs=1" \
+            "misc.seed=$seed" \
+            "misc.device='cpu'" \
+            "misc.save_name='${model}_$augment'" \
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+        done
 
-#         for augment in "2noise=1" "3noise=1" "5noise=1"
-#         do
-#             srun python3 eval_users.py \
-#             "model='$model'" \
-#             "model.configs.self_augment='$augment'" \
-#             "task.lags=$lags" \
-#             "task.horizon=$horizon" \
-#             "normalization=instance" \
-#             "data=$data" \
-#             "data.sampling.use_context=False" \
-#             "data.splits.date_splits=1" \
-#             "data.splits.indiv_split=1" \
-#             "data.sampling.train_idx_mode='all'" \
-#             "data.sampling.eval_idx_mode='all'" \
-#             "data.sampling.train_stride=$stride" \
-#             "data.sampling.eval_stride=$stride" \
-#             "data.sampling.remove_train_cte=False" \
-#             "data.sampling.remove_eval_cte=False" \
-#             "training.complete_evaluation=False" \
-#             "training.eval_runs=1" \
-#             "misc.seed=$seed" \
-#             "misc.device='cpu'" \
-#             "misc.save_name='${model}_$augment'" \
-#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-#         done
+        for augment in "2noise=1" "3noise=1" "5noise=1"
+        do
+            srun python3 eval_users.py \
+            "model='$model'" \
+            "model.configs.self_augment='$augment'" \
+            "task.lags=$lags" \
+            "task.horizon=$horizon" \
+            "normalization=instance" \
+            "data=$data" \
+            "data.sampling.use_context=False" \
+            "data.splits.date_splits=1" \
+            "data.splits.indiv_split=1" \
+            "data.sampling.train_idx_mode='all'" \
+            "data.sampling.eval_idx_mode='all'" \
+            "data.sampling.train_stride=$stride" \
+            "data.sampling.eval_stride=$stride" \
+            "data.sampling.remove_train_cte=False" \
+            "data.sampling.remove_eval_cte=False" \
+            "training.complete_evaluation=False" \
+            "training.eval_runs=1" \
+            "misc.seed=$seed" \
+            "misc.device='cpu'" \
+            "misc.save_name='${model}_$augment'" \
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+        done
 
-#         for augment in "2constant=0" "3constant=0" "5constant=0"
-#         do
-#             srun python3 eval_users.py \
-#             "model='$model'" \
-#             "model.configs.self_augment='$augment'" \
-#             "task.lags=$lags" \
-#             "task.horizon=$horizon" \
-#             "normalization=instance" \
-#             "data=$data" \
-#             "data.sampling.use_context=False" \
-#             "data.splits.date_splits=1" \
-#             "data.splits.indiv_split=1" \
-#             "data.sampling.train_idx_mode='all'" \
-#             "data.sampling.eval_idx_mode='all'" \
-#             "data.sampling.train_stride=$stride" \
-#             "data.sampling.eval_stride=$stride" \
-#             "data.sampling.remove_train_cte=False" \
-#             "data.sampling.remove_eval_cte=False" \
-#             "training.complete_evaluation=False" \
-#             "training.eval_runs=1" \
-#             "misc.seed=$seed" \
-#             "misc.device='cpu'" \
-#             "misc.save_name='${model}_$augment'" \
-#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-#         done
-#     done
-# done
+        for augment in "2constant=0" "3constant=0" "5constant=0"
+        do
+            srun python3 eval_users.py \
+            "model='$model'" \
+            "model.configs.self_augment='$augment'" \
+            "task.lags=$lags" \
+            "task.horizon=$horizon" \
+            "normalization=instance" \
+            "data=$data" \
+            "data.sampling.use_context=False" \
+            "data.splits.date_splits=1" \
+            "data.splits.indiv_split=1" \
+            "data.sampling.train_idx_mode='all'" \
+            "data.sampling.eval_idx_mode='all'" \
+            "data.sampling.train_stride=$stride" \
+            "data.sampling.eval_stride=$stride" \
+            "data.sampling.remove_train_cte=False" \
+            "data.sampling.remove_eval_cte=False" \
+            "training.complete_evaluation=False" \
+            "training.eval_runs=1" \
+            "misc.seed=$seed" \
+            "misc.device='cpu'" \
+            "misc.save_name='${model}_$augment'" \
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+        done
+    done
+done
 
-# lags=672
-# horizon=168
-# stride=512
-# for model in chronos
-# do
-#     for data in electricity traffic solar exchange_rate
-#     do
-#         for augment in none "noise=1" "noise=0.1" "noise=0.01" "constant=0" "constant=1"
-#         do
-#             srun python3 eval_users.py \
-#             "model='$model'" \
-#             "model.configs.self_augment='$augment'" \
-#             "task.lags=$lags" \
-#             "task.horizon=$horizon" \
-#             "normalization=instance" \
-#             "data=$data" \
-#             "data.sampling.use_context=False" \
-#             "data.splits.date_splits=1" \
-#             "data.splits.indiv_split=1" \
-#             "data.sampling.train_idx_mode='all'" \
-#             "data.sampling.eval_idx_mode='all'" \
-#             "data.sampling.train_stride=$stride" \
-#             "data.sampling.eval_stride=$stride" \
-#             "data.sampling.remove_train_cte=False" \
-#             "data.sampling.remove_eval_cte=False" \
-#             "training.complete_evaluation=False" \
-#             "training.eval_runs=1" \
-#             "misc.seed=$seed" \
-#             "misc.device='cpu'" \
-#             "misc.save_name='${model}_$augment'" \
-#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-#         done
+lags=672
+horizon=168
+stride=512
+for model in chronos
+do
+    for data in electricity traffic solar exchange_rate
+    do
+        for augment in none "noise=1" "noise=0.1" "noise=0.01" "constant=0" "constant=1"
+        do
+            srun python3 eval_users.py \
+            "model='$model'" \
+            "model.configs.self_augment='$augment'" \
+            "task.lags=$lags" \
+            "task.horizon=$horizon" \
+            "normalization=instance" \
+            "data=$data" \
+            "data.sampling.use_context=False" \
+            "data.splits.date_splits=1" \
+            "data.splits.indiv_split=1" \
+            "data.sampling.train_idx_mode='all'" \
+            "data.sampling.eval_idx_mode='all'" \
+            "data.sampling.train_stride=$stride" \
+            "data.sampling.eval_stride=$stride" \
+            "data.sampling.remove_train_cte=False" \
+            "data.sampling.remove_eval_cte=False" \
+            "training.complete_evaluation=False" \
+            "training.eval_runs=1" \
+            "misc.seed=$seed" \
+            "misc.device='cpu'" \
+            "misc.save_name='${model}_$augment'" \
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+        done
 
-#         for augment in "2noise=1" "3noise=1" "5noise=1"
-#         do
-#             srun python3 eval_users.py \
-#             "model='$model'" \
-#             "model.configs.self_augment='$augment'" \
-#             "task.lags=$lags" \
-#             "task.horizon=$horizon" \
-#             "normalization=instance" \
-#             "data=$data" \
-#             "data.sampling.use_context=False" \
-#             "data.splits.date_splits=1" \
-#             "data.splits.indiv_split=1" \
-#             "data.sampling.train_idx_mode='all'" \
-#             "data.sampling.eval_idx_mode='all'" \
-#             "data.sampling.train_stride=$stride" \
-#             "data.sampling.eval_stride=$stride" \
-#             "data.sampling.remove_train_cte=False" \
-#             "data.sampling.remove_eval_cte=False" \
-#             "training.complete_evaluation=False" \
-#             "training.eval_runs=1" \
-#             "misc.seed=$seed" \
-#             "misc.device='cpu'" \
-#             "misc.save_name='${model}_$augment'" \
-#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-#         done
+        for augment in "2noise=1" "3noise=1" "5noise=1"
+        do
+            srun python3 eval_users.py \
+            "model='$model'" \
+            "model.configs.self_augment='$augment'" \
+            "task.lags=$lags" \
+            "task.horizon=$horizon" \
+            "normalization=instance" \
+            "data=$data" \
+            "data.sampling.use_context=False" \
+            "data.splits.date_splits=1" \
+            "data.splits.indiv_split=1" \
+            "data.sampling.train_idx_mode='all'" \
+            "data.sampling.eval_idx_mode='all'" \
+            "data.sampling.train_stride=$stride" \
+            "data.sampling.eval_stride=$stride" \
+            "data.sampling.remove_train_cte=False" \
+            "data.sampling.remove_eval_cte=False" \
+            "training.complete_evaluation=False" \
+            "training.eval_runs=1" \
+            "misc.seed=$seed" \
+            "misc.device='cpu'" \
+            "misc.save_name='${model}_$augment'" \
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+        done
 
-#         for augment in "2constant=0" "3constant=0" "5constant=0"
-#         do
-#             srun python3 eval_users.py \
-#             "model='$model'" \
-#             "model.configs.self_augment='$augment'" \
-#             "task.lags=$lags" \
-#             "task.horizon=$horizon" \
-#             "normalization=instance" \
-#             "data=$data" \
-#             "data.sampling.use_context=False" \
-#             "data.splits.date_splits=1" \
-#             "data.splits.indiv_split=1" \
-#             "data.sampling.train_idx_mode='all'" \
-#             "data.sampling.eval_idx_mode='all'" \
-#             "data.sampling.train_stride=$stride" \
-#             "data.sampling.eval_stride=$stride" \
-#             "data.sampling.remove_train_cte=False" \
-#             "data.sampling.remove_eval_cte=False" \
-#             "training.complete_evaluation=False" \
-#             "training.eval_runs=1" \
-#             "misc.seed=$seed" \
-#             "misc.device='cpu'" \
-#             "misc.save_name='${model}_$augment'" \
-#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-#         done
-#     done
-# done
+        for augment in "2constant=0" "3constant=0" "5constant=0"
+        do
+            srun python3 eval_users.py \
+            "model='$model'" \
+            "model.configs.self_augment='$augment'" \
+            "task.lags=$lags" \
+            "task.horizon=$horizon" \
+            "normalization=instance" \
+            "data=$data" \
+            "data.sampling.use_context=False" \
+            "data.splits.date_splits=1" \
+            "data.splits.indiv_split=1" \
+            "data.sampling.train_idx_mode='all'" \
+            "data.sampling.eval_idx_mode='all'" \
+            "data.sampling.train_stride=$stride" \
+            "data.sampling.eval_stride=$stride" \
+            "data.sampling.remove_train_cte=False" \
+            "data.sampling.remove_eval_cte=False" \
+            "training.complete_evaluation=False" \
+            "training.eval_runs=1" \
+            "misc.seed=$seed" \
+            "misc.device='cpu'" \
+            "misc.save_name='${model}_$augment'" \
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+        done
+    done
+done
 
-# lags=168
-# horizon=24
-# stride=512
-# for model in chronos
-# do
-#     for data in electricity traffic solar exchange_rate
-#     do
-#         for augment in none "noise=1" "noise=0.1" "noise=0.01" "constant=0" "constant=1"
-#         do
-#             srun python3 eval_users.py \
-#             "model='$model'" \
-#             "model.configs.self_augment='$augment'" \
-#             "task.lags=$lags" \
-#             "task.horizon=$horizon" \
-#             "normalization=instance" \
-#             "data=$data" \
-#             "data.sampling.use_context=False" \
-#             "data.splits.date_splits=1" \
-#             "data.splits.indiv_split=1" \
-#             "data.sampling.train_idx_mode='all'" \
-#             "data.sampling.eval_idx_mode='all'" \
-#             "data.sampling.train_stride=$stride" \
-#             "data.sampling.eval_stride=$stride" \
-#             "data.sampling.remove_train_cte=False" \
-#             "data.sampling.remove_eval_cte=False" \
-#             "training.complete_evaluation=False" \
-#             "training.eval_runs=1" \
-#             "misc.seed=$seed" \
-#             "misc.device='cpu'" \
-#             "misc.save_name='${model}_$augment'" \
-#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-#         done
+lags=168
+horizon=24
+stride=512
+for model in chronos
+do
+    for data in electricity traffic solar exchange_rate
+    do
+        for augment in none "noise=1" "noise=0.1" "noise=0.01" "constant=0" "constant=1"
+        do
+            srun python3 eval_users.py \
+            "model='$model'" \
+            "model.configs.self_augment='$augment'" \
+            "task.lags=$lags" \
+            "task.horizon=$horizon" \
+            "normalization=instance" \
+            "data=$data" \
+            "data.sampling.use_context=False" \
+            "data.splits.date_splits=1" \
+            "data.splits.indiv_split=1" \
+            "data.sampling.train_idx_mode='all'" \
+            "data.sampling.eval_idx_mode='all'" \
+            "data.sampling.train_stride=$stride" \
+            "data.sampling.eval_stride=$stride" \
+            "data.sampling.remove_train_cte=False" \
+            "data.sampling.remove_eval_cte=False" \
+            "training.complete_evaluation=False" \
+            "training.eval_runs=1" \
+            "misc.seed=$seed" \
+            "misc.device='cpu'" \
+            "misc.save_name='${model}_$augment'" \
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+        done
 
-#         for augment in "2noise=1" "3noise=1" "5noise=1"
-#         do
-#             srun python3 eval_users.py \
-#             "model='$model'" \
-#             "model.configs.self_augment='$augment'" \
-#             "task.lags=$lags" \
-#             "task.horizon=$horizon" \
-#             "normalization=instance" \
-#             "data=$data" \
-#             "data.sampling.use_context=False" \
-#             "data.splits.date_splits=1" \
-#             "data.splits.indiv_split=1" \
-#             "data.sampling.train_idx_mode='all'" \
-#             "data.sampling.eval_idx_mode='all'" \
-#             "data.sampling.train_stride=$stride" \
-#             "data.sampling.eval_stride=$stride" \
-#             "data.sampling.remove_train_cte=False" \
-#             "data.sampling.remove_eval_cte=False" \
-#             "training.complete_evaluation=False" \
-#             "training.eval_runs=1" \
-#             "misc.seed=$seed" \
-#             "misc.device='cpu'" \
-#             "misc.save_name='${model}_$augment'" \
-#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-#         done
+        for augment in "2noise=1" "3noise=1" "5noise=1"
+        do
+            srun python3 eval_users.py \
+            "model='$model'" \
+            "model.configs.self_augment='$augment'" \
+            "task.lags=$lags" \
+            "task.horizon=$horizon" \
+            "normalization=instance" \
+            "data=$data" \
+            "data.sampling.use_context=False" \
+            "data.splits.date_splits=1" \
+            "data.splits.indiv_split=1" \
+            "data.sampling.train_idx_mode='all'" \
+            "data.sampling.eval_idx_mode='all'" \
+            "data.sampling.train_stride=$stride" \
+            "data.sampling.eval_stride=$stride" \
+            "data.sampling.remove_train_cte=False" \
+            "data.sampling.remove_eval_cte=False" \
+            "training.complete_evaluation=False" \
+            "training.eval_runs=1" \
+            "misc.seed=$seed" \
+            "misc.device='cpu'" \
+            "misc.save_name='${model}_$augment'" \
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+        done
 
-#         for augment in "2constant=0" "3constant=0" "5constant=0"
-#         do
-#             srun python3 eval_users.py \
-#             "model='$model'" \
-#             "model.configs.self_augment='$augment'" \
-#             "task.lags=$lags" \
-#             "task.horizon=$horizon" \
-#             "normalization=instance" \
-#             "data=$data" \
-#             "data.sampling.use_context=False" \
-#             "data.splits.date_splits=1" \
-#             "data.splits.indiv_split=1" \
-#             "data.sampling.train_idx_mode='all'" \
-#             "data.sampling.eval_idx_mode='all'" \
-#             "data.sampling.train_stride=$stride" \
-#             "data.sampling.eval_stride=$stride" \
-#             "data.sampling.remove_train_cte=False" \
-#             "data.sampling.remove_eval_cte=False" \
-#             "training.complete_evaluation=False" \
-#             "training.eval_runs=1" \
-#             "misc.seed=$seed" \
-#             "misc.device='cpu'" \
-#             "misc.save_name='${model}_$augment'" \
-#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-#         done
-#     done
-# done
+        for augment in "2constant=0" "3constant=0" "5constant=0"
+        do
+            srun python3 eval_users.py \
+            "model='$model'" \
+            "model.configs.self_augment='$augment'" \
+            "task.lags=$lags" \
+            "task.horizon=$horizon" \
+            "normalization=instance" \
+            "data=$data" \
+            "data.sampling.use_context=False" \
+            "data.splits.date_splits=1" \
+            "data.splits.indiv_split=1" \
+            "data.sampling.train_idx_mode='all'" \
+            "data.sampling.eval_idx_mode='all'" \
+            "data.sampling.train_stride=$stride" \
+            "data.sampling.eval_stride=$stride" \
+            "data.sampling.remove_train_cte=False" \
+            "data.sampling.remove_eval_cte=False" \
+            "training.complete_evaluation=False" \
+            "training.eval_runs=1" \
+            "misc.seed=$seed" \
+            "misc.device='cpu'" \
+            "misc.save_name='${model}_$augment'" \
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+        done
+    done
+done
 
-# lags=24
-# horizon=24
-# stride=512
-# for model in chronos
-# do
-#     for data in electricity traffic solar exchange_rate
-#     do
-#         for augment in none "noise=1" "noise=0.1" "noise=0.01" "constant=0" "constant=1"
-#         do
-#             srun python3 eval_users.py \
-#             "model='$model'" \
-#             "model.configs.self_augment='$augment'" \
-#             "task.lags=$lags" \
-#             "task.horizon=$horizon" \
-#             "normalization=instance" \
-#             "data=$data" \
-#             "data.sampling.use_context=False" \
-#             "data.splits.date_splits=1" \
-#             "data.splits.indiv_split=1" \
-#             "data.sampling.train_idx_mode='all'" \
-#             "data.sampling.eval_idx_mode='all'" \
-#             "data.sampling.train_stride=$stride" \
-#             "data.sampling.eval_stride=$stride" \
-#             "data.sampling.remove_train_cte=False" \
-#             "data.sampling.remove_eval_cte=False" \
-#             "training.complete_evaluation=False" \
-#             "training.eval_runs=1" \
-#             "misc.seed=$seed" \
-#             "misc.device='cpu'" \
-#             "misc.save_name='${model}_$augment'" \
-#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-#         done
+lags=24
+horizon=24
+stride=512
+for model in chronos
+do
+    for data in electricity traffic solar exchange_rate
+    do
+        for augment in none "noise=1" "noise=0.1" "noise=0.01" "constant=0" "constant=1"
+        do
+            srun python3 eval_users.py \
+            "model='$model'" \
+            "model.configs.self_augment='$augment'" \
+            "task.lags=$lags" \
+            "task.horizon=$horizon" \
+            "normalization=instance" \
+            "data=$data" \
+            "data.sampling.use_context=False" \
+            "data.splits.date_splits=1" \
+            "data.splits.indiv_split=1" \
+            "data.sampling.train_idx_mode='all'" \
+            "data.sampling.eval_idx_mode='all'" \
+            "data.sampling.train_stride=$stride" \
+            "data.sampling.eval_stride=$stride" \
+            "data.sampling.remove_train_cte=False" \
+            "data.sampling.remove_eval_cte=False" \
+            "training.complete_evaluation=False" \
+            "training.eval_runs=1" \
+            "misc.seed=$seed" \
+            "misc.device='cpu'" \
+            "misc.save_name='${model}_$augment'" \
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+        done
 
-#         for augment in "2noise=1" "3noise=1" "5noise=1"
-#         do
-#             srun python3 eval_users.py \
-#             "model='$model'" \
-#             "model.configs.self_augment='$augment'" \
-#             "task.lags=$lags" \
-#             "task.horizon=$horizon" \
-#             "normalization=instance" \
-#             "data=$data" \
-#             "data.sampling.use_context=False" \
-#             "data.splits.date_splits=1" \
-#             "data.splits.indiv_split=1" \
-#             "data.sampling.train_idx_mode='all'" \
-#             "data.sampling.eval_idx_mode='all'" \
-#             "data.sampling.train_stride=$stride" \
-#             "data.sampling.eval_stride=$stride" \
-#             "data.sampling.remove_train_cte=False" \
-#             "data.sampling.remove_eval_cte=False" \
-#             "training.complete_evaluation=False" \
-#             "training.eval_runs=1" \
-#             "misc.seed=$seed" \
-#             "misc.device='cpu'" \
-#             "misc.save_name='${model}_$augment'" \
-#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-#         done
+        for augment in "2noise=1" "3noise=1" "5noise=1"
+        do
+            srun python3 eval_users.py \
+            "model='$model'" \
+            "model.configs.self_augment='$augment'" \
+            "task.lags=$lags" \
+            "task.horizon=$horizon" \
+            "normalization=instance" \
+            "data=$data" \
+            "data.sampling.use_context=False" \
+            "data.splits.date_splits=1" \
+            "data.splits.indiv_split=1" \
+            "data.sampling.train_idx_mode='all'" \
+            "data.sampling.eval_idx_mode='all'" \
+            "data.sampling.train_stride=$stride" \
+            "data.sampling.eval_stride=$stride" \
+            "data.sampling.remove_train_cte=False" \
+            "data.sampling.remove_eval_cte=False" \
+            "training.complete_evaluation=False" \
+            "training.eval_runs=1" \
+            "misc.seed=$seed" \
+            "misc.device='cpu'" \
+            "misc.save_name='${model}_$augment'" \
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+        done
 
-#         for augment in "2constant=0" "3constant=0" "5constant=0"
-#         do
-#             srun python3 eval_users.py \
-#             "model='$model'" \
-#             "model.configs.self_augment='$augment'" \
-#             "task.lags=$lags" \
-#             "task.horizon=$horizon" \
-#             "normalization=instance" \
-#             "data=$data" \
-#             "data.sampling.use_context=False" \
-#             "data.splits.date_splits=1" \
-#             "data.splits.indiv_split=1" \
-#             "data.sampling.train_idx_mode='all'" \
-#             "data.sampling.eval_idx_mode='all'" \
-#             "data.sampling.train_stride=$stride" \
-#             "data.sampling.eval_stride=$stride" \
-#             "data.sampling.remove_train_cte=False" \
-#             "data.sampling.remove_eval_cte=False" \
-#             "training.complete_evaluation=False" \
-#             "training.eval_runs=1" \
-#             "misc.seed=$seed" \
-#             "misc.device='cpu'" \
-#             "misc.save_name='${model}_$augment'" \
-#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-#         done
-#     done
-# done
+        for augment in "2constant=0" "3constant=0" "5constant=0"
+        do
+            srun python3 eval_users.py \
+            "model='$model'" \
+            "model.configs.self_augment='$augment'" \
+            "task.lags=$lags" \
+            "task.horizon=$horizon" \
+            "normalization=instance" \
+            "data=$data" \
+            "data.sampling.use_context=False" \
+            "data.splits.date_splits=1" \
+            "data.splits.indiv_split=1" \
+            "data.sampling.train_idx_mode='all'" \
+            "data.sampling.eval_idx_mode='all'" \
+            "data.sampling.train_stride=$stride" \
+            "data.sampling.eval_stride=$stride" \
+            "data.sampling.remove_train_cte=False" \
+            "data.sampling.remove_eval_cte=False" \
+            "training.complete_evaluation=False" \
+            "training.eval_runs=1" \
+            "misc.seed=$seed" \
+            "misc.device='cpu'" \
+            "misc.save_name='${model}_$augment'" \
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+        done
+    done
+done
 
 file_name=test1_mean_results.json
 settings="1344_336;672_168;168_24;24_24"
