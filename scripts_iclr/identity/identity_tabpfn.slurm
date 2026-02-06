@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=identity_tab
+#SBATCH --job-name=id_tab
 #SBATCH --gres=gpu:1
 #SBATCH --output=script_outputs/identity_tab.out
 #SBATCH --error=script_outputs/identity_tab.err

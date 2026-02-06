@@ -117,7 +117,12 @@ class TabPFN:
             y_train_blocks.append(y_c)
             
         if future_context is not None:
-            X_cf, y_cf = self._create_tabular_block(future_context, time_features, start_idx=lags, channel_id=1, has_context=True)
+
+            X_cf, y_cf = self._create_tabular_block(future_context[:, :, :lags], time_features, start_idx=0, channel_id=1, has_context=True)
+            X_train_blocks.append(X_cf)
+            y_train_blocks.append(y_cf)
+
+            X_cf, y_cf = self._create_tabular_block(future_context[:, :, lags:], time_features, start_idx=lags, channel_id=1, has_context=True)
             X_train_blocks.append(X_cf)
             y_train_blocks.append(y_cf)
 
@@ -150,7 +155,7 @@ class TabPFN:
                 past_only_i, future_included_i = past_only, future_included
                 if past_only is not None and past_only.shape[0] == bs:
                     past_only_i = past_only[i].unsqueeze(0)
-                if future_included and future_included.shape[0] == bs:
+                if future_included is not None and future_included.shape[0] == bs:
                     future_included_i = future_included[i].unsqueeze(0)
                 X_train, y_train, X_test = self._prepare_matrix(x_i, time_features, past_only_i, future_included_i)
                 

@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=covariates_tab
+#SBATCH --job-name=cov_tab
 #SBATCH --gres=gpu:1
-#SBATCH --output=script_outputs/covariates_tab.out
-#SBATCH --error=script_outputs/covariates_tab.err
+#SBATCH --output=script_outputs/cov_tab.out
+#SBATCH --error=script_outputs/cov_tab.err
 #SBATCH --time=23:00:00
-#SBATCH --partition=h100-bis
+#SBATCH --partition=h100
 source .venv/bin/activate
 
 seed=1
@@ -16,7 +16,7 @@ horizon=336
 stride=512
 for data in electricity traffic solar exchange_rate
 do
-    for bs in 2 3 5 10
+    for bs in 2 1000
     do
         srun python3 covariates_test.py \
         "model='$model'" \
@@ -43,7 +43,7 @@ do
         "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
     done
 
-    for augment in none sign
+    for augment in sign
     do
         srun python3 covariates_test.py \
         "model='$model'" \
@@ -77,7 +77,7 @@ horizon=168
 stride=512
 for data in electricity traffic solar exchange_rate
 do
-    for bs in 2 3 5 10
+    for bs in 2 1000
     do
         srun python3 covariates_test.py \
         "model='$model'" \
@@ -104,7 +104,7 @@ do
         "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
     done
 
-    for augment in none sign
+    for augment in sign
     do
         srun python3 covariates_test.py \
         "model='$model'" \
@@ -138,7 +138,7 @@ horizon=24
 stride=512
 for data in electricity traffic solar exchange_rate
 do
-    for bs in 2 3 5 10
+    for bs in 2 1000
     do
         srun python3 covariates_test.py \
         "model='$model'" \
@@ -165,7 +165,7 @@ do
         "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
     done
 
-    for augment in none sign
+    for augment in sign
     do
         srun python3 covariates_test.py \
         "model='$model'" \
@@ -199,7 +199,7 @@ horizon=24
 stride=512
 for data in electricity traffic solar exchange_rate
 do
-    for bs in 2 3 5 10
+    for bs in 2 1000
     do
         srun python3 covariates_test.py \
         "model='$model'" \
@@ -226,7 +226,7 @@ do
         "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
     done
 
-    for augment in none sign
+    for augment in sign
     do
         srun python3 covariates_test.py \
         "model='$model'" \
