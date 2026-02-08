@@ -4,7 +4,7 @@
 #SBATCH --output=script_outputs/tst.out
 #SBATCH --error=script_outputs/tst.err
 #SBATCH --time=23:00:00
-#SBATCH --partition=h100-bis
+#SBATCH --partition=h100
 source .venv/bin/activate
 
 seed=1

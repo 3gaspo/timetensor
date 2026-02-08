@@ -10,112 +10,112 @@ source .venv/bin/activate
 seed=1
 experiment_dir="../outputs/iclr/identity/"
 
-lags=1344
-horizon=336
-stride=512
-for model in tabpfn
-do
-    for data in electricity traffic solar exchange_rate
-    do
-        for use_context in True 
-        do
-            srun python3 identity_test.py \
-            "model='$model'" \
-            "model.configs.context_mode='future'" \
-            "task.lags=$lags" \
-            "task.horizon=$horizon" \
-            "normalization=instance" \
-            "data=$data" \
-            "data.sampling.use_context=$use_context" \
-            "data.splits.date_splits=1" \
-            "data.splits.indiv_split=1" \
-            "data.sampling.train_idx_mode='all'" \
-            "data.sampling.eval_idx_mode='all'" \
-            "data.sampling.train_stride=$stride" \
-            "data.sampling.eval_stride=$stride" \
-            "data.sampling.remove_train_cte=False" \
-            "data.sampling.remove_eval_cte=False" \
-            "training.complete_evaluation=False" \
-            "training.eval_runs=1" \
-            "misc.seed=$seed" \
-            "misc.device='cpu'" \
-            "misc.save_name=${model}_identity$use_context" \
-            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-        done
-    done
-done
+# lags=1344
+# horizon=336
+# stride=512
+# for model in tabpfn
+# do
+#     for data in electricity traffic solar exchange_rate
+#     do
+#         for use_context in False True 
+#         do
+#             srun python3 identity_test.py \
+#             "model='$model'" \
+#             "model.configs.context_mode='future'" \
+#             "task.lags=$lags" \
+#             "task.horizon=$horizon" \
+#             "normalization=instance" \
+#             "data=$data" \
+#             "data.sampling.use_context=$use_context" \
+#             "data.splits.date_splits=1" \
+#             "data.splits.indiv_split=1" \
+#             "data.sampling.train_idx_mode='all'" \
+#             "data.sampling.eval_idx_mode='all'" \
+#             "data.sampling.train_stride=$stride" \
+#             "data.sampling.eval_stride=$stride" \
+#             "data.sampling.remove_train_cte=False" \
+#             "data.sampling.remove_eval_cte=False" \
+#             "training.complete_evaluation=False" \
+#             "training.eval_runs=1" \
+#             "misc.seed=$seed" \
+#             "misc.device='cpu'" \
+#             "misc.save_name=${model}_identity$use_context" \
+#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+#         done
+#     done
+# done
 
 
 
-lags=672
-horizon=168
-stride=512
-for model in tabpfn
-do
-    for data in electricity traffic solar exchange_rate
-    do
-        for use_context in True 
-        do
-            srun python3 identity_test.py \
-            "model='$model'" \
-            "model.configs.context_mode='future'" \
-            "task.lags=$lags" \
-            "task.horizon=$horizon" \
-            "normalization=instance" \
-            "data=$data" \
-            "data.sampling.use_context=$use_context" \
-            "data.splits.date_splits=1" \
-            "data.splits.indiv_split=1" \
-            "data.sampling.train_idx_mode='all'" \
-            "data.sampling.eval_idx_mode='all'" \
-            "data.sampling.train_stride=$stride" \
-            "data.sampling.eval_stride=$stride" \
-            "data.sampling.remove_train_cte=False" \
-            "data.sampling.remove_eval_cte=False" \
-            "training.complete_evaluation=False" \
-            "training.eval_runs=1" \
-            "misc.seed=$seed" \
-            "misc.device='cpu'" \
-            "misc.save_name=${model}_identity$use_context" \
-            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-        done
-    done
-done
+# lags=672
+# horizon=168
+# stride=512
+# for model in tabpfn
+# do
+#     for data in electricity traffic solar exchange_rate
+#     do
+#         for use_context in False True 
+#         do
+#             srun python3 identity_test.py \
+#             "model='$model'" \
+#             "model.configs.context_mode='future'" \
+#             "task.lags=$lags" \
+#             "task.horizon=$horizon" \
+#             "normalization=instance" \
+#             "data=$data" \
+#             "data.sampling.use_context=$use_context" \
+#             "data.splits.date_splits=1" \
+#             "data.splits.indiv_split=1" \
+#             "data.sampling.train_idx_mode='all'" \
+#             "data.sampling.eval_idx_mode='all'" \
+#             "data.sampling.train_stride=$stride" \
+#             "data.sampling.eval_stride=$stride" \
+#             "data.sampling.remove_train_cte=False" \
+#             "data.sampling.remove_eval_cte=False" \
+#             "training.complete_evaluation=False" \
+#             "training.eval_runs=1" \
+#             "misc.seed=$seed" \
+#             "misc.device='cpu'" \
+#             "misc.save_name=${model}_identity$use_context" \
+#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+#         done
+#     done
+# done
 
-lags=168
-horizon=24
-stride=512
-for model in tabpfn
-do
-    for data in electricity traffic solar exchange_rate
-    do
-        for use_context in True 
-        do
-            srun python3 identity_test.py \
-            "model='$model'" \
-            "model.configs.context_mode='future'" \
-            "task.lags=$lags" \
-            "task.horizon=$horizon" \
-            "normalization=instance" \
-            "data=$data" \
-            "data.sampling.use_context=$use_context" \
-            "data.splits.date_splits=1" \
-            "data.splits.indiv_split=1" \
-            "data.sampling.train_idx_mode='all'" \
-            "data.sampling.eval_idx_mode='all'" \
-            "data.sampling.train_stride=$stride" \
-            "data.sampling.eval_stride=$stride" \
-            "data.sampling.remove_train_cte=False" \
-            "data.sampling.remove_eval_cte=False" \
-            "training.complete_evaluation=False" \
-            "training.eval_runs=1" \
-            "misc.seed=$seed" \
-            "misc.device='cpu'" \
-            "misc.save_name=${model}_identity$use_context" \
-            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
-        done
-    done
-done
+# lags=168
+# horizon=24
+# stride=512
+# for model in tabpfn
+# do
+#     for data in electricity traffic solar exchange_rate
+#     do
+#         for use_context in False True 
+#         do
+#             srun python3 identity_test.py \
+#             "model='$model'" \
+#             "model.configs.context_mode='future'" \
+#             "task.lags=$lags" \
+#             "task.horizon=$horizon" \
+#             "normalization=instance" \
+#             "data=$data" \
+#             "data.sampling.use_context=$use_context" \
+#             "data.splits.date_splits=1" \
+#             "data.splits.indiv_split=1" \
+#             "data.sampling.train_idx_mode='all'" \
+#             "data.sampling.eval_idx_mode='all'" \
+#             "data.sampling.train_stride=$stride" \
+#             "data.sampling.eval_stride=$stride" \
+#             "data.sampling.remove_train_cte=False" \
+#             "data.sampling.remove_eval_cte=False" \
+#             "training.complete_evaluation=False" \
+#             "training.eval_runs=1" \
+#             "misc.seed=$seed" \
+#             "misc.device='cpu'" \
+#             "misc.save_name=${model}_identity$use_context" \
+#             "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
+#         done
+#     done
+# done
 
 lags=24
 horizon=24
@@ -124,7 +124,7 @@ for model in tabpfn
 do
     for data in electricity traffic solar exchange_rate
     do
-        for use_context in True 
+        for use_context in False True 
         do
             srun python3 identity_test.py \
             "model='$model'" \

@@ -52,7 +52,7 @@ for model in chronos
 do
     for data in electricity traffic solar exchange_rate
     do
-        for augment in "10noise=1" "100noise=1"
+        for augment in "2noise=1" "3noise=1" "5noise=1"
         do
             srun python3 eval_users.py \
             "model='$model'" \
@@ -87,7 +87,7 @@ for model in chronos
 do
     for data in electricity traffic solar exchange_rate
     do
-        for augment in "10noise=1" "100noise=1"
+        for augment in "2noise=1" "3noise=1" "5noise=1"
         do
             srun python3 eval_users.py \
             "model='$model'" \
@@ -122,7 +122,7 @@ for model in chronos
 do
     for data in electricity traffic solar exchange_rate
     do
-        for augment in "10noise=1" "100noise=1"
+        for augment in "2noise=1" "3noise=1" "5noise=1"
         do
             srun python3 eval_users.py \
             "model='$model'" \

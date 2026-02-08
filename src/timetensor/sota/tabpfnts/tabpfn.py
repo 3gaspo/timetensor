@@ -65,73 +65,103 @@ class TabPFN:
         
         return None, None
 
-    def _create_tabular_block(self, values, time_features, start_idx=0, has_context=False, channel_id=0):
+    def _create_tabular_block(
+        self,
+        values,
+        time_features,
+        start_idx=0,
+        bs_offset=0,
+        d_offset=0,
+        total_bs_classes=1,
+        total_dim_classes=1,
+        id_encoding="ordinal",  # "ordinal" | "one-hot"
+    ):
         bs, dim, length = values.shape
         device = values.device
-        
-        tf_subset = time_features[start_idx: start_idx+length].unsqueeze(0).unsqueeze(0)  # (1, 1, length, n_t)
+        dtype = time_features.dtype
+
+        tf_subset = time_features[start_idx:start_idx + length].view(1, 1, length, -1)
         X = tf_subset.expand(bs, dim, length, -1)  # (bs, dim, length, n_t)
-        
-        if has_context and self.dimension_encoding == "ordinal":
-            chan_idx = torch.full((bs, dim, length, 1), float(channel_id), device=device, dtype=time_features.dtype)
-            X = torch.cat([X, chan_idx], dim=-1)
 
-        if dim > 1:
-            if self.dimension_encoding == "ordinal":
-                d_enc = torch.arange(dim, device=device, dtype=time_features.dtype).view(1, dim, 1, 1).expand(bs, dim, length, 1)
-            elif self.dimension_encoding == "one-hot":
-                d_enc = F.one_hot(torch.arange(dim, device=device), num_classes=dim).float()
-                d_enc = d_enc.view(1, dim, 1, -1).expand(bs, dim, length, -1)
-            elif self.dimension_encoding == "categorical":
-                raise ValueError("TODO")
-            X = torch.cat([X, d_enc], dim=-1)
-            
-        if bs > 1:
-            if self.dimension_encoding == "ordinal":
-                b_enc = torch.arange(bs, device=device, dtype=time_features.dtype).view(bs, 1, 1, 1).expand(bs, dim, length, 1)
-            elif self.dimension_encoding == "one-hot":
-                b_enc = F.one_hot(torch.arange(bs, device=device), num_classes=bs).float()
-                b_enc = b_enc.view(bs, 1, 1, -1).expand(bs, dim, length, -1)
-            elif self.dimension_encoding == "categorical":
-                raise ValueError("TODO")
-            X = torch.cat([X, b_enc], dim=-1)
+        b_ids = (torch.arange(bs, device=device) + bs_offset).view(bs, 1, 1)          # (bs,1,1)
+        d_ids = (torch.arange(dim, device=device) + d_offset).view(1, dim, 1)         # (1,dim,1)
 
-        X_flat = X.reshape(-1, X.shape[-1]) # (bs * dim * length, n_features)
-        y_flat = values.reshape(-1) # (bs * dim * length)
-        
-        return X_flat, y_flat
+        if id_encoding == "ordinal":
+            b_feat = b_ids.to(dtype).expand(bs, dim, length).unsqueeze(-1)            # (bs,dim,length,1)
+            d_feat = d_ids.to(dtype).expand(bs, dim, length).unsqueeze(-1)            # (bs,dim,length,1)
+        elif id_encoding == "one-hot":
+            b_oh = F.one_hot(b_ids.view(-1), num_classes=total_bs_classes).to(dtype)  # (bs, total_bs)
+            d_oh = F.one_hot(d_ids.view(-1), num_classes=total_dim_classes).to(dtype) # (dim, total_dim)
+            b_feat = b_oh.view(bs, 1, 1, -1).expand(bs, dim, length, -1)              # (bs,dim,length,total_bs)
+            d_feat = d_oh.view(1, dim, 1, -1).expand(bs, dim, length, -1)             # (bs,dim,length,total_dim)
+        else:
+            raise ValueError(f"Unknown id_encoding: {id_encoding}")
 
+        X = torch.cat([X, b_feat, d_feat], dim=-1)
+
+        return X.reshape(-1, X.shape[-1]), values.reshape(-1)
+    
     def _prepare_matrix(self, x, time_features, past_context, future_context):
-        bs, dim, lags = x.shape
+        bs_x, dim_x, lags = x.shape
         horizon = self.horizon
-        has_context = (past_context is not None) or (future_context is not None)
+        enc = self.dimension_encoding  # "ordinal" | "one-hot"
+
+        bs_p = 0 if past_context is None else past_context.shape[0]
+        dim_p = 0 if past_context is None else past_context.shape[1]
+        bs_f = 0 if future_context is None else future_context.shape[0]
+        dim_f = 0 if future_context is None else future_context.shape[1]
+
+        # sample-id universe: always unique across x, past, future
+        total_bs = max(1, bs_x + bs_p + bs_f)
+        bs_off_x = 0
+        bs_off_p = bs_x
+        bs_off_f = bs_x + bs_p
+
+        # dim-id universe: overlap allowed => no offsets
+        total_dim = max(1, dim_x, dim_p, dim_f)
+        d_off_x = d_off_p = d_off_f = 0
+
+        def make_block(vals, start_idx, bs_offset, d_offset):
+            return self._create_tabular_block(
+                vals,
+                time_features,
+                start_idx=start_idx,
+                bs_offset=bs_offset,
+                d_offset=d_offset,
+                total_bs_classes=total_bs,
+                total_dim_classes=total_dim,
+                id_encoding=enc,
+            )
+
         X_train_blocks, y_train_blocks = [], []
 
-        X_t, y_t = self._create_tabular_block(x, time_features, channel_id=0, has_context=has_context)
+        # main x
+        X_t, y_t = make_block(x, start_idx=0, bs_offset=bs_off_x, d_offset=d_off_x)
         X_train_blocks.append(X_t)
         y_train_blocks.append(y_t)
-        
+
+        # past context
         if past_context is not None:
-            X_c, y_c = self._create_tabular_block(past_context, time_features, channel_id=1, has_context=True)
-            X_train_blocks.append(X_c)
-            y_train_blocks.append(y_c)
-            
+            X_p, y_past = make_block(past_context, start_idx=0, bs_offset=bs_off_p, d_offset=d_off_p)
+            X_train_blocks.append(X_p)
+            y_train_blocks.append(y_past)
+
+        # future context (split)
         if future_context is not None:
+            X_fp, y_fp = make_block(future_context[:, :, :lags], start_idx=0, bs_offset=bs_off_f, d_offset=d_off_f)
+            X_train_blocks.append(X_fp)
+            y_train_blocks.append(y_fp)
 
-            X_cf, y_cf = self._create_tabular_block(future_context[:, :, :lags], time_features, start_idx=0, channel_id=1, has_context=True)
-            X_train_blocks.append(X_cf)
-            y_train_blocks.append(y_cf)
+            X_ff, y_ff = make_block(future_context[:, :, lags:], start_idx=lags, bs_offset=bs_off_f, d_offset=d_off_f)
+            X_train_blocks.append(X_ff)
+            y_train_blocks.append(y_ff)
 
-            X_cf, y_cf = self._create_tabular_block(future_context[:, :, lags:], time_features, start_idx=lags, channel_id=1, has_context=True)
-            X_train_blocks.append(X_cf)
-            y_train_blocks.append(y_cf)
-
-        dummy = torch.zeros((bs, dim, horizon), device=x.device)
-        X_test, _ = self._create_tabular_block(dummy, time_features, start_idx=lags, channel_id=0, has_context=has_context)
+        # test rows: predict horizon for x only
+        dummy = torch.zeros((bs_x, dim_x, horizon), device=x.device, dtype=x.dtype)
+        X_test, _ = make_block(dummy, start_idx=lags, bs_offset=bs_off_x, d_offset=d_off_x)
 
         X_train = torch.cat(X_train_blocks, dim=0)
         y_train = torch.cat(y_train_blocks, dim=0)
-        
         return X_train.cpu().numpy(), y_train.cpu().numpy(), X_test.cpu().numpy()
 
     def __call__(self, x, c=None): # x (bs, dim, lags)
