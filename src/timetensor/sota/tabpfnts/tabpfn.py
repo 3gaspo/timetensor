@@ -2,17 +2,16 @@
 
 import torch
 import numpy as np
+import torch.nn.functional as F
+
 from tabpfn import TabPFNRegressor
 
 from hydra.utils import to_absolute_path
-import torch
-import numpy as np
-import torch.nn.functional as F
 
 
 class TabPFN:
     def __init__(self, lags, horizon, context_mode="past_only", seasonal_periods=None,
-        cross_learning=False, dimension_encoding="ordinal",
+        cross_learning=False, dimension_encoding="ordinal", context_as_features=False,
         device="cuda", weights_path="src/timetensor/sota/tabpfnts/weights/tabpfn-v2.5-regressor-v2.5_default.ckpt"
     ):
         self.lags = lags
@@ -21,6 +20,7 @@ class TabPFN:
         self.device = device
         self.cross_learning = cross_learning
         self.dimension_encoding = dimension_encoding # "ordinal" | "one-hot" | "categorical"
+        self.context_as_features = context_as_features
 
         ## seasonality
         if seasonal_periods:
@@ -69,6 +69,7 @@ class TabPFN:
         self,
         values,
         time_features,
+        context_values=None,
         start_idx=0,
         bs_offset=0,
         d_offset=0,
@@ -83,21 +84,32 @@ class TabPFN:
         tf_subset = time_features[start_idx:start_idx + length].view(1, 1, length, -1)
         X = tf_subset.expand(bs, dim, length, -1)  # (bs, dim, length, n_t)
 
-        b_ids = (torch.arange(bs, device=device) + bs_offset).view(bs, 1, 1)          # (bs,1,1)
-        d_ids = (torch.arange(dim, device=device) + d_offset).view(1, dim, 1)         # (1,dim,1)
-
-        if id_encoding == "ordinal":
-            b_feat = b_ids.to(dtype).expand(bs, dim, length).unsqueeze(-1)            # (bs,dim,length,1)
-            d_feat = d_ids.to(dtype).expand(bs, dim, length).unsqueeze(-1)            # (bs,dim,length,1)
-        elif id_encoding == "one-hot":
-            b_oh = F.one_hot(b_ids.view(-1), num_classes=total_bs_classes).to(dtype)  # (bs, total_bs)
-            d_oh = F.one_hot(d_ids.view(-1), num_classes=total_dim_classes).to(dtype) # (dim, total_dim)
-            b_feat = b_oh.view(bs, 1, 1, -1).expand(bs, dim, length, -1)              # (bs,dim,length,total_bs)
-            d_feat = d_oh.view(1, dim, 1, -1).expand(bs, dim, length, -1)             # (bs,dim,length,total_dim)
+        if self.context_as_features:
+            if context_values is None:
+                raise ValueError("context_as_features=True but no context_values provided.")
+            # Align Context: (bs, c_dim, length) -> (bs, 1, length, c_dim) -> Expand to (bs, dim, length, c_dim)
+            # This assumes context_values are covariates aligned on the time axis
+            # We treat the second dimension of context_values as the feature dimension to concatenate
+            c_feat = context_values.permute(0, 2, 1).unsqueeze(1) # (bs, 1, length, c_dim)
+            c_feat = c_feat.to(dtype).expand(bs, dim, length, -1)
+            X = torch.cat([X, c_feat], dim=-1) #(bs, dim, length, n_t + c_dim)
+        
         else:
-            raise ValueError(f"Unknown id_encoding: {id_encoding}")
+            b_ids = (torch.arange(bs, device=device) + bs_offset).view(bs, 1, 1)          # (bs,1,1)
+            d_ids = (torch.arange(dim, device=device) + d_offset).view(1, dim, 1)         # (1,dim,1)
 
-        X = torch.cat([X, b_feat, d_feat], dim=-1)
+            if id_encoding == "ordinal":
+                b_feat = b_ids.to(dtype).expand(bs, dim, length).unsqueeze(-1)            # (bs,dim,length,1)
+                d_feat = d_ids.to(dtype).expand(bs, dim, length).unsqueeze(-1)            # (bs,dim,length,1)
+            elif id_encoding == "one-hot":
+                b_oh = F.one_hot(b_ids.view(-1), num_classes=total_bs_classes).to(dtype)  # (bs, total_bs)
+                d_oh = F.one_hot(d_ids.view(-1), num_classes=total_dim_classes).to(dtype) # (dim, total_dim)
+                b_feat = b_oh.view(bs, 1, 1, -1).expand(bs, dim, length, -1)              # (bs,dim,length,total_bs)
+                d_feat = d_oh.view(1, dim, 1, -1).expand(bs, dim, length, -1)             # (bs,dim,length,total_dim)
+            else:
+                raise ValueError(f"Unknown id_encoding: {id_encoding}")
+
+            X = torch.cat([X, b_feat, d_feat], dim=-1)
 
         return X.reshape(-1, X.shape[-1]), values.reshape(-1)
     
@@ -105,6 +117,44 @@ class TabPFN:
         bs_x, dim_x, lags = x.shape
         horizon = self.horizon
         enc = self.dimension_encoding  # "ordinal" | "one-hot"
+
+        if self.context_as_features:
+            
+            # In this mode, we do NOT stack context as extra rows. 
+            # We assume 'c' (split into past/future) contains the feature columns for x.
+            # Reconstruct the full 'c' to slice it aligned with X_train (lags) and X_test (horizon)
+            # Note: _split_context logic puts the full tensor in `future_context` if mode="future"
+            # or creates `past_context` if mode="past_only".
+
+            if self.context_mode == "future" and future_context is not None:
+                c_full = future_context
+            elif self.context_mode == "past_only" and past_context is not None:
+                raise ValueError("Context as features requires horizon context values")
+            elif self.context_mode == "any":
+                if future_context is None:
+                    raise ValueError("context_as_features=True needs future_context for X_test")
+                c_full = future_context
+            else:
+                raise ValueError(f"Unknown context mode: {self.context_mode}")
+            c_train = c_full[:, :, :lags]
+            c_test = c_full[:, :, lags:lags+horizon]
+            if c_test.shape[-1] != horizon:
+                raise ValueError(f"Wrong context size: {c_full.shape}")
+
+            X_train, y_train = self._create_tabular_block(
+                x, time_features, context_values=c_train, start_idx=0
+            )
+
+            dummy = torch.zeros((bs_x, dim_x, horizon), device=x.device, dtype=x.dtype)
+            X_test, _ = self._create_tabular_block(
+                dummy, time_features, context_values=c_test, start_idx=lags
+            )
+
+            return X_train.cpu().numpy(), y_train.cpu().numpy(), X_test.cpu().numpy()
+
+
+
+        # --- Standard Logic (Context as Support Samples) ---
 
         bs_p = 0 if past_context is None else past_context.shape[0]
         dim_p = 0 if past_context is None else past_context.shape[1]
