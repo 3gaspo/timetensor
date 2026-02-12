@@ -9,13 +9,14 @@ source .venv/bin/activate
 
 seed=1
 eval_runs=10
+experiment_dir="../outputs/fm/cross_learning/indiv/"
 
 lags=672
 horizon=168
 stride=512
-for data in exchange_rate #electricity traffic solar exchange_rate
+for data in electricity traffic solar exchange_rate
     do
-    for bs in 10 #1 2 3 4 5 10
+    for bs in 1 2 3 4 5 10
     do
         for cross in True False
         do
@@ -34,7 +35,7 @@ for data in exchange_rate #electricity traffic solar exchange_rate
             "misc.seed=$seed" \
             "misc.device='cpu'" \
             "misc.save_name='chronos2_cross${cross}_bs$bs'" \
-            "misc.output_dir='../outputs/fm/cross_learning/indiv/$data/${lags}_$horizon/'"
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
         done
     done
 done
@@ -43,9 +44,9 @@ done
 lags=168
 horizon=24
 stride=512
-for data in exchange_rate #electricity traffic solar exchange_rate
+for data in electricity traffic solar exchange_rate
     do
-    for bs in 10 #1 2 3 4 5 10
+    for bs in 1 2 3 4 5 10
     do
         for cross in True False
         do
@@ -64,7 +65,7 @@ for data in exchange_rate #electricity traffic solar exchange_rate
             "misc.seed=$seed" \
             "misc.device='cpu'" \
             "misc.save_name='chronos2_cross${cross}_bs$bs'" \
-            "misc.output_dir='../outputs/fm/cross_learning/indiv/$data/${lags}_$horizon/'"
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
         done
     done
 done
@@ -73,9 +74,9 @@ done
 lags=24
 horizon=24
 stride=512
-for data in exchange_rate #electricity traffic solar exchange_rate
+for data in electricity traffic solar exchange_rate
     do
-    for bs in 10 #1 2 3 4 5 10
+    for bs in 1 2 3 4 5 10
     do
         for cross in True False
         do
@@ -94,7 +95,14 @@ for data in exchange_rate #electricity traffic solar exchange_rate
             "misc.seed=$seed" \
             "misc.device='cpu'" \
             "misc.save_name='chronos2_cross${cross}_bs$bs'" \
-            "misc.output_dir='../outputs/fm/cross_learning/indiv/$data/${lags}_$horizon/'"
+            "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
         done
     done
+done
+
+file_name=mean_results.json
+for metric in nMSE 'w10 nMSE' 'compute (min)'
+do
+    output_path="${experiment_dir}${metric}_results.tex"
+    srun python3 -c "from src.timetensor.visu import generate_results_table;generate_results_table('$experiment_dir', json_filename='$file_name', metric_key='$metric', output_tex_path='$output_path', settings='$settings')"
 done

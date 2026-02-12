@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name=noise_cr
+#SBATCH --job-name=aug_cr
 #SBATCH --gres=gpu:1
-#SBATCH --output=script_outputs/noise_cr.out
-#SBATCH --error=script_outputs/noise_cr.err
+#SBATCH --output=script_outputs/aug_cr.out
+#SBATCH --error=script_outputs/aug_cr.err
 #SBATCH --time=23:00:00
 #SBATCH --partition=a100
 source .venv/bin/activate
@@ -17,7 +17,7 @@ for model in chronos
 do
     for data in electricity traffic solar exchange_rate
     do
-        for augment in "10noise=1" "100noise=1"
+        for augment in identity square
         do
             srun python3 eval_users.py \
             "model='$model'" \
@@ -52,7 +52,7 @@ for model in chronos
 do
     for data in electricity traffic solar exchange_rate
     do
-        for augment in "10noise=1" "100noise=1"
+        for augment in identity square
         do
             srun python3 eval_users.py \
             "model='$model'" \
@@ -87,7 +87,7 @@ for model in chronos
 do
     for data in electricity traffic solar exchange_rate
     do
-        for augment in "10noise=1" "100noise=1"
+        for augment in identity square
         do
             srun python3 eval_users.py \
             "model='$model'" \
@@ -122,7 +122,7 @@ for model in chronos
 do
     for data in electricity traffic solar exchange_rate
     do
-        for augment in "10noise=1" "100noise=1"
+        for augment in identity square
         do
             srun python3 eval_users.py \
             "model='$model'" \
@@ -157,8 +157,8 @@ metric=nMSE
 for model in chronos
 do
     #noises
-    model_names="${model}_none;${model}_noise=1;${model}_2noise=1;${model}_3noise=1;${model}_5noise=1;${model}_10noise=1;${model}_100noise=1"
-    prefix="${model}_noises"
+    model_names="${model}_none;${model}_square;${model}_identity"
+    prefix="${model}_augments"
     output_path="${experiment_dir}${prefix}_${metric}_results.tex"
     srun python3 -c "from src.timetensor.visu import generate_results_table;generate_results_table('$experiment_dir', json_filename='$file_name', metric_key='$metric', output_tex_path='$output_path', model_names='$model_names', settings='$settings', decimals=4)"
 

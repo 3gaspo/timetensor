@@ -243,13 +243,14 @@ class RevIN(DefaultNorm):
 
 class AugmentModel(nn.Module):
     """Wrapper for model, repeats value in case of constant window"""
-    def __init__(self, model, horizon, repeat_constant=False, self_augment=False, eps=1e-8):
+    def __init__(self, model, horizon, repeat_constant=False, self_augment=False, augment_mode = "past_only", eps=1e-8):
         super().__init__()
         self.model = model
         self.horizon = horizon
         self.eps = eps
 
         self.repeat_constant = repeat_constant
+        self.augment_mode = augment_mode
 
         assert self_augment is None or self_augment is False or type(self_augment) == str, f"Unrecognized self_augment mode {self_augment}"
         self.modes = self_augment
@@ -287,13 +288,17 @@ class AugmentModel(nn.Module):
         for mode in modes:
             
             #garbage covariates
-            shape = (x.shape[0], 1, x.shape[-1])
+            if self.augment_mode == "future":
+                shape = (x.shape[0], 1, x.shape[-1] + self.horizon)
+            else:
+                shape = (x.shape[0], 1, x.shape[-1])
             if "noise" in mode:
                 a, b = mode.split("=")
                 assert a[-5:] == "noise"
                 n=1
                 if len(a)>5:
-                    n=int(a[0])
+                    aa, _ = a.split("noise")
+                    n=int(aa)
                 b = float(b)
                 for _ in range(n):
                     transforms.append(b*torch.randn(shape))
@@ -302,28 +307,31 @@ class AugmentModel(nn.Module):
                 assert a[-8:] == "constant"
                 n=1
                 if len(a)>8:
-                    n=int(a[0])
+                    aa, _ = a.split("constant")
+                    n=int(aa)
                 b = float(b)
                 for _ in range(n):
                     tensor = torch.empty(shape)
                     tensor.fill_(b)
                     transforms.append(tensor)
             elif mode == "identity":
+                assert self.augment_mode == "past_only"
                 transforms.append(x)
             elif "synthetic" in mode:
-                a, b = mode.split("=") #e.g past_synthetic=10
-                aa, bb = a.split("_")
-                assert bb == "synthetic", f"aa:{aa}, bb:{bb}, b:{b}"
+                a, b = mode.split("=") #e.g synthetic=10 #past_synthetic=10
+                # aa, bb = a.split("_")
+                # assert bb == "synthetic", f"aa:{aa}, bb:{bb}, b:{b}"
                 num_series = int(b)
                 synthetic_series = generate_multiple_time_series(num_series=x.shape[0]*num_series)
                 
                 covariates_tensor = []
                 for serie in synthetic_series:
                     serie_array = serie["target"] #array
-                    if aa == "past":
-                        tensor = torch.tensor(serie_array[:x.shape[-1]])
-                    elif aa == "future":
-                        tensor = torch.tensor(serie_array[:x.shape[-1]+self.horizon])
+                    # if aa == "past":
+                    #     tensor = torch.tensor(serie_array[:x.shape[-1]])
+                    # elif aa == "future":
+                    #     tensor = torch.tensor(serie_array[:x.shape[-1]+self.horizon])
+                    tensor = torch.tensor(serie_array[:x.shape[-1]])
                     covariates_tensor.append(tensor)
                 covariates_tensor = torch.stack(covariates_tensor, dim=0) # (bs*num_series, L(+H))
                 transforms.append(covariates_tensor.expand(x.shape[0], num_series, tensor.shape[0])) # (bs, 1, num_series)
@@ -333,18 +341,23 @@ class AugmentModel(nn.Module):
                 k = self.smooth_kernel.view(1, 1, -1).repeat(x.shape[1], 1, 1)
                 transforms.append(F.conv1d(x, k, padding=self.smooth_kernel.shape[0]//2, groups=x.shape[1])) 
             elif mode == "square":  # signed square
+                assert self.augment_mode == "past_only"
                 transforms.append(x * x.abs())
             elif mode == "root": # signed sqrt
+                assert self.augment_mode == "past_only"
                 transforms.append(torch.sign(x) * torch.sqrt(x.abs() + self.eps))
             elif mode == "sign": #signed
+                assert self.augment_mode == "past_only"
                 transforms.append(torch.sign(x))
             elif mode == "mirror":
+                assert self.augment_mode == "past_only"
                 transforms.append(-x)
             else:
                 raise ValueError(f"Unrecognized augment mode: {mode}")
-
-        return torch.cat(transforms, dim=1)
-
+        try:
+            return torch.cat(transforms, dim=1)
+        except:
+            raise ValueError(f"transform shapes: {[transform.shape for transform in transforms]}")
     
     def forward(self, x, c=None):
         if self.augment:
@@ -436,7 +449,7 @@ def load_model(model_name, shape, norm_name=None, init_path=None, cpu=False, **k
     
     model = model_selector(model_name, lags, dim, horizon, **kwargs) #model architecture
     if model.model_type == "pytorch": 
-        model = AugmentModel(model, horizon, kwargs.get("repeat_constant"), kwargs.get("self_augment")) #allow context in call input
+        model = AugmentModel(model, horizon, kwargs.get("repeat_constant"), kwargs.get("self_augment"), kwargs.get("augment_mode")) #allow context in call input
         model = normalization_selector(model, norm_name, dim, **kwargs)
 
     #init

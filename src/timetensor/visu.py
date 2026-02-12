@@ -560,6 +560,10 @@ def build_results_table_latex(
     with open(save_dir + save_name, "w", encoding="utf-8") as f:
         f.write(latex)
 
+import os
+import json
+import numpy as np
+
 def generate_results_table(
     experiment_dir: str,
     dataset_names: list = None,  # Default to None for auto-detection
@@ -688,7 +692,7 @@ def generate_results_table(
         table_data[ds] = new_rows
 
     # --- 3. Compute Improvements ---
-    # A) Overall improvements (existing behavior)
+    # A) Overall improvements
     improvement_percentages = []
     flat_rows = []
     for ds in dataset_names:
@@ -712,7 +716,30 @@ def generate_results_table(
             rel_diffs.append(diff)
         improvement_percentages.append(np.mean(rel_diffs) * 100 if rel_diffs else 0.0)
 
-    # B) Per-setting improvements (NEW): for each distinct setting, average over all datasets
+    # NEW: Per-dataset improvements (avg over all settings for each dataset)
+    per_dataset_improvements = {}
+    for ds in dataset_names:
+        rows = [values for _, values in table_data[ds]]
+        imps = []
+        for col_idx in range(len(model_names)):
+            if col_idx == baseline_idx:
+                imps.append(0.0)
+                continue
+            rel_diffs = []
+            for row in rows:
+                baseline_val = row[baseline_idx]
+                current_val = row[col_idx]
+                if np.isnan(baseline_val) or np.isnan(current_val) or baseline_val == 0:
+                    continue
+                if lower_is_better:
+                    diff = (baseline_val - current_val) / baseline_val
+                else:
+                    diff = (current_val - baseline_val) / baseline_val
+                rel_diffs.append(diff)
+            imps.append(np.mean(rel_diffs) * 100 if rel_diffs else 0.0)
+        per_dataset_improvements[ds] = imps
+
+    # B) Per-setting improvements: for each distinct setting, average over all datasets
     setting_to_rows = {}
     for ds in dataset_names:
         for setting, values in table_data[ds]:
@@ -757,6 +784,7 @@ def generate_results_table(
     for d_idx, dataset in enumerate(dataset_names):
         rows = table_data[dataset]
         num_rows = len(rows)
+
         for r_idx, (setting, values) in enumerate(rows):
             if r_idx == 0:
                 ds_display = dataset.replace("_", r"\_")
@@ -784,10 +812,15 @@ def generate_results_table(
             line_content = [ds_cell, setting_display] + val_cells
             lines.append(" & ".join(line_content) + r" \\")
 
+        # NEW: improvement row per dataset (avg over all settings for that dataset)
+        ds_imps = per_dataset_improvements.get(dataset, [0.0] * len(model_names))
+        imp_cells = ["", r"\textit{Improvement}"] + [f"{imp:.1f}\\%" for imp in ds_imps]
+        lines.append(" & ".join(imp_cells) + r" \\")
+
         if d_idx < len(dataset_names) - 1:
             lines.append(r"\midrule")
 
-    # NEW: per-setting improvements section (between raw values and overall improvements)
+    # Per-setting improvements section (between raw values and overall improvements)
     lines.append(r"\midrule")
     lines.append(r"\midrule")
     distinct_settings = []
@@ -804,7 +837,7 @@ def generate_results_table(
         imp_cells = [label_cell, setting_display] + [f"{imp:.1f}\\%" for imp in per_setting_improvements[setting]]
         lines.append(" & ".join(imp_cells) + r" \\")
 
-    # Overall improvements row (existing, now clearly labeled)
+    # Overall improvements row
     lines.append(r"\midrule")
     imp_cells = ["Overall improvements", ""] + [f"{imp:.1f}\\%" for imp in improvement_percentages]
     lines.append(" & ".join(imp_cells) + r" \\")

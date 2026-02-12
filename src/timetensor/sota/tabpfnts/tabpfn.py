@@ -12,7 +12,7 @@ from hydra.utils import to_absolute_path
 class TabPFN:
     """Wrapper for TabPFN for time series forecasting with covariates"""
     def __init__(self, lags, horizon, context_mode="past_only", seasonal_periods=None,
-        cross_learning=False, dimension_encoding="ordinal", context_as_features=False,
+        cross_learning=False, dimension_encoding="ordinal", context_as_features=True,
         device="cuda", weights_path="src/timetensor/sota/tabpfnts/weights/tabpfn-v2.5-regressor-v2.5_default.ckpt"
     ):
         self.lags = lags

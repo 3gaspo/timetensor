@@ -21,7 +21,7 @@ experiment_dir="../outputs/iclr/identity/"
 #         do
 #             srun python3 identity_test.py \
 #             "model='$model'" \
-#             "model.configs.context_mode='future'" \
+            # "model.configs.context_mode='future'" \
 #             "task.lags=$lags" \
 #             "task.horizon=$horizon" \
 #             "normalization=instance" \

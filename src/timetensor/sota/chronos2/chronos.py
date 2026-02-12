@@ -67,12 +67,13 @@ class Chronos:
                 cs, dim_c, _ = future_included.shape
                 if bs == cs:
                     for i in range(dim_c):
-                        past_cov[f"fut_{i}"] = future_included[b, i, :lags]
-                        fut_cov[f"fut_{i}"] = future_included[b, i, lags : lags + self.horizon]
+                        past_cov[f"fut_{i}"] = future_included[b, i, :lags].cpu()
+                        fut_cov[f"fut_{i}"] = future_included[b, i, lags : lags + self.horizon].cpu()
                 else:
                     for b_ in range(cs):
                         for i in range(dim_c):
-                            past_cov[f"past_{b_}_{i}"] = past_only[b_, i, :]
+                            past_cov[f"fut_{b_}_{i}"] = future_included[b, i, :lags].cpu()
+                            fut_cov[f"fut_{b_}_{i}"] = future_included[b, i, lags : lags + self.horizon].cpu()
 
             if len(past_cov) > 0:
                 d["past_covariates"] = past_cov
