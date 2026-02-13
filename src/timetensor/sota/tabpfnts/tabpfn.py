@@ -78,14 +78,10 @@ class TabPFN:
         X = tf_subset.expand(bs, dim, length, -1)  # (bs, dim, length, n_t)
 
         if self.context_as_features:
-            if context_values is None:
-                raise ValueError("context_as_features=True but no context_values provided.")
-            # Align Context: (bs, c_dim, length) -> (bs, 1, length, c_dim) -> Expand to (bs, dim, length, c_dim)
-            # This assumes context_values are covariates aligned on the time axis
-            # We treat the second dimension of context_values as the feature dimension to concatenate
-            c_feat = context_values.permute(0, 2, 1).unsqueeze(1) # (bs, 1, length, c_dim)
-            c_feat = c_feat.to(dtype).expand(bs, dim, length, -1)
-            X = torch.cat([X, c_feat], dim=-1) #(bs, dim, length, n_t + c_dim)
+            if context_values is not None:
+                c_feat = context_values.permute(0, 2, 1).unsqueeze(1) # (bs, 1, length, c_dim)
+                c_feat = c_feat.to(dtype).expand(bs, dim, length, -1)
+                X = torch.cat([X, c_feat], dim=-1) #(bs, dim, length, n_t + c_dim)
         
         else:
             b_ids = (torch.arange(bs, device=device) + bs_offset).view(bs, 1, 1)          # (bs,1,1)
@@ -112,9 +108,10 @@ class TabPFN:
         horizon = self.horizon
 
         if self.context_as_features: #add context as features (assumes known horizon context)
-            assert self.context_mode != "past_only"
-            c_train = future_context[:, :, :lags]
-            c_test = future_context[:, :, lags:lags+horizon]
+            c_train, c_test = None, None
+            if future_context is not None:
+                c_train = future_context[:, :, :lags]
+                c_test = future_context[:, :, lags:lags+horizon]
 
             X_train, y_train = self._create_tabular_block(x, time_features,
                 context_values=c_train, start_idx=0)

@@ -435,7 +435,7 @@ def normalization_selector(model, norm_name, dim, **kwargs):
         model = GRevIN.build_cmin(model, dim)
         model.norm_name = "cmIN"
     elif norm_name == "PRevIN":
-        model = GRevIN.build_ersonalized_revin(model, dim)
+        model = GRevIN.build_personalized_revin(model, dim)
         model.norm_name = "revin"
     elif norm_name == "GRevIN":
         model = GRevIN(model, dim, **kwargs)

@@ -1,10 +1,4 @@
 name: cmIN
 configs:
   latent: False
-  init_beta: False
-  fixed_beta: False
-  init_alpha: False
-  fixed_alpha: False
-  use_gamma: True
-  inverse_gamma: True
   n_clusters:
