@@ -4,7 +4,7 @@ import torch
 from time import perf_counter
 
 from src.timetensor.dataset import fetch_training_data, get_sizes, apply_standard_norm
-from src.timetensor.models import load_model
+from src.timetensor.models import load_model, update_kwargs
 from src.timetensor.pipeline import get_losses, launch_training, launch_eval, launch_example
 from src.timetensor.utils import get_dirs, set_seed, save_results
 
@@ -55,6 +55,7 @@ def run(cfg):
         logger.info(batch_str)
 
     #model
+    kwargs = update_kwargs(kwargs, model_name, norm_name, stats_dict)
     model = load_model(model_name, shape, norm_name, cfg.training.init, device.type=="cpu", **kwargs)
     if verbose:
         logger.info("Fetched model")

@@ -4,16 +4,20 @@
 #SBATCH --output=script_outputs/exotics.out
 #SBATCH --error=script_outputs/exotics.err
 #SBATCH --time=23:00:00
-#SBATCH --partition=a100
+#SBATCH --partition=h100
 source .venv/bin/activate
 
 seed=1
 experiment_dir="../outputs/exotics/"
 
+# lags=1344
+# horizon=336
+# stride=512
+
 lags=672
 horizon=168
 stride=512
-for data in raw_electricity #traffic solar exchange_rate
+for data in raw_electricity #traffic solar
 do
     srun python3 train_model.py \
     "model=PatchTST" \
@@ -117,10 +121,18 @@ do
 done
 
 
-settings="1344_336;672_168;168_24;24_24"
-model_names="PatchTST_all;PatchTST_rmvtrain;PatchTSTrmvall;PatchTST_rmvtest"
+# lags=168
+# horizon=24
+# stride=512
 
-for metric in nMSE 'w10 nMSE' 'train time (min)' 'eval time (min)'
+# lags=24
+# horizon=24
+# stride=512
+
+settings="1344_336;672_168;168_24;24_24"
+model_names="PatchTST_all;PatchTST_rmvtrain;PatchTST_rmvall;PatchTST_rmvtest"
+
+for metric in nMSE 'train time (min)'
 do
     for prefix in train test1
     do

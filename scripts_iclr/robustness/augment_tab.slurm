@@ -17,7 +17,7 @@ for model in tabpfn
 do
     for data in electricity traffic solar exchange_rate
     do
-        for augment in none
+        for augment in none "constant=0"
         do
             srun python3 eval_users.py \
             "model='$model'" \
@@ -52,7 +52,7 @@ for model in tabpfn
 do
     for data in electricity traffic solar exchange_rate
     do
-        for augment in none
+        for augment in none "constant=0"
         do
             srun python3 eval_users.py \
             "model='$model'" \
@@ -87,7 +87,7 @@ for model in tabpfn
 do
     for data in electricity traffic solar exchange_rate
     do
-        for augment in none
+        for augment in none "constant=0"
         do
             srun python3 eval_users.py \
             "model='$model'" \
@@ -122,7 +122,7 @@ for model in tabpfn
 do
     for data in electricity traffic solar exchange_rate
     do
-        for augment in none
+        for augment in none "constant=0"
         do
             srun python3 eval_users.py \
             "model='$model'" \
@@ -151,16 +151,15 @@ do
 done
 
 
-# file_name=test1_mean_results.json
-# settings="1344_336;672_168;168_24;24_24"
-# metric=nMSE
+file_name=test1_mean_results.json
+settings="1344_336;672_168;168_24;24_24"
+metric=nMSE
 
-# for model in chronos
-# do
-#     #noises
-#     model_names="${model}_none_future;${model}_noise=1_future;${model}_2noise=1_future;${model}_3noise=1_future;${model}_5noise=1_future;${model}_10noise=1_future;${model}_100noise=1_future"
-#     prefix="${model}_noises_future"
-#     output_path="${experiment_dir}${prefix}_${metric}_results.tex"
-#     srun python3 -c "from src.timetensor.visu import generate_results_table;generate_results_table('$experiment_dir', json_filename='$file_name', metric_key='$metric', output_tex_path='$output_path', model_names='$model_names', settings='$settings', decimals=4)"
-
-# done
+for model in tabpfn
+do
+    #noises
+    model_names="${model}_none_future;${model}_noise=1_future;${model}_constant=1_future"
+    prefix="${model}_noises_future"
+    output_path="${experiment_dir}${prefix}_${metric}_results.tex"
+    srun python3 -c "from src.timetensor.visu import generate_results_table;generate_results_table('$experiment_dir', json_filename='$file_name', metric_key='$metric', output_tex_path='$output_path', model_names='$model_names', settings='$settings', decimals=4)"
+done

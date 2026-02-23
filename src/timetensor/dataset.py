@@ -169,20 +169,29 @@ class IndexSampler:
         # 2. Handle constant windows
         if self.remove_cte:
             mask = self._get_non_cte_mask(indivs, date)
-            if mask.sum().item() == 0:
-                remove_cte_counter = 0
-                while mask.sum().item() == 0:
+            remove_cte_counter = 0
 
-                    if self.idx_mode == "individuals":
-                        date = self._get_strided_date(raw_step=None)
-                    else:
-                        indivs = self._get_indivs(idx=None)
-                        date = self._get_strided_date(raw_step=None)
+            # require ALL individuals in the block to be non-cte
+            while not mask.all().item():
 
-                    remove_cte_counter += 1
-                    if remove_cte_counter > 100:
-                        raise ValueError("Overflow constant windows")
-                    mask = self._get_non_cte_mask(indivs, date)
+                if self.idx_mode == "dates":
+                    # keep date fixed (idx selects the date), resample indivs only
+                    indivs = self._get_indivs(idx=None)
+
+                elif self.idx_mode == "individuals":
+                    # keep individual fixed (idx selects the indiv), resample date only
+                    date = self._get_strided_date(raw_step=None)
+
+                else:
+                    # free resampling
+                    indivs = self._get_indivs(idx=None)
+                    date = self._get_strided_date(raw_step=None)
+
+                remove_cte_counter += 1
+                if remove_cte_counter > 100:
+                    raise ValueError("Overflow constant windows")
+
+                mask = self._get_non_cte_mask(indivs, date)
 
         # 3. Context
         if self.use_context:
@@ -266,7 +275,7 @@ class TimeSeriesDataset(Dataset):
                 raise AttributeError(f"IndexSampler has no attribute '{key}'")
             if key in ["values", "lags", "horizon"]:
                 raise AttributeError(f"{key} should not be changed after dataset init")
-            if key == "stride": assert value>0 and value < (self.dates-self.lags-self.horizon)
+            if key == "stride": assert value>0 and value < (self.dates-self.lags-self.horizon + 1)
             setattr(self.index_sampler, key, value)
 
     def __getitem__(self, idx):                
@@ -553,7 +562,7 @@ def split_6_way(values, context, datetimes, indiv_split, date_splits, context_by
     return dico
 
 
-def get_dataset_splits(splits, sampling, data_path=None, save_path=None, cluster_path=None, set_cluster_context=None, data=None, cluster_ids=None):
+def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None, set_cluster_context=None, data=None, cluster_ids=None):
     """splits data from path. If str splits, will load given split, if float will save new split
     set_cluster_context: associated provided integer value to specified cluster (via cluster_ids or cluster_path)
     """
@@ -654,6 +663,9 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, splits, sampling, su
             weight = sampling["eval_len_multiplier"]
             blocks = sampling["eval_block_individuals"]
 
+        #dataset
+        dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon)
+
         #subsets
         subset = subsets[key]
         if subset_mode is None:
@@ -671,7 +683,6 @@ def get_train_loaders(data_dict, batch_size, lags, horizon, splits, sampling, su
                 torch.save(subset_indices, subset_dir + f"{key}_subset.pt")
         
         #loader
-        dataset = TimeSeriesDataset(values, datetimes, context, lags, horizon)
         dataset.set_sampler(idx_mode = idx_mode,
             block_individuals = blocks, use_context = sampling["use_context"], remove_cte=remove_cte,
             weight=weight, subset_indices=subset_indices, subset_mode=subset_mode, stride=stride)       
@@ -788,7 +799,7 @@ def fetch_training_data(data_path, splits, sampling, subsets, batch_size, lags, 
             else:
                 split_path, subset_path = None, None
             cluster_path_ = cluster_path + cluster_name
-            data_dict = get_dataset_splits(splits, sampling, data_path, split_path, cluster_path_, set_cluster_context=k)
+            data_dict = get_dataset_splits(splits, data_path, split_path, cluster_path_, set_cluster_context=k)
             loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon,
                 splits, sampling, subsets, subset_path,
                 standard_stats=None)
@@ -819,7 +830,7 @@ def fetch_training_data(data_path, splits, sampling, subsets, batch_size, lags, 
                 subset_path = save_path+cluster_name[:-3]+"subsets/"
             else:
                 split_path, subset_path = None, None
-            data_dict = get_dataset_splits(splits, sampling, data_path, split_path, cluster_path)
+            data_dict = get_dataset_splits(splits, data_path, split_path, cluster_path)
             loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon,
                 splits, sampling, subsets, subset_path,
                 standard_stats=None)
@@ -831,7 +842,7 @@ def fetch_training_data(data_path, splits, sampling, subsets, batch_size, lags, 
                 subset_path = save_path+ "subsets/"
             else:
                 split_path, subset_path = None, None
-            data_dict = get_dataset_splits(splits, sampling, data_path, split_path, cluster_ids=cluster_ids) #cluster_ids: integer of indivs 
+            data_dict = get_dataset_splits(splits, data_path, split_path, cluster_ids=cluster_ids) #cluster_ids: integer of indivs 
             loaders_dict = get_train_loaders(data_dict, batch_size, lags, horizon,
                 splits, sampling, subsets, subset_path,
                 standard_stats=None)
@@ -844,7 +855,7 @@ def fetch_training_data(data_path, splits, sampling, subsets, batch_size, lags, 
         #     indiv_stats_dict = {}
         #     n_users = list(df_dict.values())[0].shape[-1]
         #     for indiv in range(n_users):
-        #         data_dict_ = get_dataset_splits(splits, sampling, data_path, split_path, cluster_ids=[indiv])
+        #         data_dict_ = get_dataset_splits(splits, data_path, split_path, cluster_ids=[indiv])
         #         loaders_dict_ = get_train_loaders(data_dict_, batch_size, lags, horizon,
         #             splits, sampling, subsets, subset_path,
         #             standard_stats=None)

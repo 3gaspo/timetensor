@@ -167,9 +167,9 @@ class StandardNorm(DefaultNorm):
         self.norm_name = "standard"
         self.mean, self.std = mean, std
         self.eps = eps
-        assert torch.all(self.std >= 0)
+        assert self.std >= 0
     def norm(self, x):
-        x = (x - self.mean) / (self.std+self.eps) # (B, dim, lags)
+        x = (x - self.mean) / (self.std) # (B, dim, lags)
         return x
     def denorm(self, y):
         y = y * self.std + self.mean
@@ -380,6 +380,17 @@ class AugmentModel(nn.Module):
 
 ## Loading model
 
+def update_kwargs(kwargs, model_name, norm_name, stats_dict):
+    if norm_name == "standard" and not (kwargs.get("mean") and kwargs.get("std")):
+        kwargs["mean"] = stats_dict["train"]["mean"]
+        kwargs["std"] = stats_dict["train"]["std"]
+    elif (norm_name == "PRevIN" or norm_name == "cmIN") and kwargs.get("n_clusters") is None:
+        if "train" in stats_dict: #not a nodes stats dict
+            kwargs["n_clusters"] = stats_dict["train"]["shape"][1]
+        else:
+            kwargs["n_clusters"] = len(stats_dict)
+    return kwargs
+
 def model_selector(model_name, lags, dim, horizon, **kwargs):
     if model_name == "persistence":
         model = Persistence(horizon)
@@ -424,18 +435,18 @@ def normalization_selector(model, norm_name, dim, **kwargs):
     elif norm_name == "instance":
         model = InstanceNorm(model, **kwargs)
     elif norm_name == "IN":
-        model = GRevIN.build_in(model, dim)
+        model = GRevIN.build_in(model, dim, **kwargs)
         model.norm_name = "instance"
     elif norm_name == "revin":
         model = RevIN(model, dim, **kwargs)
     elif norm_name == "RevIN":
-        model = GRevIN.build_revin(model, dim)
+        model = GRevIN.build_revin(model, dim, **kwargs)
         model.norm_name = "revin"
     elif norm_name == "cmIN":
-        model = GRevIN.build_cmin(model, dim)
+        model = GRevIN.build_cmin(model, dim, **kwargs)
         model.norm_name = "cmIN"
     elif norm_name == "PRevIN":
-        model = GRevIN.build_personalized_revin(model, dim)
+        model = GRevIN.build_personalized_revin(model, dim, **kwargs)
         model.norm_name = "revin"
     elif norm_name == "GRevIN":
         model = GRevIN(model, dim, **kwargs)
@@ -548,19 +559,27 @@ class GRevIN(DefaultNorm):
         self.std = None
 
     # ---------- helpers ----------
-
+    
     def _parse_cluster(self, c):
-        if c is None:
+        #TODO : what if c includes both the normalization and model's context?
+        if c is None or not isinstance(c, torch.Tensor):
             return None
 
-        #TODO : what if c includes both the normalization and model's context?
-        if isinstance(c, torch.Tensor):
-            if c.ndim == 1:
-                return c
-            if c.ndim == 2:
-                return c[:, 0]
-            return c[:, 0, 0]
-        return None
+        if c.numel() == 0:
+            return None
+
+        if c.ndim == 1:
+            return c
+
+        if c.ndim == 2:
+            if c.size(1) == 0:
+                return None
+            return c[:, 0]
+
+        # c.ndim >= 3
+        if c.size(1) == 0 or c.size(2) == 0:
+            return None
+        return c[:, 0, 0]
 
     def _is_unknown(self, k: int):
         if self.unknown_cluster_id is not None and k == int(self.unknown_cluster_id):

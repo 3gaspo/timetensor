@@ -67,7 +67,7 @@ def run(cfg):
             logger.info(shape_str)
             logger.info(batch_str)
         for key in stats_dict:
-            stats_str = "\n".join(f"{k}\t{v:.4f}" for k, v in stats_dict[key].items())
+            stats_str = "\n".join(f"{k}\t{v:.4f}" for k, v in stats_dict[key].items() if k != "shape")
             logger.info(f"{key} stats:\n{stats_str}")
 
     logger.info('End of script\n')

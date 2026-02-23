@@ -560,9 +560,6 @@ def build_results_table_latex(
     with open(save_dir + save_name, "w", encoding="utf-8") as f:
         f.write(latex)
 
-import os
-import json
-import numpy as np
 
 def generate_results_table(
     experiment_dir: str,
@@ -573,7 +570,7 @@ def generate_results_table(
     metric_key: str = "nMSE",    # Default to nMSE
     output_tex_path: str = None,
     lower_is_better: bool = True,
-    decimals: int = 3,
+    decimals: int = 4,
     baseline_idx: int = 0,
     multiplier: any = 1,
 ):
@@ -716,7 +713,7 @@ def generate_results_table(
             rel_diffs.append(diff)
         improvement_percentages.append(np.mean(rel_diffs) * 100 if rel_diffs else 0.0)
 
-    # NEW: Per-dataset improvements (avg over all settings for each dataset)
+    # Per-dataset improvements (avg over all settings for each dataset)
     per_dataset_improvements = {}
     for ds in dataset_names:
         rows = [values for _, values in table_data[ds]]
@@ -739,7 +736,7 @@ def generate_results_table(
             imps.append(np.mean(rel_diffs) * 100 if rel_diffs else 0.0)
         per_dataset_improvements[ds] = imps
 
-    # B) Per-setting improvements: for each distinct setting, average over all datasets
+    # Per-setting improvements: for each distinct setting, average over all datasets
     setting_to_rows = {}
     for ds in dataset_names:
         for setting, values in table_data[ds]:
@@ -767,6 +764,12 @@ def generate_results_table(
         per_setting_improvements[setting] = imps
 
     # --- 4. Generate LaTeX ---
+    def _is_best(a, b, tol=1e-12):
+        return a is not None and b is not None and abs(a - b) <= tol
+
+    def _fmt_imp(v):
+        return f"{v:.{decimals}f}\\%"
+
     lines = []
     lines.append(r"\begin{table}[h!]")
     lines.append(fr"\caption{{Results for {metric_key} metric.}}")
@@ -812,15 +815,24 @@ def generate_results_table(
             line_content = [ds_cell, setting_display] + val_cells
             lines.append(" & ".join(line_content) + r" \\")
 
-        # NEW: improvement row per dataset (avg over all settings for that dataset)
+        # Per-dataset improvement row (bold best improvement)
         ds_imps = per_dataset_improvements.get(dataset, [0.0] * len(model_names))
-        imp_cells = ["", r"\textit{Improvement}"] + [f"{imp:.1f}\\%" for imp in ds_imps]
+        best_imp = max(ds_imps) if ds_imps else None
+
+        imp_val_cells = []
+        for imp in ds_imps:
+            s = _fmt_imp(imp)
+            if _is_best(imp, best_imp):
+                s = fr"\textbf{{{s}}}"
+            imp_val_cells.append(s)
+
+        imp_cells = ["", r"\textit{Improvement}"] + imp_val_cells
         lines.append(" & ".join(imp_cells) + r" \\")
 
         if d_idx < len(dataset_names) - 1:
             lines.append(r"\midrule")
 
-    # Per-setting improvements section (between raw values and overall improvements)
+    # Per-setting improvements section
     lines.append(r"\midrule")
     lines.append(r"\midrule")
     distinct_settings = []
@@ -834,12 +846,31 @@ def generate_results_table(
     for i, setting in enumerate(distinct_settings):
         label_cell = "Improvements" if i == 0 else ""
         setting_display = setting.replace("_", "-")
-        imp_cells = [label_cell, setting_display] + [f"{imp:.1f}\\%" for imp in per_setting_improvements[setting]]
+        imps = per_setting_improvements[setting]
+        best_imp = max(imps) if imps else None
+
+        imp_val_cells = []
+        for imp in imps:
+            s = _fmt_imp(imp)
+            if _is_best(imp, best_imp):
+                s = fr"\textbf{{{s}}}"
+            imp_val_cells.append(s)
+
+        imp_cells = [label_cell, setting_display] + imp_val_cells
         lines.append(" & ".join(imp_cells) + r" \\")
 
-    # Overall improvements row
+    # Overall improvements row (bold best improvement)
     lines.append(r"\midrule")
-    imp_cells = ["Overall improvements", ""] + [f"{imp:.1f}\\%" for imp in improvement_percentages]
+    best_imp = max(improvement_percentages) if improvement_percentages else None
+
+    imp_val_cells = []
+    for imp in improvement_percentages:
+        s = _fmt_imp(imp)
+        if _is_best(imp, best_imp):
+            s = fr"\textbf{{{s}}}"
+        imp_val_cells.append(s)
+
+    imp_cells = ["Overall improvements", ""] + imp_val_cells
     lines.append(" & ".join(imp_cells) + r" \\")
 
     lines.append(r"\bottomrule")

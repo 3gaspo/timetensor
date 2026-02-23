@@ -199,6 +199,7 @@ def get_dataset_stats(df_dict, lags, horizon, sampling, save_path=None):
         else:
             clean_df, clean_alphas, clean_betas = df_dict[key], gammas_dict[key][0], gammas_dict[key][1]
         stats_dict[key] = {
+            "shape": clean_df.shape,
             "mean": float(np.nanmean(clean_df.values)),
             "stds": float(np.nanmean(np.nanstd(clean_df.values, axis=0))),
             "std": float(np.nanstd(clean_df.values)),
