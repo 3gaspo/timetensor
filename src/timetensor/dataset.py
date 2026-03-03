@@ -599,24 +599,24 @@ def get_dataset_splits(splits, data_path=None, save_path=None, cluster_path=None
         if set_cluster_context is not None:
             context = torch.full((len(indices), 1, 1), set_cluster_context) # (indices, 1, 1)
 
-    if type(date_splits) == float:
+    if type(date_splits) == float or type(date_splits) == int:
         date_splits = [date_splits]
     elif type(date_splits) == str:
         date_splits = date_splits.split(";")
         date_splits = [float(txt) for txt in date_splits]
     if type(indiv_split) == str:
         indiv_split = float(indiv_split)
-    if date_splits is None or (type(date_splits)==list and date_splits[0]==1) or date_splits==1:
+    if date_splits is None or (type(date_splits)==list and date_splits[0]==1): #no splits
         type_split = 1
-    elif len(date_splits) == 1:
-        if indiv_split is None or (type(indiv_split)==list and date_splits[0]==1) or indiv_split ==  1 or values.shape[0]==1:
+    elif len(date_splits) == 1 or (type(date_splits)==list and date_splits[0]+date_splits[1]==1): # split dates in two
+        if indiv_split is None or (type(indiv_split)==list and date_splits[0]==1) or indiv_split ==  1:
             type_split = 2
-        else:
+        else: # and split indivs
             type_split = 4
-    elif len(date_splits) >= 2:
-        if indiv_split is None or (type(indiv_split)==list and date_splits[0]==1) or indiv_split ==  1 or values.shape[0]==1:
+    elif len(date_splits) >= 2: # split dates in three
+        if indiv_split is None or (type(indiv_split)==list and date_splits[0]==1) or indiv_split ==  1:
             type_split = 3
-        else:
+        else: # and split indivs
             type_split = 6
     if type_split == 1:
         data_dict = split_1_way(values, context, datetimes)

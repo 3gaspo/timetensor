@@ -261,7 +261,7 @@ class AugmentModel(nn.Module):
         elif self.modes == "all" or self.modes == "All":
             self.modes = ["kernel", "square", "root", "sign", "mirror"]
         else:
-            self.modes = self.modes.split(";")
+            self.modes = self.modes.split("-")
 
         if "kernel" in self.modes:
             kernel_size, sigma = 5, 1.0

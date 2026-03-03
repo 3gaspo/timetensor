@@ -20,3 +20,5 @@ configs/normalization/*
 
 script_outputs/
 temp_scripts/
+
+xpc*/

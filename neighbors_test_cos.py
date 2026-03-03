@@ -61,23 +61,25 @@ def run(cfg):
     model = load_model(model_name, (lags, 1, horizon), norm_name, cfg.training.init, device.type=="cpu", **kwargs)
     model.eval()
 
-    #user eval
+    #evals
     all_indiv = list(range(data.shape[1]))
     individuals = len(all_indiv)
-        
+    bs = cfg.training.bs 
+    is_context = (bs > 1)
+
     dates = data.shape[0]
-    stride = int(cfg.data.sampling.train_stride)
     date_split = 1.0  #train / total dates ratio
     if cfg.data.splits.date_splits:
         date_split = float(cfg.data.splits.date_splits.split(";")[0])
     split_date_idx = int(date_split * dates)
-    max_train_date = split_date_idx - (lags+horizon)
-    max_eval_date = dates - (lags + horizon)
-    train_dates = list(range(0, max_train_date+ 1, stride))
-    eval_dates = list(range(split_date_idx, max_eval_date + 1, stride))
+    
+    eval_stride = int(cfg.data.sampling.eval_stride)
+    max_start = dates - (lags + horizon)
+    train_dates = list(range(0, split_date_idx))
+    eval_strided_dates = list(range(split_date_idx, max_start + 1, eval_stride))
 
-    logger.info(f"Stride dates: {len(train_dates)} (train) {len(eval_dates)} (eval)")
-    logger.info(f"Total eval loops: {len(eval_dates) * individuals}")
+    logger.info(f"Stride dates: {len(train_dates)} (train) {len(eval_strided_dates)} (eval)")
+    logger.info(f"Total eval loops: {len(eval_strided_dates) * individuals}")
 
     indiv_losses = {indiv: [] for indiv in range(individuals)}
     per_user_losses, stds_per_user_losses = [], []
@@ -87,13 +89,14 @@ def run(cfg):
 
     if is_context:
         metric = "cosine"
-        D = calculate_distances(data.iloc[:, train_dates], metric=metric, matrix=True)
+        D = calculate_distances(data.iloc[train_dates, :], metric=metric, matrix=True)
     
     t1 = perf_counter()
-    for date_idx in eval_dates:
+    for stride_date_idx in range(len(eval_strided_dates)):
+        t = eval_strided_dates[stride_date_idx]
         for indiv in all_indiv:
                                 
-            x, y = data.iloc[date_idx : date_idx+lags, indiv], data.iloc[date_idx+lags : date_idx+lags+horizon, indiv]
+            x, y = data.iloc[t : t+lags, indiv], data.iloc[t+lags : t+lags+horizon, indiv]
             x, y = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
             
             if is_context:
@@ -102,7 +105,7 @@ def run(cfg):
                 else:
                     sorted_indices = np.argsort(D[indiv])
                     context_indivs = list(sorted_indices[1:bs])
-                xc, yc = data.iloc[date_idx : date_idx+lags, context_indivs], data.iloc[date_idx+lags : date_idx+lags+horizon, context_indivs]
+                xc, yc = data.iloc[t : t+lags, context_indivs], data.iloc[t+lags : t+lags+horizon, context_indivs]
                 xc, yc = torch.tensor(xc.values).transpose(1,0).unsqueeze(1), torch.tensor(yc.values).transpose(1,0).unsqueeze(1) # c: (bs-1, 1, L)
 
             c_batch = None

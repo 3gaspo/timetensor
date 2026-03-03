@@ -5,8 +5,8 @@ normalize: False
 aggregation:
 
 splits:
-  indiv_split: 0.8
-  date_splits: 0.6;0.2;0.2
+  indiv_split: 1
+  date_splits: 0.6;0.4
   drop_users: 57;106;127;182;298;6;113;143
   reshuffle: True #to redraw splits
   clusters: #Name of cluster folder
@@ -15,7 +15,7 @@ sampling:
   train_len_multiplier: 1
   eval_len_multiplier: 1
   train_idx_mode: individuals
-  eval_idx_mode: random
+  eval_idx_mode: all
   shuffle_train: True
   shuffle_eval: True
   train_stride: 1
@@ -24,7 +24,7 @@ sampling:
   eval_block_individuals: 1
   remove_train_cte: True
   remove_eval_cte: True
-  use_context: True
+  use_context: False
   context_by_individuals: False
   
 subsets:

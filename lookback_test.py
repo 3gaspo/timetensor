@@ -61,66 +61,60 @@ def run(cfg):
     model = load_model(model_name, (lags, 1, horizon), norm_name, cfg.training.init, device.type=="cpu", **kwargs)
     model.eval()
 
-    #user eval
+    #evals
     all_indiv = list(range(data.shape[1]))
     individuals = len(all_indiv)
-        
+    bs = cfg.training.bs 
+    is_context = (bs > 1)
+
     dates = data.shape[0]
-    stride = int(cfg.data.sampling.train_stride)
     date_split = 1.0  #train / total dates ratio
     if cfg.data.splits.date_splits:
         date_split = float(cfg.data.splits.date_splits.split(";")[0])
     split_date_idx = int(date_split * dates)
-    max_train_date = split_date_idx - (lags+horizon)
-    max_eval_date = dates - (lags + horizon)
-    train_dates = list(range(0, max_train_date+ 1, stride))
-    eval_dates = list(range(split_date_idx, max_eval_date + 1, stride))
+    
+    eval_stride = int(cfg.data.sampling.eval_stride)
+    max_start = dates - (lags + horizon)
+    eval_strided_dates = list(range(split_date_idx, max_start + 1, eval_stride))
 
-    logger.info(f"Stride dates: {len(train_dates)} (train) {len(eval_dates)} (eval)")
-    logger.info(f"Total eval loops: {len(eval_dates) * individuals}")
+    logger.info(f"Stride dates: {len(eval_strided_dates)} (eval)")
+    logger.info(f"Total eval loops: {len(eval_strided_dates) * individuals}")
 
     indiv_losses = {indiv: [] for indiv in range(individuals)}
     per_user_losses, stds_per_user_losses = [], []
 
-    bs = cfg.training.bs 
-    is_context = (bs > 1)
-
     t1 = perf_counter()
     for indiv in all_indiv:
-        indiv_data = np.array(data.iloc[:,indiv])
-        indiv_matrix = np.lib.stride_tricks.sliding_window_view(indiv_data, lags)   # shape: (n-L+1, L)
-        indiv_matrix = indiv_matrix[::stride]  # shape: (n_strides_dates, L)
+        indiv_data = np.asarray(data.iloc[:, indiv])
 
         if is_context:
-            metric = "euclidean"
-            D = calculate_distances(indiv_matrix, metric=metric, matrix=True)
+            indiv_matrix = np.array([indiv_data[t:t+lags] for t in eval_strided_dates]) # (eval_strided_dates, lags)
+            D = calculate_distances(indiv_matrix.T, metric="euclidean", matrix=True) # (eval_strided_dates, eval_strided_dates)
 
-        for date_idx in eval_dates:
-            x, y = data.iloc[date_idx : date_idx+lags, indiv], data.iloc[date_idx+lags : date_idx+lags+horizon, indiv]
-            x, y = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
-            
+        for stride_date_idx in range(len(eval_strided_dates)):
+            t = eval_strided_dates[stride_date_idx]
+            x = data.iloc[t: t+lags, indiv]
+            y = data.iloc[t+lags: t+lags+horizon, indiv]
+            x = torch.tensor(x.values).unsqueeze(0).unsqueeze(0)
+            y = torch.tensor(y.values).unsqueeze(0).unsqueeze(0)
+
             xc = []
             if is_context:
-                if bs > dates:
-                    context_dates = [t for t in eval_dates if t != date_idx]
+                if bs >= len(eval_strided_dates):
+                    context_rows = [s for s in range(len(eval_strided_dates)) if s!=stride_date_idx]
                 else:
-                    sorted_indices = np.argsort(D[date_idx // stride, :date_idx// stride])
-                    context_dates = list(sorted_indices[1:bs])
+                    sorted_rows = np.argsort(D[stride_date_idx])
+                    context_rows = list(sorted_rows[1:bs])
 
-                if len(context_dates)>0:
-                    for k in range(bs-1):
-                        xc.append(indiv_data[context_dates[k]*stride:context_dates[k]*stride+lags+horizon])
-                    xc = torch.stack(xc).unsqueeze(1) # c: (bs-1, 1, L)
+                for s in context_rows:
+                    xc.append(torch.tensor(indiv_data[eval_strided_dates[s]:eval_strided_dates[s]+lags+horizon]))
+                if xc:
+                    xc = torch.stack(xc).unsqueeze(1)
 
-            c_batch = None
-            x_batch = x
-            y_batch = y
-            if is_context and len(xc)>0:
-                c_batch = xc
-            
-            mean, std = get_normal_stats(x_batch)
-            pred_batch = model(x_batch, c_batch)
-            loss = criterion(pred_batch, y_batch, mean, std) # (bs, dim, H)
+            c_batch = xc if (is_context and len(xc) > 0) else None
+            mean, std = get_normal_stats(x)
+            pred = model(x, c_batch)
+            loss = criterion(pred, y, mean, std)
             indiv_losses[indiv].append(loss[0].mean().item())
                 
     for indiv in all_indiv:
