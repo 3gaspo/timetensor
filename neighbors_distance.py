@@ -5,9 +5,6 @@ import logging
 import torch
 import numpy as np
 import torch.nn as nn
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
 from time import perf_counter
 
 from src.timetensor.dataset import fetch_csv
@@ -17,6 +14,7 @@ from src.timetensor.utils import get_dirs, set_seed, get_normal_stats, save_resu
 
 from src.timetensor.analysis import calculate_distances
 from src.timetensor.utils import symlog
+from src.timetensor.visu import plot_2D
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -72,30 +70,34 @@ def run(cfg):
     if cfg.data.splits.date_splits:
         date_split = float(cfg.data.splits.date_splits.split(";")[0])
     split_date_idx = int(date_split * dates)
-
+    
     eval_stride = int(cfg.data.sampling.eval_stride)
     max_start = dates - (lags + horizon)
+    train_dates = list(range(0, split_date_idx))
     eval_strided_dates = list(range(split_date_idx, max_start + 1, eval_stride))
 
-    logger.info(f"Stride dates: {len(eval_strided_dates)} (eval)")
+    logger.info(f"Stride dates: {len(train_dates)} (train) {len(eval_strided_dates)} (eval)")
     logger.info(f"Total eval loops: {len(eval_strided_dates) * individuals}")
 
     indiv_losses = {indiv: [] for indiv in range(individuals)}
     per_user_losses, stds_per_user_losses = [], []
 
+    bs = cfg.training.bs 
+    is_context = (bs > 1)
+
+    if is_context and (bs <= individuals):
+        D = calculate_distances(data.iloc[train_dates, :], metric=cfg.extra.distance, matrix=True)
+        plot_2D(D, save_dir, name=f"{cfg.extra.distance}_distances.pdf", title=f'Neighbor {cfg.extra.distance} distances', x_name="Users", y_name="Users")
+    
     t1 = perf_counter()
     for stride_date_idx in range(len(eval_strided_dates)):
         t = eval_strided_dates[stride_date_idx]
-
-        if is_context:
-            metric = "euclidean"
-            D = calculate_distances(data.iloc[[t+u for u in range(lags)], :], metric=metric, matrix=True)
-
         for indiv in all_indiv:
                                 
             x, y = data.iloc[t : t+lags, indiv], data.iloc[t+lags : t+lags+horizon, indiv]
             x, y = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
             
+            xc = None
             if is_context:
                 if bs > individuals:
                     context_indivs = [indiv_ for indiv_ in all_indiv if indiv_ != indiv]
@@ -105,15 +107,9 @@ def run(cfg):
                 xc, yc = data.iloc[t : t+lags, context_indivs], data.iloc[t+lags : t+lags+horizon, context_indivs]
                 xc, yc = torch.tensor(xc.values).transpose(1,0).unsqueeze(1), torch.tensor(yc.values).transpose(1,0).unsqueeze(1) # c: (bs-1, 1, L)
 
-            c_batch = None
-            x_batch = x
-            y_batch = y
-            if is_context:
-                c_batch = xc
-            
-            mean, std = get_normal_stats(x_batch)
-            pred_batch = model(x_batch, c_batch)
-            loss = criterion(pred_batch, y_batch, mean, std) # (bs, dim, H)
+            mean, std = get_normal_stats(x)
+            pred = model(x, xc)
+            loss = criterion(pred, y, mean, std) # (bs, dim, H)
             indiv_losses[indiv].append(loss[0].mean().item())
                 
     for indiv in all_indiv:
@@ -133,26 +129,6 @@ def run(cfg):
     save_results(w10_means, output_dir, f"mean_results.json", save_name, f"w10 nMSE")
     save_results(delta_t, output_dir, f"mean_results.json", save_name, f"eval time (min)")
 
-    stats_df = pd.DataFrame({
-        "log(mean_error)": per_user_losses,
-        "log(std_error)": stds_per_user_losses}).dropna()
-
-    plt.figure(figsize=(10, 7))
-    g = sns.jointplot(
-        data=stats_df,
-        x="log(mean_error)",
-        y="log(std_error)",
-        kind='scatter',
-        palette='Set1',
-    )
-    plt.suptitle(
-        f"Per-user nMSE of {save_name} (mean:{total_means:.4f}, W10:{w10_means:.4f})",
-        fontsize=20)   
-    plt.tight_layout()
-    plt.savefig(save_dir+ "plots/" + f"{bs}_user_errors.pdf")
-    plt.close()
-
-    
     logger.info('End of script\n')
 
 if __name__ == "__main__":

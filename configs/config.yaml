@@ -32,7 +32,7 @@ defaults:
   - data: electricity
   - model: PatchTST
   - normalization: instance
-
+  - extra: extra 
 
 # fl:
 #   rounds: 10

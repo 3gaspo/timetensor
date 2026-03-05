@@ -4,7 +4,7 @@
 #SBATCH --output=script_outputs/exotics.out
 #SBATCH --error=script_outputs/exotics.err
 #SBATCH --time=23:00:00
-#SBATCH --partition=a100
+#SBATCH --partition=h100
 source .venv/bin/activate
 
 experiment_dir="../outputs/exotics/"
@@ -23,7 +23,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -41,7 +41,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -59,7 +59,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -77,7 +77,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -95,7 +95,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -113,7 +113,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -131,7 +131,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -149,7 +149,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -178,7 +178,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -196,7 +196,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -214,7 +214,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -232,7 +232,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -250,7 +250,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -268,7 +268,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -286,7 +286,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -304,7 +304,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -332,7 +332,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -350,7 +350,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -368,7 +368,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -386,7 +386,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -404,7 +404,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -422,7 +422,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -440,7 +440,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -458,7 +458,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -486,7 +486,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -504,7 +504,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -522,7 +522,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -540,7 +540,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -558,7 +558,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -576,7 +576,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -594,7 +594,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \
@@ -612,7 +612,7 @@ do
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "data=$data" \
-        "data.splits.date_splits='0.6;0.1;0.3'" \
+        "data.splits.date_splits='0.6;0.2;0.2'" \
         "data.sampling.train_idx_mode='individuals'" \
         "data.sampling.eval_idx_mode='all'" \
         "data.sampling.eval_stride=$stride" \

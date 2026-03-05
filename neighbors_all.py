@@ -1,14 +1,13 @@
-##tests adding past windows as context
+##tests adding neighbors as covariates (horizon NOT included)
 
 import hydra
 import logging
 import torch
 import numpy as np
 import torch.nn as nn
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
 from time import perf_counter
+
+from sklearn.neighbors import NearestNeighbors
 
 from src.timetensor.dataset import fetch_csv
 from src.timetensor.models import load_model
@@ -17,6 +16,7 @@ from src.timetensor.utils import get_dirs, set_seed, get_normal_stats, save_resu
 
 from src.timetensor.analysis import calculate_distances
 from src.timetensor.utils import symlog
+from src.timetensor.visu import plot_2D
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -72,51 +72,58 @@ def run(cfg):
     if cfg.data.splits.date_splits:
         date_split = float(cfg.data.splits.date_splits.split(";")[0])
     split_date_idx = int(date_split * dates)
-    
+
+
     eval_stride = int(cfg.data.sampling.eval_stride)
     max_start = dates - (lags + horizon)
     eval_strided_dates = list(range(split_date_idx, max_start + 1, eval_stride))
+    train_strides_dates = np.array(range(0, min(split_date_idx, max_start+1), eval_stride))
 
-    logger.info(f"Stride dates: {len(eval_strided_dates)} (eval)")
-    logger.info(f"Total eval loops: {len(eval_strided_dates) * individuals}")
+    logger.info(f"Stride dates: {len(train_strides_dates)} (train) {len(eval_strided_dates)} (eval)")
 
     indiv_losses = {indiv: [] for indiv in range(individuals)}
     per_user_losses, stds_per_user_losses = [], []
 
     t1 = perf_counter()
+
+    if is_context:
+        X = data.values  # (dates, individuals)
+        idx = train_strides_dates[:, None] + np.arange(lags) #  (len(train_strides_dates), lags)
+        extracted = X[idx] # (train_dates, lags, individuals)
+        reordered = extracted.transpose(2, 0, 1) # (individuals, train_dates, lags)
+        all_train_windows = reordered.reshape(-1, lags) # (individuals * train_dates, lags)
+        
+        idx_context = train_strides_dates[:, None] + np.arange(lags + horizon)
+        all_context_windows = X[idx_context].transpose(2, 0, 1).reshape(-1, lags + horizon)
+        
+        nn_model = NearestNeighbors(n_neighbors=bs-1, metric='euclidean')
+        nn_model.fit(all_train_windows)
+
     for indiv in all_indiv:
-        indiv_data = np.asarray(data.iloc[:, indiv])
+        indiv_data = data.iloc[:, indiv].values
 
-        if is_context:
-            indiv_matrix = np.array([indiv_data[t:t+lags] for t in eval_strided_dates]) # (eval_strided_dates, lags)
-            D = calculate_distances(indiv_matrix.T, metric="euclidean", matrix=True) # (eval_strided_dates, eval_strided_dates)
-
-        for stride_date_idx in range(len(eval_strided_dates)):
-            t = eval_strided_dates[stride_date_idx]
-            x = data.iloc[t: t+lags, indiv]
-            y = data.iloc[t+lags: t+lags+horizon, indiv]
-            x = torch.tensor(x.values).unsqueeze(0).unsqueeze(0)
-            y = torch.tensor(y.values).unsqueeze(0).unsqueeze(0)
-
-            xc = []
+        if is_context and (bs <= len(all_train_windows)):
+            eval_windows = indiv_data[np.asarray(eval_strided_dates)[:, None] + np.arange(lags)]
+            distances, indices = nn_model.kneighbors(eval_windows)
+        
+        for i, stride_date_idx in enumerate(range(len(eval_strided_dates))):
+            t = eval_strided_dates[stride_date_idx]          
+            x, y = indiv_data[t : t+lags], indiv_data[t+lags : t+lags+horizon]
+            x, y = torch.tensor(x).unsqueeze(0).unsqueeze(0), torch.tensor(y).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
+            
+            xc = None
             if is_context:
-                if bs >= len(eval_strided_dates):
-                    context_rows = [s for s in range(len(eval_strided_dates)) if s!=stride_date_idx]
+                if bs > len(all_train_windows):
+                    xc = torch.tensor(all_context_windows, dtype=torch.float32).unsqueeze(1)
                 else:
-                    sorted_rows = np.argsort(D[stride_date_idx])
-                    context_rows = list(sorted_rows[1:bs])
+                    xc = all_context_windows[indices[i]]
+                    xc = torch.tensor(xc, dtype=torch.float32).unsqueeze(1)
 
-                for s in context_rows:
-                    xc.append(torch.tensor(indiv_data[eval_strided_dates[s]:eval_strided_dates[s]+lags+horizon]))
-                if xc:
-                    xc = torch.stack(xc).unsqueeze(1)
-
-            c_batch = xc if (is_context and len(xc) > 0) else None
             mean, std = get_normal_stats(x)
-            pred = model(x, c_batch)
-            loss = criterion(pred, y, mean, std)
+            pred = model(x, xc)
+            loss = criterion(pred, y, mean, std) # (bs, dim, H)
             indiv_losses[indiv].append(loss[0].mean().item())
-                
+    
     for indiv in all_indiv:
         indiv_loss = indiv_losses[indiv]
         mean = symlog(np.mean(indiv_loss))
@@ -134,26 +141,6 @@ def run(cfg):
     save_results(w10_means, output_dir, f"mean_results.json", save_name, f"w10 nMSE")
     save_results(delta_t, output_dir, f"mean_results.json", save_name, f"eval time (min)")
 
-    stats_df = pd.DataFrame({
-        "log(mean_error)": per_user_losses,
-        "log(std_error)": stds_per_user_losses}).dropna()
-
-    plt.figure(figsize=(10, 7))
-    g = sns.jointplot(
-        data=stats_df,
-        x="log(mean_error)",
-        y="log(std_error)",
-        kind='scatter',
-        palette='Set1',
-    )
-    plt.suptitle(
-        f"Per-user nMSE of {save_name} (mean:{total_means:.4f}, W10:{w10_means:.4f})",
-        fontsize=20)   
-    plt.tight_layout()
-    plt.savefig(save_dir+ "plots/" + f"{bs}_user_errors.pdf")
-    plt.close()
-
-    
     logger.info('End of script\n')
 
 if __name__ == "__main__":
