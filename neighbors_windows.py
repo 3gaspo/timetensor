@@ -1,4 +1,4 @@
-##tests adding neighbors as covariates (horizon NOT included)
+## Adding neighbors (per window) for each user as context
 
 import hydra
 import logging
@@ -85,14 +85,13 @@ def run(cfg):
     D_avg = np.zeros((individuals, individuals))
     for stride_date_idx in range(len(eval_strided_dates)):
         t = eval_strided_dates[stride_date_idx]
-
+        date_data = data.iloc[t: t+lags, :].values
         if is_context and (bs <= individuals):
-            D = calculate_distances(data.iloc[[t+u for u in range(lags)], :], metric=cfg.extra.distance, matrix=True)
+            D = calculate_distances(date_data, metric=cfg.extra.distance, matrix=True)
             D_avg += D
         for indiv in all_indiv:
-                                
-            x, y = data.iloc[t : t+lags, indiv], data.iloc[t+lags : t+lags+horizon, indiv]
-            x, y = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
+            x, y = date_data[:, indiv], data.iloc[t+lags: t+lags+horizon, indiv].values
+            x, y = torch.tensor(x).unsqueeze(0).unsqueeze(0), torch.tensor(y).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
             
             xc = None
             if is_context:
@@ -101,10 +100,9 @@ def run(cfg):
                 else:
                     sorted_indices = np.argsort(D[indiv])
                     context_indivs = list(sorted_indices[1:bs])
-                xc, yc = data.iloc[t : t+lags, context_indivs], data.iloc[t+lags : t+lags+horizon, context_indivs]
-                xc, yc = torch.tensor(xc.values).transpose(1,0).unsqueeze(1), torch.tensor(yc.values).transpose(1,0).unsqueeze(1) # c: (bs-1, 1, L)
+                xc = date_data[:, context_indivs]
+                xc = torch.tensor(xc).transpose(1,0).unsqueeze(1) # c: (bs-1, 1, L)
 
-            
             mean, std = get_normal_stats(x)
             pred = model(x, xc)
             loss = criterion(pred, y, mean, std) # (bs, dim, H)
@@ -129,7 +127,7 @@ def run(cfg):
 
 
     D_avg = D_avg / len(eval_strided_dates)
-    plot_2D(D, save_dir, name="window_distances.pdf", title='Neighbor window distances', x_name="Users", y_name="Users")
+    plot_2D(D_avg, save_dir, name="window_distances.pdf", title='Neighbor window distances', x_name="Users", y_name="Users")
 
     logger.info('End of script\n')
 

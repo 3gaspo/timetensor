@@ -1,4 +1,4 @@
-##tests adding neighbors as covariates (horizon NOT included)
+## Adding neighbors for each user as context
 
 import hydra
 import logging
@@ -63,7 +63,6 @@ def run(cfg):
     all_indiv = list(range(data.shape[1]))
     individuals = len(all_indiv)
     bs = cfg.training.bs 
-    is_context = (bs > 1)
 
     dates = data.shape[0]
     date_split = 1.0  #train / total dates ratio
@@ -90,12 +89,12 @@ def run(cfg):
         plot_2D(D, save_dir, name=f"{cfg.extra.distance}_distances.pdf", title=f'Neighbor {cfg.extra.distance} distances', x_name="Users", y_name="Users")
     
     t1 = perf_counter()
-    for stride_date_idx in range(len(eval_strided_dates)):
-        t = eval_strided_dates[stride_date_idx]
-        for indiv in all_indiv:
-                                
-            x, y = data.iloc[t : t+lags, indiv], data.iloc[t+lags : t+lags+horizon, indiv]
-            x, y = torch.tensor(x.values).unsqueeze(0).unsqueeze(0), torch.tensor(y.values).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
+    for indiv in all_indiv:
+        indiv_data = data.iloc[:, indiv].values
+        for stride_date_idx in range(len(eval_strided_dates)):
+            t = eval_strided_dates[stride_date_idx]
+            x, y = indiv_data[t : t+lags], indiv_data[t+lags : t+lags+horizon]
+            x, y = torch.tensor(x).unsqueeze(0).unsqueeze(0), torch.tensor(y).unsqueeze(0).unsqueeze(0) # x: (1, 1, L)
             
             xc = None
             if is_context:
@@ -104,8 +103,8 @@ def run(cfg):
                 else:
                     sorted_indices = np.argsort(D[indiv])
                     context_indivs = list(sorted_indices[1:bs])
-                xc, yc = data.iloc[t : t+lags, context_indivs], data.iloc[t+lags : t+lags+horizon, context_indivs]
-                xc, yc = torch.tensor(xc.values).transpose(1,0).unsqueeze(1), torch.tensor(yc.values).transpose(1,0).unsqueeze(1) # c: (bs-1, 1, L)
+                xc = data.iloc[t : t+lags, context_indivs]
+                xc = torch.tensor(xc.values).transpose(1,0).unsqueeze(1) # c: (bs-1, 1, L)
 
             mean, std = get_normal_stats(x)
             pred = model(x, xc)

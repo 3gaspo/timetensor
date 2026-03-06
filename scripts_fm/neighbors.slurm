@@ -4,7 +4,7 @@
 #SBATCH --output=script_outputs/neighbors.out
 #SBATCH --error=script_outputs/neighbors.err
 #SBATCH --time=23:00:00
-#SBATCH --partition=h100
+#SBATCH --partition=a100
 source .venv/bin/activate
 
 seed=1
@@ -33,12 +33,12 @@ do
     "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
 
     for bs in 2 3 4 5 10
-    do  
-
+    do
         #cos distance
         srun python3 neighbors_distance.py \
         "extra.distance=cosine" \
         "model='$model'" \
+        "model.configs.context_mode=past_only" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -56,6 +56,7 @@ do
         srun python3 neighbors_distance.py \
         "extra.distance=euclidean" \
         "model='$model'" \
+        "model.configs.context_mode=past_only" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -73,6 +74,7 @@ do
         srun python3 neighbors_windows.py \
         "extra.distance=euclidean" \
         "model='$model'" \
+        "model.configs.context_mode=past_only" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -89,6 +91,7 @@ do
         #past
         srun python3 covariates_past.py \
         "model='$model'" \
+        "model.configs.context_mode=future" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -105,6 +108,7 @@ do
         #all
         srun python3 neighbors_all.py \
         "model='$model'" \
+        "model.configs.context_mode=future" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -142,12 +146,12 @@ do
     "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
 
     for bs in 2 3 4 5 10
-    do  
-
+    do
         #cos distance
         srun python3 neighbors_distance.py \
         "extra.distance=cosine" \
         "model='$model'" \
+        "model.configs.context_mode=past_only" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -165,6 +169,7 @@ do
         srun python3 neighbors_distance.py \
         "extra.distance=euclidean" \
         "model='$model'" \
+        "model.configs.context_mode=past_only" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -182,6 +187,7 @@ do
         srun python3 neighbors_windows.py \
         "extra.distance=euclidean" \
         "model='$model'" \
+        "model.configs.context_mode=past_only" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -198,6 +204,7 @@ do
         #past
         srun python3 covariates_past.py \
         "model='$model'" \
+        "model.configs.context_mode=future" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -214,6 +221,7 @@ do
         #all
         srun python3 neighbors_all.py \
         "model='$model'" \
+        "model.configs.context_mode=future" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -252,12 +260,12 @@ do
     "misc.output_dir='${experiment_dir}${data}/${lags}_$horizon/'"
 
     for bs in 2 3 4 5 10
-    do  
-
+    do
         #cos distance
         srun python3 neighbors_distance.py \
         "extra.distance=cosine" \
         "model='$model'" \
+        "model.configs.context_mode=past_only" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -275,6 +283,7 @@ do
         srun python3 neighbors_distance.py \
         "extra.distance=euclidean" \
         "model='$model'" \
+        "model.configs.context_mode=past_only" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -292,6 +301,7 @@ do
         srun python3 neighbors_windows.py \
         "extra.distance=euclidean" \
         "model='$model'" \
+        "model.configs.context_mode=past_only" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -308,6 +318,7 @@ do
         #past
         srun python3 covariates_past.py \
         "model='$model'" \
+        "model.configs.context_mode=future" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -324,6 +335,7 @@ do
         #all
         srun python3 neighbors_all.py \
         "model='$model'" \
+        "model.configs.context_mode=future" \
         "task.lags=$lags" \
         "task.horizon=$horizon" \
         "normalization=instance" \
@@ -358,7 +370,7 @@ output_path="${experiment_dir}neighbors_chronos_${prefix}_${metric}_results.tex"
 srun python3 -c "from src.timetensor.visu import generate_results_table;generate_results_table('$experiment_dir', json_filename='$file_name', metric_key='$metric', output_tex_path='$output_path', model_names='$model_names', settings='$settings', decimals=4)"
 
 prefix="windows"
-model_names="${model}_baseline;${model}_neighbors_lookback_2;${model}_neighbors_lookback_3;${model}_neighbors_lookback_4;${model}_neighbors_lookback_5;${model}_neighbors_lookback_10"
+model_names="${model}_baseline;${model}_neighbors_windows_2;${model}_neighbors_windows_3;${model}_neighbors_windows_4;${model}_neighbors_windows_5;${model}_neighbors_windows_10"
 metric=nMSE
 output_path="${experiment_dir}neighbors_chronos_${prefix}_${metric}_results.tex"
 srun python3 -c "from src.timetensor.visu import generate_results_table;generate_results_table('$experiment_dir', json_filename='$file_name', metric_key='$metric', output_tex_path='$output_path', model_names='$model_names', settings='$settings', decimals=4)"
@@ -370,7 +382,7 @@ output_path="${experiment_dir}neighbors_chronos_${prefix}_${metric}_results.tex"
 srun python3 -c "from src.timetensor.visu import generate_results_table;generate_results_table('$experiment_dir', json_filename='$file_name', metric_key='$metric', output_tex_path='$output_path', model_names='$model_names', settings='$settings', decimals=4)"
 
 prefix="all"
-model_names="${model}_baseline;${model}_past_2;${model}_past_3;${model}_past_4;${model}_past_5;${model}_past_10"
+model_names="${model}_baseline;${model}_all_2;${model}_all_3;${model}_all_4;${model}_all_5;${model}_all_10"
 metric=nMSE
 output_path="${experiment_dir}neighbors_chronos_${prefix}_${metric}_results.tex"
 srun python3 -c "from src.timetensor.visu import generate_results_table;generate_results_table('$experiment_dir', json_filename='$file_name', metric_key='$metric', output_tex_path='$output_path', model_names='$model_names', settings='$settings', decimals=4)"

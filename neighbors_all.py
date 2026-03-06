@@ -1,4 +1,4 @@
-##tests adding neighbors as covariates (horizon NOT included)
+## Adding both neighboring past windows of user and neighbors, for each user as context
 
 import hydra
 import logging
@@ -76,7 +76,7 @@ def run(cfg):
 
     eval_stride = int(cfg.data.sampling.eval_stride)
     max_start = dates - (lags + horizon)
-    eval_strided_dates = list(range(split_date_idx, max_start + 1, eval_stride))
+    eval_strided_dates = np.array(range(split_date_idx, max_start + 1, eval_stride))
     train_strides_dates = np.array(range(0, min(split_date_idx, max_start+1), eval_stride))
 
     logger.info(f"Stride dates: {len(train_strides_dates)} (train) {len(eval_strided_dates)} (eval)")
@@ -103,7 +103,7 @@ def run(cfg):
         indiv_data = data.iloc[:, indiv].values
 
         if is_context and (bs <= len(all_train_windows)):
-            eval_windows = indiv_data[np.asarray(eval_strided_dates)[:, None] + np.arange(lags)]
+            eval_windows = indiv_data[eval_strided_dates[:, None] + np.arange(lags)]
             distances, indices = nn_model.kneighbors(eval_windows)
         
         for i, stride_date_idx in enumerate(range(len(eval_strided_dates))):

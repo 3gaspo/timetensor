@@ -1,4 +1,4 @@
-##tests adding past windows as context
+## Adding neighboring past windows of each user as context
 
 import hydra
 import logging
@@ -78,7 +78,7 @@ def run(cfg):
     eval_stride = int(cfg.data.sampling.eval_stride)
     max_start = dates - (lags + horizon)
     train_strides_dates = np.array(range(0, min(split_date_idx, max_start+1), eval_stride))
-    eval_strided_dates = list(range(split_date_idx, max_start + 1, eval_stride))
+    eval_strided_dates = np.array(range(split_date_idx, max_start + 1, eval_stride))
     
     logger.info(f"Stride dates: {len(train_strides_dates)} (train) {len(eval_strided_dates)} (eval)")
     # logger.info(f"Total eval loops: {len(eval_strided_dates) * individuals}")
@@ -94,7 +94,7 @@ def run(cfg):
             # eval_windows = [indiv_data[t:t+lags] for t in eval_strided_dates]
             # train_windows = [indiv_data[t:t+lags] for t in train_strides_dates]
             train_windows = indiv_data[train_strides_dates[:, None] + np.arange(lags)]
-            eval_windows = indiv_data[train_strides_dates[:, None] + np.arange(lags)]
+            eval_windows = indiv_data[eval_strided_dates[:, None] + np.arange(lags)]
 
             nn_model = NearestNeighbors(n_neighbors=bs-1, metric=cfg.extra.distance)
             nn_model.fit(train_windows)
@@ -106,8 +106,8 @@ def run(cfg):
             t = eval_strided_dates[stride_date_idx]
             x = indiv_data[t: t+lags]
             y = indiv_data[t+lags: t+lags+horizon]
-            x = torch.tensor(x.values).unsqueeze(0).unsqueeze(0)
-            y = torch.tensor(y.values).unsqueeze(0).unsqueeze(0)
+            x = torch.tensor(x).unsqueeze(0).unsqueeze(0)
+            y = torch.tensor(y).unsqueeze(0).unsqueeze(0)
 
             xc = []
             if is_context:
