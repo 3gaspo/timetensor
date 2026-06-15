@@ -287,7 +287,7 @@ def train_model(learner, loaders_dict, epochs=1, print_freq=50, eval_freq=10, ve
             if do_eval and (step == 1 or step % eval_freq == 0 or step == total_steps):
                 #valid eval
                 for valid_key in valid_keys:
-                    valid_loss, _ = learner.eval(loaders_dict[valid_key], runs=eval_runs, seed=seed)
+                    valid_loss, _ = learner.eval(loaders_dict[valid_key], runs=eval_runs) #DO NOT set seed, or it will reset seed of training dataloaders as well
                     for loss_key in valid_loss:
                         if loss_key not in valid_losses[valid_key]:
                             valid_losses[valid_key][loss_key] = []

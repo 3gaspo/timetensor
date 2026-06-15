@@ -246,13 +246,13 @@ class AugmentModel(nn.Module):
     def __init__(self, model, horizon, repeat_constant=False, self_augment=False, augment_mode = "past_only", eps=1e-8):
         super().__init__()
         self.model = model
-        self.horizon = horizon
+        self.lags, self.horizon = self.model.lags, horizon
         self.eps = eps
 
         self.repeat_constant = repeat_constant
         self.augment_mode = augment_mode
 
-        assert self_augment is None or self_augment is False or type(self_augment) == str, f"Unrecognized self_augment mode {self_augment}"
+        assert self_augment is None or self_augment is False or isinstance(self_augment, str), f"Unrecognized self_augment mode {self_augment}"
         self.modes = self_augment
         self.augment = True
         if self.modes is None or self.modes is False or self.modes == "None" or self.modes == "" or self.modes == "none":
@@ -270,25 +270,36 @@ class AugmentModel(nn.Module):
             kernel = kernel / kernel.sum()
             self.register_buffer('smooth_kernel', kernel)
 
+        if "transform" in self.modes: #assume d=1
+            self.hidden_dim = self.lags
+            self.transform_mlp = nn.Sequential(
+                nn.Linear(self.lags, self.hidden_dim),
+                nn.ReLU(),
+                nn.Linear(self.hidden_dim, self.lags),
+            )
+
     def _repeat_constant(self, x, c=None): #x : (B, dim, lags)
         """repeats constant lookbacks instead of model prediction"""
-        std = x.std(dim=-1).sum(dim=1)
-        is_constant = (std < self.eps)
+        # std = x.std(dim=-1).sum(dim=1)
+        is_constant = (x.std(dim=-1) < self.eps).all(dim=1)
         y = self.model(x, c=c)
         if is_constant.any():
             last_values = x[is_constant, :, -1:] # (B_const, dim, 1)
             y[is_constant] = last_values.repeat(1, 1, self.horizon)
         return y
 
-    def _self_augment(self, x, c, modes=[]): #x : (B, dim, lags)
+    def _self_augment(self, x, c, modes=None): #x : (B, dim, lags)
         """returns augmentations of x and append to context c"""
+        device, dtype = x.device, x.dtype
         transforms = []
         if c is not None:
             transforms.append(c)
+        if modes is None:
+            modes = []
         for mode in modes:
             
             #garbage covariates
-            if self.augment_mode == "future":
+            if self.augment_mode == "future": #only works for noise and constant augmentations
                 shape = (x.shape[0], 1, x.shape[-1] + self.horizon)
             else:
                 shape = (x.shape[0], 1, x.shape[-1])
@@ -301,7 +312,7 @@ class AugmentModel(nn.Module):
                     n=int(aa)
                 b = float(b)
                 for _ in range(n):
-                    transforms.append(b*torch.randn(shape))
+                    transforms.append(b*torch.randn(shape, device=device, dtype=dtype))
             elif "constant" in mode:
                 a, b = mode.split("=")
                 assert a[-8:] == "constant"
@@ -311,46 +322,44 @@ class AugmentModel(nn.Module):
                     n=int(aa)
                 b = float(b)
                 for _ in range(n):
-                    tensor = torch.empty(shape)
+                    tensor = torch.empty(shape, device=device, dtype=dtype)
                     tensor.fill_(b)
                     transforms.append(tensor)
             elif mode == "identity":
                 assert self.augment_mode == "past_only"
                 transforms.append(x)
-            elif "synthetic" in mode:
-                a, b = mode.split("=") #e.g synthetic=10 #past_synthetic=10
-                # aa, bb = a.split("_")
-                # assert bb == "synthetic", f"aa:{aa}, bb:{bb}, b:{b}"
-                num_series = int(b)
-                synthetic_series = generate_multiple_time_series(num_series=x.shape[0]*num_series)
+            elif mode == "transform":
+                transforms.append(self.transform_mlp(x.float()))
+            # elif "synthetic" in mode:
+            #     a, b = mode.split("=") #e.g synthetic=10 #past_synthetic=10
+            #     # aa, bb = a.split("_")
+            #     # assert bb == "synthetic", f"aa:{aa}, bb:{bb}, b:{b}"
+            #     num_series = int(b)
+            #     synthetic_series = generate_multiple_time_series(num_series=x.shape[0]*num_series)
                 
-                covariates_tensor = []
-                for serie in synthetic_series:
-                    serie_array = serie["target"] #array
-                    # if aa == "past":
-                    #     tensor = torch.tensor(serie_array[:x.shape[-1]])
-                    # elif aa == "future":
-                    #     tensor = torch.tensor(serie_array[:x.shape[-1]+self.horizon])
-                    tensor = torch.tensor(serie_array[:x.shape[-1]])
-                    covariates_tensor.append(tensor)
-                covariates_tensor = torch.stack(covariates_tensor, dim=0) # (bs*num_series, L(+H))
-                transforms.append(covariates_tensor.expand(x.shape[0], num_series, tensor.shape[0])) # (bs, 1, num_series)
+            #     covariates_tensor = []
+            #     for serie in synthetic_series:
+            #         serie_array = serie["target"] #array
+            #         # if aa == "past":
+            #         #     tensor = torch.tensor(serie_array[:x.shape[-1]])
+            #         # elif aa == "future":
+            #         #     tensor = torch.tensor(serie_array[:x.shape[-1]+self.horizon])
+            #         tensor = torch.tensor(serie_array[:x.shape[-1]])
+            #         covariates_tensor.append(tensor)
+            #     covariates_tensor = torch.stack(covariates_tensor, dim=0) # (bs*num_series, L(+H))
+            #     transforms.append(covariates_tensor.expand(x.shape[0], num_series, tensor.shape[0])) # (bs, 1, num_series)
 
             #self augmentation
             elif mode == "kernel": # kernel smoothing
                 k = self.smooth_kernel.view(1, 1, -1).repeat(x.shape[1], 1, 1)
                 transforms.append(F.conv1d(x, k, padding=self.smooth_kernel.shape[0]//2, groups=x.shape[1])) 
             elif mode == "square":  # signed square
-                assert self.augment_mode == "past_only"
                 transforms.append(x * x.abs())
             elif mode == "root": # signed sqrt
-                assert self.augment_mode == "past_only"
                 transforms.append(torch.sign(x) * torch.sqrt(x.abs() + self.eps))
             elif mode == "sign": #signed
-                assert self.augment_mode == "past_only"
                 transforms.append(torch.sign(x))
             elif mode == "mirror":
-                assert self.augment_mode == "past_only"
                 transforms.append(-x)
             else:
                 raise ValueError(f"Unrecognized augment mode: {mode}")
@@ -415,12 +424,11 @@ def model_selector(model_name, lags, dim, horizon, **kwargs):
         model.model_name = "PatchTST"
         model.model_type = "pytorch"
     elif model_name == "chronos":
-        model = Chronos(lags, horizon, kwargs.get("context_mode", "past_only"), kwargs.get("cross_learning", False))
+        model = Chronos(lags, horizon, **kwargs)
         model.model_name = "chronos"
         model.model_type = "pytorch"
     elif model_name == "tabpfn":
-        model = TabPFN(lags, horizon, kwargs.get("context_mode", "past_only"), kwargs.get("seasonal_periods", None),
-                       kwargs.get("cross_learning", False), kwargs.get("dimension_encoding", "ordinal"))
+        model = TabPFN(lags, horizon, **kwargs)
         model.model_name = "tabpfn"
         model.model_type = "pytorch"
     else:

@@ -8,7 +8,7 @@ import warnings
 
 from torch.utils.data import Dataset, DataLoader
 
-from .utils import normalize, is_cte, set_seed
+from .utils import normalize, set_seed
 from .analysis import get_dataset_stats
 
 

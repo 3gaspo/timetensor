@@ -1,0 +1,6 @@
+[2026-03-13 18:15:01,225][__main__][INFO] - =====Running eval script=====
+[2026-03-13 18:15:01,230][__main__][INFO] - Fetched main configs, save directory : ../outputs/new/chronos_instance_nMSE/
+[2026-03-13 18:15:01,230][__main__][INFO] - Model chronos, norm instance, criterion nMSE, kwargs {'last': False, 'latent': False, 'repeat_constant': False, 'self_augment': False, 'cross_learning': False, 'context_mode': 'past_only', 'augment_mode': 'past_only', 'shared_context': False}
+[2026-03-13 18:15:01,641][__main__][INFO] - Fetched model
+[2026-03-13 18:15:01,641][__main__][INFO] - --Example--
+x shape:  torch.Size([100, 1, 1344])

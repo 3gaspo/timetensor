@@ -4,12 +4,13 @@
 #SBATCH --output=script_outputs/neighbors.out
 #SBATCH --error=script_outputs/neighbors.err
 #SBATCH --time=23:00:00
-#SBATCH --partition=a100
+#SBATCH --partition=h100
 source .venv/bin/activate
 
 seed=1
 experiment_dir="../outputs/fm/neighbors/"
 model=chronos
+date_splits='0.6;0.4'
 
 lags=1344
 horizon=336

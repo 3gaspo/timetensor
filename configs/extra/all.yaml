@@ -1,1 +1,7 @@
 distance: euclidean
+max_windows: 10000
+online: True
+oracle: False
+thresh: 0
+period: 24
+neighbors: 0

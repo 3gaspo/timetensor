@@ -8,8 +8,6 @@ import torch
 import seaborn as sns
 
 from .dataset import fetch_example_data
-# from .analysis import *
-from .utils import text_list
 
 ## series plots
 
@@ -17,6 +15,23 @@ def plot_serie(x, path="", name="series.pdf", title="Time series", axis=True, sh
     """plots example serie"""
     fig = plt.figure(figsize=(20,5))
     plt.plot(range(len(x)), x)
+    if not axis:
+      plt.axis('off')
+      plt.title(None)
+    plt.title(title)
+    fig.tight_layout()
+    if show:
+        plt.show()
+    else:
+        plt.savefig(path+name)
+    plt.close()
+
+def plot_series(x, path="", name="series.pdf", title="Multiple series", axis=True, show=False):
+    """plots multiple series"""
+    fig = plt.figure(figsize=(20,5))
+    for key, serie in x.items():
+        plt.plot(range(len(serie)), serie, label=f"{key}")
+    plt.legend(bbox_to_anchor=(0.5, -0.15), ncol=3, loc='center', fontsize=14)
     if not axis:
       plt.axis('off')
       plt.title(None)
@@ -1225,7 +1240,7 @@ def generate_results_table(
             s = fr"\textbf{{{s}}}"
         imp_cells.append(s)
 
-    lines.append(" & ".join([f"Overall improvements (vs {ref_model.replace('_', r'\\_')})", ""] + imp_cells) + r" \\")
+    lines.append(" & ".join([f"Overall improvements", ""] + imp_cells) + r" \\")
 
     lines.append(r"\bottomrule")
     lines.append(r"\end{tabular}")

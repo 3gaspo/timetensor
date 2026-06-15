@@ -6,7 +6,7 @@ import hydra
 import pandas as pd
 
 
-def get_dirs(output_dir, save_name, model_name, norm_name=None, criterion_name=None, subsets=None):
+def get_dirs(output_dir, save_name, model_name, norm_name=None, criterion_name=None, subsets=None, make_dirs=True):
     
     get_training = ((norm_name is not None) and (("revin" in norm_name) or ("mIN" in norm_name))) or (model_name not in ["persistence", "repeat", "lookback", "expected"])
     if subsets is not None:
@@ -22,18 +22,15 @@ def get_dirs(output_dir, save_name, model_name, norm_name=None, criterion_name=N
         if get_training and (subset is not None) and (subset != 1):
             save_name = save_name + "_" + str(subset)
     save_dir = output_dir + save_name + "/" #current experiment dir
-    # if not os.path.exists(save_dir):
-    #     os.makedirs(save_dir)
     os.makedirs(save_dir, exist_ok=True)
+
     hydra_dir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir #hydra logs
     with open(save_dir + f'hydra_dir.txt', 'w') as file: 
         file.write(f"{hydra_dir}") #save path of hydra logs to experiment dir
-    # if not os.path.exists(save_dir + "examples/"): #dir for example predictions
-    #     os.makedirs(save_dir + "examples/")
-    os.makedirs(save_dir + "examples/", exist_ok=True)
-    # if not os.path.exists(save_dir + "plots/"): #dir for example predictions
-    #     os.makedirs(save_dir + "plots/")
-    os.makedirs(save_dir + "plots/", exist_ok=True)
+    
+    if make_dirs:
+        os.makedirs(save_dir + "examples/", exist_ok=True)
+        os.makedirs(save_dir + "plots/", exist_ok=True)
 
     return save_name, save_dir
 
